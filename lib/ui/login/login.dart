@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/home/home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,16 +32,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Simulate API call
       Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-        // TODO: Implement actual login logic
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const TextWidget(
-              labelText: 'Login successful!',
+        // TODO: Implement actual login logic and get user name from API
+        // For now, using phone number as name placeholder
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(
+              userName: _phoneController.text,
+              // TODO: Replace with actual user name from API response
             ),
-            backgroundColor: AppColors.success,
           ),
         );
       });
@@ -124,8 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your phone number';
                       }
-                      if (value.length < 10) {
-                        return 'Please enter a valid phone number';
+                      if (value.length != 10) {
+                        return 'Phone number must be exactly 10 digits';
+                      }
+                      // Check if all characters are digits
+                      if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                        return 'Phone number must contain only digits';
                       }
                       return null;
                     },
