@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class TextWidget extends StatefulWidget {
-  const TextWidget({
+class TextComponent extends StatefulWidget {
+  const TextComponent({
     super.key,
     required this.labelText,
     this.fontSize,
@@ -50,10 +50,10 @@ class TextWidget extends StatefulWidget {
   final bool? softWrap;
 
   @override
-  State<TextWidget> createState() => _TextWidgetState();
+  State<TextComponent> createState() => _TextComponentState();
 }
 
-class _TextWidgetState extends State<TextWidget> {
+class _TextComponentState extends State<TextComponent> {
   /// Translate text if translation service is available
   /// For now, this returns the text as-is
   /// TODO: Implement translation service integration when available
