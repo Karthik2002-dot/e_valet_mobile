@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: AppColors.primary,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: const TextWidget(
+        title: const TextComponent(
           labelText: 'Home',
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 // Welcome Message
-                TextWidget(
+                TextComponent(
                   labelText: 'Welcome $userName',
                   fontSize: 28,
                   fontWeight: FontWeight.bold,

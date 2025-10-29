@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/home/home.dart';
@@ -82,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 50),
                   // Welcome Text
-                  const TextWidget(
+                  const TextComponent(
                     labelText: 'Welcome Back',
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -90,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  const TextWidget(
+                  const TextComponent(
                     labelText: 'Sign in to continue',
                     fontSize: 16,
                     color: AppColors.black,
@@ -195,13 +196,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         // TODO: Implement forgot password
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: TextWidget(
+                            content: TextComponent(
                               labelText: 'Forgot password feature coming soon',
                             ),
                           ),
                         );
                       },
-                      child: const TextWidget(
+                      child: const TextComponent(
                         labelText: 'Forgot Password?',
                         color: AppColors.primaryDark,
                         fontSize: 14,
@@ -213,33 +214,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Login Button
                   SizedBox(
                     height: 56,
-                    child: ElevatedButton(
+                    child: ElevatedButtonComponent(
+                      labelText: 'Login',
                       onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.black,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        disabledBackgroundColor: AppColors.grey,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.black),
-                              ),
-                            )
-                          : const TextWidget(
-                              labelText: 'Login',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.white,
-                            ),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      elevatedButtonBackgroundColor: AppColors.primary,
+                      radius: 5,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -247,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const TextWidget(
+                      const TextComponent(
                         labelText: "Don't have an account? ",
                         color: AppColors.black,
                         fontSize: 14,
@@ -257,13 +238,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           // TODO: Implement sign up navigation
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: TextWidget(
+                              content: TextComponent(
                                 labelText: 'Sign up feature coming soon',
                               ),
                             ),
                           );
                         },
-                        child: const TextWidget(
+                        child: const TextComponent(
                           labelText: 'Sign Up',
                           color: AppColors.primaryDark,
                           fontSize: 14,
