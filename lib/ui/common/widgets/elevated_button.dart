@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class ElevatedButtonComponent extends StatefulWidget {
-  final String? labelText;
-  final void Function()? onPressed;
+  final String labelText;
+  final void Function() onPressed;
   final Color? elevatedButtonBackgroundColor;
   final double? radius;
   final double? fontSize;
@@ -54,7 +54,6 @@ class _ElevatedButtonComponentState extends State<ElevatedButtonComponent> {
           fontSize: widget.fontSize,
           color: widget.fontColor,
           fontWeight: widget.fontWeight,
-          fontFamily: widget.fontFamily,
           maxLines: widget.maxLines,
           overflow: widget.overflow,
           textAlign: widget.textAlign,

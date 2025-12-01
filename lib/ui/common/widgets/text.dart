@@ -11,7 +11,6 @@ class TextComponent extends StatefulWidget {
     this.height,
     this.color,
     this.fontWeight,
-    this.fontFamily,
     this.maxLines,
     this.overflow,
     this.textAlign,
@@ -28,12 +27,11 @@ class TextComponent extends StatefulWidget {
     this.softWrap,
   });
 
-  final String? labelText;
+  final String labelText;
   final double? fontSize;
   final double? height;
   final Color? color;
   final FontWeight? fontWeight;
-  final String? fontFamily;
   final int? maxLines;
   final TextOverflow? overflow;
   final TextAlign? textAlign;
@@ -66,9 +64,8 @@ class _TextComponentState extends State<TextComponent> {
   @override
   Widget build(BuildContext context) {
     final shouldTranslate = widget.isTranslateRequired ?? false;
-    final displayText = shouldTranslate
-        ? _translateText(widget.labelText ?? '')
-        : widget.labelText ?? '';
+    final displayText =
+        shouldTranslate ? _translateText(widget.labelText) : widget.labelText;
 
     // Check if running on iOS
     if (defaultTargetPlatform == TargetPlatform.iOS) {
