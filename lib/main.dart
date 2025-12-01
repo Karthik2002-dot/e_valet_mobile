@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
+import 'package:niloufer_valet_mobile/ui/splash/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,10 +15,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: dotenv.env['APP_NAME'] ?? 'Niloufer Valet',
-      home:  Container(),
-      debugShowCheckedModeBanner: false,
+    return BlocProvider(
+      create: (context) => SplashBloc(),
+      child: MaterialApp(
+        title: dotenv.env['APP_NAME'] ?? 'Niloufer Valet',
+        home: const SplashScreen(),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
