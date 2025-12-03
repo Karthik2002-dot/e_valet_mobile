@@ -45,4 +45,3 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(const LoginInitial());
   }
 }
-

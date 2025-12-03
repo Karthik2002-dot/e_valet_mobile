@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_event.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/qrscreen/qr_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -23,12 +20,11 @@ class LoginForm extends StatelessWidget {
   });
 
   void _handleLogin(BuildContext context) {
-    context.read<LoginBloc>().add(
-          LoginSubmitted(
-            loginId: loginIdController.text.trim(),
-            pin: pinController.text.trim(),
-          ),
-        );
+    // Navigate directly to QR screen without validation
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const QRScreen()),
+    );
   }
 
   @override
@@ -109,45 +105,25 @@ class LoginForm extends StatelessWidget {
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 // Login button
-                BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButtonComponent(
-                        labelText: 'Login',
-                        onPressed: state is LoginLoading
-                            ? () {}
-                            : () => _handleLogin(context),
-                        elevatedButtonBackgroundColor: AppColors.accent, // Orange
-                        radius: 8,
-                        fontSize: 16,
-                        fontColor: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                        ),
-                        icon: const Icon(
-                          Icons.arrow_forward,
-                          color: AppColors.white,
-                          size: 20,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                // Loading indicator
-                BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    if (state is LoginLoading) {
-                      return const Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: CircularProgressIndicator(
-                          color: AppColors.accent,
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButtonComponent(
+                    labelText: 'Login',
+                    onPressed: () => _handleLogin(context),
+                    elevatedButtonBackgroundColor: AppColors.accent, // Orange
+                    radius: 8,
+                    fontSize: 16,
+                    fontColor: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+                    icon: const Icon(
+                      Icons.arrow_forward,
+                      color: AppColors.white,
+                      size: 20,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -157,4 +133,3 @@ class LoginForm extends StatelessWidget {
     );
   }
 }
-
