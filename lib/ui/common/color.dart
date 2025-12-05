@@ -10,6 +10,7 @@ class AppColors {
   static const Color primarySoft = Color(0xFFFFF1D6); // light chip/border
   static const Color accent =
       Color(0xFFFF7A00); // vivid accent used in tabs/buttons
+  static const Color headerYellow = Color(0xFFF7B32B); // QR screen header color
 
   // Secondary Color
   static const Color secondary = Color(0xFF39756A);

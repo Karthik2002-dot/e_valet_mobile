@@ -16,6 +16,7 @@ class ElevatedButtonComponent extends StatefulWidget {
   final TextAlign? textAlign;
   final Color? textbackgroundColor;
   final FontStyle? fontStyle;
+  final Widget? icon;
   const ElevatedButtonComponent(
       {super.key,
       required this.labelText,
@@ -31,7 +32,8 @@ class ElevatedButtonComponent extends StatefulWidget {
       this.textAlign,
       this.fontWeight,
       this.fontFamily,
-      this.fontStyle});
+      this.fontStyle,
+      this.icon});
 
   @override
   State<ElevatedButtonComponent> createState() =>
@@ -49,16 +51,36 @@ class _ElevatedButtonComponentState extends State<ElevatedButtonComponent> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(widget.radius as double)),
         ),
-        child: TextComponent(
-          labelText: widget.labelText,
-          fontSize: widget.fontSize,
-          color: widget.fontColor,
-          fontWeight: widget.fontWeight,
-          maxLines: widget.maxLines,
-          overflow: widget.overflow,
-          textAlign: widget.textAlign,
-          textBackgroundColor: widget.textbackgroundColor,
-          fontStyle: widget.fontStyle,
-        ));
+        child: widget.icon != null
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextComponent(
+                    labelText: widget.labelText,
+                    fontSize: widget.fontSize,
+                    color: widget.fontColor,
+                    fontWeight: widget.fontWeight,
+                    maxLines: widget.maxLines,
+                    overflow: widget.overflow,
+                    textAlign: widget.textAlign,
+                    textBackgroundColor: widget.textbackgroundColor,
+                    fontStyle: widget.fontStyle,
+                  ),
+                  const SizedBox(width: 8),
+                  widget.icon!,
+                ],
+              )
+            : TextComponent(
+                labelText: widget.labelText,
+                fontSize: widget.fontSize,
+                color: widget.fontColor,
+                fontWeight: widget.fontWeight,
+                maxLines: widget.maxLines,
+                overflow: widget.overflow,
+                textAlign: widget.textAlign,
+                textBackgroundColor: widget.textbackgroundColor,
+                fontStyle: widget.fontStyle,
+              ));
   }
 }
