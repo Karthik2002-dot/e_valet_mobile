@@ -3,7 +3,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
-import 'package:niloufer_valet_mobile/ui/qrscreen/qr_screen.dart';
+import 'package:niloufer_valet_mobile/ui/pilot/qrscreen/qr_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
