@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/texts.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 import 'qr_event.dart';
 import 'qr_state.dart';
@@ -27,8 +27,8 @@ class QrBloc extends Bloc<QrEvent, QrState> {
         isLoading: false,
         isOnline: event.isOnline,
         message: event.isOnline
-            ? AppTexts.statusOnlineMessage
-            : AppTexts.statusOfflineMessage,
+            ? TextConstants.statusOnlineMessage
+            : TextConstants.statusOfflineMessage,
       ),
     );
   }
@@ -44,8 +44,8 @@ class QrBloc extends Bloc<QrEvent, QrState> {
         isLoading: false,
         isOnBreak: event.isOnBreak,
         message: event.isOnBreak
-            ? AppTexts.breakEnabledMessage
-            : AppTexts.breakDisabledMessage,
+            ? TextConstants.breakEnabledMessage
+            : TextConstants.breakDisabledMessage,
       ),
     );
   }

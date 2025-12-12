@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/pilot/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/texts.dart';
-import 'package:niloufer_valet_mobile/widgets/qr_screen_header.dart';
-import 'package:niloufer_valet_mobile/widgets/qr_screen_content.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class QRScreen extends StatelessWidget {
   const QRScreen({super.key});
@@ -52,15 +50,6 @@ class _QrScreenView extends StatelessWidget {
         backgroundColor: const Color(0xFFF5F5F0),
         body: Column(
           children: [
-            QrScreenHeader(
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-              headerHeight: headerHeight,
-            ),
-            QrScreenContent(
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
             const Footer(),
           ],
         ),
