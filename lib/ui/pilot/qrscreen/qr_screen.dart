@@ -4,7 +4,6 @@ import 'package:niloufer_valet_mobile/bloc/pilot/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class QRScreen extends StatelessWidget {
   const QRScreen({super.key});
@@ -23,10 +22,6 @@ class _QrScreenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    const headerHeight = 196.0;
-
     return BlocListener<QrBloc, QrState>(
       listenWhen: (previous, current) => previous.message != current.message,
       listener: (context, state) {

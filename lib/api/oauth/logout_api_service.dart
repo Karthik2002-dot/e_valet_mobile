@@ -1,10 +1,8 @@
-// lib/api/auth/login_api_service.dart
 import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
-import 'package:niloufer_valet_mobile/api/core/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/api/oauth/session_manager.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 
 class LogoutApiService {
   LogoutApiService._();
@@ -39,8 +37,4 @@ class LogoutApiService {
 
     return response.statusCode >= 200 && response.statusCode < 300;
   }
-
-  // keep _parseSetCookieHeader, forgotPassword, requestOTP, verifyResetOTP,
-  // resetPassword, _clearLocalCaches here, but switch all raw env reads
-  // to ApiConfig.authBaseUrl / ApiConfig.authApiKey.
 }

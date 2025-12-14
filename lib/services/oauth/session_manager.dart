@@ -1,6 +1,5 @@
-// lib/api/auth/session_manager.dart
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:niloufer_valet_mobile/api/core/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class SessionManager {
   SessionManager._();

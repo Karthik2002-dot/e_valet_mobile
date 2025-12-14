@@ -1,9 +1,8 @@
-// lib/api/auth/profile_api_service.dart
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
-import 'package:niloufer_valet_mobile/api/core/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 
 class ProfileApiService {

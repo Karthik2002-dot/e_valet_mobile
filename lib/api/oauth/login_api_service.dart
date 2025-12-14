@@ -1,4 +1,3 @@
-// lib/api/auth/login_api_service.dart
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -37,8 +36,4 @@ class LoginApiService {
     }
     return false;
   }
-
-  // keep _parseSetCookieHeader, forgotPassword, requestOTP, verifyResetOTP,
-  // resetPassword, _clearLocalCaches here, but switch all raw env reads
-  // to ApiConfig.authBaseUrl / ApiConfig.authApiKey.
 }
