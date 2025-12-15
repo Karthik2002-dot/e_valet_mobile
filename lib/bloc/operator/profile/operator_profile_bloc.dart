@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_state.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
 class OperatorProfileBloc
     extends Bloc<OperatorProfileEvent, OperatorProfileState> {
@@ -15,9 +17,10 @@ class OperatorProfileBloc
     emit(const OperatorProfileLoading());
 
     try {
-      // TODO: load operator profile from API when available
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      emit(const OperatorProfileLoaded());
+      final profile = await ProfileApiService.getProfile();
+      emit(OperatorProfileLoaded(profile));
+    } on ApiException catch (e) {
+      emit(OperatorProfileError(e.message));
     } catch (_) {
       emit(const OperatorProfileError('Failed to load profile'));
     }

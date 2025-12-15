@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
+import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/operator/profile/operator_profile_info_row.dart';
+import 'package:niloufer_valet_mobile/ui/operator/profile/operator_reset_password_dialog.dart';
+
+class OperatorProfileContent extends StatelessWidget {
+  final Profile profile;
+
+  const OperatorProfileContent({
+    super.key,
+    required this.profile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final user = profile.user;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(
+        MediaQuery.of(context).size.width * 0.02,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(
+                MediaQuery.of(context).size.width * 0.05,
+              ),
+              border: Border.all(
+                color: AppColors.primary,
+                width: 2,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.05,
+                vertical: MediaQuery.of(context).size.height * 0.02,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: MediaQuery.of(context).size.width * 0.1,
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    child: Icon(
+                      Icons.person_outline,
+                      size: MediaQuery.of(context).size.width * 0.1,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.02,
+                  ),
+                  TextComponent(
+                    labelText:
+                        user.fullName.isNotEmpty ? user.fullName : 'Operator',
+                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  if (profile.roles.isNotEmpty)
+                    TextComponent(
+                      labelText: profile.roles.join(' · '),
+                      fontSize: MediaQuery.of(context).size.width * 0.03,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.02,
+                  ),
+                  Divider(
+                    color: AppColors.primary,
+                    thickness: 1,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  OperatorProfileInfoRow(
+                    icon: Icons.phone_outlined,
+                    label: 'Phone',
+                    value: user.phoneNumber,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  OperatorProfileInfoRow(
+                    icon: Icons.email_outlined,
+                    label: 'Email',
+                    value: user.email,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  OperatorProfileInfoRow(
+                    icon: Icons.badge_outlined,
+                    label: 'Username',
+                    value: user.username,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  OperatorProfileInfoRow(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Joined',
+                    value: user.createdAt.split('T').first,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButtonComponent(
+                      elevatedButtonBackgroundColor: AppColors.accent,
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (dialogContext) =>
+                              const OperatorResetPasswordDialog(),
+                        );
+                      },
+                      labelText: 'Reset Password',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

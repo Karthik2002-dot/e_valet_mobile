@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 
 abstract class OperatorProfileState extends Equatable {
   const OperatorProfileState();
@@ -16,7 +17,12 @@ class OperatorProfileLoading extends OperatorProfileState {
 }
 
 class OperatorProfileLoaded extends OperatorProfileState {
-  const OperatorProfileLoaded();
+  final Profile profile;
+
+  const OperatorProfileLoaded(this.profile);
+
+  @override
+  List<Object?> get props => [profile];
 }
 
 class OperatorProfileError extends OperatorProfileState {
