@@ -45,6 +45,7 @@ dependencies:
   dio: ^5.9.0
   hive_flutter: ^1.1.0
   intl_phone_field: ^3.2.0
+  pull_down_button: ^0.10.2
 
 dev_dependencies:
   flutter_test:

@@ -1,11 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/login/login.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_overflow_menu.dart';
+import 'package:niloufer_valet_mobile/ui/operator/profile/operator_profile_screen.dart';
 
 class OperatorHomeScreen extends StatelessWidget {
   const OperatorHomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OperatorMenuBloc(),
+      child: BlocListener<OperatorMenuBloc, OperatorMenuState>(
+        listener: (context, state) {
+          if (state is OperatorMenuAction) {
+            switch (state.action) {
+              case OperatorMenuActionType.logout:
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const LoginScreen(),
+                  ),
+                  (route) => false,
+                );
+                break;
+              case OperatorMenuActionType.profile:
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const OperatorProfileScreen(),
+                  ),
+                );
+                break;
+            }
+            // Reset state so the same action can be handled again later
+            context.read<OperatorMenuBloc>().add(const OperatorMenuReset());
+          }
+        },
+        child: const _OperatorHomeView(),
+      ),
+    );
+  }
+}
+
+class _OperatorHomeView extends StatelessWidget {
+  const _OperatorHomeView();
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +71,9 @@ class OperatorHomeScreen extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(width: 16),
-                // 3-dots menu icon
-                IconButton(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    color: AppColors.white,
-                  ),
-                  onPressed: () {
-                    // TODO: open operator menu / overflow actions
-                  },
-                ),
+                SizedBox(width: 16),
+                // Overflow menu using pull_down_button
+                OperatorOverflowMenu(),
               ],
             ),
           ),
