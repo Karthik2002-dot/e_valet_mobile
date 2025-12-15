@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/login/login_event.dart';
 import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -73,19 +73,12 @@ class LoginForm extends StatelessWidget {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // Login ID field
-                TextFieldComponent(
+                // Phone number with country code
+                PhoneNumberField(
                   labelText: 'Phone Number',
                   hintText: 'Enter Phone Number',
                   controller: loginIdController,
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: Icon(
-                    Icons.phone,
-                    size: MediaQuery.of(context).size.width * 0.04,
-                    color: AppColors.black,
-                  ),
                   focusNode: loginIdFocusNode,
-                  borderRadius: 8,
                   onChanged: (value) =>
                       context.read<LoginBloc>().add(LoginIdChanged(value)),
                 ),
