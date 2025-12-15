@@ -26,16 +26,7 @@ class PinChanged extends LoginEvent {
 }
 
 class LoginSubmitted extends LoginEvent {
-  final String loginId;
-  final String pin;
-
-  const LoginSubmitted({
-    required this.loginId,
-    required this.pin,
-  });
-
-  @override
-  List<Object?> get props => [loginId, pin];
+  const LoginSubmitted();
 }
 
 class LoginReset extends LoginEvent {

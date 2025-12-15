@@ -8,8 +8,27 @@ import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(const LoginInitial()) {
+    on<LoginIdChanged>(_onLoginIdChanged);
+    on<PinChanged>(_onPinChanged);
     on<LoginSubmitted>(_onLoginSubmitted);
     on<LoginReset>(_onLoginReset);
+  }
+
+  String _loginId = '';
+  String _pin = '';
+
+  void _onLoginIdChanged(
+    LoginIdChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    _loginId = event.loginId.trim();
+  }
+
+  void _onPinChanged(
+    PinChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    _pin = event.pin;
   }
 
   Future<void> _onLoginSubmitted(
@@ -19,20 +38,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(const LoginLoading());
 
     // Validate inputs
-    if (event.loginId.isEmpty) {
+    if (_loginId.isEmpty) {
       emit(const LoginFailure('Please enter your Phone Number'));
       return;
     }
 
-    if (event.pin.isEmpty) {
+    if (_pin.isEmpty) {
       emit(const LoginFailure('Please enter your Password'));
       return;
     }
 
     try {
       final request = PhonePasswordLoginRequest(
-        phoneNumber: event.loginId,
-        password: event.pin,
+        phoneNumber: _loginId,
+        password: _pin,
       );
 
       final success = await LoginApiService.verifyPhonePasswordLogin(request);

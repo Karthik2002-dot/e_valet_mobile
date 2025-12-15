@@ -7,7 +7,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/login/login_form.dart';
-import 'package:niloufer_valet_mobile/ui/pilot/qrscreen/qr_screen.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,10 +38,12 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // Navigate to QR screen
+            // Navigate to Operator Home screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const QRScreen()),
+              MaterialPageRoute(
+                builder: (_) => const OperatorHomeScreen(),
+              ),
             );
           } else if (state is LoginFailure) {
             SnackBars.showErrorSnackBar(context, state.message);

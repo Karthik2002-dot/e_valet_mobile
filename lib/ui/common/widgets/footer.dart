@@ -8,20 +8,25 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.05,
+        vertical: MediaQuery.of(context).size.height * 0.02,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextComponent(
             labelText: 'Powered By',
-            fontSize: 12,
+            fontSize: MediaQuery.of(context).size.width * 0.03,
             color: AppColors.mutedText,
           ),
-          const SizedBox(width: 8),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.02,
+          ),
           // Yathi logo
           Image.asset(
             'assets/images/YathiLogo.png',
-            height: 24,
+            height: MediaQuery.of(context).size.width * 0.04,
             fit: BoxFit.contain,
           ),
         ],

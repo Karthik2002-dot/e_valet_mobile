@@ -24,15 +24,7 @@ class LoginForm extends StatelessWidget {
   });
 
   void _handleLogin(BuildContext context) {
-    final loginId = loginIdController.text.trim();
-    final pin = pinController.text;
-
-    context.read<LoginBloc>().add(
-          LoginSubmitted(
-            loginId: loginId,
-            pin: pin,
-          ),
-        );
+    context.read<LoginBloc>().add(const LoginSubmitted());
   }
 
   @override
@@ -45,11 +37,15 @@ class LoginForm extends StatelessWidget {
           // White card with blue border
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(32),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 1,
+            ),
+            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(
+                MediaQuery.of(context).size.width * 0.05,
+              ),
               border: Border.all(
                 color: AppColors.primary, // Blue border
                 width: 2,
@@ -83,13 +79,15 @@ class LoginForm extends StatelessWidget {
                   hintText: 'Enter Phone Number',
                   controller: loginIdController,
                   keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.phone,
-                    size: 18,
+                    size: MediaQuery.of(context).size.width * 0.04,
                     color: AppColors.black,
                   ),
                   focusNode: loginIdFocusNode,
                   borderRadius: 8,
+                  onChanged: (value) =>
+                      context.read<LoginBloc>().add(LoginIdChanged(value)),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
@@ -100,6 +98,8 @@ class LoginForm extends StatelessWidget {
                   focusNode: pinFocusNode,
                   labelText: 'Password',
                   hintText: 'Enter Your Password',
+                  onChanged: (value) =>
+                      context.read<LoginBloc>().add(PinChanged(value)),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
@@ -113,6 +113,7 @@ class LoginForm extends StatelessWidget {
                         _handleLogin(context);
                       }
                     }
+
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButtonComponent(
@@ -124,13 +125,14 @@ class LoginForm extends StatelessWidget {
                         fontSize: 16,
                         fontColor: AppColors.white,
                         fontWeight: FontWeight.w600,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
+                        padding: EdgeInsets.symmetric(
+                          vertical: MediaQuery.of(context).size.height * 0.02,
                         ),
                         icon: isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.05,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -138,10 +140,10 @@ class LoginForm extends StatelessWidget {
                                   ),
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.arrow_forward,
                                 color: AppColors.white,
-                                size: 20,
+                                size: MediaQuery.of(context).size.width * 0.05,
                               ),
                       ),
                     );
