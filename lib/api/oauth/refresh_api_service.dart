@@ -1,6 +1,7 @@
-import 'dart:async';
+// lib/api/oauth/refresh_api_service.dart
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class RefreshApiService {
@@ -12,8 +13,10 @@ class RefreshApiService {
   static Future<void> refreshToken() async {
     final accessToken = await TokenStorage.getAccessToken();
     final refreshToken = await TokenStorage.getRefreshToken();
+
     if (refreshToken == null || refreshToken.isEmpty) {
-      throw Exception('Refresh token not found. Please login again.');
+      throw ApiException('Refresh token not found. Please login again.',
+          code: 'no_refresh');
     }
 
     final cookieParts = <String>[];
@@ -28,7 +31,8 @@ class RefreshApiService {
       'Cookie': cookieParts.join('; '),
     });
 
-    final response = await base.dio.post('/auth/refresh');
-    // keep your Set‑Cookie parsing + TokenStorage update, but no env reads
+    final response = await base.post('/auth/refresh');
+
+    // parse Set-Cookie headers from response, update TokenStorage here
   }
 }

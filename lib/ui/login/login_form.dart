@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_event.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
-import 'package:niloufer_valet_mobile/ui/pilot/qrscreen/qr_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -20,11 +24,15 @@ class LoginForm extends StatelessWidget {
   });
 
   void _handleLogin(BuildContext context) {
-    // Navigate directly to QR screen without validation
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const QRScreen()),
-    );
+    final loginId = loginIdController.text.trim();
+    final pin = pinController.text;
+
+    context.read<LoginBloc>().add(
+          LoginSubmitted(
+            loginId: loginId,
+            pin: pin,
+          ),
+        );
   }
 
   @override
@@ -86,44 +94,58 @@ class LoginForm extends StatelessWidget {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // PIN field
-                TextFieldComponent(
-                  labelText: 'PIN',
-                  hintText: 'Enter Your PIN',
+                // Password field
+                PasswordTextField(
                   controller: pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(
-                    Icons.lock,
-                    size: 18,
-                    color: AppColors.black,
-                  ),
                   focusNode: pinFocusNode,
-                  borderRadius: 8,
+                  labelText: 'Password',
+                  hintText: 'Enter Your Password',
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 // Login button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButtonComponent(
-                    labelText: 'Login',
-                    onPressed: () => _handleLogin(context),
-                    elevatedButtonBackgroundColor: AppColors.accent, // Orange
-                    radius: 8,
-                    fontSize: 16,
-                    fontColor: AppColors.white,
-                    fontWeight: FontWeight.w600,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                    icon: const Icon(
-                      Icons.arrow_forward,
-                      color: AppColors.white,
-                      size: 20,
-                    ),
-                  ),
+                BlocBuilder<LoginBloc, LoginState>(
+                  builder: (context, state) {
+                    final isLoading = state is LoginLoading;
+                    void handlePress() {
+                      if (!isLoading) {
+                        _handleLogin(context);
+                      }
+                    }
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButtonComponent(
+                        labelText: isLoading ? 'Logging in...' : 'Login',
+                        onPressed: handlePress,
+                        elevatedButtonBackgroundColor:
+                            AppColors.accent, // Orange
+                        radius: 8,
+                        fontSize: 16,
+                        fontColor: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                        ),
+                        icon: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white,
+                                  ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.arrow_forward,
+                                color: AppColors.white,
+                                size: 20,
+                              ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

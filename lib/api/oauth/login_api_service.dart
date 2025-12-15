@@ -1,39 +1,37 @@
-import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
+import 'package:niloufer_valet_mobile/api/core/base_http_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/oauth/phone_password_login_request.dart';
 
 class LoginApiService {
   LoginApiService._();
 
   static String get _baseUrl => ApiConfig.authBaseUrl;
-  static String get _passwordLoginApiKey => ApiConfig.authApiKey;
+  static String get _apiKey => ApiConfig.authApiKey;
 
-  static Future<bool> verifyPhonePasswordLogin({
-    required String phone,
-    required String password,
-  }) async {
-    final uri = Uri.parse('$_baseUrl/auth/login');
+  static final _http = BaseHttpService(
+    baseUrl: _baseUrl,
+    defaultHeaders: ApiConfig.apiKeyHeaders(_apiKey),
+  );
 
-    final headers = {
-      ...ApiConfig.apiKeyHeaders(_passwordLoginApiKey),
-    };
+  static Future<bool> verifyPhonePasswordLogin(
+    PhonePasswordLoginRequest request,
+  ) async {
+    final body = request.toJson();
 
-    final body = jsonEncode({
-      'loginType': 'PHONE_PASSWORD',
-      'phoneNumber': phone,
-      'password': password,
-    });
+    try {
+      final response = await _http.postJson(
+        '/auth/login',
+        body: body,
+      ); // throws ApiException on error
 
-    final response = await http
-        .post(uri, headers: headers, body: body)
-        .timeout(const Duration(seconds: 30));
+      // parse Set-Cookie headers + save tokens via TokenStorage here
+      jsonDecode(response.body) as Map<String, dynamic>;
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      // keep your existing cookie parsing + TokenStorage logic here
-      // ...
       return true;
+    } on ApiException {
+      rethrow; // let bloc/ui decide what to show
     }
-    return false;
   }
 }

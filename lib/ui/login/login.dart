@@ -5,6 +5,7 @@ import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/login/login_form.dart';
 import 'package:niloufer_valet_mobile/ui/pilot/qrscreen/qr_screen.dart';
 
@@ -43,12 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (_) => const QRScreen()),
             );
           } else if (state is LoginFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            SnackBars.showErrorSnackBar(context, state.message);
           }
         },
         child: Scaffold(
