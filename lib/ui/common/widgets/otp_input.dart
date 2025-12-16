@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
 class OtpInput extends StatelessWidget {
   final int length;

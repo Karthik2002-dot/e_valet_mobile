@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/api/oauth/otp_api_service.dart';
-import 'package:niloufer_valet_mobile/api/oauth/reset_password_api_service.dart';
-import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
-import 'package:niloufer_valet_mobile/models/oauth/reset_password_request.dart';
-import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/password_reset_otp/password_reset_otp_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/password_reset_otp/password_reset_otp_event.dart';
+import 'package:niloufer_valet_mobile/bloc/password_reset_otp/password_reset_otp_state.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
@@ -30,27 +29,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
   final FocusNode _otpFocusNode = FocusNode();
   final TextEditingController _newPasswordController = TextEditingController();
 
-  String _otp = '';
-  String? _storedPhone;
-  bool _isLoading = false;
-  String? _resetToken;
-  bool _otpVerified = false;
-  bool _isResetting = false;
   bool _obscureNewPassword = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPhoneFromStorage();
-  }
-
-  Future<void> _loadPhoneFromStorage() async {
-    final saved = await TokenStorage.getPhoneNumber();
-    if (!mounted) return;
-    setState(() {
-      _storedPhone = saved;
-    });
-  }
 
   @override
   void dispose() {
@@ -60,294 +39,251 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
     super.dispose();
   }
 
-  bool get _isOtpComplete => _otp.length == 6;
-
-  String get _identifier => _storedPhone ?? widget.phoneNumber;
-
-  Future<void> _handleSubmit() async {
-    if (!_isOtpComplete) {
-      SnackBars.showErrorSnackBar(
-        context,
-        TextConstants.enterSixDigitOtp,
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final message = await OtpApiService.verifyPasswordResetOtp(
-        identifier: _identifier,
-        otp: _otp,
-      );
-      if (!mounted) return;
-      _resetToken = message.resetToken ?? await TokenStorage.getResetToken();
-      SnackBars.showSuccessSnackBar(context, message.message);
-      if (_resetToken == null || _resetToken!.isEmpty) {
-        SnackBars.showErrorSnackBar(
-          context,
-          TextConstants.resetTokenMissing,
-        );
-        return;
-      }
-      setState(() {
-        _otpVerified = true;
-      });
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(context, e.message);
-    } catch (_) {
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(
-        context,
-        TextConstants.genericError,
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _handlePasswordReset() async {
-    final password = _newPasswordController.text.trim();
-
-    if (password.isEmpty) {
-      SnackBars.showErrorSnackBar(
-        context,
-        TextConstants.newPasswordRequired,
-      );
-      return;
-    }
-
-    final token = _resetToken ?? await TokenStorage.getResetToken();
-    if (token == null || token.isEmpty) {
-      SnackBars.showErrorSnackBar(
-        context,
-        TextConstants.resetTokenMissing,
-      );
-      return;
-    }
-
-    setState(() {
-      _isResetting = true;
-    });
-
-    try {
-      final message = await ResetPasswordApiService.resetPassword(
-        ResetPasswordRequest(
-          resetToken: token,
-          newPassword: password,
-        ),
-      );
-
-      if (!mounted) return;
-      SnackBars.showSuccessSnackBar(context, message);
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(context, e.message);
-    } catch (_) {
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(
-        context,
-        TextConstants.genericError,
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isResetting = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: const CustomAppBar(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Container(
-                    width: double.infinity,
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 1,
-                    ),
-                    padding: EdgeInsets.all(
-                      MediaQuery.of(context).size.width * 0.05,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(
-                        MediaQuery.of(context).size.width * 0.05,
-                      ),
-                      border: Border.all(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.mark_email_unread_outlined,
-                          color: AppColors.black,
-                          size: MediaQuery.of(context).size.width * 0.2,
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.02,
-                        ),
-                        TextComponent(
-                          labelText: TextConstants.enterOtpTitle,
-                          fontSize: MediaQuery.of(context).size.width * 0.06,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.black,
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.01,
-                        ),
-                        if (!_otpVerified) ...[
-                          TextComponent(
-                            labelText:
-                                TextConstants.otpSentTo(widget.phoneNumber),
-                            fontSize: MediaQuery.of(context).size.width * 0.04,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.grey,
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.03,
-                          ),
-                          OtpInput(
-                            length: 6,
-                            controller: _otpController,
-                            focusNode: _otpFocusNode,
-                            autoFocus: true,
-                            onChanged: (value) {
-                              setState(() {
-                                _otp = value.trim();
-                              });
-                            },
-                            onCompleted: (value) {
-                              setState(() {
-                                _otp = value.trim();
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.03,
-                          ),
-                          SizedBox(
+    return BlocProvider(
+      create: (context) => PasswordResetOtpBloc()
+        ..add(PasswordResetOtpInitialized(widget.phoneNumber)),
+      child: BlocListener<PasswordResetOtpBloc, PasswordResetOtpState>(
+        listener: (context, state) {
+          if (state is PasswordResetOtpVerified) {
+            SnackBars.showSuccessSnackBar(context, state.message);
+          } else if (state is PasswordResetOtpResetSuccess) {
+            SnackBars.showSuccessSnackBar(context, state.message);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          } else if (state is PasswordResetOtpFailure) {
+            SnackBars.showErrorSnackBar(context, state.message);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.white,
+          appBar: const CustomAppBar(),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: BlocBuilder<PasswordResetOtpBloc,
+                          PasswordResetOtpState>(
+                        builder: (context, state) {
+                          final storedPhone = state is PasswordResetOtpInitial
+                              ? state.storedPhone
+                              : null;
+                          final phoneNumber = storedPhone ?? widget.phoneNumber;
+                          final isOtpVerified =
+                              state is PasswordResetOtpVerified;
+                          final isVerifying =
+                              state is PasswordResetOtpVerifying;
+                          final isResetting =
+                              state is PasswordResetOtpResetting;
+
+                          return Container(
                             width: double.infinity,
-                            child: ElevatedButtonComponent(
-                              labelText: _isLoading
-                                  ? TextConstants.verifyingOtp
-                                  : TextConstants.verifyOtp,
-                              onPressed: () {
-                                if (!_isLoading) {
-                                  _handleSubmit();
-                                }
-                              },
-                              elevatedButtonBackgroundColor: AppColors.accent,
-                              radius: 8,
-                              fontSize: 16,
-                              fontColor: AppColors.white,
-                              fontWeight: FontWeight.w600,
-                              padding: EdgeInsets.symmetric(
-                                vertical:
-                                    MediaQuery.of(context).size.height * 0.02,
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 1,
+                            ),
+                            padding: EdgeInsets.all(
+                              MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(
+                                MediaQuery.of(context).size.width * 0.05,
                               ),
-                              icon: Icon(
-                                Icons.verified_user_outlined,
-                                color: AppColors.white,
-                                size: MediaQuery.of(context).size.width * 0.05,
+                              border: Border.all(
+                                color: AppColors.primary,
+                                width: 2,
                               ),
                             ),
-                          ),
-                        ] else ...[
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02,
-                          ),
-                          TextComponent(
-                            labelText: TextConstants.otpVerifiedSetPassword,
-                            fontSize: MediaQuery.of(context).size.width * 0.04,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.black,
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02,
-                          ),
-                          TextField(
-                            controller: _newPasswordController,
-                            obscureText: _obscureNewPassword,
-                            decoration: InputDecoration(
-                              labelText: TextConstants.newPasswordLabel,
-                              border: const OutlineInputBorder(),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureNewPassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.mark_email_unread_outlined,
+                                  color: AppColors.black,
+                                  size:
+                                      MediaQuery.of(context).size.width * 0.2,
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureNewPassword = !_obscureNewPassword;
-                                  });
-                                },
-                              ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.02,
+                                ),
+                                TextComponent(
+                                  labelText: TextConstants.enterOtpTitle,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.06,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.black,
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.01,
+                                ),
+                                if (!isOtpVerified) ...[
+                                  TextComponent(
+                                    labelText:
+                                        TextConstants.otpSentTo(phoneNumber),
+                                    fontSize:
+                                        MediaQuery.of(context).size.width * 0.04,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.grey,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.03,
+                                  ),
+                                  OtpInput(
+                                    length: 6,
+                                    controller: _otpController,
+                                    focusNode: _otpFocusNode,
+                                    autoFocus: true,
+                                    onChanged: (value) {
+                                      context.read<PasswordResetOtpBloc>().add(
+                                            PasswordResetOtpChanged(value),
+                                          );
+                                    },
+                                    onCompleted: (value) {
+                                      context.read<PasswordResetOtpBloc>().add(
+                                            PasswordResetOtpChanged(value),
+                                          );
+                                    },
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.03,
+                                  ),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButtonComponent(
+                                      labelText: isVerifying
+                                          ? TextConstants.verifyingOtp
+                                          : TextConstants.verifyOtp,
+                                      onPressed: () {
+                                        if (!isVerifying) {
+                                          context
+                                              .read<PasswordResetOtpBloc>()
+                                              .add(const PasswordResetOtpVerifySubmitted());
+                                        }
+                                      },
+                                      elevatedButtonBackgroundColor:
+                                          AppColors.accent,
+                                      radius: 8,
+                                      fontSize: 16,
+                                      fontColor: AppColors.white,
+                                      fontWeight: FontWeight.w600,
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                            0.02,
+                                      ),
+                                      icon: Icon(
+                                        Icons.verified_user_outlined,
+                                        color: AppColors.white,
+                                        size: MediaQuery.of(context).size.width *
+                                            0.05,
+                                      ),
+                                    ),
+                                  ),
+                                ] else ...[
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02,
+                                  ),
+                                  TextComponent(
+                                    labelText:
+                                        TextConstants.otpVerifiedSetPassword,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width * 0.04,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.black,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02,
+                                  ),
+                                  TextField(
+                                    controller: _newPasswordController,
+                                    obscureText: _obscureNewPassword,
+                                    onChanged: (value) {
+                                      context.read<PasswordResetOtpBloc>().add(
+                                            PasswordResetOtpNewPasswordChanged(
+                                                value),
+                                          );
+                                    },
+                                    decoration: InputDecoration(
+                                      labelText: TextConstants.newPasswordLabel,
+                                      border: const OutlineInputBorder(),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _obscureNewPassword
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _obscureNewPassword =
+                                                !_obscureNewPassword;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02,
+                                  ),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButtonComponent(
+                                      labelText: isResetting
+                                          ? TextConstants.submittingNewPassword
+                                          : TextConstants.submitNewPassword,
+                                      onPressed: () {
+                                        if (!isResetting) {
+                                          context
+                                              .read<PasswordResetOtpBloc>()
+                                              .add(const PasswordResetOtpResetPasswordSubmitted());
+                                        }
+                                      },
+                                      elevatedButtonBackgroundColor:
+                                          AppColors.accent,
+                                      radius: 8,
+                                      fontSize: 16,
+                                      fontColor: AppColors.white,
+                                      fontWeight: FontWeight.w600,
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                            0.02,
+                                      ),
+                                      icon: Icon(
+                                        Icons.lock_reset,
+                                        color: AppColors.white,
+                                        size: MediaQuery.of(context).size.width *
+                                            0.05,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02,
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButtonComponent(
-                              labelText: _isResetting
-                                  ? TextConstants.submittingNewPassword
-                                  : TextConstants.submitNewPassword,
-                              onPressed: () {
-                                if (!_isResetting) {
-                                  _handlePasswordReset();
-                                }
-                              },
-                              elevatedButtonBackgroundColor: AppColors.accent,
-                              radius: 8,
-                              fontSize: 16,
-                              fontColor: AppColors.white,
-                              fontWeight: FontWeight.w600,
-                              padding: EdgeInsets.symmetric(
-                                vertical:
-                                    MediaQuery.of(context).size.height * 0.02,
-                              ),
-                              icon: Icon(
-                                Icons.lock_reset,
-                                color: AppColors.white,
-                                size: MediaQuery.of(context).size.width * 0.05,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const Footer(),
+              ],
             ),
-            const Footer(),
-          ],
+          ),
         ),
       ),
     );

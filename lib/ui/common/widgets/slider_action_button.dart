@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:slider_button/slider_button.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class SliderActionButton extends StatelessWidget {

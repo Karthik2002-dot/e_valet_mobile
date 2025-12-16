@@ -7,7 +7,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/login/forgot_password_screen.dart';

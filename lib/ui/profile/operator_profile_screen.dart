@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';

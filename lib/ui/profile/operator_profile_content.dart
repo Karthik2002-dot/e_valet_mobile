@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/profile/operator_profile_info_row.dart';

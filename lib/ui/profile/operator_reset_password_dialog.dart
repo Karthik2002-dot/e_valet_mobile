@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
