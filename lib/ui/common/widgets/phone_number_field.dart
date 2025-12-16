@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class PhoneNumberField extends StatelessWidget {
@@ -11,6 +11,8 @@ class PhoneNumberField extends StatelessWidget {
   final FocusNode? focusNode;
   final void Function(String)? onChanged;
   final String initialCountryCode;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onSubmitted;
 
   const PhoneNumberField({
     super.key,
@@ -20,6 +22,8 @@ class PhoneNumberField extends StatelessWidget {
     this.focusNode,
     this.onChanged,
     this.initialCountryCode = 'IN',
+    this.textInputAction,
+    this.onSubmitted,
   });
 
   @override
@@ -38,6 +42,7 @@ class PhoneNumberField extends StatelessWidget {
           initialCountryCode: initialCountryCode,
           controller: controller,
           focusNode: focusNode,
+          textInputAction: textInputAction,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
@@ -99,6 +104,7 @@ class PhoneNumberField extends StatelessWidget {
             fontSize: 14,
             color: AppColors.black,
           ),
+          onSubmitted: onSubmitted,
           onChanged: (PhoneNumber phone) {
             if (onChanged != null) {
               onChanged!(phone.completeNumber);

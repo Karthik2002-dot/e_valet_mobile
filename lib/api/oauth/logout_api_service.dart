@@ -49,7 +49,7 @@ class LogoutApiService {
     // Always clear local tokens and session, even if API call failed
     await TokenStorage.clearAll();
     await SessionManager.clearSessionFlags();
-    
+
     return response;
   }
 }

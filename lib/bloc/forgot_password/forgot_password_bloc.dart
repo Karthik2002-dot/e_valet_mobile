@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/oauth/otp_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/forgot_password/forgot_password_event.dart';
 import 'package:niloufer_valet_mobile/bloc/forgot_password/forgot_password_state.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ForgotPasswordBloc
     extends Bloc<ForgotPasswordEvent, ForgotPasswordState> {
@@ -13,11 +16,21 @@ class ForgotPasswordBloc
 
   String _phoneNumber = '';
 
+  String _normalizePhone(String value) {
+    // Remove spaces and dashes
+    final cleaned = value.replaceAll(RegExp(r'\s+|-'), '');
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+    // Default to India country code if not provided
+    return '+91$cleaned';
+  }
+
   void _onPhoneChanged(
     ForgotPasswordPhoneChanged event,
     Emitter<ForgotPasswordState> emit,
   ) {
-    _phoneNumber = event.phoneNumber.trim();
+    _phoneNumber = _normalizePhone(event.phoneNumber.trim());
   }
 
   Future<void> _onSubmitted(
@@ -32,14 +45,22 @@ class ForgotPasswordBloc
       return;
     }
 
-    // TODO: Call forgot password API service when available
-    // For now, simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final message = await OtpApiService.requestPasswordResetOtp(_phoneNumber);
 
-    // Simulate success
-    emit(const ForgotPasswordSuccess(
-      'Password reset instructions have been sent to your phone number.',
-    ));
+      await TokenStorage.savePhoneNumber(_phoneNumber);
+
+      emit(ForgotPasswordSuccess(
+        message,
+        _phoneNumber,
+      ));
+    } on ApiException catch (e) {
+      emit(ForgotPasswordFailure(e.message));
+    } catch (_) {
+      emit(const ForgotPasswordFailure(
+        'Something went wrong. Please try again.',
+      ));
+    }
   }
 
   void _onReset(

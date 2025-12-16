@@ -21,5 +21,3 @@ class ChangePasswordSubmitted extends ChangePasswordEvent {
   @override
   List<Object?> get props => [oldPassword, newPassword, confirmPassword];
 }
-
-

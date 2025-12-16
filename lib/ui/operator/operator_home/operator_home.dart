@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/profile/operator_overflow_menu.dart';
 import 'package:niloufer_valet_mobile/ui/profile/operator_profile_screen.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorHomeScreen extends StatelessWidget {
   const OperatorHomeScreen({super.key});
@@ -106,7 +107,7 @@ class _OperatorHomeView extends StatelessWidget {
             Expanded(
               child: Center(
                 child: TextComponent(
-                  labelText: 'Operator Home',
+                  labelText: TextConstants.operatorHomeTitle,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,

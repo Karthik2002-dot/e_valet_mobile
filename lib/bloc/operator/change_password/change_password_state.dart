@@ -26,5 +26,3 @@ class ChangePasswordState extends Equatable {
   @override
   List<Object?> get props => [isLoading, errorMessage, isSuccess];
 }
-
-

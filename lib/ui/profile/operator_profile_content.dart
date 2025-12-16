@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/profile/operator_profile_info_row.dart';
 import 'package:niloufer_valet_mobile/ui/profile/operator_reset_password_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorProfileContent extends StatelessWidget {
   final Profile profile;
@@ -59,8 +60,9 @@ class OperatorProfileContent extends StatelessWidget {
                     height: MediaQuery.of(context).size.height * 0.02,
                   ),
                   TextComponent(
-                    labelText:
-                        user.fullName.isNotEmpty ? user.fullName : 'Operator',
+                    labelText: user.fullName.isNotEmpty
+                        ? user.fullName
+                        : TextConstants.operatorFallbackName,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -87,7 +89,7 @@ class OperatorProfileContent extends StatelessWidget {
                   ),
                   OperatorProfileInfoRow(
                     icon: Icons.phone_outlined,
-                    label: 'Phone',
+                    label: TextConstants.phoneLabel,
                     value: user.phoneNumber,
                   ),
                   SizedBox(
@@ -95,7 +97,7 @@ class OperatorProfileContent extends StatelessWidget {
                   ),
                   OperatorProfileInfoRow(
                     icon: Icons.email_outlined,
-                    label: 'Email',
+                    label: TextConstants.emailLabel,
                     value: user.email,
                   ),
                   SizedBox(
@@ -103,7 +105,7 @@ class OperatorProfileContent extends StatelessWidget {
                   ),
                   OperatorProfileInfoRow(
                     icon: Icons.badge_outlined,
-                    label: 'Username',
+                    label: TextConstants.usernameLabel,
                     value: user.username,
                   ),
                   SizedBox(
@@ -111,7 +113,7 @@ class OperatorProfileContent extends StatelessWidget {
                   ),
                   OperatorProfileInfoRow(
                     icon: Icons.calendar_today_outlined,
-                    label: 'Joined',
+                    label: TextConstants.joinedLabel,
                     value: user.createdAt.split('T').first,
                   ),
                   SizedBox(
@@ -128,7 +130,7 @@ class OperatorProfileContent extends StatelessWidget {
                               const OperatorResetPasswordDialog(),
                         );
                       },
-                      labelText: 'Reset Password',
+                      labelText: TextConstants.resetPassword,
                       fontColor: AppColors.black,
                     ),
                   ),

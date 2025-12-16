@@ -17,11 +17,12 @@ class ForgotPasswordLoading extends ForgotPasswordState {
 
 class ForgotPasswordSuccess extends ForgotPasswordState {
   final String message;
+  final String phoneNumber;
 
-  const ForgotPasswordSuccess(this.message);
+  const ForgotPasswordSuccess(this.message, this.phoneNumber);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, phoneNumber];
 }
 
 class ForgotPasswordFailure extends ForgotPasswordState {

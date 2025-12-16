@@ -3,12 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_password_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorResetPasswordDialog extends StatefulWidget {
   const OperatorResetPasswordDialog({super.key});
@@ -51,7 +52,7 @@ class _OperatorResetPasswordDialogState
           if (state.isSuccess) {
             SnackBars.showSuccessSnackBar(
               context,
-              'Password changed successfully',
+              TextConstants.passwordChangedSuccess,
             );
             Navigator.of(context).pop();
           } else if (state.errorMessage != null &&
@@ -76,7 +77,7 @@ class _OperatorResetPasswordDialogState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextComponent(
-                    labelText: 'Reset Password',
+                    labelText: TextConstants.resetPassword,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -86,24 +87,24 @@ class _OperatorResetPasswordDialogState
                   ),
                   PasswordTextField(
                     controller: _currentPasswordController,
-                    labelText: 'Current Password',
-                    hintText: 'Enter your current password',
+                    labelText: TextConstants.currentPasswordLabel,
+                    hintText: TextConstants.currentPasswordHint,
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.015,
                   ),
                   PasswordTextField(
                     controller: _newPasswordController,
-                    labelText: 'New Password',
-                    hintText: 'Enter your new password',
+                    labelText: TextConstants.newPasswordLabel,
+                    hintText: TextConstants.newPasswordHint,
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.015,
                   ),
                   PasswordTextField(
                     controller: _confirmPasswordController,
-                    labelText: 'Confirm New Password',
-                    hintText: 'Confirm your new password',
+                    labelText: TextConstants.confirmNewPasswordLabel,
+                    hintText: TextConstants.confirmNewPasswordHint,
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.025,
@@ -112,7 +113,7 @@ class _OperatorResetPasswordDialogState
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButtonComponent(
-                        labelText: 'Close',
+                        labelText: TextConstants.close,
                         onPressed: isLoading
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -128,7 +129,7 @@ class _OperatorResetPasswordDialogState
                         width: MediaQuery.of(context).size.width * 0.02,
                       ),
                       ElevatedButtonComponent(
-                        labelText: 'Update',
+                        labelText: TextConstants.update,
                         onPressed:
                             isLoading ? () {} : () => _handleUpdate(context),
                         elevatedButtonBackgroundColor: AppColors.accent,

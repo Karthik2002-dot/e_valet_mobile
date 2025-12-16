@@ -10,5 +10,3 @@ abstract class OperatorProfileEvent extends Equatable {
 class OperatorProfileStarted extends OperatorProfileEvent {
   const OperatorProfileStarted();
 }
-
-

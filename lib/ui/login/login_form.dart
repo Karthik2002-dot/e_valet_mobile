@@ -7,8 +7,9 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/login/forgot_password_screen.dart';
 
 class LoginForm extends StatelessWidget {
@@ -64,9 +65,9 @@ class LoginForm extends StatelessWidget {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // "Please Login to Continue" text
+                // Login prompt
                 TextComponent(
-                  labelText: 'Please Login to Continue',
+                  labelText: TextConstants.loginPrompt,
                   fontSize: MediaQuery.of(context).size.width * 0.06,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -77,10 +78,14 @@ class LoginForm extends StatelessWidget {
                 ),
                 // Phone number with country code
                 PhoneNumberField(
-                  labelText: 'Phone Number',
-                  hintText: 'Enter Phone Number',
+                  labelText: TextConstants.phoneNumberLabel,
+                  hintText: TextConstants.phoneNumberHint,
                   controller: loginIdController,
                   focusNode: loginIdFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) {
+                    FocusScope.of(context).requestFocus(pinFocusNode);
+                  },
                   onChanged: (value) =>
                       context.read<LoginBloc>().add(LoginIdChanged(value)),
                 ),
@@ -91,8 +96,10 @@ class LoginForm extends StatelessWidget {
                 PasswordTextField(
                   controller: pinController,
                   focusNode: pinFocusNode,
-                  labelText: 'Password',
-                  hintText: 'Enter Your Password',
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _handleLogin(context),
+                  labelText: TextConstants.passwordLabel,
+                  hintText: TextConstants.passwordHint,
                   onChanged: (value) =>
                       context.read<LoginBloc>().add(PinChanged(value)),
                 ),
@@ -112,7 +119,9 @@ class LoginForm extends StatelessWidget {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButtonComponent(
-                        labelText: isLoading ? 'Logging in...' : 'Login',
+                        labelText: isLoading
+                            ? TextConstants.loginButtonLoading
+                            : TextConstants.loginButton,
                         onPressed: handlePress,
                         elevatedButtonBackgroundColor:
                             AppColors.accent, // Orange
@@ -152,7 +161,7 @@ class LoginForm extends StatelessWidget {
                   children: [
                     Spacer(),
                     TextButtonComponent(
-                      labelText: 'Forgot Password?',
+                      labelText: TextConstants.forgotPassword,
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(

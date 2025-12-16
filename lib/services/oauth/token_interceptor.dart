@@ -10,6 +10,8 @@ class TokenStorage {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _firstNameKey = 'user_first_name';
   static const String _lastNameKey = 'user_last_name';
+  static const String _phoneNumberKey = 'user_phone_number';
+  static const String _resetTokenKey = 'reset_token';
 
   /// Must be called once at app start (after Hive.initFlutter()).
   static Future<void> init() async {
@@ -122,6 +124,60 @@ class TokenStorage {
     }
   }
 
+  // Phone number (identifier)
+  static Future<void> savePhoneNumber(String phoneNumber) async {
+    try {
+      await _box.put(_phoneNumberKey, phoneNumber);
+    } catch (e) {
+      print('[TokenStorage] Error saving phone number: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getPhoneNumber() async {
+    try {
+      return _box.get(_phoneNumberKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error retrieving phone number: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearPhoneNumber() async {
+    try {
+      await _box.delete(_phoneNumberKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing phone number: $e');
+    }
+  }
+
+  // Reset token (password reset flow)
+  static Future<void> saveResetToken(String token) async {
+    try {
+      await _box.put(_resetTokenKey, token);
+    } catch (e) {
+      print('[TokenStorage] Error saving reset token: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getResetToken() async {
+    try {
+      return _box.get(_resetTokenKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error retrieving reset token: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearResetToken() async {
+    try {
+      await _box.delete(_resetTokenKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing reset token: $e');
+    }
+  }
+
   // Bulk helpers
   static Future<void> clearAllTokens() async {
     await clearAccessToken();
@@ -131,6 +187,8 @@ class TokenStorage {
   static Future<void> clearAll() async {
     await clearAllTokens();
     await clearUserName();
+    await clearPhoneNumber();
+    await clearResetToken();
   }
 
   static Future<bool> hasValidTokens() async {

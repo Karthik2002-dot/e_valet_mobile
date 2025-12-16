@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -49,26 +49,30 @@ class _LoginScreenState extends State<LoginScreen> {
             SnackBars.showErrorSnackBar(context, state.message);
           }
         },
-        child: Scaffold(
-          backgroundColor: AppColors.white, // Light beige background
-          appBar: const CustomAppBar(),
-          body: SafeArea(
-            child: Column(
-              children: [
-                // Main content
-                Expanded(
-                  child: Center(
-                    child: LoginForm(
-                      loginIdController: _loginIdController,
-                      pinController: _pinController,
-                      loginIdFocusNode: _loginIdFocusNode,
-                      pinFocusNode: _pinFocusNode,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            backgroundColor: AppColors.white, // Light beige background
+            appBar: const CustomAppBar(),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  // Main content
+                  Expanded(
+                    child: Center(
+                      child: LoginForm(
+                        loginIdController: _loginIdController,
+                        pinController: _pinController,
+                        loginIdFocusNode: _loginIdFocusNode,
+                        pinFocusNode: _pinFocusNode,
+                      ),
                     ),
                   ),
-                ),
-                // Footer
-                const Footer(),
-              ],
+                  // Footer
+                  const Footer(),
+                ],
+              ),
             ),
           ),
         ),
