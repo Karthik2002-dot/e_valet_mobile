@@ -7,7 +7,7 @@ import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/operator/profile/operator_profile_content.dart';
+import 'package:niloufer_valet_mobile/ui/profile/operator_profile_content.dart';
 
 class OperatorProfileScreen extends StatelessWidget {
   const OperatorProfileScreen({super.key});

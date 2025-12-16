@@ -6,8 +6,10 @@ import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
+import 'package:niloufer_valet_mobile/ui/login/forgot_password_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -141,6 +143,28 @@ class LoginForm extends StatelessWidget {
                       ),
                     );
                   },
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+                // Forgot Password link
+                Row(
+                  children: [
+                    Spacer(),
+                    TextButtonComponent(
+                      labelText: 'Forgot Password?',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
+                      fontSize: 14,
+                      fontColor: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ],
                 ),
               ],
             ),
