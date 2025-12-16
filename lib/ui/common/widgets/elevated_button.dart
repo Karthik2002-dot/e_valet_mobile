@@ -49,7 +49,10 @@ class _ElevatedButtonComponentState extends State<ElevatedButtonComponent> {
           padding: widget.padding,
           backgroundColor: widget.elevatedButtonBackgroundColor,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(widget.radius as double)),
+            borderRadius: BorderRadius.circular(
+              widget.radius ?? 8.0,
+            ),
+          ),
         ),
         child: widget.icon != null
             ? Row(

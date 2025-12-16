@@ -20,7 +20,12 @@ class SplashLoaded extends SplashState {
 }
 
 class SplashCompleted extends SplashState {
-  const SplashCompleted();
+  final bool isAuthenticated;
+
+  const SplashCompleted({this.isAuthenticated = false});
+
+  @override
+  List<Object?> get props => [isAuthenticated];
 }
 
 class SplashError extends SplashState {

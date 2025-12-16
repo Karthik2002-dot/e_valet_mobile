@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:slider_button/slider_button.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class SliderActionButton extends StatelessWidget {
@@ -21,8 +21,8 @@ class SliderActionButton extends StatelessWidget {
     super.key,
     required this.labelText,
     required this.onSlideComplete,
-    this.buttonColor = Colors.green,
-    this.backgroundColor = Colors.grey,
+    this.buttonColor = AppColors.success,
+    this.backgroundColor = AppColors.grey,
     this.labelColor,
     this.icon = Icons.check_rounded,
     this.width,

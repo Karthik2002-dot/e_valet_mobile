@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class PasswordTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -48,63 +49,88 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.controller,
-      obscureText: _obscurePassword,
-      textInputAction: widget.textInputAction,
-      focusNode: widget.focusNode,
-      enabled: widget.enabled,
-      onChanged: widget.onChanged,
-      onFieldSubmitted: widget.onFieldSubmitted,
-      decoration: InputDecoration(
-        hintText: widget.hintText ?? TextConstants.defaultPasswordHint,
-        filled: true,
-        fillColor: AppColors.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.surfaceBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.surfaceBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error, width: 2),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.surfaceBorder),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscurePassword
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
-            color: AppColors.mutedText,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.labelText != null) ...[
+          TextComponent(
+            labelText: widget.labelText!,
+            fontSize: 14,
+            color: AppColors.black,
+            fontWeight: FontWeight.w500,
           ),
-          onPressed: widget.enabled
-              ? () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                }
-              : null,
+          const SizedBox(height: 8),
+        ],
+        TextFormField(
+          controller: widget.controller,
+          obscureText: _obscurePassword,
+          textInputAction: widget.textInputAction,
+          focusNode: widget.focusNode,
+          enabled: widget.enabled,
+          onChanged: widget.onChanged,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.black,
+          ),
+          decoration: InputDecoration(
+            hintText: widget.hintText ?? TextConstants.defaultPasswordHint,
+            hintStyle: TextStyle(
+              fontSize: 14,
+              color: AppColors.grey.withOpacity(0.6),
+            ),
+            filled: true,
+            fillColor: AppColors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.surfaceBorder, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.surfaceBorder, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.error, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: AppColors.surfaceBorder.withOpacity(0.5),
+                width: 1,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: AppColors.mutedText,
+              ),
+              onPressed: widget.enabled
+                  ? () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    }
+                  : null,
+            ),
+          ),
+          validator: widget.validator ?? _defaultValidator,
         ),
-      ),
-      validator: widget.validator ?? _defaultValidator,
+      ],
     );
   }
 }

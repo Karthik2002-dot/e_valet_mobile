@@ -1,12 +1,34 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/oauth/login_api_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/oauth/phone_password_login_request.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(const LoginInitial()) {
+    on<LoginIdChanged>(_onLoginIdChanged);
+    on<PinChanged>(_onPinChanged);
     on<LoginSubmitted>(_onLoginSubmitted);
     on<LoginReset>(_onLoginReset);
+  }
+
+  String _loginId = '';
+  String _pin = '';
+
+  void _onLoginIdChanged(
+    LoginIdChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    _loginId = event.loginId.trim();
+  }
+
+  void _onPinChanged(
+    PinChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    _pin = event.pin;
   }
 
   Future<void> _onLoginSubmitted(
@@ -16,25 +38,33 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(const LoginLoading());
 
     // Validate inputs
-    if (event.loginId.isEmpty) {
-      emit(const LoginFailure('Please enter your Login ID'));
+    if (_loginId.isEmpty) {
+      emit(const LoginFailure('Please enter your Phone Number'));
       return;
     }
 
-    if (event.pin.isEmpty) {
-      emit(const LoginFailure('Please enter your PIN'));
+    if (_pin.isEmpty) {
+      emit(const LoginFailure('Please enter your Password'));
       return;
     }
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final request = PhonePasswordLoginRequest(
+        phoneNumber: _loginId,
+        password: _pin,
+      );
 
-    // TODO: Replace with actual API call
-    // For now, simulate success
-    if (event.loginId.isNotEmpty && event.pin.isNotEmpty) {
-      emit(const LoginSuccess());
-    } else {
-      emit(const LoginFailure('Invalid Login ID or PIN'));
+      final success = await LoginApiService.verifyPhonePasswordLogin(request);
+
+      if (success) {
+        emit(const LoginSuccess());
+      } else {
+        emit(const LoginFailure('Invalid phone number or password'));
+      }
+    } on ApiException catch (e) {
+      emit(LoginFailure(e.message));
+    } catch (_) {
+      emit(const LoginFailure('Something went wrong. Please try again.'));
     }
   }
 

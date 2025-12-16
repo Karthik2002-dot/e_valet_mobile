@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_event.dart';
+import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/color.dart';
-import 'package:niloufer_valet_mobile/ui/pilot/qrscreen/qr_screen.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/login/forgot_password_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -20,11 +27,7 @@ class LoginForm extends StatelessWidget {
   });
 
   void _handleLogin(BuildContext context) {
-    // Navigate directly to QR screen without validation
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const QRScreen()),
-    );
+    context.read<LoginBloc>().add(const LoginSubmitted());
   }
 
   @override
@@ -37,11 +40,15 @@ class LoginForm extends StatelessWidget {
           // White card with blue border
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(32),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 1,
+            ),
+            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(
+                MediaQuery.of(context).size.width * 0.05,
+              ),
               border: Border.all(
                 color: AppColors.primary, // Blue border
                 width: 2,
@@ -58,9 +65,9 @@ class LoginForm extends StatelessWidget {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // "Please Login to Continue" text
+                // Login prompt
                 TextComponent(
-                  labelText: 'Please Login to Continue',
+                  labelText: TextConstants.loginPrompt,
                   fontSize: MediaQuery.of(context).size.width * 0.06,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -69,61 +76,104 @@ class LoginForm extends StatelessWidget {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // Login ID field
-                TextFieldComponent(
-                  labelText: 'Phone Number',
-                  hintText: 'Enter Phone Number',
+                // Phone number with country code
+                PhoneNumberField(
+                  labelText: TextConstants.phoneNumberLabel,
+                  hintText: TextConstants.phoneNumberHint,
                   controller: loginIdController,
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(
-                    Icons.phone,
-                    size: 18,
-                    color: AppColors.black,
-                  ),
                   focusNode: loginIdFocusNode,
-                  borderRadius: 8,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) {
+                    FocusScope.of(context).requestFocus(pinFocusNode);
+                  },
+                  onChanged: (value) =>
+                      context.read<LoginBloc>().add(LoginIdChanged(value)),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                // PIN field
-                TextFieldComponent(
-                  labelText: 'PIN',
-                  hintText: 'Enter Your PIN',
+                // Password field
+                PasswordTextField(
                   controller: pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(
-                    Icons.lock,
-                    size: 18,
-                    color: AppColors.black,
-                  ),
                   focusNode: pinFocusNode,
-                  borderRadius: 8,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _handleLogin(context),
+                  labelText: TextConstants.passwordLabel,
+                  hintText: TextConstants.passwordHint,
+                  onChanged: (value) =>
+                      context.read<LoginBloc>().add(PinChanged(value)),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 // Login button
+                BlocBuilder<LoginBloc, LoginState>(
+                  builder: (context, state) {
+                    final isLoading = state is LoginLoading;
+                    void handlePress() {
+                      if (!isLoading) {
+                        _handleLogin(context);
+                      }
+                    }
+
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButtonComponent(
+                        labelText: isLoading
+                            ? TextConstants.loginButtonLoading
+                            : TextConstants.loginButton,
+                        onPressed: handlePress,
+                        elevatedButtonBackgroundColor:
+                            AppColors.accent, // Orange
+                        radius: 8,
+                        fontSize: 16,
+                        fontColor: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        padding: EdgeInsets.symmetric(
+                          vertical: MediaQuery.of(context).size.height * 0.02,
+                        ),
+                        icon: isLoading
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.05,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.02,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.arrow_forward,
+                                color: AppColors.white,
+                                size: MediaQuery.of(context).size.width * 0.05,
+                              ),
+                      ),
+                    );
+                  },
+                ),
                 SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButtonComponent(
-                    labelText: 'Login',
-                    onPressed: () => _handleLogin(context),
-                    elevatedButtonBackgroundColor: AppColors.accent, // Orange
-                    radius: 8,
-                    fontSize: 16,
-                    fontColor: AppColors.white,
-                    fontWeight: FontWeight.w600,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
+                  height: MediaQuery.of(context).size.height * 0.02,
+                ),
+                // Forgot Password link
+                Row(
+                  children: [
+                    Spacer(),
+                    TextButtonComponent(
+                      labelText: TextConstants.forgotPassword,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
+                      fontSize: 14,
+                      fontColor: AppColors.primary,
+                      fontWeight: FontWeight.w500,
                     ),
-                    icon: const Icon(
-                      Icons.arrow_forward,
-                      color: AppColors.white,
-                      size: 20,
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
