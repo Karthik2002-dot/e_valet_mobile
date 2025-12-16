@@ -103,8 +103,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                 Icon(
                                   Icons.mark_email_unread_outlined,
                                   color: AppColors.black,
-                                  size:
-                                      MediaQuery.of(context).size.width * 0.2,
+                                  size: MediaQuery.of(context).size.width * 0.2,
                                 ),
                                 SizedBox(
                                   height:
@@ -127,7 +126,8 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                     labelText:
                                         TextConstants.otpSentTo(phoneNumber),
                                     fontSize:
-                                        MediaQuery.of(context).size.width * 0.04,
+                                        MediaQuery.of(context).size.width *
+                                            0.04,
                                     fontWeight: FontWeight.w400,
                                     color: AppColors.grey,
                                     textAlign: TextAlign.center,
@@ -164,9 +164,8 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                           : TextConstants.verifyOtp,
                                       onPressed: () {
                                         if (!isVerifying) {
-                                          context
-                                              .read<PasswordResetOtpBloc>()
-                                              .add(const PasswordResetOtpVerifySubmitted());
+                                          context.read<PasswordResetOtpBloc>().add(
+                                              const PasswordResetOtpVerifySubmitted());
                                         }
                                       },
                                       elevatedButtonBackgroundColor:
@@ -176,16 +175,16 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                       fontColor: AppColors.white,
                                       fontWeight: FontWeight.w600,
                                       padding: EdgeInsets.symmetric(
-                                        vertical: MediaQuery.of(context)
-                                                .size
-                                                .height *
-                                            0.02,
+                                        vertical:
+                                            MediaQuery.of(context).size.height *
+                                                0.02,
                                       ),
                                       icon: Icon(
                                         Icons.verified_user_outlined,
                                         color: AppColors.white,
-                                        size: MediaQuery.of(context).size.width *
-                                            0.05,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.05,
                                       ),
                                     ),
                                   ),
@@ -198,7 +197,8 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                     labelText:
                                         TextConstants.otpVerifiedSetPassword,
                                     fontSize:
-                                        MediaQuery.of(context).size.width * 0.04,
+                                        MediaQuery.of(context).size.width *
+                                            0.04,
                                     fontWeight: FontWeight.w500,
                                     color: AppColors.black,
                                     textAlign: TextAlign.center,
@@ -246,9 +246,8 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                           : TextConstants.submitNewPassword,
                                       onPressed: () {
                                         if (!isResetting) {
-                                          context
-                                              .read<PasswordResetOtpBloc>()
-                                              .add(const PasswordResetOtpResetPasswordSubmitted());
+                                          context.read<PasswordResetOtpBloc>().add(
+                                              const PasswordResetOtpResetPasswordSubmitted());
                                         }
                                       },
                                       elevatedButtonBackgroundColor:
@@ -258,16 +257,16 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                                       fontColor: AppColors.white,
                                       fontWeight: FontWeight.w600,
                                       padding: EdgeInsets.symmetric(
-                                        vertical: MediaQuery.of(context)
-                                                .size
-                                                .height *
-                                            0.02,
+                                        vertical:
+                                            MediaQuery.of(context).size.height *
+                                                0.02,
                                       ),
                                       icon: Icon(
                                         Icons.lock_reset,
                                         color: AppColors.white,
-                                        size: MediaQuery.of(context).size.width *
-                                            0.05,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.05,
                                       ),
                                     ),
                                   ),
