@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_event.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/login/login.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -40,10 +41,21 @@ class _SplashScreenState extends State<SplashScreen>
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashCompleted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
+          if (state.isAuthenticated) {
+            // User is already logged in, navigate to home
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const OperatorHomeScreen(),
+              ),
+            );
+          } else {
+            // User is not logged in, navigate to login
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            );
+          }
         }
       },
       child: BlocBuilder<SplashBloc, SplashState>(

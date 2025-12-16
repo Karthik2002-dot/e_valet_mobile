@@ -120,7 +120,7 @@ class OperatorProfileContent extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButtonComponent(
-                      elevatedButtonBackgroundColor: AppColors.accent,
+                      elevatedButtonBackgroundColor: AppColors.primary,
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -129,6 +129,7 @@ class OperatorProfileContent extends StatelessWidget {
                         );
                       },
                       labelText: 'Reset Password',
+                      fontColor: AppColors.black,
                     ),
                   ),
                 ],

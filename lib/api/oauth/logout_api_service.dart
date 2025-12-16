@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_http_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/oauth/logout_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 
@@ -10,7 +12,7 @@ class LogoutApiService {
   static String get _baseUrl => ApiConfig.authBaseUrl;
   static String get _apiKey => ApiConfig.authApiKey;
 
-  static Future<bool> logout() async {
+  static Future<LogoutResponse> logout() async {
     final accessToken = await TokenStorage.getAccessToken();
     final refreshToken = await TokenStorage.getRefreshToken();
 
@@ -30,14 +32,24 @@ class LogoutApiService {
       },
     );
 
+    LogoutResponse response;
     try {
-      await http.postJson('/auth/logout'); // throws ApiException on failure
+      final httpResponse = await http.postJson(
+        '/auth/logout',
+        body: '',
+      ); // throws ApiException on failure
+      final json = jsonDecode(httpResponse.body) as Map<String, dynamic>;
+      response = LogoutResponse.fromJson(json);
     } on ApiException {
       // even if API fails, local logout should continue
+      // Return a default response
+      response = LogoutResponse(message: 'Logged out locally');
     }
 
+    // Always clear local tokens and session, even if API call failed
     await TokenStorage.clearAll();
     await SessionManager.clearSessionFlags();
-    return true;
+    
+    return response;
   }
 }

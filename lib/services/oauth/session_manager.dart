@@ -41,6 +41,12 @@ class SessionManager {
     return token != null && token.isNotEmpty;
   }
 
+  /// Returns true if user has valid tokens (persistent login check).
+  /// This checks for tokens regardless of date, for persistent authentication.
+  static Future<bool> isUserLoggedIn() async {
+    return await TokenStorage.hasValidTokens();
+  }
+
   static String _todayKey() {
     final now = DateTime.now();
     final month = now.month.toString().padLeft(2, '0');

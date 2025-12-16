@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_overflow_menu.dart';
@@ -20,26 +21,45 @@ class OperatorHomeScreen extends StatelessWidget {
       create: (_) => OperatorMenuBloc(),
       child: BlocListener<OperatorMenuBloc, OperatorMenuState>(
         listener: (context, state) {
-          if (state is OperatorMenuAction) {
+          if (state is OperatorMenuLogoutSuccess) {
+            // Show success message
+            SnackBars.showSuccessSnackBar(context, state.response.message);
+            // Navigate to login screen
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const LoginScreen(),
+              ),
+              (route) => false,
+            );
+            // Reset state
+            context.read<OperatorMenuBloc>().add(const OperatorMenuReset());
+          } else if (state is OperatorMenuLogoutFailure) {
+            // Show error message
+            SnackBars.showErrorSnackBar(context, state.message);
+            // Still navigate to login screen even on failure (tokens are cleared locally)
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const LoginScreen(),
+              ),
+              (route) => false,
+            );
+            // Reset state
+            context.read<OperatorMenuBloc>().add(const OperatorMenuReset());
+          } else if (state is OperatorMenuAction) {
             switch (state.action) {
-              case OperatorMenuActionType.logout:
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const LoginScreen(),
-                  ),
-                  (route) => false,
-                );
-                break;
               case OperatorMenuActionType.profile:
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const OperatorProfileScreen(),
                   ),
                 );
+                // Reset state so the same action can be handled again later
+                context.read<OperatorMenuBloc>().add(const OperatorMenuReset());
+                break;
+              case OperatorMenuActionType.logout:
+                // This case is now handled by OperatorMenuLogoutSuccess/Failure
                 break;
             }
-            // Reset state so the same action can be handled again later
-            context.read<OperatorMenuBloc>().add(const OperatorMenuReset());
           }
         },
         child: const _OperatorHomeView(),

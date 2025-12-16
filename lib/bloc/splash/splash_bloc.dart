@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
 
@@ -21,10 +22,12 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     emit(const SplashLoaded());
   }
 
-  void _onSplashAnimationCompleted(
+  Future<void> _onSplashAnimationCompleted(
     SplashAnimationCompleted event,
     Emitter<SplashState> emit,
-  ) {
-    emit(const SplashCompleted());
+  ) async {
+    // Check if user is already logged in
+    final isAuthenticated = await SessionManager.isUserLoggedIn();
+    emit(SplashCompleted(isAuthenticated: isAuthenticated));
   }
 }
