@@ -5,7 +5,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/change_password/change_passw
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/oauth/change_password_request.dart';
 
-class ChangePasswordBloc extends Bloc<ChangePasswordEvent, ChangePasswordState> {
+class ChangePasswordBloc
+    extends Bloc<ChangePasswordEvent, ChangePasswordState> {
   ChangePasswordBloc() : super(const ChangePasswordState()) {
     on<ChangePasswordSubmitted>(_onSubmitted);
   }
@@ -20,9 +21,7 @@ class ChangePasswordBloc extends Bloc<ChangePasswordEvent, ChangePasswordState> 
     final confirmPassword = event.confirmPassword.trim();
 
     // Validation: All fields required
-    if (oldPassword.isEmpty ||
-        newPassword.isEmpty ||
-        confirmPassword.isEmpty) {
+    if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       emit(
         state.copyWith(
           isLoading: false,
@@ -40,7 +39,8 @@ class ChangePasswordBloc extends Bloc<ChangePasswordEvent, ChangePasswordState> 
         state.copyWith(
           isLoading: false,
           isSuccess: false,
-          errorMessage: 'Current password must be at least $minPasswordLength characters.',
+          errorMessage:
+              'Current password must be at least $minPasswordLength characters.',
         ),
       );
       return;
@@ -51,7 +51,8 @@ class ChangePasswordBloc extends Bloc<ChangePasswordEvent, ChangePasswordState> 
         state.copyWith(
           isLoading: false,
           isSuccess: false,
-          errorMessage: 'New password must be at least $minPasswordLength characters.',
+          errorMessage:
+              'New password must be at least $minPasswordLength characters.',
         ),
       );
       return;
@@ -110,5 +111,3 @@ class ChangePasswordBloc extends Bloc<ChangePasswordEvent, ChangePasswordState> 
     }
   }
 }
-
-

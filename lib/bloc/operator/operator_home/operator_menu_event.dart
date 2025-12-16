@@ -18,5 +18,3 @@ class OperatorProfilePressed extends OperatorMenuEvent {
 class OperatorMenuReset extends OperatorMenuEvent {
   const OperatorMenuReset();
 }
-
-

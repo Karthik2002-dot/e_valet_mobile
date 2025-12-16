@@ -44,5 +44,3 @@ class OperatorMenuLogoutFailure extends OperatorMenuState {
   @override
   List<Object?> get props => [message];
 }
-
-

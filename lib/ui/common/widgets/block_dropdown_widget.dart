@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class BlockDropdownWidget extends StatefulWidget {
   final String? value;
@@ -14,7 +15,7 @@ class BlockDropdownWidget extends StatefulWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.labelText = 'Block',
+    this.labelText = TextConstants.blockLabel,
   });
 
   @override
@@ -72,13 +73,13 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
           child: TextComponent(
             labelText: widget.labelText,
             fontSize: 12,
-            color: CupertinoColors.label.resolveFrom(context),
+            color: AppCupertinoColors.label(context),
           ),
         ),
         Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
+              color: AppCupertinoColors.separator(context),
               width: 0.5,
             ),
             borderRadius: BorderRadius.circular(8),
@@ -87,9 +88,9 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
             value: widget.value,
             isExpanded: true,
             hint: TextComponent(
-              labelText: 'Select ${widget.labelText}',
+              labelText: TextConstants.selectLabel(widget.labelText),
               fontSize: 16,
-              color: CupertinoColors.placeholderText.resolveFrom(context),
+              color: AppCupertinoColors.placeholderText(context),
             ),
             items: _blockOptions.map((String block) {
               return DropdownMenuItem<String>(
@@ -105,21 +106,21 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: CupertinoColors.systemBackground.resolveFrom(context),
+                color: AppCupertinoColors.systemBackground(context),
               ),
             ),
             iconStyleData: IconStyleData(
               icon: Icon(
                 CupertinoIcons.chevron_down,
                 size: 20,
-                color: CupertinoColors.label.resolveFrom(context),
+                color: AppCupertinoColors.label(context),
               ),
             ),
             dropdownStyleData: DropdownStyleData(
               maxHeight: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: CupertinoColors.systemBackground.resolveFrom(context),
+                color: AppCupertinoColors.systemBackground(context),
               ),
               offset: const Offset(0, -8),
               scrollbarTheme: ScrollbarThemeData(
@@ -153,28 +154,27 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
                       horizontal: 10,
                       vertical: 8,
                     ),
-                    hintText: 'Search block...',
+                    hintText: TextConstants.searchBlockHint,
                     hintStyle: TextStyle(
                       fontSize: 14,
-                      color:
-                          CupertinoColors.placeholderText.resolveFrom(context),
+                      color: AppCupertinoColors.placeholderText(context),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: CupertinoColors.separator.resolveFrom(context),
+                        color: AppCupertinoColors.separator(context),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: CupertinoColors.separator.resolveFrom(context),
+                        color: AppCupertinoColors.separator(context),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: CupertinoColors.activeBlue,
+                        color: AppCupertinoColors.activeBlue,
                         width: 2,
                       ),
                     ),
@@ -213,7 +213,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
         ),
       ),
       hint: TextComponent(
-        labelText: 'Select ${widget.labelText}',
+        labelText: TextConstants.selectLabel(widget.labelText),
         fontSize: 16,
         color: AppColors.mutedText,
       ),
@@ -283,7 +283,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
                 horizontal: 12,
                 vertical: 10,
               ),
-              hintText: 'Search block...',
+              hintText: TextConstants.searchBlockHint,
               hintStyle: TextStyle(
                 fontSize: 14,
                 color: AppColors.mutedText,

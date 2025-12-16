@@ -49,26 +49,30 @@ class _LoginScreenState extends State<LoginScreen> {
             SnackBars.showErrorSnackBar(context, state.message);
           }
         },
-        child: Scaffold(
-          backgroundColor: AppColors.white, // Light beige background
-          appBar: const CustomAppBar(),
-          body: SafeArea(
-            child: Column(
-              children: [
-                // Main content
-                Expanded(
-                  child: Center(
-                    child: LoginForm(
-                      loginIdController: _loginIdController,
-                      pinController: _pinController,
-                      loginIdFocusNode: _loginIdFocusNode,
-                      pinFocusNode: _pinFocusNode,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            backgroundColor: AppColors.white, // Light beige background
+            appBar: const CustomAppBar(),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  // Main content
+                  Expanded(
+                    child: Center(
+                      child: LoginForm(
+                        loginIdController: _loginIdController,
+                        pinController: _pinController,
+                        loginIdFocusNode: _loginIdFocusNode,
+                        pinFocusNode: _pinFocusNode,
+                      ),
                     ),
                   ),
-                ),
-                // Footer
-                const Footer(),
-              ],
+                  // Footer
+                  const Footer(),
+                ],
+              ),
             ),
           ),
         ),

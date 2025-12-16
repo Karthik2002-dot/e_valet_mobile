@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
@@ -16,7 +17,7 @@ class Footer extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextComponent(
-            labelText: 'Powered By',
+            labelText: TextConstants.poweredBy,
             fontSize: MediaQuery.of(context).size.width * 0.03,
             color: AppColors.mutedText,
           ),

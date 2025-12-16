@@ -7,6 +7,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
+import 'package:niloufer_valet_mobile/ui/common/color.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -61,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
       child: BlocBuilder<SplashBloc, SplashState>(
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.white,
             body: state is SplashError
                 ? Center(
                     child: Column(
@@ -70,13 +71,13 @@ class _SplashScreenState extends State<SplashScreen>
                         const Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                         const SizedBox(height: 16),
                         TextComponent(
                           labelText: state.message,
                           fontSize: 16,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                       ],
                     ),

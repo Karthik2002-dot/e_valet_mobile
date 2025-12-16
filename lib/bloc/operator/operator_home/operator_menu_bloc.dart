@@ -33,5 +33,3 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
     }
   }
 }
-
-

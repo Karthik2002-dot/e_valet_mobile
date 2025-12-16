@@ -33,5 +33,3 @@ class OperatorProfileError extends OperatorProfileState {
   @override
   List<Object?> get props => [message];
 }
-
-

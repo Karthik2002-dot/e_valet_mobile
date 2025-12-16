@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/color.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorOverflowMenu extends StatelessWidget {
   const OperatorOverflowMenu({super.key});
@@ -13,7 +14,7 @@ class OperatorOverflowMenu extends StatelessWidget {
     return PullDownButton(
       itemBuilder: (context) => [
         PullDownMenuItem(
-          title: 'Profile',
+          title: TextConstants.profileMenuTitle,
           icon: Icons.person_outline,
           onTap: () {
             context
@@ -23,7 +24,7 @@ class OperatorOverflowMenu extends StatelessWidget {
         ),
         const PullDownMenuDivider(),
         PullDownMenuItem(
-          title: 'Logout',
+          title: TextConstants.logoutMenuTitle,
           icon: Icons.logout,
           onTap: () {
             context.read<OperatorMenuBloc>().add(const OperatorLogoutPressed());
