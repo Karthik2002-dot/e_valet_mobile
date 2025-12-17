@@ -51,6 +51,7 @@ class TextConstants {
 
   // Password Reset OTP
   static const String enterOtpTitle = 'Enter OTP';
+  static const String enterNewPasswordTitle = 'Enter New Password';
   static String otpSentTo(String phoneNumber) =>
       'We sent a 6-digit code to $phoneNumber';
   static const String verifyOtp = 'Verify OTP';

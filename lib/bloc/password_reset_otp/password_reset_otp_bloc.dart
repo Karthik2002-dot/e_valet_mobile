@@ -100,7 +100,7 @@ class PasswordResetOtpBloc
       return;
     }
 
-    emit(const PasswordResetOtpResetting());
+    emit(PasswordResetOtpResetting(resetToken: token));
 
     try {
       final message = await ResetPasswordApiService.resetPassword(
@@ -112,9 +112,21 @@ class PasswordResetOtpBloc
 
       emit(PasswordResetOtpResetSuccess(message));
     } on ApiException catch (e) {
-      emit(PasswordResetOtpFailure(e.message));
+      // Preserve the verified state when password reset fails
+      // This allows the user to stay on the new password step and see the error
+      emit(PasswordResetOtpVerifiedWithError(
+        message: 'OTP verified',
+        errorMessage: e.message,
+        resetToken: token,
+      ));
     } catch (_) {
-      emit(const PasswordResetOtpFailure(TextConstants.genericError));
+      // Preserve the verified state when password reset fails
+      final token = _resetToken ?? await TokenStorage.getResetToken();
+      emit(PasswordResetOtpVerifiedWithError(
+        message: 'OTP verified',
+        errorMessage: TextConstants.genericError,
+        resetToken: token,
+      ));
     }
   }
 }
