@@ -1,26 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/core/profile/operator_overflow_menu.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
+  final bool showLanguageIcon;
+  final double? logoSize;
+  final double? iconSize;
 
   const CustomAppBar({
     super.key,
     this.actions,
+    this.showLanguageIcon = false,
+    this.logoSize,
+    this.iconSize,
   });
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final defaultLogoSize = logoSize ?? 60;
+    final defaultIconSize = iconSize ?? screenWidth * 0.06;
+
+    // Build default actions with language icon and menu if needed
+    List<Widget>? appBarActions = actions;
+    if (showLanguageIcon && actions == null) {
+      appBarActions = [
+        SizedBox(
+          width: defaultIconSize,
+          height: defaultIconSize,
+          child: Image.asset(
+            'assets/images/language.png',
+            fit: BoxFit.contain,
+          ),
+        ),
+        SizedBox(width: screenWidth * 0.04),
+        OperatorOverflowMenu(),
+        SizedBox(width: screenWidth * 0.04),
+      ];
+    }
+
     return AppBar(
-      backgroundColor: AppColors.primary, // Yellow
+      backgroundColor: AppColors.primary,
       elevation: 0,
       automaticallyImplyLeading: false,
       title: SizedBox(
-        width: 60,
-        height: 60,
-        child: Image.asset('assets/images/niloufer.logo.png'),
+        width: defaultLogoSize,
+        height: defaultLogoSize,
+        child: Image.asset(
+          'assets/images/niloufer.logo.png',
+          fit: BoxFit.contain,
+        ),
       ),
-      actions: actions,
+      actions: appBarActions,
     );
   }
 

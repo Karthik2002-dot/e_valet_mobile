@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/operator_header_widget.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_header_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_scanner_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -25,11 +26,29 @@ class OperatorHomeContent extends StatelessWidget {
     final isTablet = screenWidth > 600;
     final isDesktop = screenWidth > 1200;
 
+    final logoSize = isDesktop
+        ? screenWidth * 0.08
+        : isTablet
+            ? screenWidth * 0.12
+            : screenWidth * 0.2;
+
+    final iconSize = isDesktop
+        ? screenWidth * 0.02
+        : isTablet
+            ? screenWidth * 0.035
+            : screenWidth * 0.06;
+
     return Scaffold(
       backgroundColor: AppColors.lightBeigeBackground,
+      // Use CustomAppBar with language icon and menu
+      appBar: CustomAppBar(
+        showLanguageIcon: true,
+        logoSize: logoSize,
+        iconSize: iconSize,
+      ),
       body: Column(
         children: [
-          // Header Section (responsive height, orange background) - extends to top
+          // Header Content Section (welcome message, on break toggle, status card)
           OperatorHeaderWidget(
             operatorName: operatorName,
             isOnBreak: isOnBreak,
