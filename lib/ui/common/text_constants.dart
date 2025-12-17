@@ -45,8 +45,8 @@ class TextConstants {
   // Forgot Password
   static const String forgotPasswordTitle = 'Forgot Password';
   static const String forgotPasswordDescription =
-      'Enter your phone number to receive password reset instructions';
-  static const String sendResetInstructions = 'Send Reset Instructions';
+      'Enter your phone number to receive OTP';
+  static const String sendResetInstructions = 'Send OTP';
   static const String sendResetInstructionsLoading = 'Sending...';
 
   // Password Reset OTP

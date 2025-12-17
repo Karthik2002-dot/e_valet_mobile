@@ -73,8 +73,20 @@ class BaseHttpService {
     String msg = 'Request failed with status code ${response.statusCode}.';
     try {
       final body = jsonDecode(response.body);
-      if (body is Map && body['message'] is String) {
-        msg = body['message'] as String;
+      if (body is Map) {
+        final message = body['message'];
+        if (message is String) {
+          msg = message;
+        } else if (message is List) {
+          // Handle array of messages - join them with newlines
+          final messageList = message
+              .whereType<String>()
+              .where((m) => m.isNotEmpty)
+              .toList();
+          if (messageList.isNotEmpty) {
+            msg = messageList.join('\n');
+          }
+        }
       }
     } catch (_) {}
     throw ApiException(
