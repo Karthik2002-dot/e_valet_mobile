@@ -50,32 +50,47 @@ class _OperatorResetPasswordDialogState
       child: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            SnackBars.showSuccessSnackBar(
-              context,
-              TextConstants.passwordChangedSuccess,
-            );
+            // Capture the underlying screen context before closing dialog
+            final underlyingContext = Navigator.of(context, rootNavigator: false).context;
+            // Close dialog
             Navigator.of(context).pop();
-          } else if (state.errorMessage != null &&
-              state.errorMessage!.isNotEmpty) {
-            SnackBars.showErrorSnackBar(context, state.errorMessage!);
+            // Show success snackbar on underlying screen after dialog closes
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (underlyingContext.mounted) {
+                SnackBars.showSuccessSnackBar(
+                  underlyingContext,
+                  TextConstants.passwordChangedSuccess,
+                );
+              }
+            });
           }
+          // Error messages are now shown inline in the dialog, not as snackbars
         },
         builder: (context, state) {
           final isLoading = state.isLoading;
+          final errorMessage = state.errorMessage;
 
           return Dialog(
             backgroundColor: AppColors.white,
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.9,
-              ),
-              padding: EdgeInsets.all(
-                MediaQuery.of(context).size.width * 0.06,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            child: GestureDetector(
+              onTap: () {
+                // Dismiss keyboard when tapping outside input fields
+                FocusScope.of(context).unfocus();
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.9,
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                ),
+                padding: EdgeInsets.all(
+                  MediaQuery.of(context).size.width * 0.06,
+                ),
+                child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   TextComponent(
                     labelText: TextConstants.resetPassword,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -146,6 +161,48 @@ class _OperatorResetPasswordDialogState
                     labelText: TextConstants.confirmNewPasswordLabel,
                     hintText: TextConstants.confirmNewPasswordHint,
                   ),
+                  // Error message display
+                  if (errorMessage != null && errorMessage.isNotEmpty) ...[
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.015,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.03,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: MediaQuery.of(context).size.width * 0.04,
+                            color: AppColors.error,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.02,
+                          ),
+                          Expanded(
+                            child: TextComponent(
+                              labelText: errorMessage,
+                              fontSize: MediaQuery.of(context).size.width * 0.032,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.error,
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.025,
                   ),
@@ -197,9 +254,11 @@ class _OperatorResetPasswordDialogState
                       ),
                     ],
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
+          ),
           );
         },
       ),

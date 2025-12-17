@@ -19,13 +19,15 @@ class OperatorProfileInfoRow extends StatelessWidget {
     if (value.isEmpty) return const SizedBox.shrink();
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon,
-            size: MediaQuery.of(context).size.width * 0.02,
-            color: AppColors.grey),
+        Icon(
+          icon,
+          size: MediaQuery.of(context).size.width * 0.06,
+          color: AppColors.primary,
+        ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.01,
+          width: MediaQuery.of(context).size.width * 0.04,
         ),
         Expanded(
           child: Column(
