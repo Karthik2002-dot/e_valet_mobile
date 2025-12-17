@@ -47,35 +47,42 @@ class OtpStep extends StatelessWidget {
                 .add(PasswordResetOtpChanged(value));
           },
           onCompleted: (value) {
-            context
-                .read<PasswordResetOtpBloc>()
-                .add(PasswordResetOtpChanged(value));
+            final bloc = context.read<PasswordResetOtpBloc>();
+            // Update the OTP in the bloc
+            bloc.add(PasswordResetOtpChanged(value));
+            // Automatically trigger verification if not already verifying
+            if (!isVerifying) {
+              bloc.add(const PasswordResetOtpVerifySubmitted());
+            }
           },
         ),
         SizedBox(height: size.height * 0.03),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButtonComponent(
-            labelText: isVerifying
-                ? TextConstants.verifyingOtp
-                : TextConstants.verifyOtp,
-            onPressed: () {
-              if (!isVerifying) {
-                context
-                    .read<PasswordResetOtpBloc>()
-                    .add(const PasswordResetOtpVerifySubmitted());
-              }
-            },
-            elevatedButtonBackgroundColor: AppColors.accent,
-            radius: 8,
-            fontSize: 16,
-            fontColor: AppColors.white,
-            fontWeight: FontWeight.w600,
-            padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
-            icon: Icon(
-              Icons.verified_user_outlined,
-              color: AppColors.white,
-              size: size.width * 0.05,
+          child: Opacity(
+            opacity: isVerifying ? 0.5 : 1.0,
+            child: ElevatedButtonComponent(
+              labelText: isVerifying
+                  ? TextConstants.verifyingOtp
+                  : TextConstants.verifyOtp,
+              onPressed: isVerifying
+                  ? () {}
+                  : () {
+                      context
+                          .read<PasswordResetOtpBloc>()
+                          .add(const PasswordResetOtpVerifySubmitted());
+                    },
+              elevatedButtonBackgroundColor: AppColors.accent,
+              radius: 8,
+              fontSize: 16,
+              fontColor: AppColors.white,
+              fontWeight: FontWeight.w600,
+              padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
+              icon: Icon(
+                Icons.verified_user_outlined,
+                color: AppColors.white,
+                size: size.width * 0.05,
+              ),
             ),
           ),
         ),
