@@ -10,7 +10,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/login/forgot_password_screen.dart';
+import 'package:niloufer_valet_mobile/ui/core/forgot_password/forgot_password_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;

@@ -8,9 +8,9 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/login/login.dart';
-import 'package:niloufer_valet_mobile/ui/profile/operator_overflow_menu.dart';
-import 'package:niloufer_valet_mobile/ui/profile/operator_profile_screen.dart';
+import 'package:niloufer_valet_mobile/ui/core/login/login.dart';
+import 'package:niloufer_valet_mobile/ui/core/profile/operator_overflow_menu.dart';
+import 'package:niloufer_valet_mobile/ui/core/profile/operator_profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorHomeScreen extends StatelessWidget {

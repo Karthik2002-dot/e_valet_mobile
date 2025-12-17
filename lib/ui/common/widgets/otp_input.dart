@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
@@ -85,6 +86,9 @@ class OtpInput extends StatelessWidget {
       onChanged: onChanged,
       onCompleted: onCompleted,
       keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
       hapticFeedbackType: HapticFeedbackType.lightImpact,
       autofocus: autoFocus,
     );

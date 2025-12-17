@@ -38,7 +38,12 @@ class PasswordResetOtpVerified extends PasswordResetOtpState {
 }
 
 class PasswordResetOtpResetting extends PasswordResetOtpState {
-  const PasswordResetOtpResetting();
+  final String? resetToken;
+
+  const PasswordResetOtpResetting({this.resetToken});
+
+  @override
+  List<Object?> get props => [resetToken];
 }
 
 class PasswordResetOtpResetSuccess extends PasswordResetOtpState {
@@ -57,4 +62,19 @@ class PasswordResetOtpFailure extends PasswordResetOtpState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class PasswordResetOtpVerifiedWithError extends PasswordResetOtpState {
+  final String message;
+  final String errorMessage;
+  final String? resetToken;
+
+  const PasswordResetOtpVerifiedWithError({
+    required this.message,
+    required this.errorMessage,
+    this.resetToken,
+  });
+
+  @override
+  List<Object?> get props => [message, errorMessage, resetToken];
 }

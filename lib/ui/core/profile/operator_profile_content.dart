@@ -3,8 +3,8 @@ import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/profile/operator_profile_info_row.dart';
-import 'package:niloufer_valet_mobile/ui/profile/operator_reset_password_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/core/profile/operator_profile_info_row.dart';
+import 'package:niloufer_valet_mobile/ui/core/profile/operator_reset_password_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorProfileContent extends StatelessWidget {

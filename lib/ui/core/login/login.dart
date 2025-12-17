@@ -6,7 +6,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/login/login_form.dart';
+import 'package:niloufer_valet_mobile/ui/core/login/login_form.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
 
 class LoginScreen extends StatefulWidget {

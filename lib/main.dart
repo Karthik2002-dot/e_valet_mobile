@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/ui/splash/splash.dart';
+import 'package:niloufer_valet_mobile/ui/core/splash/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
