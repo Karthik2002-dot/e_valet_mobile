@@ -35,4 +35,3 @@ class OperatorHomeView extends StatelessWidget {
     );
   }
 }
-

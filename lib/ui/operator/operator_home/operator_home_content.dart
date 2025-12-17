@@ -55,7 +55,8 @@ class OperatorHomeContent extends StatelessWidget {
                         SizedBox(height: screenHeight * 0.03),
                         // Welcome message
                         TextComponent(
-                          labelText: TextConstants.readyToParkMessage(operatorName),
+                          labelText:
+                              TextConstants.readyToParkMessage(operatorName),
                           fontSize: isDesktop
                               ? screenWidth * 0.018
                               : isTablet
@@ -120,7 +121,8 @@ class OperatorHomeContent extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.02),
                               ),
                               elevation: 0,
                             ),
@@ -169,4 +171,3 @@ class OperatorHomeContent extends StatelessWidget {
     );
   }
 }
-

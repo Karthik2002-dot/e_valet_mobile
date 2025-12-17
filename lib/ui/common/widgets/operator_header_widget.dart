@@ -141,7 +141,11 @@ class OperatorHeaderWidget extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.02),
                     Transform.scale(
-                      scale: isDesktop ? 0.8 : isTablet ? 0.9 : 1.0,
+                      scale: isDesktop
+                          ? 0.8
+                          : isTablet
+                              ? 0.9
+                              : 1.0,
                       child: Switch(
                         value: isOnBreak,
                         onChanged: (value) {
@@ -192,7 +196,8 @@ class OperatorStatusCardWidget extends StatelessWidget {
     return Center(
       child: Container(
         width: (267 * screenWidth / 360).clamp(267.0, screenWidth * 0.9),
-        height: (40.3 * MediaQuery.of(context).size.height / 800).clamp(40.3, 57.0),
+        height:
+            (40.3 * MediaQuery.of(context).size.height / 800).clamp(40.3, 57.0),
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.04,
           vertical: 0,
@@ -245,7 +250,11 @@ class OperatorStatusCardWidget extends StatelessWidget {
                   ),
                   SizedBox(width: screenWidth * 0.02),
                   Transform.scale(
-                    scale: isDesktop ? 0.75 : isTablet ? 0.85 : 0.9,
+                    scale: isDesktop
+                        ? 0.75
+                        : isTablet
+                            ? 0.85
+                            : 0.9,
                     child: Switch(
                       value: isOnline,
                       onChanged: (value) {
@@ -267,4 +276,3 @@ class OperatorStatusCardWidget extends StatelessWidget {
     );
   }
 }
-

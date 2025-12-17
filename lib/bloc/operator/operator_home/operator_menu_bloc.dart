@@ -43,9 +43,8 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
     Emitter<OperatorMenuState> emit,
   ) async {
     final firstName = await TokenStorage.getFirstName() ?? '';
-    final operatorName = firstName.isNotEmpty
-        ? firstName
-        : TextConstants.operatorFallbackName;
+    final operatorName =
+        firstName.isNotEmpty ? firstName : TextConstants.operatorFallbackName;
 
     emit(OperatorHomeLoaded(
       operatorName: operatorName,

@@ -18,8 +18,7 @@ class PasswordResetOtpScreen extends StatefulWidget {
   });
 
   @override
-  State<PasswordResetOtpScreen> createState() =>
-      _PasswordResetOtpScreenState();
+  State<PasswordResetOtpScreen> createState() => _PasswordResetOtpScreenState();
 }
 
 class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
@@ -69,25 +68,24 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
                       child: BlocBuilder<PasswordResetOtpBloc,
                           PasswordResetOtpState>(
                         builder: (context, state) {
-                          final storedPhone =
-                              state is PasswordResetOtpInitial
-                                  ? state.storedPhone
-                                  : null;
-                          final phoneNumber =
-                              storedPhone ?? widget.phoneNumber;
+                          final storedPhone = state is PasswordResetOtpInitial
+                              ? state.storedPhone
+                              : null;
+                          final phoneNumber = storedPhone ?? widget.phoneNumber;
                           // OTP is verified if we're in verified state, resetting state, or verified with error
                           // This ensures we stay on new password step during reset
                           final isOtpVerified =
                               state is PasswordResetOtpVerified ||
-                              state is PasswordResetOtpVerifiedWithError ||
-                              state is PasswordResetOtpResetting;
+                                  state is PasswordResetOtpVerifiedWithError ||
+                                  state is PasswordResetOtpResetting;
                           final isVerifying =
                               state is PasswordResetOtpVerifying;
                           final isResetting =
                               state is PasswordResetOtpResetting;
-                          final errorMessage = state is PasswordResetOtpVerifiedWithError
-                              ? state.errorMessage
-                              : null;
+                          final errorMessage =
+                              state is PasswordResetOtpVerifiedWithError
+                                  ? state.errorMessage
+                                  : null;
 
                           return PasswordResetOtpCard(
                             isOtpVerified: isOtpVerified,
