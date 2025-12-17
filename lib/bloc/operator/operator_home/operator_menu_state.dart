@@ -44,3 +44,30 @@ class OperatorMenuLogoutFailure extends OperatorMenuState {
   @override
   List<Object?> get props => [message];
 }
+
+class OperatorHomeLoaded extends OperatorMenuState {
+  final String operatorName;
+  final bool isOnBreak;
+  final bool isOnline;
+
+  const OperatorHomeLoaded({
+    required this.operatorName,
+    required this.isOnBreak,
+    required this.isOnline,
+  });
+
+  OperatorHomeLoaded copyWith({
+    String? operatorName,
+    bool? isOnBreak,
+    bool? isOnline,
+  }) {
+    return OperatorHomeLoaded(
+      operatorName: operatorName ?? this.operatorName,
+      isOnBreak: isOnBreak ?? this.isOnBreak,
+      isOnline: isOnline ?? this.isOnline,
+    );
+  }
+
+  @override
+  List<Object?> get props => [operatorName, isOnBreak, isOnline];
+}

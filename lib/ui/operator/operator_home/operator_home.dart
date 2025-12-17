@@ -3,15 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/core/login/login.dart';
-import 'package:niloufer_valet_mobile/ui/core/profile/operator_overflow_menu.dart';
 import 'package:niloufer_valet_mobile/ui/core/profile/operator_profile_screen.dart';
-import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home_view.dart';
 
 class OperatorHomeScreen extends StatelessWidget {
   const OperatorHomeScreen({super.key});
@@ -63,61 +58,7 @@ class OperatorHomeScreen extends StatelessWidget {
             }
           }
         },
-        child: const _OperatorHomeView(),
-      ),
-    );
-  }
-}
-
-class _OperatorHomeView extends StatelessWidget {
-  const _OperatorHomeView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: CustomAppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Language icon
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Image.asset(
-                    'assets/images/language.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                SizedBox(width: 16),
-                // Overflow menu using pull_down_button
-                OperatorOverflowMenu(),
-              ],
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Main content area
-            Expanded(
-              child: Center(
-                child: TextComponent(
-                  labelText: TextConstants.operatorHomeTitle,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-              ),
-            ),
-            // Shared footer
-            const Footer(),
-          ],
-        ),
+        child: const OperatorHomeView(),
       ),
     );
   }

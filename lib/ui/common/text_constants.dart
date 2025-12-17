@@ -71,6 +71,12 @@ class TextConstants {
   // Operator Home & Profile
   static const String operatorHomeTitle = 'Operator Home';
   static const String operatorFallbackName = 'Operator';
+  static String readyToParkMessage(String operatorName) =>
+      'Hi $operatorName, Ready to Park?';
+  static const String scanKeyTagInstruction =
+      'Scan the key tag to start the parking process.';
+  static const String enterTagNumberLink = 'Or enter the tag number';
+  static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
   static const String usernameLabel = 'Username';

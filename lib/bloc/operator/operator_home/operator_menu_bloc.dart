@@ -3,6 +3,8 @@ import 'package:niloufer_valet_mobile/api/oauth/logout_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
   OperatorMenuBloc() : super(const OperatorMenuInitial()) {
@@ -13,6 +15,9 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
     on<OperatorMenuReset>((event, emit) {
       emit(const OperatorMenuInitial());
     });
+    on<OperatorHomeStarted>(_onOperatorHomeStarted);
+    on<OperatorOnBreakToggled>(_onOnBreakToggled);
+    on<OperatorOnlineStatusToggled>(_onOnlineStatusToggled);
   }
 
   Future<void> _onLogoutPressed(
@@ -28,8 +33,44 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
       emit(OperatorMenuLogoutFailure(e.message));
     } catch (e) {
       emit(OperatorMenuLogoutFailure(
-        'Something went wrong. Please try again.',
+        TextConstants.genericError,
       ));
+    }
+  }
+
+  Future<void> _onOperatorHomeStarted(
+    OperatorHomeStarted event,
+    Emitter<OperatorMenuState> emit,
+  ) async {
+    final firstName = await TokenStorage.getFirstName() ?? '';
+    final operatorName = firstName.isNotEmpty
+        ? firstName
+        : TextConstants.operatorFallbackName;
+
+    emit(OperatorHomeLoaded(
+      operatorName: operatorName,
+      isOnBreak: false,
+      isOnline: true,
+    ));
+  }
+
+  void _onOnBreakToggled(
+    OperatorOnBreakToggled event,
+    Emitter<OperatorMenuState> emit,
+  ) {
+    if (state is OperatorHomeLoaded) {
+      final currentState = state as OperatorHomeLoaded;
+      emit(currentState.copyWith(isOnBreak: event.isOnBreak));
+    }
+  }
+
+  void _onOnlineStatusToggled(
+    OperatorOnlineStatusToggled event,
+    Emitter<OperatorMenuState> emit,
+  ) {
+    if (state is OperatorHomeLoaded) {
+      final currentState = state as OperatorHomeLoaded;
+      emit(currentState.copyWith(isOnline: event.isOnline));
     }
   }
 }

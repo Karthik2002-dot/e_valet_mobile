@@ -18,3 +18,25 @@ class OperatorProfilePressed extends OperatorMenuEvent {
 class OperatorMenuReset extends OperatorMenuEvent {
   const OperatorMenuReset();
 }
+
+class OperatorHomeStarted extends OperatorMenuEvent {
+  const OperatorHomeStarted();
+}
+
+class OperatorOnBreakToggled extends OperatorMenuEvent {
+  final bool isOnBreak;
+
+  const OperatorOnBreakToggled(this.isOnBreak);
+
+  @override
+  List<Object?> get props => [isOnBreak];
+}
+
+class OperatorOnlineStatusToggled extends OperatorMenuEvent {
+  final bool isOnline;
+
+  const OperatorOnlineStatusToggled(this.isOnline);
+
+  @override
+  List<Object?> get props => [isOnline];
+}

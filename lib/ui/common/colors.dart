@@ -18,11 +18,15 @@ class AppColors {
 
   // Surfaces
   static const Color background = Color(0xFFF7F7F9);
+  static const Color lightBeigeBackground = Color(0xFFF5F5F0); // Light beige background
   static const Color surface = Colors.white;
   static const Color surfaceBorder = Color(0xFFEAEAEA);
   static const Color divider = Color(0xFFE5E7EB);
   static const Color shadow10 = Color(0x1A000000); // 10% black
   static const Color mutedText = Color(0xFF6B7280);
+  
+  // Grey shades
+  static const Color greyLight = Color(0xFFE0E0E0); // Colors.grey.shade300
 
   static const Color success = Colors.green;
   static const Color error = Colors.red;
