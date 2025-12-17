@@ -144,15 +144,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       ForgotPasswordState>(
                                     builder: (context, state) {
                                       return PhoneNumberField(
-                                        labelText: TextConstants.phoneNumberLabel,
+                                        labelText:
+                                            TextConstants.phoneNumberLabel,
                                         hintText: TextConstants.phoneNumberHint,
                                         controller: _phoneController,
                                         focusNode: _phoneFocusNode,
+                                        initialCountryCode: 'IN',
+                                        disableCountryPicker: true,
                                         textInputAction: TextInputAction.done,
-                                        onSubmitted: (_) => _handleSubmit(context),
+                                        onSubmitted: (_) =>
+                                            _handleSubmit(context),
                                         onChanged: (value) => context
                                             .read<ForgotPasswordBloc>()
-                                            .add(ForgotPasswordPhoneChanged(value)),
+                                            .add(ForgotPasswordPhoneChanged(
+                                                value)),
                                       );
                                     },
                                   ),

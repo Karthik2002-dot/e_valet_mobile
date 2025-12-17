@@ -85,6 +85,46 @@ class _OperatorResetPasswordDialogState
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.02,
                   ),
+                  // Password requirements banner
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(
+                      MediaQuery.of(context).size.width * 0.03,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: MediaQuery.of(context).size.width * 0.04,
+                          color: AppColors.primary,
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.02,
+                        ),
+                        Expanded(
+                          child: TextComponent(
+                            labelText: TextConstants.passwordRequirements,
+                            fontSize: MediaQuery.of(context).size.width * 0.032,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.black,
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.015,
+                  ),
                   PasswordTextField(
                     controller: _currentPasswordController,
                     labelText: TextConstants.currentPasswordLabel,

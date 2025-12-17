@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/oauth/otp_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/password_reset_otp/password_reset_otp_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/password_reset_otp/password_reset_otp_event.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/otp_input.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
-class OtpStep extends StatelessWidget {
+class OtpStep extends StatefulWidget {
   final String phoneNumber;
   final bool isVerifying;
   final TextEditingController otpController;
@@ -25,21 +30,105 @@ class OtpStep extends StatelessWidget {
   });
 
   @override
+  State<OtpStep> createState() => _OtpStepState();
+}
+
+class _OtpStepState extends State<OtpStep> {
+  Timer? _timer;
+  int _remainingSeconds = 30;
+  bool _isResending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _remainingSeconds = 30;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_remainingSeconds > 0) {
+            _remainingSeconds--;
+          } else {
+            timer.cancel();
+          }
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  String _formatTime(int seconds) {
+    final secs = seconds % 60;
+    return '0:${secs.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _handleResendOtp() async {
+    if (_isResending || _remainingSeconds > 0) return;
+
+    setState(() {
+      _isResending = true;
+    });
+
+    try {
+      // Use stored phone number (normalized) or fallback to prop
+      final phoneNumber = await TokenStorage.getPhoneNumber() ?? widget.phoneNumber;
+      await OtpApiService.requestPasswordResetOtp(phoneNumber);
+      if (mounted) {
+        SnackBars.showSuccessSnackBar(
+          context,
+          'OTP sent successfully.',
+        );
+        _startTimer(); // Restart timer after successful resend
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(context, e.message);
+      }
+    } catch (_) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          context,
+          TextConstants.genericError,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final canResend = _remainingSeconds == 0 && !_isResending;
+
     return Column(
       children: [
         TextComponent(
-          labelText: TextConstants.otpSentTo(phoneNumber),
-          fontSize: size.width * 0.04,
+          labelText: TextConstants.otpSentTo(widget.phoneNumber),
+          fontSize: widget.size.width * 0.04,
           fontWeight: FontWeight.w400,
           color: AppColors.grey,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: size.height * 0.03),
+        SizedBox(height: widget.size.height * 0.03),
         OtpInput(
           length: 6,
-          controller: otpController,
-          focusNode: otpFocusNode,
+          controller: widget.otpController,
+          focusNode: widget.otpFocusNode,
           autoFocus: true,
           onChanged: (value) {
             context
@@ -51,21 +140,44 @@ class OtpStep extends StatelessWidget {
             // Update the OTP in the bloc
             bloc.add(PasswordResetOtpChanged(value));
             // Automatically trigger verification if not already verifying
-            if (!isVerifying) {
+            if (!widget.isVerifying) {
               bloc.add(const PasswordResetOtpVerifySubmitted());
             }
           },
         ),
-        SizedBox(height: size.height * 0.03),
+        SizedBox(height: widget.size.height * 0.02),
+        // Timer or Resend OTP text
+        if (canResend)
+          GestureDetector(
+            onTap: _handleResendOtp,
+            child: TextComponent(
+              labelText: _isResending
+                  ? TextConstants.resendingOtp
+                  : TextConstants.resendOtp,
+              fontSize: widget.size.width * 0.04,
+              fontWeight: FontWeight.w500,
+              color: AppColors.primary,
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          TextComponent(
+            labelText: _formatTime(_remainingSeconds),
+            fontSize: widget.size.width * 0.04,
+            fontWeight: FontWeight.w500,
+            color: AppColors.grey,
+            textAlign: TextAlign.center,
+          ),
+        SizedBox(height: widget.size.height * 0.03),
         SizedBox(
           width: double.infinity,
           child: Opacity(
-            opacity: isVerifying ? 0.5 : 1.0,
+            opacity: widget.isVerifying ? 0.5 : 1.0,
             child: ElevatedButtonComponent(
-              labelText: isVerifying
+              labelText: widget.isVerifying
                   ? TextConstants.verifyingOtp
                   : TextConstants.verifyOtp,
-              onPressed: isVerifying
+              onPressed: widget.isVerifying
                   ? () {}
                   : () {
                       context
@@ -77,11 +189,11 @@ class OtpStep extends StatelessWidget {
               fontSize: 16,
               fontColor: AppColors.white,
               fontWeight: FontWeight.w600,
-              padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
+              padding: EdgeInsets.symmetric(vertical: widget.size.height * 0.02),
               icon: Icon(
                 Icons.verified_user_outlined,
                 color: AppColors.white,
-                size: size.width * 0.05,
+                size: widget.size.width * 0.05,
               ),
             ),
           ),
