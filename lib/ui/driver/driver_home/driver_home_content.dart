@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_header_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_scanner_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
+import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_status_display_widget.dart';
 
 class DriverHomeContent extends StatelessWidget {
   final String driverName;
@@ -98,14 +101,28 @@ class DriverHomeContent extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: screenHeight * 0.03),
-                        // Scanner Area
-                        DriverScannerWidget(
-                          screenWidth: screenWidth,
-                          screenHeight: screenHeight,
-                          isTablet: isTablet,
-                          isDesktop: isDesktop,
+                        // Scanner Area with dedicated QR bloc
+                        BlocProvider(
+                          create: (_) => QrBloc(),
+                          child: Column(
+                            children: [
+                              QrReaderWidget(
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                isTablet: isTablet,
+                                isDesktop: isDesktop,
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              // Display processing status and QR code data
+                              QrStatusDisplayWidget(
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                isTablet: isTablet,
+                                isDesktop: isDesktop,
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: screenHeight * 0.02),
                         // Manual entry link
                         GestureDetector(
                           onTap: () {
