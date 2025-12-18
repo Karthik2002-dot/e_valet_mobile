@@ -27,14 +27,21 @@ class PasswordResetOtpVerifying extends PasswordResetOtpState {
 class PasswordResetOtpVerified extends PasswordResetOtpState {
   final String message;
   final String? resetToken;
+  final String? password;
+  final bool isPasswordValid;
+  final String? passwordError;
 
   const PasswordResetOtpVerified({
     required this.message,
     this.resetToken,
+    this.password,
+    this.isPasswordValid = false,
+    this.passwordError,
   });
 
   @override
-  List<Object?> get props => [message, resetToken];
+  List<Object?> get props =>
+      [message, resetToken, password, isPasswordValid, passwordError];
 }
 
 class PasswordResetOtpResetting extends PasswordResetOtpState {
@@ -68,13 +75,26 @@ class PasswordResetOtpVerifiedWithError extends PasswordResetOtpState {
   final String message;
   final String errorMessage;
   final String? resetToken;
+  final String? password;
+  final bool isPasswordValid;
+  final String? passwordError;
 
   const PasswordResetOtpVerifiedWithError({
     required this.message,
     required this.errorMessage,
     this.resetToken,
+    this.password,
+    this.isPasswordValid = false,
+    this.passwordError,
   });
 
   @override
-  List<Object?> get props => [message, errorMessage, resetToken];
+  List<Object?> get props => [
+        message,
+        errorMessage,
+        resetToken,
+        password,
+        isPasswordValid,
+        passwordError
+      ];
 }

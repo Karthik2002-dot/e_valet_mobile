@@ -27,6 +27,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
 
   bool _obscureNewPassword = true;
+  PasswordResetOtpState? _previousState;
 
   @override
   void dispose() {
@@ -43,8 +44,16 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
         ..add(PasswordResetOtpInitialized(widget.phoneNumber)),
       child: BlocListener<PasswordResetOtpBloc, PasswordResetOtpState>(
         listener: (context, state) {
+          // Only show snackbar when transitioning TO verified state (not when already verified)
           if (state is PasswordResetOtpVerified) {
-            SnackBars.showSuccessSnackBar(context, state.message);
+            // Check if we're transitioning from a non-verified state to verified
+            final wasNotVerified = _previousState == null ||
+                (_previousState is! PasswordResetOtpVerified &&
+                    _previousState is! PasswordResetOtpVerifiedWithError);
+
+            if (wasNotVerified) {
+              SnackBars.showSuccessSnackBar(context, state.message);
+            }
           } else if (state is PasswordResetOtpResetSuccess) {
             SnackBars.showSuccessSnackBar(context, state.message);
             Navigator.of(context).popUntil((route) => route.isFirst);
@@ -54,6 +63,9 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
             SnackBars.showErrorSnackBar(context, state.message);
           }
           // PasswordResetOtpVerifiedWithError is handled in the UI, not here
+
+          // Update previous state
+          _previousState = state;
         },
         child: Scaffold(
           backgroundColor: AppColors.white,

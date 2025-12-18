@@ -45,8 +45,8 @@ class TextConstants {
   // Forgot Password
   static const String forgotPasswordTitle = 'Forgot Password';
   static const String forgotPasswordDescription =
-      'Enter your phone number to receive password reset instructions';
-  static const String sendResetInstructions = 'Send Reset Instructions';
+      'Enter your phone number to receive OTP';
+  static const String sendResetInstructions = 'Send OTP';
   static const String sendResetInstructionsLoading = 'Sending...';
 
   // Password Reset OTP
@@ -62,11 +62,15 @@ class TextConstants {
   static const String resetTokenMissing =
       'Reset token missing. Please request OTP again.';
   static const String genericError = 'Something went wrong. Please try again.';
+  static const String resendOtp = 'Resend OTP';
+  static const String resendingOtp = 'Resending...';
   static const String newPasswordLabel = 'New Password';
   static const String newPasswordHint = 'Enter your new password';
   static const String submitNewPassword = 'Submit New Password';
   static const String submittingNewPassword = 'Submitting...';
   static const String newPasswordRequired = 'Please enter a new password.';
+  static const String passwordRequirements =
+      'Password must contain uppercase, lowercase, number and special character and more than 8 characters';
 
   // Driver Home & Profile
   static const String driverHomeTitle = 'Driver Home';

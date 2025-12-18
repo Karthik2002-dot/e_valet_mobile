@@ -33,6 +33,44 @@ class RefreshApiService {
 
     final response = await base.post('/auth/refresh');
 
-    // parse Set-Cookie headers from response, update TokenStorage here
+    // Parse Set-Cookie headers from response and update TokenStorage
+    final headers = response.headers;
+    final setCookieHeaderValue = headers['set-cookie'] ?? headers['Set-Cookie'];
+
+    String? newAccessToken;
+    String? newRefreshToken;
+
+    // Dio Headers returns List<String>? for header values
+    if (setCookieHeaderValue != null) {
+      // setCookieHeaderValue is List<String> from Dio Headers
+      for (final cookieHeader in setCookieHeaderValue) {
+        // Split into individual cookies, then into attributes
+        for (final cookie in cookieHeader.split(',')) {
+          for (final part in cookie.split(';')) {
+            final trimmed = part.trim();
+            if (trimmed.startsWith('accessToken=')) {
+              newAccessToken = trimmed
+                  .substring('accessToken='.length)
+                  .split(';')
+                  .first
+                  .trim();
+            } else if (trimmed.startsWith('refreshToken=')) {
+              newRefreshToken = trimmed
+                  .substring('refreshToken='.length)
+                  .split(';')
+                  .first
+                  .trim();
+            }
+          }
+        }
+      }
+    }
+
+    if (newAccessToken != null && newAccessToken.isNotEmpty) {
+      await TokenStorage.saveAccessToken(newAccessToken);
+    }
+    if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+      await TokenStorage.saveRefreshToken(newRefreshToken);
+    }
   }
 }

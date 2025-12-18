@@ -140,16 +140,26 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         0.03,
                                   ),
                                   // Phone number field
-                                  PhoneNumberField(
-                                    labelText: TextConstants.phoneNumberLabel,
-                                    hintText: TextConstants.phoneNumberHint,
-                                    controller: _phoneController,
-                                    focusNode: _phoneFocusNode,
-                                    textInputAction: TextInputAction.done,
-                                    onSubmitted: (_) => _handleSubmit(context),
-                                    onChanged: (value) => context
-                                        .read<ForgotPasswordBloc>()
-                                        .add(ForgotPasswordPhoneChanged(value)),
+                                  BlocBuilder<ForgotPasswordBloc,
+                                      ForgotPasswordState>(
+                                    builder: (context, state) {
+                                      return PhoneNumberField(
+                                        labelText:
+                                            TextConstants.phoneNumberLabel,
+                                        hintText: TextConstants.phoneNumberHint,
+                                        controller: _phoneController,
+                                        focusNode: _phoneFocusNode,
+                                        initialCountryCode: 'IN',
+                                        disableCountryPicker: true,
+                                        textInputAction: TextInputAction.done,
+                                        onSubmitted: (_) =>
+                                            _handleSubmit(context),
+                                        onChanged: (value) => context
+                                            .read<ForgotPasswordBloc>()
+                                            .add(ForgotPasswordPhoneChanged(
+                                                value)),
+                                      );
+                                    },
                                   ),
                                   SizedBox(
                                     height: MediaQuery.of(context).size.height *

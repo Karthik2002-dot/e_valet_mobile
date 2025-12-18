@@ -9,6 +9,13 @@ import 'package:niloufer_valet_mobile/models/oauth/reset_password_request.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
+class _PasswordValidation {
+  final bool isValid;
+  final String? error;
+
+  _PasswordValidation({required this.isValid, this.error});
+}
+
 class PasswordResetOtpBloc
     extends Bloc<PasswordResetOtpEvent, PasswordResetOtpState> {
   PasswordResetOtpBloc() : super(const PasswordResetOtpInitial()) {
@@ -66,9 +73,13 @@ class PasswordResetOtpBloc
         return;
       }
 
+      final validation = _validatePassword(_newPassword);
       emit(PasswordResetOtpVerified(
         message: message.message,
         resetToken: _resetToken,
+        password: _newPassword,
+        isPasswordValid: validation.isValid,
+        passwordError: validation.error,
       ));
     } on ApiException catch (e) {
       emit(PasswordResetOtpFailure(e.message));
@@ -82,6 +93,42 @@ class PasswordResetOtpBloc
     Emitter<PasswordResetOtpState> emit,
   ) {
     _newPassword = event.password.trim();
+
+    // Validate password and emit updated state if we're in a verified state
+    final currentState = state;
+    if (currentState is PasswordResetOtpVerified) {
+      final validation = _validatePassword(_newPassword);
+      emit(PasswordResetOtpVerified(
+        message: currentState.message,
+        resetToken: currentState.resetToken,
+        password: _newPassword,
+        isPasswordValid: validation.isValid,
+        passwordError: validation.error,
+      ));
+    } else if (currentState is PasswordResetOtpVerifiedWithError) {
+      final validation = _validatePassword(_newPassword);
+      emit(PasswordResetOtpVerifiedWithError(
+        message: currentState.message,
+        errorMessage: currentState.errorMessage,
+        resetToken: currentState.resetToken,
+        password: _newPassword,
+        isPasswordValid: validation.isValid,
+        passwordError: validation.error,
+      ));
+    }
+  }
+
+  _PasswordValidation _validatePassword(String password) {
+    if (password.isEmpty) {
+      return _PasswordValidation(isValid: false, error: null);
+    }
+    if (password.length < 8) {
+      return _PasswordValidation(
+        isValid: false,
+        error: TextConstants.validationPasswordMinLength(8),
+      );
+    }
+    return _PasswordValidation(isValid: true, error: null);
   }
 
   Future<void> _onResetPasswordSubmitted(
@@ -114,18 +161,26 @@ class PasswordResetOtpBloc
     } on ApiException catch (e) {
       // Preserve the verified state when password reset fails
       // This allows the user to stay on the new password step and see the error
+      final validation = _validatePassword(_newPassword);
       emit(PasswordResetOtpVerifiedWithError(
         message: 'OTP verified',
         errorMessage: e.message,
         resetToken: token,
+        password: _newPassword,
+        isPasswordValid: validation.isValid,
+        passwordError: validation.error,
       ));
     } catch (_) {
       // Preserve the verified state when password reset fails
       final token = _resetToken ?? await TokenStorage.getResetToken();
+      final validation = _validatePassword(_newPassword);
       emit(PasswordResetOtpVerifiedWithError(
         message: 'OTP verified',
         errorMessage: TextConstants.genericError,
         resetToken: token,
+        password: _newPassword,
+        isPasswordValid: validation.isValid,
+        passwordError: validation.error,
       ));
     }
   }

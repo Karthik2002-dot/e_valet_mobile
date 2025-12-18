@@ -83,6 +83,8 @@ class LoginForm extends StatelessWidget {
                   controller: loginIdController,
                   focusNode: loginIdFocusNode,
                   textInputAction: TextInputAction.next,
+                  initialCountryCode: 'IN',
+                  disableCountryPicker: true,
                   onSubmitted: (_) {
                     FocusScope.of(context).requestFocus(pinFocusNode);
                   },
