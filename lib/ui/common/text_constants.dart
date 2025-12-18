@@ -68,9 +68,16 @@ class TextConstants {
   static const String submittingNewPassword = 'Submitting...';
   static const String newPasswordRequired = 'Please enter a new password.';
 
-  // Operator Home & Profile
-  static const String operatorHomeTitle = 'Operator Home';
-  static const String operatorFallbackName = 'Operator';
+  // Driver Home & Profile
+  static const String driverHomeTitle = 'Driver Home';
+  static const String driverFallbackName = 'Driver';
+  static const String userFallbackName = 'User';
+  static String readyToParkMessage(String driverName) =>
+      'Hi $driverName, Ready to Park?';
+  static const String scanKeyTagInstruction =
+      'Scan the key tag to start the parking process.';
+  static const String enterTagNumberLink = 'Or enter the tag number';
+  static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
   static const String usernameLabel = 'Username';
