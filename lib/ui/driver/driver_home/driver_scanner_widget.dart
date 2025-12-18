@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/scanner_brackets_painter.dart';
 
-class OperatorScannerWidget extends StatelessWidget {
+class DriverScannerWidget extends StatelessWidget {
   final double screenWidth;
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
 
-  const OperatorScannerWidget({
+  const DriverScannerWidget({
     super.key,
     required this.screenWidth,
     required this.screenHeight,

@@ -11,7 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart'
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/core/forgot_password/password_reset_otp_screen.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/forgot_password/password_reset_otp_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

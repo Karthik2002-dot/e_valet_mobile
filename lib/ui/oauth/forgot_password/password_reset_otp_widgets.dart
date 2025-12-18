@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/core/forgot_password/new_password_step.dart';
-import 'package:niloufer_valet_mobile/ui/core/forgot_password/otp_step.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/forgot_password/new_password_step.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/forgot_password/otp_step.dart';
 
 /// Card wrapper that decides which step to show.
 class PasswordResetOtpCard extends StatelessWidget {

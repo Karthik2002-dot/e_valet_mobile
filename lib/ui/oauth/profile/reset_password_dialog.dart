@@ -11,16 +11,14 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
-class OperatorResetPasswordDialog extends StatefulWidget {
-  const OperatorResetPasswordDialog({super.key});
+class ResetPasswordDialog extends StatefulWidget {
+  const ResetPasswordDialog({super.key});
 
   @override
-  State<OperatorResetPasswordDialog> createState() =>
-      _OperatorResetPasswordDialogState();
+  State<ResetPasswordDialog> createState() => _ResetPasswordDialogState();
 }
 
-class _OperatorResetPasswordDialogState
-    extends State<OperatorResetPasswordDialog> {
+class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();

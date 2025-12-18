@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
-class OperatorPasswordField extends StatelessWidget {
+class ProfilePasswordField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
 
-  const OperatorPasswordField({
+  const ProfilePasswordField({
     super.key,
     required this.label,
     required this.controller,

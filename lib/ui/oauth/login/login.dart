@@ -6,8 +6,8 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/core/login/login_form.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_home.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/login_form.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,11 +38,11 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // Navigate to Operator Home screen
+            // Navigate to Driver Home screen
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => const OperatorHomeScreen(),
+                builder: (_) => const DriverHomeScreen(),
               ),
             );
           } else if (state is LoginFailure) {

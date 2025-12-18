@@ -3,14 +3,14 @@ import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/core/profile/operator_profile_info_row.dart';
-import 'package:niloufer_valet_mobile/ui/core/profile/operator_reset_password_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_info_row.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/reset_password_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
-class OperatorProfileContent extends StatelessWidget {
+class ProfileContent extends StatelessWidget {
   final Profile profile;
 
-  const OperatorProfileContent({
+  const ProfileContent({
     super.key,
     required this.profile,
   });
@@ -62,7 +62,7 @@ class OperatorProfileContent extends StatelessWidget {
                   TextComponent(
                     labelText: user.fullName.isNotEmpty
                         ? user.fullName
-                        : TextConstants.operatorFallbackName,
+                        : TextConstants.userFallbackName,
                     fontSize: MediaQuery.of(context).size.width * 0.05,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -87,7 +87,7 @@ class OperatorProfileContent extends StatelessWidget {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.01,
                   ),
-                  OperatorProfileInfoRow(
+                  ProfileInfoRow(
                     icon: Icons.phone_outlined,
                     label: TextConstants.phoneLabel,
                     value: user.phoneNumber,
@@ -95,7 +95,7 @@ class OperatorProfileContent extends StatelessWidget {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.01,
                   ),
-                  OperatorProfileInfoRow(
+                  ProfileInfoRow(
                     icon: Icons.email_outlined,
                     label: TextConstants.emailLabel,
                     value: user.email,
@@ -103,7 +103,7 @@ class OperatorProfileContent extends StatelessWidget {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.01,
                   ),
-                  OperatorProfileInfoRow(
+                  ProfileInfoRow(
                     icon: Icons.badge_outlined,
                     label: TextConstants.usernameLabel,
                     value: user.username,
@@ -111,7 +111,7 @@ class OperatorProfileContent extends StatelessWidget {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.01,
                   ),
-                  OperatorProfileInfoRow(
+                  ProfileInfoRow(
                     icon: Icons.calendar_today_outlined,
                     label: TextConstants.joinedLabel,
                     value: user.createdAt.split('T').first,
@@ -127,7 +127,7 @@ class OperatorProfileContent extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (dialogContext) =>
-                              const OperatorResetPasswordDialog(),
+                              const ResetPasswordDialog(),
                         );
                       },
                       labelText: TextConstants.resetPassword,

@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_header_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_header_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_scanner_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_scanner_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
-class OperatorHomeContent extends StatelessWidget {
-  final String operatorName;
+class DriverHomeContent extends StatelessWidget {
+  final String driverName;
   final bool isOnBreak;
   final bool isOnline;
 
-  const OperatorHomeContent({
+  const DriverHomeContent({
     super.key,
-    required this.operatorName,
+    required this.driverName,
     required this.isOnBreak,
     required this.isOnline,
   });
@@ -49,8 +49,8 @@ class OperatorHomeContent extends StatelessWidget {
       body: Column(
         children: [
           // Header Content Section (welcome message, on break toggle, status card)
-          OperatorHeaderWidget(
-            operatorName: operatorName,
+          DriverHeaderWidget(
+            driverName: driverName,
             isOnBreak: isOnBreak,
             isOnline: isOnline,
             screenWidth: screenWidth,
@@ -75,7 +75,7 @@ class OperatorHomeContent extends StatelessWidget {
                         // Welcome message
                         TextComponent(
                           labelText:
-                              TextConstants.readyToParkMessage(operatorName),
+                              TextConstants.readyToParkMessage(driverName),
                           fontSize: isDesktop
                               ? screenWidth * 0.018
                               : isTablet
@@ -99,7 +99,7 @@ class OperatorHomeContent extends StatelessWidget {
                         ),
                         SizedBox(height: screenHeight * 0.03),
                         // Scanner Area
-                        OperatorScannerWidget(
+                        DriverScannerWidget(
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           isTablet: isTablet,

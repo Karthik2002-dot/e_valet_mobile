@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_status_card_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_status_card_widget.dart';
 
-class OperatorHeaderWidget extends StatelessWidget {
-  final String operatorName;
+class DriverHeaderWidget extends StatelessWidget {
+  final String driverName;
   final bool isOnBreak;
   final bool isOnline;
   final double screenWidth;
@@ -16,9 +16,9 @@ class OperatorHeaderWidget extends StatelessWidget {
   final bool isTablet;
   final bool isDesktop;
 
-  const OperatorHeaderWidget({
+  const DriverHeaderWidget({
     super.key,
-    required this.operatorName,
+    required this.driverName,
     required this.isOnBreak,
     required this.isOnline,
     required this.screenWidth,
@@ -49,12 +49,12 @@ class OperatorHeaderWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome/Operator name on left, On Break toggle on right
+            // Welcome/Driver name on left, On Break toggle on right
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Left side: Welcome and operator name (stacked vertically)
+                // Left side: Welcome and driver name (stacked vertically)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -69,7 +69,7 @@ class OperatorHeaderWidget extends StatelessWidget {
                       color: AppColors.white.withOpacity(0.8),
                     ),
                     TextComponent(
-                      labelText: operatorName,
+                      labelText: driverName,
                       fontSize: isDesktop
                           ? screenWidth * 0.018
                           : isTablet
@@ -105,8 +105,8 @@ class OperatorHeaderWidget extends StatelessWidget {
                         value: isOnBreak,
                         onChanged: (value) {
                           context
-                              .read<OperatorMenuBloc>()
-                              .add(OperatorOnBreakToggled(value));
+                              .read<DriverMenuBloc>()
+                              .add(DriverOnBreakToggled(value));
                         },
                         activeColor: AppColors.white,
                         inactiveThumbColor: AppColors.grey,
@@ -119,7 +119,7 @@ class OperatorHeaderWidget extends StatelessWidget {
             ),
             const Spacer(),
             // Status Card (267px width, 43px height) - centered at bottom
-            OperatorStatusCardWidget(
+            DriverStatusCardWidget(
               isOnline: isOnline,
               screenWidth: screenWidth,
               isTablet: isTablet,

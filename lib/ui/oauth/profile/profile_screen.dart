@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/oauth/profile/operator_profile_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/oauth/profile/operator_profile_event.dart';
-import 'package:niloufer_valet_mobile/bloc/oauth/profile/operator_profile_state.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/profile/profile_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/profile/profile_event.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/profile/profile_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/core/profile/operator_profile_content.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_content.dart';
 
-class OperatorProfileScreen extends StatelessWidget {
-  const OperatorProfileScreen({super.key});
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OperatorProfileBloc()..add(const OperatorProfileStarted()),
-      child: const _OperatorProfileView(),
+      create: (_) => ProfileBloc()..add(const ProfileStarted()),
+      child: const _ProfileView(),
     );
   }
 }
 
-class _OperatorProfileView extends StatelessWidget {
-  const _OperatorProfileView();
+class _ProfileView extends StatelessWidget {
+  const _ProfileView();
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +34,13 @@ class _OperatorProfileView extends StatelessWidget {
           children: [
             Expanded(
               child: Center(
-                child: BlocBuilder<OperatorProfileBloc, OperatorProfileState>(
+                child: BlocBuilder<ProfileBloc, ProfileState>(
                   builder: (context, state) {
-                    if (state is OperatorProfileLoading ||
-                        state is OperatorProfileInitial) {
+                    if (state is ProfileLoading || state is ProfileInitial) {
                       return const CircularProgressIndicator();
                     }
 
-                    if (state is OperatorProfileError) {
+                    if (state is ProfileError) {
                       return TextComponent(
                         labelText: state.message,
                         fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -51,8 +50,8 @@ class _OperatorProfileView extends StatelessWidget {
                       );
                     }
 
-                    if (state is OperatorProfileLoaded) {
-                      return OperatorProfileContent(profile: state.profile);
+                    if (state is ProfileLoaded) {
+                      return ProfileContent(profile: state.profile);
                     }
 
                     // Fallback – shouldn't normally reach here

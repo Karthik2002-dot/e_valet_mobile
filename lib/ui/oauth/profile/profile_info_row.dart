@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
-class OperatorProfileInfoRow extends StatelessWidget {
+class ProfileInfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
 
-  const OperatorProfileInfoRow({
+  const ProfileInfoRow({
     super.key,
     required this.icon,
     required this.label,

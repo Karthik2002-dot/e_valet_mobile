@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
-class OperatorOverflowMenu extends StatelessWidget {
-  const OperatorOverflowMenu({super.key});
+class OverflowMenu extends StatelessWidget {
+  const OverflowMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +17,7 @@ class OperatorOverflowMenu extends StatelessWidget {
           title: TextConstants.profileMenuTitle,
           icon: Icons.person_outline,
           onTap: () {
-            context
-                .read<OperatorMenuBloc>()
-                .add(const OperatorProfilePressed());
+            context.read<DriverMenuBloc>().add(const DriverProfilePressed());
           },
         ),
         const PullDownMenuDivider(),
@@ -27,7 +25,7 @@ class OperatorOverflowMenu extends StatelessWidget {
           title: TextConstants.logoutMenuTitle,
           icon: Icons.logout,
           onTap: () {
-            context.read<OperatorMenuBloc>().add(const OperatorLogoutPressed());
+            context.read<DriverMenuBloc>().add(const DriverLogoutPressed());
           },
         ),
       ],

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
-class OperatorStatusCardWidget extends StatelessWidget {
+class DriverStatusCardWidget extends StatelessWidget {
   final bool isOnline;
   final double screenWidth;
   final bool isTablet;
   final bool isDesktop;
 
-  const OperatorStatusCardWidget({
+  const DriverStatusCardWidget({
     super.key,
     required this.isOnline,
     required this.screenWidth,
@@ -88,8 +88,8 @@ class OperatorStatusCardWidget extends StatelessWidget {
                       value: isOnline,
                       onChanged: (value) {
                         context
-                            .read<OperatorMenuBloc>()
-                            .add(OperatorOnlineStatusToggled(value));
+                            .read<DriverMenuBloc>()
+                            .add(DriverOnlineStatusToggled(value));
                       },
                       activeColor: AppColors.success,
                       inactiveThumbColor: AppColors.grey,
@@ -105,4 +105,3 @@ class OperatorStatusCardWidget extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/core/profile/operator_overflow_menu.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
@@ -35,7 +35,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         SizedBox(width: screenWidth * 0.04),
-        OperatorOverflowMenu(),
+        OverflowMenu(),
         SizedBox(width: screenWidth * 0.04),
       ];
     }

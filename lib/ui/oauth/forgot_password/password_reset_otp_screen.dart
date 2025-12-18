@@ -7,7 +7,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/core/forgot_password/password_reset_otp_widgets.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/forgot_password/password_reset_otp_widgets.dart';
 
 class PasswordResetOtpScreen extends StatefulWidget {
   final String phoneNumber;
