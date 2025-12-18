@@ -4,8 +4,8 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/phone_number validation.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/phone_number_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number%20validation.dart';
+import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number_field.dart';
 
 class PhoneNumberFieldState extends State<PhoneNumberField> {
   late FocusNode _internalFocusNode;
