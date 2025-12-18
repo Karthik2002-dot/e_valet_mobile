@@ -50,7 +50,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
             final wasNotVerified = _previousState == null ||
                 (_previousState is! PasswordResetOtpVerified &&
                     _previousState is! PasswordResetOtpVerifiedWithError);
-            
+
             if (wasNotVerified) {
               SnackBars.showSuccessSnackBar(context, state.message);
             }
@@ -63,7 +63,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
             SnackBars.showErrorSnackBar(context, state.message);
           }
           // PasswordResetOtpVerifiedWithError is handled in the UI, not here
-          
+
           // Update previous state
           _previousState = state;
         },

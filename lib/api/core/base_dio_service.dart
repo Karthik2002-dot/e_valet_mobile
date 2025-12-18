@@ -159,8 +159,9 @@ class BaseDioService {
     // Update existing options
     final headers = Map<String, dynamic>.from(options.headers ?? {});
     final cookieHeader = headers['Cookie'] ?? headers['cookie'];
-    
-    if (cookieHeader == null || !cookieHeader.toString().contains('accessToken=')) {
+
+    if (cookieHeader == null ||
+        !cookieHeader.toString().contains('accessToken=')) {
       return options;
     }
 
@@ -210,10 +211,8 @@ class BaseDioService {
           msg = message;
         } else if (message is List) {
           // Handle array of messages - join them with newlines
-          final messageList = message
-              .whereType<String>()
-              .where((m) => m.isNotEmpty)
-              .toList();
+          final messageList =
+              message.whereType<String>().where((m) => m.isNotEmpty).toList();
           if (messageList.isNotEmpty) {
             msg = messageList.join('\n');
           }

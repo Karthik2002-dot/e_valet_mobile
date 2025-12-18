@@ -49,7 +49,8 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         listener: (context, state) {
           if (state.isSuccess) {
             // Capture the underlying screen context before closing dialog
-            final underlyingContext = Navigator.of(context, rootNavigator: false).context;
+            final underlyingContext =
+                Navigator.of(context, rootNavigator: false).context;
             // Close dialog
             Navigator.of(context).pop();
             // Show success snackbar on underlying screen after dialog closes
@@ -85,178 +86,185 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                   MediaQuery.of(context).size.width * 0.06,
                 ),
                 child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  TextComponent(
-                    labelText: TextConstants.resetPassword,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.02,
-                  ),
-                  // Password requirements banner
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(
-                      MediaQuery.of(context).size.width * 0.03,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.primary.withOpacity(0.3),
-                        width: 1,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextComponent(
+                        labelText: TextConstants.resetPassword,
+                        fontSize: MediaQuery.of(context).size.width * 0.05,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
                       ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: MediaQuery.of(context).size.width * 0.04,
-                          color: AppColors.primary,
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.02,
+                      ),
+                      // Password requirements banner
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(
+                          MediaQuery.of(context).size.width * 0.03,
                         ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: MediaQuery.of(context).size.width * 0.04,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.02,
+                            ),
+                            Expanded(
+                              child: TextComponent(
+                                labelText: TextConstants.passwordRequirements,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.032,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.black,
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.015,
+                      ),
+                      PasswordTextField(
+                        controller: _currentPasswordController,
+                        labelText: TextConstants.currentPasswordLabel,
+                        hintText: TextConstants.currentPasswordHint,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.015,
+                      ),
+                      PasswordTextField(
+                        controller: _newPasswordController,
+                        labelText: TextConstants.newPasswordLabel,
+                        hintText: TextConstants.newPasswordHint,
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.015,
+                      ),
+                      PasswordTextField(
+                        controller: _confirmPasswordController,
+                        labelText: TextConstants.confirmNewPasswordLabel,
+                        hintText: TextConstants.confirmNewPasswordHint,
+                      ),
+                      // Error message display
+                      if (errorMessage != null && errorMessage.isNotEmpty) ...[
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.02,
+                          height: MediaQuery.of(context).size.height * 0.015,
                         ),
-                        Expanded(
-                          child: TextComponent(
-                            labelText: TextConstants.passwordRequirements,
-                            fontSize: MediaQuery.of(context).size.width * 0.032,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.black,
-                            textAlign: TextAlign.left,
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.03,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.error.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: MediaQuery.of(context).size.width * 0.04,
+                                color: AppColors.error,
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.02,
+                              ),
+                              Expanded(
+                                child: TextComponent(
+                                  labelText: errorMessage,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.032,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.error,
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.015,
-                  ),
-                  PasswordTextField(
-                    controller: _currentPasswordController,
-                    labelText: TextConstants.currentPasswordLabel,
-                    hintText: TextConstants.currentPasswordHint,
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.015,
-                  ),
-                  PasswordTextField(
-                    controller: _newPasswordController,
-                    labelText: TextConstants.newPasswordLabel,
-                    hintText: TextConstants.newPasswordHint,
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.015,
-                  ),
-                  PasswordTextField(
-                    controller: _confirmPasswordController,
-                    labelText: TextConstants.confirmNewPasswordLabel,
-                    hintText: TextConstants.confirmNewPasswordHint,
-                  ),
-                  // Error message display
-                  if (errorMessage != null && errorMessage.isNotEmpty) ...[
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.015,
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.width * 0.03,
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.025,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.error.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: MediaQuery.of(context).size.width * 0.04,
-                            color: AppColors.error,
+                          TextButtonComponent(
+                            labelText: TextConstants.close,
+                            onPressed: isLoading
+                                ? null
+                                : () => Navigator.of(context).pop(),
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontColor: AppColors.grey,
+                            fontWeight: FontWeight.w500,
+                            padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.04,
+                              vertical:
+                                  MediaQuery.of(context).size.height * 0.01,
+                            ),
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.02,
                           ),
-                          Expanded(
-                            child: TextComponent(
-                              labelText: errorMessage,
-                              fontSize: MediaQuery.of(context).size.width * 0.032,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.error,
-                              textAlign: TextAlign.left,
+                          ElevatedButtonComponent(
+                            labelText: TextConstants.update,
+                            onPressed: isLoading
+                                ? () {}
+                                : () => _handleUpdate(context),
+                            elevatedButtonBackgroundColor: AppColors.accent,
+                            radius: 8,
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontColor: AppColors.white,
+                            fontWeight: FontWeight.w600,
+                            padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.04,
+                              vertical:
+                                  MediaQuery.of(context).size.height * 0.01,
                             ),
+                            icon: isLoading
+                                ? SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                        AppColors.white,
+                                      ),
+                                    ),
+                                  )
+                                : null,
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.025,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButtonComponent(
-                        labelText: TextConstants.close,
-                        onPressed: isLoading
-                            ? null
-                            : () => Navigator.of(context).pop(),
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontColor: AppColors.grey,
-                        fontWeight: FontWeight.w500,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.04,
-                          vertical: MediaQuery.of(context).size.height * 0.01,
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.02,
-                      ),
-                      ElevatedButtonComponent(
-                        labelText: TextConstants.update,
-                        onPressed:
-                            isLoading ? () {} : () => _handleUpdate(context),
-                        elevatedButtonBackgroundColor: AppColors.accent,
-                        radius: 8,
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontColor: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.04,
-                          vertical: MediaQuery.of(context).size.height * 0.01,
-                        ),
-                        icon: isLoading
-                            ? SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                    AppColors.white,
-                                  ),
-                                ),
-                              )
-                            : null,
-                      ),
                     ],
                   ),
-                  ],
                 ),
               ),
             ),
-          ),
           );
         },
       ),

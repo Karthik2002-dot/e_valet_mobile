@@ -40,7 +40,8 @@ class PasswordResetOtpVerified extends PasswordResetOtpState {
   });
 
   @override
-  List<Object?> get props => [message, resetToken, password, isPasswordValid, passwordError];
+  List<Object?> get props =>
+      [message, resetToken, password, isPasswordValid, passwordError];
 }
 
 class PasswordResetOtpResetting extends PasswordResetOtpState {
@@ -88,5 +89,12 @@ class PasswordResetOtpVerifiedWithError extends PasswordResetOtpState {
   });
 
   @override
-  List<Object?> get props => [message, errorMessage, resetToken, password, isPasswordValid, passwordError];
+  List<Object?> get props => [
+        message,
+        errorMessage,
+        resetToken,
+        password,
+        isPasswordValid,
+        passwordError
+      ];
 }

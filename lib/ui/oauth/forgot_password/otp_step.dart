@@ -82,7 +82,8 @@ class _OtpStepState extends State<OtpStep> {
 
     try {
       // Use stored phone number (normalized) or fallback to prop
-      final phoneNumber = await TokenStorage.getPhoneNumber() ?? widget.phoneNumber;
+      final phoneNumber =
+          await TokenStorage.getPhoneNumber() ?? widget.phoneNumber;
       await OtpApiService.requestPasswordResetOtp(phoneNumber);
       if (mounted) {
         SnackBars.showSuccessSnackBar(
@@ -189,7 +190,8 @@ class _OtpStepState extends State<OtpStep> {
               fontSize: 16,
               fontColor: AppColors.white,
               fontWeight: FontWeight.w600,
-              padding: EdgeInsets.symmetric(vertical: widget.size.height * 0.02),
+              padding:
+                  EdgeInsets.symmetric(vertical: widget.size.height * 0.02),
               icon: Icon(
                 Icons.verified_user_outlined,
                 color: AppColors.white,

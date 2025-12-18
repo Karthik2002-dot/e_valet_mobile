@@ -93,7 +93,7 @@ class PasswordResetOtpBloc
     Emitter<PasswordResetOtpState> emit,
   ) {
     _newPassword = event.password.trim();
-    
+
     // Validate password and emit updated state if we're in a verified state
     final currentState = state;
     if (currentState is PasswordResetOtpVerified) {

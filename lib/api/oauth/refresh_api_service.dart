@@ -36,7 +36,7 @@ class RefreshApiService {
     // Parse Set-Cookie headers from response and update TokenStorage
     final headers = response.headers;
     final setCookieHeaderValue = headers['set-cookie'] ?? headers['Set-Cookie'];
-    
+
     String? newAccessToken;
     String? newRefreshToken;
 
@@ -49,9 +49,17 @@ class RefreshApiService {
           for (final part in cookie.split(';')) {
             final trimmed = part.trim();
             if (trimmed.startsWith('accessToken=')) {
-              newAccessToken = trimmed.substring('accessToken='.length).split(';').first.trim();
+              newAccessToken = trimmed
+                  .substring('accessToken='.length)
+                  .split(';')
+                  .first
+                  .trim();
             } else if (trimmed.startsWith('refreshToken=')) {
-              newRefreshToken = trimmed.substring('refreshToken='.length).split(';').first.trim();
+              newRefreshToken = trimmed
+                  .substring('refreshToken='.length)
+                  .split(';')
+                  .first
+                  .trim();
             }
           }
         }
