@@ -234,4 +234,3 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
     );
   }
 }
-
