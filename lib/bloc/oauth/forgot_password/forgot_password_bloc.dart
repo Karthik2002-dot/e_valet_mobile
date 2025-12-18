@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/oauth/otp_api_service.dart';
-import 'package:niloufer_valet_mobile/bloc/forgot_password/forgot_password_event.dart';
-import 'package:niloufer_valet_mobile/bloc/forgot_password/forgot_password_state.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/forgot_password/forgot_password_event.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/forgot_password/forgot_password_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 

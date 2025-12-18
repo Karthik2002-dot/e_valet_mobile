@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_event.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 

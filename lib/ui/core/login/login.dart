@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/core/login/login_form.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

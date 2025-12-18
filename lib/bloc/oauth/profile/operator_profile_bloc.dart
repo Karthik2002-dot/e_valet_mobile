@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_event.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/profile/operator_profile_state.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/profile/operator_profile_event.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/profile/operator_profile_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
 class OperatorProfileBloc

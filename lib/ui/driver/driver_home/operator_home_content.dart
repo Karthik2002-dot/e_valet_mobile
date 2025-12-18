@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_header_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_header_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_scanner_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_scanner_widget.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorHomeContent extends StatelessWidget {

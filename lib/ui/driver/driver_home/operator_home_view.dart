@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home_content.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/operator_menu_state.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/operator_home_content.dart';
 
 class OperatorHomeView extends StatelessWidget {
   const OperatorHomeView({super.key});

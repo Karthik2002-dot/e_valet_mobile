@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/scanner_brackets_painter.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/scanner_brackets_painter.dart';
 
 class OperatorScannerWidget extends StatelessWidget {
   final double screenWidth;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_event.dart';
-import 'package:niloufer_valet_mobile/bloc/login/login_state.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_event.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
