@@ -166,67 +166,80 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         0.03,
                                   ),
                                   // Submit button
-                                  BlocBuilder<ForgotPasswordBloc,
-                                      ForgotPasswordState>(
-                                    builder: (context, state) {
-                                      final isLoading =
-                                          state is ForgotPasswordLoading;
-                                      void handlePress() {
-                                        if (!isLoading) {
-                                          _handleSubmit(context);
-                                        }
-                                      }
+                                  ValueListenableBuilder<TextEditingValue>(
+                                    valueListenable: _phoneController,
+                                    builder: (context, phoneValue, _) {
+                                      return BlocBuilder<ForgotPasswordBloc,
+                                          ForgotPasswordState>(
+                                        builder: (context, state) {
+                                          final isLoading =
+                                              state is ForgotPasswordLoading;
+                                          // Check if phone number is valid (10 digits required)
+                                          final phoneText = phoneValue.text.trim();
+                                          final isValidPhone = phoneText.length == 10;
+                                          final isButtonEnabled = !isLoading && isValidPhone;
+                                          
+                                          void handlePress() {
+                                            if (isButtonEnabled) {
+                                              _handleSubmit(context);
+                                            }
+                                          }
 
-                                      return SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButtonComponent(
-                                          labelText: isLoading
-                                              ? TextConstants
-                                                  .sendResetInstructionsLoading
-                                              : TextConstants
-                                                  .sendResetInstructions,
-                                          onPressed: handlePress,
-                                          elevatedButtonBackgroundColor:
-                                              AppColors.accent, // Orange
-                                          radius: 8,
-                                          fontSize: 16,
-                                          fontColor: AppColors.white,
-                                          fontWeight: FontWeight.w600,
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.02,
-                                          ),
-                                          icon: isLoading
-                                              ? SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.05,
-                                                  height: MediaQuery.of(context)
+                                          return SizedBox(
+                                            width: double.infinity,
+                                            child: Opacity(
+                                              opacity: isButtonEnabled ? 1.0 : 0.5,
+                                              child: ElevatedButtonComponent(
+                                                labelText: isLoading
+                                                    ? TextConstants
+                                                        .sendResetInstructionsLoading
+                                                    : TextConstants
+                                                        .sendResetInstructions,
+                                                onPressed: handlePress,
+                                                elevatedButtonBackgroundColor:
+                                                    AppColors.accent, // Orange
+                                                radius: 8,
+                                                fontSize: 16,
+                                                fontColor: AppColors.white,
+                                                fontWeight: FontWeight.w600,
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: MediaQuery.of(context)
                                                           .size
                                                           .height *
                                                       0.02,
-                                                  child:
-                                                      const CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                            Color>(
-                                                      AppColors.white,
-                                                    ),
-                                                  ),
-                                                )
-                                              : Icon(
-                                                  Icons.send,
-                                                  color: AppColors.white,
-                                                  size: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.05,
                                                 ),
-                                        ),
+                                                icon: isLoading
+                                                    ? SizedBox(
+                                                        width: MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.05,
+                                                        height: MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.02,
+                                                        child:
+                                                            const CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                            AppColors.white,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Icon(
+                                                        Icons.send,
+                                                        color: AppColors.white,
+                                                        size: MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.05,
+                                                      ),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   ),

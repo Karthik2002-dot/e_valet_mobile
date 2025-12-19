@@ -71,6 +71,8 @@ class TextConstants {
   static const String newPasswordRequired = 'Please enter a new password.';
   static const String passwordRequirements =
       'Password must contain uppercase, lowercase, number and special character and more than 8 characters';
+  static const String validationPasswordNoSpaces =
+      'Password cannot contain spaces';
 
   // Driver Home & Profile
   static const String driverHomeTitle = 'Driver Home';

@@ -76,50 +76,12 @@ class PasswordResetOtpCard extends StatelessWidget {
               size: size,
             )
           else
-            Column(
-              children: [
-                if (errorMessage != null) ...[
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(size.width * 0.03),
-                    margin: EdgeInsets.only(bottom: size.height * 0.02),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.error,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: AppColors.error,
-                          size: size.width * 0.05,
-                        ),
-                        SizedBox(width: size.width * 0.02),
-                        Expanded(
-                          child: TextComponent(
-                            labelText: errorMessage!,
-                            fontSize: size.width * 0.035,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.error,
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                NewPasswordStep(
-                  isResetting: isResetting,
-                  newPasswordController: newPasswordController,
-                  obscureNewPassword: obscureNewPassword,
-                  onToggleObscure: onToggleObscure,
-                  size: size,
-                ),
-              ],
+            NewPasswordStep(
+              isResetting: isResetting,
+              newPasswordController: newPasswordController,
+              obscureNewPassword: obscureNewPassword,
+              onToggleObscure: onToggleObscure,
+              size: size,
             ),
         ],
       ),
