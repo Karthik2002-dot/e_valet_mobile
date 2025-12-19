@@ -34,4 +34,16 @@ class AppColors {
   static const Color black = Colors.black;
   static const Color grey = Colors.grey;
   static const Color white = Colors.white;
+
+  // QR Scanner specific colors
+  static const Color qrSuccessBackground =
+      Color(0x1A4CAF50); // green.withOpacity(0.1)
+  static const Color qrSuccessBorder = Color(0xFF4CAF50); // Colors.green
+  static const Color qrSuccessText = Color(0xFF4CAF50); // Colors.green
+  static const Color qrErrorBackground =
+      Color(0x1AF44336); // red.withOpacity(0.1)
+  static const Color qrProcessingOverlay =
+      Color(0x80000000); // black.withOpacity(0.5)
+  static const Color qrSuccessBorderLight =
+      Color(0x4D4CAF50); // green.withOpacity(0.3)
 }

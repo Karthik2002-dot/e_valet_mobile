@@ -69,5 +69,9 @@ class DriverHomeLoaded extends DriverMenuState {
   }
 
   @override
-  List<Object?> get props => [driverName, isOnBreak, isOnline];
+  List<Object?> get props => [
+        driverName,
+        isOnBreak,
+        isOnline,
+      ];
 }

@@ -106,4 +106,12 @@ class TextConstants {
 
   // Footer
   static const String poweredBy = 'Powered By';
+
+  // QR Code Scanner
+  static const String processingQrCode = 'Processing QR Code...';
+  static const String scannedDataLabel = 'Scanned Data:';
+  static const String scannedLabel = 'Scanned:';
+  static const String errorProcessingQrCode = 'Error Processing QR Code';
+  static const String qrCodeScannedSuccessfully =
+      'QR Code scanned successfully';
 }
