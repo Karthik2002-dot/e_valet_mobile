@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/bloc/oauth/change_password/change_password
 import 'package:niloufer_valet_mobile/bloc/oauth/change_password/change_password_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/oauth/change_password_request.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class ChangePasswordBloc
     extends Bloc<ChangePasswordEvent, ChangePasswordState> {
@@ -15,10 +16,11 @@ class ChangePasswordBloc
     ChangePasswordSubmitted event,
     Emitter<ChangePasswordState> emit,
   ) async {
-    // Trim all inputs
-    final oldPassword = event.oldPassword.trim();
-    final newPassword = event.newPassword.trim();
-    final confirmPassword = event.confirmPassword.trim();
+    // Don't trim here - we need to check for spaces first
+    // We'll validate and then trim when submitting to API
+    final oldPassword = event.oldPassword;
+    final newPassword = event.newPassword;
+    final confirmPassword = event.confirmPassword;
 
     // Validation: All fields required
     if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
@@ -27,6 +29,18 @@ class ChangePasswordBloc
           isLoading: false,
           isSuccess: false,
           errorMessage: 'All fields are required.',
+        ),
+      );
+      return;
+    }
+
+    // Validation: Password cannot contain spaces
+    if (newPassword.contains(' ')) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isSuccess: false,
+          errorMessage: TextConstants.validationPasswordNoSpaces,
         ),
       );
       return;
@@ -79,9 +93,10 @@ class ChangePasswordBloc
     );
 
     try {
+      // Trim passwords before sending to API (validation already checked for spaces)
       final request = ChangePasswordRequest(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
+        oldPassword: oldPassword.trim(),
+        newPassword: newPassword.trim(),
       );
       await PasswordApiService.changePassword(request);
 

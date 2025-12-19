@@ -92,7 +92,9 @@ class PasswordResetOtpBloc
     PasswordResetOtpNewPasswordChanged event,
     Emitter<PasswordResetOtpState> emit,
   ) {
-    _newPassword = event.password.trim();
+    // Don't trim here - we want to preserve the original to check for spaces
+    // But we'll still validate and trim when submitting
+    _newPassword = event.password;
 
     // Validate password and emit updated state if we're in a verified state
     final currentState = state;
@@ -122,6 +124,12 @@ class PasswordResetOtpBloc
     if (password.isEmpty) {
       return _PasswordValidation(isValid: false, error: null);
     }
+    if (password.contains(' ')) {
+      return _PasswordValidation(
+        isValid: false,
+        error: TextConstants.validationPasswordNoSpaces,
+      );
+    }
     if (password.length < 8) {
       return _PasswordValidation(
         isValid: false,
@@ -150,10 +158,11 @@ class PasswordResetOtpBloc
     emit(PasswordResetOtpResetting(resetToken: token));
 
     try {
+      // Trim password before sending to API (validation already checked for spaces)
       final message = await ResetPasswordApiService.resetPassword(
         ResetPasswordRequest(
           resetToken: token,
-          newPassword: _newPassword,
+          newPassword: _newPassword.trim(),
         ),
       );
 
