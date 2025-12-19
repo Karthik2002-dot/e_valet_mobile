@@ -175,10 +175,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                           final isLoading =
                                               state is ForgotPasswordLoading;
                                           // Check if phone number is valid (10 digits required)
-                                          final phoneText = phoneValue.text.trim();
-                                          final isValidPhone = phoneText.length == 10;
-                                          final isButtonEnabled = !isLoading && isValidPhone;
-                                          
+                                          final phoneText =
+                                              phoneValue.text.trim();
+                                          final isValidPhone =
+                                              phoneText.length == 10;
+                                          final isButtonEnabled =
+                                              !isLoading && isValidPhone;
+
                                           void handlePress() {
                                             if (isButtonEnabled) {
                                               _handleSubmit(context);
@@ -188,7 +191,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                           return SizedBox(
                                             width: double.infinity,
                                             child: Opacity(
-                                              opacity: isButtonEnabled ? 1.0 : 0.5,
+                                              opacity:
+                                                  isButtonEnabled ? 1.0 : 0.5,
                                               child: ElevatedButtonComponent(
                                                 labelText: isLoading
                                                     ? TextConstants
@@ -203,18 +207,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                 fontColor: AppColors.white,
                                                 fontWeight: FontWeight.w600,
                                                 padding: EdgeInsets.symmetric(
-                                                  vertical: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.02,
+                                                  vertical:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          0.02,
                                                 ),
                                                 icon: isLoading
                                                     ? SizedBox(
-                                                        width: MediaQuery.of(context)
+                                                        width: MediaQuery.of(
+                                                                    context)
                                                                 .size
                                                                 .width *
                                                             0.05,
-                                                        height: MediaQuery.of(context)
+                                                        height: MediaQuery.of(
+                                                                    context)
                                                                 .size
                                                                 .height *
                                                             0.02,
@@ -231,7 +238,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                     : Icon(
                                                         Icons.send,
                                                         color: AppColors.white,
-                                                        size: MediaQuery.of(context)
+                                                        size: MediaQuery.of(
+                                                                    context)
                                                                 .size
                                                                 .width *
                                                             0.05,
