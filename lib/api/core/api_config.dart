@@ -6,6 +6,8 @@ class ApiConfig {
   static String get authApiKey =>
       (dotenv.env['OAUTH_BASE_API_KEY'] ?? '').trim();
 
+  static String get valetBaseUrl => dotenv.env['API_BASE_URL'] ?? '';
+
   static Map<String, String> get defaultJsonHeaders => const {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json',

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
@@ -13,8 +15,11 @@ class DriverHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => DriverMenuBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => DriverMenuBloc()),
+        BlocProvider(create: (_) => DriverStatusBloc()..add(const DriverStatusStarted())),
+      ],
       child: BlocListener<DriverMenuBloc, DriverMenuState>(
         listener: (context, state) {
           if (state is DriverMenuLogoutSuccess) {

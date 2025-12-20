@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_content.dart';
 
 class DriverHomeView extends StatelessWidget {
@@ -11,10 +13,10 @@ class DriverHomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DriverMenuBloc, DriverMenuState>(
-      builder: (context, state) {
-        if (state is! DriverHomeLoaded) {
+      builder: (context, menuState) {
+        if (menuState is! DriverHomeLoaded) {
           // Trigger loading if not already loaded
-          if (state is DriverMenuInitial) {
+          if (menuState is DriverMenuInitial) {
             context.read<DriverMenuBloc>().add(const DriverHomeStarted());
           }
           return const Scaffold(
@@ -22,14 +24,22 @@ class DriverHomeView extends StatelessWidget {
           );
         }
 
-        final driverName = state.driverName;
-        final isOnBreak = state.isOnBreak;
-        final isOnline = state.isOnline;
+        final driverName = menuState.driverName;
+        final isOnBreak = menuState.isOnBreak;
 
-        return DriverHomeContent(
-          driverName: driverName,
-          isOnBreak: isOnBreak,
-          isOnline: isOnline,
+        // Get online status from DriverStatusBloc, fallback to menu state
+        return BlocBuilder<DriverStatusBloc, DriverStatusState>(
+          builder: (context, statusState) {
+            final isOnline = statusState is DriverStatusLoaded
+                ? statusState.status.isOnline
+                : menuState.isOnline;
+
+            return DriverHomeContent(
+              driverName: driverName,
+              isOnBreak: isOnBreak,
+              isOnline: isOnline,
+            );
+          },
         );
       },
     );

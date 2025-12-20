@@ -83,6 +83,10 @@ class TextConstants {
   static const String scanKeyTagInstruction =
       'Scan the key tag to start the parking process.';
   static const String enterTagNumberLink = 'Or enter the tag number';
+  static const String pleaseTurnOnlineToPark =
+      'Please Turn Online To Park a Car';
+  static const String cannotParkCarOffline =
+      'Can\'t park Car unless you turn Online';
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
