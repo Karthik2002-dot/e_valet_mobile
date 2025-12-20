@@ -3,8 +3,8 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_header_widget.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_online_content.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_offline_content.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_online_content.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_offline_content.dart';
 
 class DriverHomeContent extends StatelessWidget {
   final String driverName;

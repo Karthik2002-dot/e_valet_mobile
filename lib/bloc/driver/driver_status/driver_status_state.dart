@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:niloufer_valet_mobile/models/driver/driver_status.dart';
+import 'package:niloufer_valet_mobile/models/driver/status/driver_status.dart';
 
 abstract class DriverStatusState extends Equatable {
   const DriverStatusState();
@@ -32,4 +32,30 @@ class DriverStatusError extends DriverStatusState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class DriverStatusClockInSuccess extends DriverStatusState {
+  final DriverStatus status;
+  final String message;
+
+  const DriverStatusClockInSuccess({
+    required this.status,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [status, message];
+}
+
+class DriverStatusClockOutSuccess extends DriverStatusState {
+  final DriverStatus status;
+  final String message;
+
+  const DriverStatusClockOutSuccess({
+    required this.status,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [status, message];
 }

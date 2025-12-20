@@ -5,7 +5,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_status_card_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_status_card_widget.dart';
 
 class DriverHeaderWidget extends StatelessWidget {
   final String driverName;

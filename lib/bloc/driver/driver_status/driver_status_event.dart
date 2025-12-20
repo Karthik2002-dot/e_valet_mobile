@@ -14,3 +14,12 @@ class DriverStatusStarted extends DriverStatusEvent {
 class DriverStatusRefreshed extends DriverStatusEvent {
   const DriverStatusRefreshed();
 }
+
+class DriverStatusUpdated extends DriverStatusEvent {
+  final String status; // "ONLINE" or "OFFLINE"
+
+  const DriverStatusUpdated(this.status);
+
+  @override
+  List<Object?> get props => [status];
+}

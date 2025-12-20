@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
@@ -31,6 +29,9 @@ class DriverStatusCardWidget extends StatelessWidget {
         final onlineStatus = statusState is DriverStatusLoaded
             ? statusState.status.isOnline
             : isOnline;
+
+        // Check if we're in a loading state (updating status)
+        final isLoading = statusState is DriverStatusLoading;
 
         return Center(
           child: Container(
@@ -88,29 +89,48 @@ class DriverStatusCardWidget extends StatelessWidget {
                         color: AppColors.black,
                       ),
                       SizedBox(width: screenWidth * 0.02),
-                      Transform.scale(
-                        scale: isDesktop
-                            ? 0.75
-                            : isTablet
-                                ? 0.85
-                                : 0.9,
-                        child: Switch(
-                          value: onlineStatus,
-                          onChanged: (value) {
-                            // Update local state
-                            context
-                                .read<DriverMenuBloc>()
-                                .add(DriverOnlineStatusToggled(value));
-                            // Refresh status from API
-                            context
-                                .read<DriverStatusBloc>()
-                                .add(const DriverStatusRefreshed());
-                          },
-                          activeColor: AppColors.success,
-                          inactiveThumbColor: AppColors.grey,
-                          inactiveTrackColor: AppColors.greyLight,
-                        ),
-                      ),
+                      // Show loader when updating status, otherwise show switch
+                      isLoading
+                          ? SizedBox(
+                              width: isDesktop
+                                  ? screenWidth * 0.03
+                                  : isTablet
+                                      ? screenWidth * 0.04
+                                      : screenWidth * 0.05,
+                              height: isDesktop
+                                  ? screenWidth * 0.03
+                                  : isTablet
+                                      ? screenWidth * 0.04
+                                      : screenWidth * 0.05,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
+                              ),
+                            )
+                          : Transform.scale(
+                              scale: isDesktop
+                                  ? 0.75
+                                  : isTablet
+                                      ? 0.85
+                                      : 0.9,
+                              child: Switch(
+                                value: onlineStatus,
+                                onChanged: (value) {
+                                  // Only call API, don't update local state immediately
+                                  // The toggle will update automatically when API succeeds
+                                  final newStatus =
+                                      value ? 'ONLINE' : 'OFFLINE';
+                                  context
+                                      .read<DriverStatusBloc>()
+                                      .add(DriverStatusUpdated(newStatus));
+                                },
+                                activeColor: AppColors.success,
+                                inactiveThumbColor: AppColors.grey,
+                                inactiveTrackColor: AppColors.greyLight,
+                              ),
+                            ),
                     ],
                   ),
                 ],
