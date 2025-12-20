@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niloufer_valet_mobile/models/driver/qr/qr_data.dart';
 
 abstract class TagSubmissionEvent extends Equatable {
   const TagSubmissionEvent();
@@ -8,21 +9,25 @@ abstract class TagSubmissionEvent extends Equatable {
 }
 
 class QrCodeSubmitted extends TagSubmissionEvent {
-  final String qrCode;
+  final QrData qrData;
 
-  const QrCodeSubmitted(this.qrCode);
+  const QrCodeSubmitted(this.qrData);
 
   @override
-  List<Object?> get props => [qrCode];
+  List<Object?> get props => [qrData];
 }
 
 class TagNumberSubmitted extends TagSubmissionEvent {
-  final String tagNumber;
+  final int outletId;
+  final int cardNumber;
 
-  const TagNumberSubmitted(this.tagNumber);
+  const TagNumberSubmitted({
+    required this.outletId,
+    required this.cardNumber,
+  });
 
   @override
-  List<Object?> get props => [tagNumber];
+  List<Object?> get props => [outletId, cardNumber];
 }
 
 class TagSubmissionReset extends TagSubmissionEvent {

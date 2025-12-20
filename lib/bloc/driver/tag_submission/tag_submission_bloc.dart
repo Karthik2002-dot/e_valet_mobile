@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/driver/session_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/checkin_request.dart';
 
 class TagSubmissionBloc
     extends Bloc<TagSubmissionEvent, TagSubmissionState> {
@@ -18,13 +20,15 @@ class TagSubmissionBloc
     emit(const TagSubmissionLoading());
 
     try {
-      // TODO: Call API service to submit QR code
-      // Example: await ParkingApiService.submitQrCode(event.qrCode);
+      final request = CheckinRequest(
+        outletId: event.qrData.outletId,
+        cardNumber: event.qrData.cardNumber,
+        isManualEntry: false,
+      );
+
+      final response = await SessionApiService.checkin(request);
       
-      // Simulate API call for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      emit(TagSubmissionSuccess('QR code submitted successfully'));
+      emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
       emit(TagSubmissionError(e.message));
     } catch (e) {
@@ -41,13 +45,15 @@ class TagSubmissionBloc
     emit(const TagSubmissionLoading());
 
     try {
-      // TODO: Call API service to submit tag number
-      // Example: await ParkingApiService.submitTagNumber(event.tagNumber);
+      final request = CheckinRequest(
+        outletId: event.outletId,
+        cardNumber: event.cardNumber,
+        isManualEntry: true,
+      );
+
+      final response = await SessionApiService.checkin(request);
       
-      // Simulate API call for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      emit(TagSubmissionSuccess('Tag number submitted successfully'));
+      emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
       emit(TagSubmissionError(e.message));
     } catch (e) {

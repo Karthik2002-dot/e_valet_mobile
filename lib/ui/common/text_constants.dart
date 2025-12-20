@@ -130,4 +130,11 @@ class TextConstants {
   static const String tagNumberLabel = 'Tag Number';
   static const String tagNumberHint = 'Enter Badge Number';
   static const String scanTagNumberLink = 'Or scan the tag number';
+
+  // QR Status Messages
+  static const String scannedSuccess = 'Scanned Success';
+  static const String cardNumberLabel = 'Card Number';
+  static const String cardLabel = 'Card: ';
+  static const String rescanButton = 'Rescan';
+  static const String errorLabel = 'Error';
 }

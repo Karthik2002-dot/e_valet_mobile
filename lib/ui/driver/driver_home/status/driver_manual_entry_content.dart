@@ -8,6 +8,8 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 
 class DriverManualEntryContent extends StatefulWidget {
   final double screenWidth;
@@ -43,8 +45,33 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
       final tagNumber = _tagNumberController.text.trim();
+      
+      // Parse card number from tag number
+      final cardNumber = int.tryParse(tagNumber);
+      if (cardNumber == null) {
+        // Show error if tag number is not a valid number
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid tag number'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      // Get outletId from DriverStatusBloc
+      final statusState = context.read<DriverStatusBloc>().state;
+      int outletId = 1; // Default fallback
+      
+      if (statusState is DriverStatusLoaded) {
+        outletId = statusState.status.outletId;
+      }
+
       context.read<TagSubmissionBloc>().add(
-            TagNumberSubmitted(tagNumber),
+            TagNumberSubmitted(
+              outletId: outletId,
+              cardNumber: cardNumber,
+            ),
           );
     }
   }
@@ -96,10 +123,14 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                   labelText: '',
                   hintText: TextConstants.tagNumberHint,
                   controller: _tagNumberController,
-                  keyboardType: TextInputType.text,
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter the tag number';
+                    }
+                    final cardNumber = int.tryParse(value.trim());
+                    if (cardNumber == null) {
+                      return 'Please enter a valid number';
                     }
                     return null;
                   },
