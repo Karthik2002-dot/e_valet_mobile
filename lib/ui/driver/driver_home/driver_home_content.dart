@@ -5,6 +5,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_header_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_online_content.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_offline_content.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_break_content.dart';
 
 class DriverHomeContent extends StatelessWidget {
   final String driverName;
@@ -50,7 +51,6 @@ class DriverHomeContent extends StatelessWidget {
           // Header Content Section (welcome message, on break toggle, status card)
           DriverHeaderWidget(
             driverName: driverName,
-            isOnBreak: isOnBreak,
             isOnline: isOnline,
             screenWidth: screenWidth,
             screenHeight: screenHeight,
@@ -68,20 +68,27 @@ class DriverHomeContent extends StatelessWidget {
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.04,
                     ),
-                    child: isOnline
-                        ? DriverOnlineContent(
-                            driverName: driverName,
+                    child: isOnBreak
+                        ? DriverBreakContent(
                             screenWidth: screenWidth,
                             screenHeight: screenHeight,
                             isTablet: isTablet,
                             isDesktop: isDesktop,
                           )
-                        : DriverOfflineContent(
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                            isTablet: isTablet,
-                            isDesktop: isDesktop,
-                          ),
+                        : isOnline
+                            ? DriverOnlineContent(
+                                driverName: driverName,
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                isTablet: isTablet,
+                                isDesktop: isDesktop,
+                              )
+                            : DriverOfflineContent(
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                isTablet: isTablet,
+                                isDesktop: isDesktop,
+                              ),
                   ),
                 ),
               ),

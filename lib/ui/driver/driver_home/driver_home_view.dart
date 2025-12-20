@@ -25,14 +25,16 @@ class DriverHomeView extends StatelessWidget {
         }
 
         final driverName = menuState.driverName;
-        final isOnBreak = menuState.isOnBreak;
 
-        // Get online status from DriverStatusBloc, fallback to menu state
+        // Get online status and break status from DriverStatusBloc, fallback to menu state
         return BlocBuilder<DriverStatusBloc, DriverStatusState>(
           builder: (context, statusState) {
             final isOnline = statusState is DriverStatusLoaded
                 ? statusState.status.isOnline
                 : menuState.isOnline;
+            final isOnBreak = statusState is DriverStatusLoaded
+                ? statusState.status.isOnBreak
+                : menuState.isOnBreak;
 
             return DriverHomeContent(
               driverName: driverName,

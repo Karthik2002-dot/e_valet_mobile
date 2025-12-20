@@ -23,3 +23,12 @@ class DriverStatusUpdated extends DriverStatusEvent {
   @override
   List<Object?> get props => [status];
 }
+
+class DriverBreakToggled extends DriverStatusEvent {
+  final bool isOnBreak;
+
+  const DriverBreakToggled(this.isOnBreak);
+
+  @override
+  List<Object?> get props => [isOnBreak];
+}

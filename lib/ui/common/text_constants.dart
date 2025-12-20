@@ -120,4 +120,8 @@ class TextConstants {
   static const String errorProcessingQrCode = 'Error Processing QR Code';
   static const String qrCodeScannedSuccessfully =
       'QR Code scanned successfully';
+
+  // Break Messages
+  static const String takingBreak = 'Taking a Break';
+  static const String relaxAndRestart = 'Relax and Restart!';
 }

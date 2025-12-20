@@ -75,6 +75,12 @@ class DriverHomeScreen extends StatelessWidget {
               } else if (state is DriverStatusClockOutSuccess) {
                 // Show success snackbar with message from API
                 SnackBars.showSuccessSnackBar(context, state.message);
+              } else if (state is DriverBreakStartSuccess) {
+                // Show success snackbar with message from API
+                SnackBars.showSuccessSnackBar(context, state.message);
+              } else if (state is DriverBreakEndSuccess) {
+                // Show success snackbar with message from API
+                SnackBars.showSuccessSnackBar(context, state.message);
               } else if (state is DriverStatusError) {
                 // Show error snackbar
                 SnackBars.showErrorSnackBar(context, state.message);

@@ -5,6 +5,8 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_st
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/clock_in_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/clock_out_request.dart';
+import 'package:niloufer_valet_mobile/models/driver/status/break_start_request.dart';
+import 'package:niloufer_valet_mobile/models/driver/status/break_end_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/driver_status.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 
@@ -14,6 +16,7 @@ class DriverStatusBloc
     on<DriverStatusStarted>(_onStarted);
     on<DriverStatusRefreshed>(_onRefreshed);
     on<DriverStatusUpdated>(_onUpdated);
+    on<DriverBreakToggled>(_onBreakToggled);
   }
 
   Future<void> _onStarted(
@@ -150,6 +153,106 @@ class DriverStatusBloc
                 : 'Failed to get location. Please try again.';
       } else {
         errorMsg = 'Failed to ${event.status.toUpperCase() == "ONLINE" ? "clock in" : "clock out"}. Please try again.';
+      }
+
+      // On error, revert to previous state if it exists
+      if (previousState != null) {
+        emit(DriverStatusError(errorMsg));
+        // After showing error, revert to previous state
+        emit(DriverStatusLoaded(previousState));
+      } else {
+        emit(DriverStatusError(errorMsg));
+      }
+    }
+  }
+
+  Future<void> _onBreakToggled(
+    DriverBreakToggled event,
+    Emitter<DriverStatusState> emit,
+  ) async {
+    // Preserve previous state in case of error
+    final previousState = state is DriverStatusLoaded
+        ? (state as DriverStatusLoaded).status
+        : null;
+
+    // Emit loading state to disable toggle during API call
+    emit(const DriverStatusLoading());
+
+    // Get current location before updating break status
+    try {
+      final coordinates = await LocationService.getCurrentCoordinates();
+      final latitude = coordinates['latitude']!;
+      final longitude = coordinates['longitude']!;
+      final address = LocationService.getAddressFromCoordinates(
+        latitude,
+        longitude,
+      );
+
+      if (event.isOnBreak) {
+        // Start break
+        final breakStartRequest = BreakStartRequest(
+          latitude: latitude,
+          longitude: longitude,
+          address: address,
+        );
+
+        final breakStartResponse = await DriverStatusApiService.startBreak(breakStartRequest);
+
+        // After starting break, refresh status from API to get latest state
+        final updatedStatus = await DriverStatusApiService.getDriverStatus();
+
+        // Emit success state with message from API, then update to loaded state
+        emit(DriverBreakStartSuccess(
+          status: updatedStatus,
+          message: breakStartResponse.message,
+        ));
+        // Immediately emit loaded state so UI updates
+        emit(DriverStatusLoaded(updatedStatus));
+      } else {
+        // End break
+        final breakEndRequest = BreakEndRequest(
+          latitude: latitude,
+          longitude: longitude,
+          address: address,
+        );
+
+        final breakEndResponse = await DriverStatusApiService.endBreak(breakEndRequest);
+
+        // After ending break, refresh status from API to get latest state
+        final updatedStatus = await DriverStatusApiService.getDriverStatus();
+
+        // Emit success state with message from API, then update to loaded state
+        emit(DriverBreakEndSuccess(
+          status: updatedStatus,
+          message: breakEndResponse.message,
+        ));
+        // Immediately emit loaded state so UI updates
+        emit(DriverStatusLoaded(updatedStatus));
+      }
+    } on ApiException catch (e) {
+      // On error, revert to previous state if it exists, otherwise emit error
+      if (previousState != null) {
+        // Revert to previous loaded state so toggle doesn't change
+        emit(DriverStatusError(e.message));
+        // After showing error, revert to previous state
+        emit(DriverStatusLoaded(previousState));
+      } else {
+        emit(DriverStatusError(e.message));
+      }
+    } catch (e) {
+      // Handle location errors or other exceptions
+      final errorMessage = e.toString();
+      String errorMsg;
+      if (errorMessage.contains('location') ||
+          errorMessage.contains('permission') ||
+          errorMessage.contains('Location')) {
+        errorMsg = errorMessage.contains('denied')
+            ? 'Location permission is required to update break status. Please grant location permission in app settings.'
+            : errorMessage.contains('disabled')
+                ? 'Location services are disabled. Please enable location services.'
+                : 'Failed to get location. Please try again.';
+      } else {
+        errorMsg = 'Failed to ${event.isOnBreak ? "start" : "end"} break. Please try again.';
       }
 
       // On error, revert to previous state if it exists

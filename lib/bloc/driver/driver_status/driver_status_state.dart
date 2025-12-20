@@ -59,3 +59,29 @@ class DriverStatusClockOutSuccess extends DriverStatusState {
   @override
   List<Object?> get props => [status, message];
 }
+
+class DriverBreakStartSuccess extends DriverStatusState {
+  final DriverStatus status;
+  final String message;
+
+  const DriverBreakStartSuccess({
+    required this.status,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [status, message];
+}
+
+class DriverBreakEndSuccess extends DriverStatusState {
+  final DriverStatus status;
+  final String message;
+
+  const DriverBreakEndSuccess({
+    required this.status,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [status, message];
+}
