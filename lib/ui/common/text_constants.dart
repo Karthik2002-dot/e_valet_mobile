@@ -124,4 +124,10 @@ class TextConstants {
   // Break Messages
   static const String takingBreak = 'Taking a Break';
   static const String relaxAndRestart = 'Relax and Restart!';
+
+  // Manual Tag Entry
+  static const String enterTagNumberTitle = 'Enter the Tag Number to Proceed';
+  static const String tagNumberLabel = 'Tag Number';
+  static const String tagNumberHint = 'Enter Badge Number';
+  static const String scanTagNumberLink = 'Or scan the tag number';
 }

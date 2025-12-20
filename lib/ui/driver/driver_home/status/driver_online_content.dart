@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
-import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
-import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_status_display_widget.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_qr_scanner_content.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_manual_entry_content.dart';
 
-class DriverOnlineContent extends StatelessWidget {
+class DriverOnlineContent extends StatefulWidget {
   final String driverName;
   final double screenWidth;
   final double screenHeight;
@@ -24,124 +26,97 @@ class DriverOnlineContent extends StatelessWidget {
   });
 
   @override
+  State<DriverOnlineContent> createState() => _DriverOnlineContentState();
+}
+
+class _DriverOnlineContentState extends State<DriverOnlineContent> {
+  bool _isManualEntry = false;
+
+  void _toggleEntryMode(BuildContext context) {
+    setState(() {
+      _isManualEntry = !_isManualEntry;
+    });
+    // Reset tag submission state when switching modes
+    context.read<TagSubmissionBloc>().add(const TagSubmissionReset());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: screenHeight * 0.03),
-        // Welcome message
-        TextComponent(
-          labelText: TextConstants.readyToParkMessage(driverName),
-          fontSize: isDesktop
-              ? screenWidth * 0.018
-              : isTablet
-                  ? screenWidth * 0.028
-                  : screenWidth * 0.05,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: screenHeight * 0.01),
-        TextComponent(
-          labelText: TextConstants.scanKeyTagInstruction,
-          fontSize: isDesktop
-              ? screenWidth * 0.012
-              : isTablet
-                  ? screenWidth * 0.02
-                  : screenWidth * 0.035,
-          fontWeight: FontWeight.w400,
-          color: AppColors.black,
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: screenHeight * 0.03),
-        // Scanner Area with dedicated QR bloc
-        BlocProvider(
-          create: (_) => QrBloc(),
-          child: Column(
-            children: [
-              QrReaderWidget(
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                isTablet: isTablet,
-                isDesktop: isDesktop,
+    return BlocProvider(
+      create: (_) => TagSubmissionBloc(),
+      child: BlocListener<TagSubmissionBloc, TagSubmissionState>(
+        listener: (context, state) {
+          if (state is TagSubmissionSuccess) {
+            // TODO: Handle success (e.g., show snackbar, navigate, etc.)
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          } else if (state is TagSubmissionError) {
+            // TODO: Handle error (e.g., show error dialog)
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
               ),
-              SizedBox(height: screenHeight * 0.02),
-              // Display processing status and QR code data
-              QrStatusDisplayWidget(
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                isTablet: isTablet,
-                isDesktop: isDesktop,
-              ),
-            ],
-          ),
-        ),
-        // Manual entry link
-        GestureDetector(
-          onTap: () {
-            // TODO: Handle manual entry
-          },
-          child: TextComponent(
-            labelText: TextConstants.enterTagNumberLink,
-            fontSize: isDesktop
-                ? screenWidth * 0.012
-                : isTablet
-                    ? screenWidth * 0.02
-                    : screenWidth * 0.035,
-            fontWeight: FontWeight.w400,
-            color: AppColors.mutedText,
-            textAlign: TextAlign.center,
-            textDecoration: TextDecoration.underline,
-          ),
-        ),
-        SizedBox(height: screenHeight * 0.03),
-        // Submit Button
-        SizedBox(
-          width: double.infinity,
-          height: isDesktop
-              ? screenHeight * 0.06
-              : isTablet
-                  ? screenHeight * 0.07
-                  : screenHeight * 0.062,
-          child: ElevatedButton(
-            onPressed: () {
-              // TODO: Handle submit
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(screenWidth * 0.02),
-              ),
-              elevation: 0,
+            );
+          }
+        },
+        child: Column(
+          children: [
+            SizedBox(height: widget.screenHeight * 0.03),
+            // Welcome message
+            TextComponent(
+              labelText: TextConstants.readyToParkMessage(widget.driverName),
+              fontSize: widget.isDesktop
+                  ? widget.screenWidth * 0.018
+                  : widget.isTablet
+                      ? widget.screenWidth * 0.028
+                      : widget.screenWidth * 0.05,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+              textAlign: TextAlign.center,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextComponent(
-                  labelText: TextConstants.submitButton,
-                  fontSize: isDesktop
-                      ? screenWidth * 0.014
-                      : isTablet
-                          ? screenWidth * 0.022
-                          : screenWidth * 0.04,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                Icon(
-                  Icons.arrow_forward,
-                  color: AppColors.white,
-                  size: isDesktop
-                      ? screenWidth * 0.015
-                      : isTablet
-                          ? screenWidth * 0.025
-                          : screenWidth * 0.045,
-                ),
-              ],
+            SizedBox(height: widget.screenHeight * 0.01),
+            TextComponent(
+              labelText: _isManualEntry
+                  ? TextConstants.enterTagNumberTitle
+                  : TextConstants.scanKeyTagInstruction,
+              fontSize: widget.isDesktop
+                  ? widget.screenWidth * 0.012
+                  : widget.isTablet
+                      ? widget.screenWidth * 0.02
+                      : widget.screenWidth * 0.035,
+              fontWeight: FontWeight.w400,
+              color: AppColors.black,
+              textAlign: TextAlign.center,
             ),
-          ),
+            SizedBox(height: widget.screenHeight * 0.03),
+            // Conditional content: QR Scanner or Manual Entry
+            Builder(
+              builder: (context) {
+                if (_isManualEntry) {
+                  return DriverManualEntryContent(
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
+                    onSwitchToQrScanner: () => _toggleEntryMode(context),
+                  );
+                } else {
+                  return DriverQrScannerContent(
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
+                    onSwitchToManualEntry: () => _toggleEntryMode(context),
+                  );
+                }
+              },
+            ),
+            SizedBox(height: widget.screenHeight * 0.03),
+          ],
         ),
-        SizedBox(height: screenHeight * 0.03),
-      ],
+      ),
     );
   }
 }
