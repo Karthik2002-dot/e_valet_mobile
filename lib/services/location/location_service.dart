@@ -98,7 +98,7 @@ class LocationService {
       }
       // Check if it's a timeout or location unavailable error
       final errorString = e.toString().toLowerCase();
-      if (errorString.contains('timeout') || 
+      if (errorString.contains('timeout') ||
           errorString.contains('location unavailable') ||
           errorString.contains('location service')) {
         throw ApiException(

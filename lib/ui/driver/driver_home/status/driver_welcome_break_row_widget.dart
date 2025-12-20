@@ -34,93 +34,93 @@ class DriverWelcomeBreakRowWidget extends StatelessWidget {
         final isLoading = statusState is DriverStatusLoading;
 
         return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Left side: Welcome and driver name (stacked vertically)
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextComponent(
-              labelText: TextConstants.headerWelcome,
-              fontSize: isDesktop
-                  ? screenWidth * 0.012
-                  : isTablet
-                      ? screenWidth * 0.02
-                      : screenWidth * 0.035,
-              fontWeight: FontWeight.w400,
-              color: AppColors.white.withOpacity(0.8),
+            // Left side: Welcome and driver name (stacked vertically)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextComponent(
+                  labelText: TextConstants.headerWelcome,
+                  fontSize: isDesktop
+                      ? screenWidth * 0.012
+                      : isTablet
+                          ? screenWidth * 0.02
+                          : screenWidth * 0.035,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white.withOpacity(0.8),
+                ),
+                TextComponent(
+                  labelText: driverName,
+                  fontSize: isDesktop
+                      ? screenWidth * 0.018
+                      : isTablet
+                          ? screenWidth * 0.028
+                          : screenWidth * 0.05,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                ),
+              ],
             ),
-            TextComponent(
-              labelText: driverName,
-              fontSize: isDesktop
-                  ? screenWidth * 0.018
-                  : isTablet
-                      ? screenWidth * 0.028
-                      : screenWidth * 0.05,
-              fontWeight: FontWeight.w700,
-              color: AppColors.white,
-            ),
-          ],
-        ),
-        // Right side: On Break toggle
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextComponent(
-              labelText: TextConstants.headerOnBreak,
-              fontSize: isDesktop
-                  ? screenWidth * 0.012
-                  : isTablet
-                      ? screenWidth * 0.02
-                      : screenWidth * 0.035,
-              fontWeight: FontWeight.w400,
-              color: AppColors.white,
-            ),
-            SizedBox(width: screenWidth * 0.02),
-            // Show loader when updating break status, otherwise show switch
-            isLoading
-                ? SizedBox(
-                    width: isDesktop
-                        ? screenWidth * 0.025
-                        : isTablet
-                            ? screenWidth * 0.035
-                            : screenWidth * 0.045,
-                    height: isDesktop
-                        ? screenWidth * 0.025
-                        : isTablet
-                            ? screenWidth * 0.035
-                            : screenWidth * 0.045,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.white,
+            // Right side: On Break toggle
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextComponent(
+                  labelText: TextConstants.headerOnBreak,
+                  fontSize: isDesktop
+                      ? screenWidth * 0.012
+                      : isTablet
+                          ? screenWidth * 0.02
+                          : screenWidth * 0.035,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white,
+                ),
+                SizedBox(width: screenWidth * 0.02),
+                // Show loader when updating break status, otherwise show switch
+                isLoading
+                    ? SizedBox(
+                        width: isDesktop
+                            ? screenWidth * 0.025
+                            : isTablet
+                                ? screenWidth * 0.035
+                                : screenWidth * 0.045,
+                        height: isDesktop
+                            ? screenWidth * 0.025
+                            : isTablet
+                                ? screenWidth * 0.035
+                                : screenWidth * 0.045,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
+                        ),
+                      )
+                    : Transform.scale(
+                        scale: isDesktop
+                            ? 0.8
+                            : isTablet
+                                ? 0.9
+                                : 1.0,
+                        child: Switch(
+                          value: isOnBreak,
+                          onChanged: (value) {
+                            // Only call API, don't update local state immediately
+                            // The toggle will update automatically when API succeeds
+                            context
+                                .read<DriverStatusBloc>()
+                                .add(DriverBreakToggled(value));
+                          },
+                          activeColor: AppColors.white,
+                          inactiveThumbColor: AppColors.grey,
+                          inactiveTrackColor: AppColors.greyLight,
+                        ),
                       ),
-                    ),
-                  )
-                : Transform.scale(
-                    scale: isDesktop
-                        ? 0.8
-                        : isTablet
-                            ? 0.9
-                            : 1.0,
-                    child: Switch(
-                      value: isOnBreak,
-                      onChanged: (value) {
-                        // Only call API, don't update local state immediately
-                        // The toggle will update automatically when API succeeds
-                        context
-                            .read<DriverStatusBloc>()
-                            .add(DriverBreakToggled(value));
-                      },
-                      activeColor: AppColors.white,
-                      inactiveThumbColor: AppColors.grey,
-                      inactiveTrackColor: AppColors.greyLight,
-                    ),
-                  ),
+              ],
+            ),
           ],
-        ),
-      ],
         );
       },
     );

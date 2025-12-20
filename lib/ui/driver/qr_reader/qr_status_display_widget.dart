@@ -139,7 +139,8 @@ class QrStatusDisplayWidget extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(screenWidth * 0.01),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                      padding:
+                          EdgeInsets.symmetric(vertical: screenHeight * 0.015),
                     ),
                     child: TextComponent(
                       labelText: TextConstants.rescanButton,
@@ -213,7 +214,8 @@ class QrStatusDisplayWidget extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(screenWidth * 0.01),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                      padding:
+                          EdgeInsets.symmetric(vertical: screenHeight * 0.015),
                     ),
                     child: TextComponent(
                       labelText: TextConstants.rescanButton,

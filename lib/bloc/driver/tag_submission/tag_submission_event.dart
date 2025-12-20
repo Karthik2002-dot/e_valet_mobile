@@ -33,4 +33,3 @@ class TagNumberSubmitted extends TagSubmissionEvent {
 class TagSubmissionReset extends TagSubmissionEvent {
   const TagSubmissionReset();
 }
-

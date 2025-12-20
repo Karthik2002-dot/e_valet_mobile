@@ -45,7 +45,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
       final tagNumber = _tagNumberController.text.trim();
-      
+
       // Parse card number from tag number
       final cardNumber = int.tryParse(tagNumber);
       if (cardNumber == null) {
@@ -62,7 +62,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
       // Get outletId from DriverStatusBloc
       final statusState = context.read<DriverStatusBloc>().state;
       int outletId = 1; // Default fallback
-      
+
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;
       }

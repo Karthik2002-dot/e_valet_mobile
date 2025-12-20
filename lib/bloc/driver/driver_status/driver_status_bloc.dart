@@ -10,8 +10,7 @@ import 'package:niloufer_valet_mobile/models/driver/status/break_end_request.dar
 import 'package:niloufer_valet_mobile/models/driver/status/driver_status.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 
-class DriverStatusBloc
-    extends Bloc<DriverStatusEvent, DriverStatusState> {
+class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
   DriverStatusBloc() : super(const DriverStatusInitial()) {
     on<DriverStatusStarted>(_onStarted);
     on<DriverStatusRefreshed>(_onRefreshed);
@@ -95,7 +94,8 @@ class DriverStatusBloc
           address: address,
         );
 
-        final clockInResponse = await DriverStatusApiService.clockIn(clockInRequest);
+        final clockInResponse =
+            await DriverStatusApiService.clockIn(clockInRequest);
 
         // After clock in, refresh status from API to get latest state
         final updatedStatus = await DriverStatusApiService.getDriverStatus();
@@ -115,7 +115,8 @@ class DriverStatusBloc
           address: address,
         );
 
-        final clockOutResponse = await DriverStatusApiService.clockOut(clockOutRequest);
+        final clockOutResponse =
+            await DriverStatusApiService.clockOut(clockOutRequest);
 
         // After clock out, status becomes OFFLINE
         // Refresh status to get updated state
@@ -152,7 +153,8 @@ class DriverStatusBloc
                 ? 'Location services are disabled. Please enable location services.'
                 : 'Failed to get location. Please try again.';
       } else {
-        errorMsg = 'Failed to ${event.status.toUpperCase() == "ONLINE" ? "clock in" : "clock out"}. Please try again.';
+        errorMsg =
+            'Failed to ${event.status.toUpperCase() == "ONLINE" ? "clock in" : "clock out"}. Please try again.';
       }
 
       // On error, revert to previous state if it exists
@@ -196,7 +198,8 @@ class DriverStatusBloc
           address: address,
         );
 
-        final breakStartResponse = await DriverStatusApiService.startBreak(breakStartRequest);
+        final breakStartResponse =
+            await DriverStatusApiService.startBreak(breakStartRequest);
 
         // After starting break, refresh status from API to get latest state
         final updatedStatus = await DriverStatusApiService.getDriverStatus();
@@ -216,7 +219,8 @@ class DriverStatusBloc
           address: address,
         );
 
-        final breakEndResponse = await DriverStatusApiService.endBreak(breakEndRequest);
+        final breakEndResponse =
+            await DriverStatusApiService.endBreak(breakEndRequest);
 
         // After ending break, refresh status from API to get latest state
         final updatedStatus = await DriverStatusApiService.getDriverStatus();
@@ -252,7 +256,8 @@ class DriverStatusBloc
                 ? 'Location services are disabled. Please enable location services.'
                 : 'Failed to get location. Please try again.';
       } else {
-        errorMsg = 'Failed to ${event.isOnBreak ? "start" : "end"} break. Please try again.';
+        errorMsg =
+            'Failed to ${event.isOnBreak ? "start" : "end"} break. Please try again.';
       }
 
       // On error, revert to previous state if it exists

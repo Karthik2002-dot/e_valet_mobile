@@ -5,8 +5,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request.dart';
 
-class TagSubmissionBloc
-    extends Bloc<TagSubmissionEvent, TagSubmissionState> {
+class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
   TagSubmissionBloc() : super(const TagSubmissionInitial()) {
     on<QrCodeSubmitted>(_onQrCodeSubmitted);
     on<TagNumberSubmitted>(_onTagNumberSubmitted);
@@ -27,7 +26,7 @@ class TagSubmissionBloc
       );
 
       final response = await SessionApiService.checkin(request);
-      
+
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
       emit(TagSubmissionError(e.message));
@@ -52,7 +51,7 @@ class TagSubmissionBloc
       );
 
       final response = await SessionApiService.checkin(request);
-      
+
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
       emit(TagSubmissionError(e.message));
@@ -70,4 +69,3 @@ class TagSubmissionBloc
     emit(const TagSubmissionInitial());
   }
 }
-

@@ -40,7 +40,8 @@ class QrBloc extends Bloc<QrEvent, QrState> {
         isProcessing: false,
         successMessage: 'Scanned Success',
         errorMessage: null,
-        shouldStopScanner: true, // Stop scanner when data is successfully parsed
+        shouldStopScanner:
+            true, // Stop scanner when data is successfully parsed
       ));
     } catch (e) {
       // On error, also stop scanner and show error message

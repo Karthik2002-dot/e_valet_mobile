@@ -19,7 +19,9 @@ class DriverHomeScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => DriverMenuBloc()),
-        BlocProvider(create: (_) => DriverStatusBloc()..add(const DriverStatusStarted())),
+        BlocProvider(
+            create: (_) =>
+                DriverStatusBloc()..add(const DriverStatusStarted())),
       ],
       child: MultiBlocListener(
         listeners: [
