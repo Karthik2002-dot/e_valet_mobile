@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
-import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/models/driver/qr/qr_data.dart';
 
 class QrBloc extends Bloc<QrEvent, QrState> {
   QrBloc() : super(const QrState()) {
@@ -15,32 +16,42 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     QrCodeDetected event,
     Emitter<QrState> emit,
   ) async {
-    // If already processing, ignore new scans
-    if (state.isProcessing) return;
+    // If already processing or scanner is stopped, ignore new scans
+    if (state.isProcessing || state.shouldStopScanner) return;
 
     emit(state.copyWith(
       scannedCode: event.code,
+      qrData: null,
       isProcessing: true,
       successMessage: null,
       errorMessage: null,
+      shouldStopScanner: false,
     ));
 
     try {
-      // TODO: Plug in real processing/API call here
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Parse JSON from QR code
+      final jsonData = jsonDecode(event.code) as Map<String, dynamic>;
+      final qrData = QrData.fromJson(jsonData);
 
+      // Show success message and stop scanner after parsing
       emit(state.copyWith(
         scannedCode: event.code,
+        qrData: qrData,
         isProcessing: false,
-        successMessage: TextConstants.qrCodeScannedSuccessfully,
+        successMessage: 'Scanned Success',
         errorMessage: null,
+        shouldStopScanner:
+            true, // Stop scanner when data is successfully parsed
       ));
     } catch (e) {
+      // On error, also stop scanner and show error message
       emit(state.copyWith(
         scannedCode: event.code,
+        qrData: null,
         isProcessing: false,
         successMessage: null,
-        errorMessage: e.toString(),
+        errorMessage: 'Invalid QR code format. Please scan again.',
+        shouldStopScanner: true, // Stop scanner on error too
       ));
     }
   }

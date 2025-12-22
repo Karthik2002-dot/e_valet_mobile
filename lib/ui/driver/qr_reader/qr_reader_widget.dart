@@ -5,6 +5,7 @@ import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_status_overlay_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/scanner_brackets_painter.dart';
 
 class QrReaderWidget extends StatefulWidget {
@@ -46,7 +47,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget> {
   }
 
   void _handleStateChange(BuildContext context, QrState state) {
-    if (state.isProcessing) {
+    if (state.isProcessing || state.shouldStopScanner) {
       controller.stop();
     } else {
       controller.start();
@@ -93,7 +94,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget> {
                     MobileScanner(
                       controller: controller,
                       onDetect: (capture) {
-                        if (isProcessing) return;
+                        if (isProcessing || state.shouldStopScanner) return;
                         final List<Barcode> barcodes = capture.barcodes;
                         if (barcodes.isNotEmpty) {
                           final barcode = barcodes.first;
@@ -134,6 +135,21 @@ class _QrReaderWidgetState extends State<QrReaderWidget> {
                               AppColors.white,
                             ),
                           ),
+                        ),
+                      ),
+                    // Success/Error overlay card on scanner
+                    if (state.shouldStopScanner &&
+                        (state.qrData != null || state.errorMessage != null))
+                      Positioned(
+                        top: scannerHeight * 0.2,
+                        left: scannerContainerWidth * 0.1,
+                        right: scannerContainerWidth * 0.1,
+                        child: QrStatusOverlayWidget(
+                          state: state,
+                          screenWidth: widget.screenWidth,
+                          screenHeight: widget.screenHeight,
+                          isTablet: widget.isTablet,
+                          isDesktop: widget.isDesktop,
                         ),
                       ),
                   ],

@@ -83,6 +83,10 @@ class TextConstants {
   static const String scanKeyTagInstruction =
       'Scan the key tag to start the parking process.';
   static const String enterTagNumberLink = 'Or enter the tag number';
+  static const String pleaseTurnOnlineToPark =
+      'Please Turn Online To Park a Car';
+  static const String cannotParkCarOffline =
+      'Can\'t park Car unless you turn Online';
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
@@ -116,4 +120,21 @@ class TextConstants {
   static const String errorProcessingQrCode = 'Error Processing QR Code';
   static const String qrCodeScannedSuccessfully =
       'QR Code scanned successfully';
+
+  // Break Messages
+  static const String takingBreak = 'Taking a Break';
+  static const String relaxAndRestart = 'Relax and Restart!';
+
+  // Manual Tag Entry
+  static const String enterTagNumberTitle = 'Enter the Tag Number to Proceed';
+  static const String tagNumberLabel = 'Tag Number';
+  static const String tagNumberHint = 'Enter Badge Number';
+  static const String scanTagNumberLink = 'Or scan the tag number';
+
+  // QR Status Messages
+  static const String scannedSuccess = 'Scanned Success';
+  static const String cardNumberLabel = 'Card Number';
+  static const String cardLabel = 'Card: ';
+  static const String rescanButton = 'Rescan';
+  static const String errorLabel = 'Error';
 }

@@ -28,37 +28,35 @@ class LoginApiService {
         body: body,
       ); // throws ApiException on error
 
-      // Parse Set-Cookie headers and persist tokens for subsequent API calls
-      final setCookieHeader = response.headers['set-cookie'];
-      if (setCookieHeader != null && setCookieHeader.isNotEmpty) {
-        String? accessToken;
-        String? refreshToken;
+      // Parse JSON response body and persist tokens for subsequent API calls
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
 
-        // Split into individual cookies, then into attributes
-        for (final cookie in setCookieHeader.split(',')) {
-          for (final part in cookie.split(';')) {
-            final trimmed = part.trim();
-            if (trimmed.startsWith('accessToken=')) {
-              accessToken = trimmed.substring('accessToken='.length);
-            } else if (trimmed.startsWith('refreshToken=')) {
-              refreshToken = trimmed.substring('refreshToken='.length);
-            }
-          }
-        }
+      // Extract tokens from response
+      final accessToken = responseData['accessToken'] as String?;
+      final refreshToken = responseData['refreshToken'] as String?;
 
-        if (accessToken != null && accessToken.isNotEmpty) {
-          await TokenStorage.saveAccessToken(accessToken);
-        }
-        if (refreshToken != null && refreshToken.isNotEmpty) {
-          await TokenStorage.saveRefreshToken(refreshToken);
-        }
-
-        // Mark session as active for today
-        await SessionManager.markLoggedInForToday();
+      if (accessToken != null && accessToken.isNotEmpty) {
+        await TokenStorage.saveAccessToken(accessToken);
+      }
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await TokenStorage.saveRefreshToken(refreshToken);
       }
 
-      // Optionally parse response body if needed later
-      jsonDecode(response.body) as Map<String, dynamic>;
+      // Extract and save user information if available
+      final user = responseData['user'] as Map<String, dynamic>?;
+      if (user != null) {
+        final firstName = user['firstName'] as String?;
+        final lastName = user['lastName'] as String?;
+        if (firstName != null && lastName != null) {
+          await TokenStorage.saveUserName(
+            firstName: firstName,
+            lastName: lastName,
+          );
+        }
+      }
+
+      // Mark session as active for today
+      await SessionManager.markLoggedInForToday();
 
       return true;
     } on ApiException {
