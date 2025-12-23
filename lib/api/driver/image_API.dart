@@ -16,7 +16,7 @@ class ImageApiService {
   }) async {
     // Get session ID from Hive storage
     final sessionId = await TokenStorage.getSessionId();
-    
+
     if (sessionId == null || sessionId.isEmpty) {
       print('❌ No session ID found!');
       throw ApiException(
@@ -27,7 +27,7 @@ class ImageApiService {
 
     // Get access token
     final accessToken = await TokenStorage.getAccessToken();
-    
+
     if (accessToken == null || accessToken.isEmpty) {
       print('❌ No access token found!');
       throw ApiException(
@@ -56,7 +56,7 @@ class ImageApiService {
         '/sessions/$sessionId/park',
         data: formData,
       );
-      
+
       // Return the response data
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
@@ -65,7 +65,7 @@ class ImageApiService {
       print('Response Data: ${e.response?.data}');
       print('Error Message: ${e.message}');
       print('Error Type: ${e.type}');
-      
+
       if (e.response?.statusCode == 404) {
         throw ApiException(
           'Session not found. Please check in again.',
@@ -98,4 +98,3 @@ class ImageApiService {
     }
   }
 }
-

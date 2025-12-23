@@ -226,4 +226,3 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
     }
   }
 }
-

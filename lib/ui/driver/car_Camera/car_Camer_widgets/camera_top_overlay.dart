@@ -84,4 +84,3 @@ class CameraTopOverlay extends StatelessWidget {
     );
   }
 }
-

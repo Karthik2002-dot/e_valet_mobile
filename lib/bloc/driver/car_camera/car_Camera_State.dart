@@ -41,4 +41,3 @@ class CarCameraValidationError extends CarCameraState {
   @override
   List<Object?> get props => [message, result];
 }
-

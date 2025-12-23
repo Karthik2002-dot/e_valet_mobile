@@ -70,8 +70,8 @@ class PreviewImageCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(screenWidth * 0.08), // More circular corners
+                    borderRadius: BorderRadius.circular(
+                        screenWidth * 0.08), // More circular corners
                   ),
                   elevation: 0,
                 ),
@@ -94,4 +94,3 @@ class PreviewImageCard extends StatelessWidget {
     );
   }
 }
-

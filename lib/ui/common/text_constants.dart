@@ -160,4 +160,3 @@ class TextConstants {
   static const String errorValidatingImage = 'Error validating image';
   static const String errorProcessingImage = 'Error processing image';
 }
-

@@ -72,4 +72,3 @@ class CameraBottomOverlay extends StatelessWidget {
     );
   }
 }
-

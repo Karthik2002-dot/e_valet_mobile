@@ -19,4 +19,3 @@ class ValidateImageRequested extends CarCameraEvent {
 class ValidationReset extends CarCameraEvent {
   const ValidationReset();
 }
-

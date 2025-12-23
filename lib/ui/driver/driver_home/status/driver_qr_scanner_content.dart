@@ -37,7 +37,7 @@ class DriverQrScannerContent extends StatelessWidget {
           // Reset QR scanner and navigate to car camera screen after successful submission
           if (submissionState is TagSubmissionSuccess) {
             context.read<QrBloc>().add(const QrResetRequested());
-            
+
             // Navigate to Car Camera Screen on success
             Navigator.push(
               context,

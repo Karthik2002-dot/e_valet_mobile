@@ -18,4 +18,3 @@ class PreviewHeader extends StatelessWidget {
     );
   }
 }
-

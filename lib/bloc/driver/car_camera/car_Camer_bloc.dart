@@ -28,7 +28,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         ));
       } else {
         emit(CarCameraValidationError(
-          message: validationResult.errorMessage ?? TextConstants.errorValidatingImage,
+          message: validationResult.errorMessage ??
+              TextConstants.errorValidatingImage,
           result: validationResult,
         ));
       }
@@ -96,7 +97,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     );
 
     try {
-      final List<ImageLabel> labels = await imageLabeler.processImage(inputImage);
+      final List<ImageLabel> labels =
+          await imageLabeler.processImage(inputImage);
 
       // Check for vehicle-related labels
       final vehicleLabels = [
@@ -163,4 +165,3 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     }
   }
 }
-

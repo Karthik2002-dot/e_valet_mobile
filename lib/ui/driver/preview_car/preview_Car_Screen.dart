@@ -53,7 +53,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
 
                 // Submit Button
                 PreviewSubmitButton(
-                  onSubmit: _isSubmitting ? () {} : () => _handleSubmit(context),
+                  onSubmit:
+                      _isSubmitting ? () {} : () => _handleSubmit(context),
                 ),
 
                 // Footer with "Powered By" and logo
@@ -100,7 +101,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       );
     } on ApiException catch (e) {
       print('❌ API ERROR: ${e.code} - ${e.message}');
-      
+
       if (!mounted) return;
 
       setState(() {
@@ -117,7 +118,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       );
     } catch (e) {
       print('❌ UNEXPECTED ERROR: $e (${e.runtimeType})');
-      
+
       if (!mounted) return;
 
       setState(() {
@@ -135,4 +136,3 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     }
   }
 }
-
