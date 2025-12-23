@@ -12,6 +12,7 @@ class TokenStorage {
   static const String _lastNameKey = 'user_last_name';
   static const String _phoneNumberKey = 'user_phone_number';
   static const String _resetTokenKey = 'reset_token';
+  static const String _sessionIdKey = 'session_id';
 
   /// Must be called once at app start (after Hive.initFlutter()).
   static Future<void> init() async {
@@ -178,6 +179,38 @@ class TokenStorage {
     }
   }
 
+  // Session ID (for parking session)
+  static Future<void> saveSessionId(String sessionId) async {
+    try {
+      await _box.put(_sessionIdKey, sessionId);
+    } catch (e) {
+      print('[TokenStorage] Error saving session ID: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getSessionId() async {
+    try {
+      return _box.get(_sessionIdKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error retrieving session ID: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearSessionId() async {
+    try {
+      await _box.delete(_sessionIdKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing session ID: $e');
+    }
+  }
+
+  static Future<bool> hasSessionId() async {
+    final sessionId = await getSessionId();
+    return sessionId != null && sessionId.isNotEmpty;
+  }
+
   // Bulk helpers
   static Future<void> clearAllTokens() async {
     await clearAccessToken();
@@ -189,6 +222,7 @@ class TokenStorage {
     await clearUserName();
     await clearPhoneNumber();
     await clearResetToken();
+    await clearSessionId();
   }
 
   static Future<bool> hasValidTokens() async {

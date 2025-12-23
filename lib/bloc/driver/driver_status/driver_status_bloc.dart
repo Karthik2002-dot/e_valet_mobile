@@ -88,7 +88,7 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         // Clock in - go online
         // Always use outletId = 1 as requested
         final clockInRequest = ClockInRequest(
-          outletId: 1,
+          outletId: 2,
           latitude: latitude,
           longitude: longitude,
           address: address,

@@ -10,6 +10,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 
 class DriverManualEntryContent extends StatefulWidget {
   final double screenWidth;
@@ -61,7 +62,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
 
       // Get outletId from DriverStatusBloc
       final statusState = context.read<DriverStatusBloc>().state;
-      int outletId = 1; // Default fallback
+      int outletId = 2; // Default fallback
 
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;
@@ -81,9 +82,21 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
     final w = widget.screenWidth;
     final h = widget.screenHeight;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return BlocListener<TagSubmissionBloc, TagSubmissionState>(
+      listener: (context, state) {
+        if (state is TagSubmissionSuccess) {
+          // Navigate to Car Camera Screen on success
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CarCameraScreen(),
+            ),
+          );
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         // Card with icon + title + input
         Container(
           width: double.infinity,
@@ -237,7 +250,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

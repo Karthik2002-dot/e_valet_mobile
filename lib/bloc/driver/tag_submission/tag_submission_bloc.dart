@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
   TagSubmissionBloc() : super(const TagSubmissionInitial()) {
@@ -26,6 +27,11 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
       );
 
       final response = await SessionApiService.checkin(request);
+
+      // Store session ID in Hive
+      if (response.sessionId.isNotEmpty) {
+        await TokenStorage.saveSessionId(response.sessionId);
+      }
 
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
@@ -51,6 +57,11 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
       );
 
       final response = await SessionApiService.checkin(request);
+
+      // Store session ID in Hive
+      if (response.sessionId.isNotEmpty) {
+        await TokenStorage.saveSessionId(response.sessionId);
+      }
 
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
