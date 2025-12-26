@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:niloufer_valet_mobile/models/driver/image_validation/validation_result.dart';
 
@@ -40,4 +41,35 @@ class CarCameraValidationError extends CarCameraState {
 
   @override
   List<Object?> get props => [message, result];
+}
+
+class CarCameraInitialized extends CarCameraState {
+  final CameraController cameraController;
+  final bool isFlashOn;
+
+  const CarCameraInitialized({
+    required this.cameraController,
+    this.isFlashOn = false,
+  });
+
+  @override
+  List<Object?> get props => [cameraController, isFlashOn];
+}
+
+class CarCameraInitializationError extends CarCameraState {
+  final String message;
+
+  const CarCameraInitializationError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class CarCameraFlashToggled extends CarCameraState {
+  final bool isFlashOn;
+
+  const CarCameraFlashToggled({required this.isFlashOn});
+
+  @override
+  List<Object?> get props => [isFlashOn];
 }

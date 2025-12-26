@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -7,9 +8,74 @@ import 'package:niloufer_valet_mobile/models/driver/image_validation/validation_
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
+  CameraController? _cameraController;
+  bool _isFlashOn = false;
+
   CarCameraBloc() : super(const CarCameraInitial()) {
     on<ValidateImageRequested>(_onValidateImageRequested);
     on<ValidationReset>(_onValidationReset);
+    on<InitializeCameraRequested>(_onInitializeCameraRequested);
+    on<ToggleFlashRequested>(_onToggleFlashRequested);
+  }
+
+  Future<void> _onInitializeCameraRequested(
+    InitializeCameraRequested event,
+    Emitter<CarCameraState> emit,
+  ) async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        emit(const CarCameraInitializationError(
+          message: TextConstants.cameraNotAvailable,
+        ));
+        return;
+      }
+
+      // Use the back camera
+      final camera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+
+      _cameraController = CameraController(
+        camera,
+        ResolutionPreset.high,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+      );
+
+      await _cameraController!.initialize();
+
+      emit(CarCameraInitialized(
+        cameraController: _cameraController!,
+        isFlashOn: _isFlashOn,
+      ));
+    } catch (e) {
+      emit(CarCameraInitializationError(
+        message: '${TextConstants.errorInitializingCamera}: $e',
+      ));
+    }
+  }
+
+  Future<void> _onToggleFlashRequested(
+    ToggleFlashRequested event,
+    Emitter<CarCameraState> emit,
+  ) async {
+    if (_cameraController == null) return;
+
+    try {
+      _isFlashOn = !_isFlashOn;
+
+      await _cameraController!.setFlashMode(
+        _isFlashOn ? FlashMode.torch : FlashMode.off,
+      );
+
+      emit(CarCameraFlashToggled(isFlashOn: _isFlashOn));
+    } catch (e) {
+      // If there's an error, revert the flash state
+      _isFlashOn = !_isFlashOn;
+      emit(CarCameraFlashToggled(isFlashOn: _isFlashOn));
+    }
   }
 
   Future<void> _onValidateImageRequested(
@@ -163,5 +229,9 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
       await textRecognizer.close();
       return (hasText: false, text: null);
     }
+  }
+
+  void dispose() {
+    _cameraController?.dispose();
   }
 }

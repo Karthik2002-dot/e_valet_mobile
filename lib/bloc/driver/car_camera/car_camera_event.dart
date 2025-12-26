@@ -19,3 +19,11 @@ class ValidateImageRequested extends CarCameraEvent {
 class ValidationReset extends CarCameraEvent {
   const ValidationReset();
 }
+
+class InitializeCameraRequested extends CarCameraEvent {
+  const InitializeCameraRequested();
+}
+
+class ToggleFlashRequested extends CarCameraEvent {
+  const ToggleFlashRequested();
+}

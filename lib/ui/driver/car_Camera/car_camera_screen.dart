@@ -20,92 +20,19 @@ class CarCameraScreen extends StatefulWidget {
 }
 
 class _CarCameraScreenState extends State<CarCameraScreen> {
-  CameraController? _cameraController;
-  Future<void>? _initializeControllerFuture;
-  bool _isFlashOn = false;
-  bool _isCameraInitialized = false;
-
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(TextConstants.cameraNotAvailable),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-        return;
-      }
-
-      // Use the back camera
-      final camera = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back,
-        orElse: () => cameras.first,
-      );
-
-      _cameraController = CameraController(
-        camera,
-        ResolutionPreset.high,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-
-      _initializeControllerFuture = _cameraController!.initialize();
-      await _initializeControllerFuture;
-
-      if (mounted) {
-        setState(() {
-          _isCameraInitialized = true;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${TextConstants.errorInitializingCamera}: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
+    // Initialize camera through BLoC
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CarCameraBloc>().add(const InitializeCameraRequested());
+    });
   }
 
   @override
   void dispose() {
-    _cameraController?.dispose();
+    context.read<CarCameraBloc>().dispose();
     super.dispose();
-  }
-
-  Future<void> _toggleFlash() async {
-    if (_cameraController == null || !_isCameraInitialized) return;
-
-    try {
-      setState(() {
-        _isFlashOn = !_isFlashOn;
-      });
-
-      await _cameraController!.setFlashMode(
-        _isFlashOn ? FlashMode.torch : FlashMode.off,
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${TextConstants.errorTogglingFlash}: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -144,39 +71,63 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
             );
             // Reset validation state so user can try again
             context.read<CarCameraBloc>().add(const ValidationReset());
+          } else if (state is CarCameraInitializationError) {
+            // Show camera initialization error
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
           }
         },
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          appBar: const CustomAppBar(),
-          body: Stack(
-            children: [
-              // Camera Preview Widget
-              CameraPreviewWidget(
-                isCameraInitialized: _isCameraInitialized,
-                cameraController: _cameraController,
-              ),
+        child: BlocBuilder<CarCameraBloc, CarCameraState>(
+          builder: (context, state) {
+            final isCameraInitialized = state is CarCameraInitialized;
+            final cameraController =
+                state is CarCameraInitialized ? state.cameraController : null;
+            final isFlashOn = state is CarCameraInitialized
+                ? state.isFlashOn
+                : state is CarCameraFlashToggled
+                    ? state.isFlashOn
+                    : false;
 
-              // Top Overlay (Back button, Flash button, Instructions)
-              CameraTopOverlay(
-                isFlashOn: _isFlashOn,
-                onFlashToggle: _toggleFlash,
-                onBack: () => Navigator.pop(context),
-              ),
+            return Scaffold(
+              backgroundColor: Colors.black,
+              appBar: const CustomAppBar(),
+              body: Stack(
+                children: [
+                  // Camera Preview Widget
+                  CameraPreviewWidget(
+                    isCameraInitialized: isCameraInitialized,
+                    cameraController: cameraController,
+                  ),
 
-              // Bottom Overlay (Photo button and text)
-              CameraBottomOverlay(
-                onCapture: _capturePhoto,
+                  // Top Overlay (Back button, Flash button, Instructions)
+                  CameraTopOverlay(
+                    isFlashOn: isFlashOn,
+                    onFlashToggle: () => context
+                        .read<CarCameraBloc>()
+                        .add(const ToggleFlashRequested()),
+                    onBack: () => Navigator.pop(context),
+                  ),
+
+                  // Bottom Overlay (Photo button and text)
+                  CameraBottomOverlay(
+                    onCapture: _capturePhoto,
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
   Future<void> _capturePhoto(BuildContext blocContext) async {
-    if (_cameraController == null || !_isCameraInitialized) {
+    final state = blocContext.read<CarCameraBloc>().state;
+    if (state is! CarCameraInitialized) {
       ScaffoldMessenger.of(blocContext).showSnackBar(
         const SnackBar(
           content: Text(TextConstants.cameraNotReady),
@@ -187,25 +138,28 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
     }
 
     try {
+      final cameraController = state.cameraController;
+      final isFlashOn = state.isFlashOn;
+
       // Ensure the camera is initialized
-      await _initializeControllerFuture;
+      // The camera is already initialized when we reach this state
 
       // Turn off flash if it's on
-      if (_isFlashOn) {
-        await _cameraController!.setFlashMode(FlashMode.off);
+      if (isFlashOn) {
+        await cameraController.setFlashMode(FlashMode.off);
       }
 
       // Set flash mode for the photo
-      await _cameraController!.setFlashMode(
-        _isFlashOn ? FlashMode.always : FlashMode.off,
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.always : FlashMode.off,
       );
 
       // Take the picture
-      final image = await _cameraController!.takePicture();
+      final image = await cameraController.takePicture();
 
       // Restore flash mode if it was on
-      if (_isFlashOn) {
-        await _cameraController!.setFlashMode(FlashMode.torch);
+      if (isFlashOn) {
+        await cameraController.setFlashMode(FlashMode.torch);
       }
 
       // Trigger validation in background
