@@ -137,4 +137,26 @@ class TextConstants {
   static const String cardLabel = 'Card: ';
   static const String rescanButton = 'Rescan';
   static const String errorLabel = 'Error';
+
+  // Camera Screen
+  static const String captureCarInstruction =
+      'Capture the car clearly with location\nlandmarks';
+  static const String photoMode = 'PHOTO MODE';
+  static const String cameraNotAvailable = 'No camera available on this device';
+  static const String errorInitializingCamera = 'Error initializing camera';
+  static const String errorTogglingFlash = 'Error toggling flash';
+  static const String cameraNotReady = 'Camera not ready';
+  static const String errorCapturingPhoto = 'Error capturing photo';
+  static const String photoCaptured = 'Photo captured';
+
+  // Preview/Review Screen
+  static const String reviewEntry = 'Review Entry';
+  static const String retakeButton = 'Retake';
+  static const String submittingCarPhoto = 'Submitting car photo...';
+
+  // Image Validation Messages
+  static const String vehicleNotFound = 'Vehicle not found in image';
+  static const String numberPlateNotFound = 'Vehicle number plate not found';
+  static const String errorValidatingImage = 'Error validating image';
+  static const String errorProcessingImage = 'Error processing image';
 }

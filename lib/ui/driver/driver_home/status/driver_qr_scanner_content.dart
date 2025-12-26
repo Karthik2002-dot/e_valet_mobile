@@ -10,6 +10,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 
 class DriverQrScannerContent extends StatelessWidget {
   final double screenWidth;
@@ -33,9 +34,17 @@ class DriverQrScannerContent extends StatelessWidget {
       create: (_) => QrBloc(),
       child: BlocListener<TagSubmissionBloc, TagSubmissionState>(
         listener: (context, submissionState) {
-          // Reset QR scanner after successful submission
+          // Reset QR scanner and navigate to car camera screen after successful submission
           if (submissionState is TagSubmissionSuccess) {
             context.read<QrBloc>().add(const QrResetRequested());
+
+            // Navigate to Car Camera Screen on success
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CarCameraScreen(),
+              ),
+            );
           }
         },
         child: Column(
