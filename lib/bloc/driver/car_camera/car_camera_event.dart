@@ -24,6 +24,10 @@ class InitializeCameraRequested extends CarCameraEvent {
   const InitializeCameraRequested();
 }
 
+class ForceReinitializeCameraRequested extends CarCameraEvent {
+  const ForceReinitializeCameraRequested();
+}
+
 class ToggleFlashRequested extends CarCameraEvent {
   const ToggleFlashRequested();
 }

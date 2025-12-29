@@ -19,20 +19,77 @@ class CarCameraScreen extends StatefulWidget {
   State<CarCameraScreen> createState() => _CarCameraScreenState();
 }
 
-class _CarCameraScreenState extends State<CarCameraScreen> {
+class _CarCameraScreenState extends State<CarCameraScreen> with WidgetsBindingObserver, RouteAware {
+  late CarCameraBloc _cameraBloc;
+  bool _isInitializing = false;
+  RouteObserver<ModalRoute>? _routeObserver;
+
   @override
   void initState() {
     super.initState();
-    // Initialize camera through BLoC
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CarCameraBloc>().add(const InitializeCameraRequested());
-    });
+    _cameraBloc = CarCameraBloc();
+    _routeObserver = RouteObserver<ModalRoute>();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Only initialize if not already initializing
+    if (!_isInitializing) {
+      _initializeCamera();
+    }
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Force reinitialize when returning to this screen
+    _initializeCamera(force: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant CarCameraScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Force reinitialize when widget is updated
+    if (!_isInitializing) {
+      _initializeCamera();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isInitializing) {
+      _initializeCamera();
+    }
   }
 
   @override
   void dispose() {
-    context.read<CarCameraBloc>().dispose();
+    _routeObserver?.unsubscribe(this);
+    WidgetsBinding.instance.removeObserver(this);
+    _cameraBloc.dispose();
     super.dispose();
+  }
+
+  void _initializeCamera({bool force = false}) {
+    if (_isInitializing && !force) return; // Prevent multiple calls unless forced
+
+    _isInitializing = true;
+    if (force) {
+      // Force reinitialization by disposing existing controller first
+      _cameraBloc.add(const ForceReinitializeCameraRequested());
+    } else {
+      _cameraBloc.add(const InitializeCameraRequested());
+    }
+
+    // Reset flag after a delay to allow for potential reinitialization
+    Future.delayed(const Duration(seconds: 15), () {
+      if (mounted) {
+        _isInitializing = false;
+      }
+    });
   }
 
   @override
@@ -40,8 +97,8 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return BlocProvider(
-      create: (context) => CarCameraBloc(),
+    return BlocProvider<CarCameraBloc>.value(
+      value: _cameraBloc,
       child: BlocListener<CarCameraBloc, CarCameraState>(
         listener: (context, state) {
           if (state is CarCameraValidationSuccess) {
@@ -79,13 +136,15 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
                 backgroundColor: AppColors.error,
               ),
             );
+          } else if (state is CarCameraInitial) {
+            // Reset initialization flag when state is reset
+            _isInitializing = false;
           }
         },
         child: BlocBuilder<CarCameraBloc, CarCameraState>(
           builder: (context, state) {
             final isCameraInitialized = state is CarCameraInitialized;
-            final cameraController =
-                state is CarCameraInitialized ? state.cameraController : null;
+            final cameraController = state is CarCameraInitialized ? state.cameraController : null;
             final isFlashOn = state is CarCameraInitialized
                 ? state.isFlashOn
                 : state is CarCameraFlashToggled
@@ -161,6 +220,9 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
       if (isFlashOn) {
         await cameraController.setFlashMode(FlashMode.torch);
       }
+
+      // Reset camera state before navigating
+      blocContext.read<CarCameraBloc>().add(const ValidationReset());
 
       // Trigger validation in background
       if (mounted) {

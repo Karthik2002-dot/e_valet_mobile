@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
 import 'package:niloufer_valet_mobile/models/driver/image_validation/validation_result.dart';
@@ -15,6 +16,7 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     on<ValidateImageRequested>(_onValidateImageRequested);
     on<ValidationReset>(_onValidationReset);
     on<InitializeCameraRequested>(_onInitializeCameraRequested);
+    on<ForceReinitializeCameraRequested>(_onForceReinitializeCameraRequested);
     on<ToggleFlashRequested>(_onToggleFlashRequested);
   }
 
@@ -22,7 +24,53 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     InitializeCameraRequested event,
     Emitter<CarCameraState> emit,
   ) async {
+    // Check if we already have a valid camera controller
+    if (_cameraController != null && _cameraController!.value.isInitialized) {
+      emit(CarCameraInitialized(
+        cameraController: _cameraController!,
+        isFlashOn: _isFlashOn,
+      ));
+      return;
+    }
+
+    await _performCameraInitialization(emit);
+  }
+
+  Future<void> _onForceReinitializeCameraRequested(
+    ForceReinitializeCameraRequested event,
+    Emitter<CarCameraState> emit,
+  ) async {
+    // Always reinitialize, regardless of current state
+    await _performCameraInitialization(emit);
+  }
+
+  Future<void> _performCameraInitialization(Emitter<CarCameraState> emit) async {
+    // Dispose existing camera controller if any
+    await _cameraController?.dispose();
+    _cameraController = null;
+
+    // Reset flash state
+    _isFlashOn = false;
+
+    // Emit initial state to show loading
+    emit(const CarCameraInitial());
+
     try {
+      // Request camera permission first
+      final status = await Permission.camera.request();
+
+      if (status == PermissionStatus.permanentlyDenied) {
+        emit(const CarCameraInitializationError(
+          message: 'Camera permission is permanently denied. Please enable camera permission in app settings.',
+        ));
+        return;
+      } else if (status != PermissionStatus.granted) {
+        emit(const CarCameraInitializationError(
+          message: 'Camera permission is required to use this feature',
+        ));
+        return;
+      }
+
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
         emit(const CarCameraInitializationError(
@@ -39,12 +87,18 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
 
       _cameraController = CameraController(
         camera,
-        ResolutionPreset.high,
+        ResolutionPreset.medium,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
-      await _cameraController!.initialize();
+      // Add timeout to camera initialization
+      await _cameraController!.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Camera initialization timed out');
+        },
+      );
 
       emit(CarCameraInitialized(
         cameraController: _cameraController!,
@@ -115,6 +169,10 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     ValidationReset event,
     Emitter<CarCameraState> emit,
   ) {
+    // Dispose camera controller to ensure clean reinitialization
+    _cameraController?.dispose();
+    _cameraController = null;
+    _isFlashOn = false;
     emit(const CarCameraInitial());
   }
 
