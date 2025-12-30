@@ -8,6 +8,8 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_qr_scanner_content.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_manual_entry_content.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
 class DriverOnlineContent extends StatefulWidget {
   final String driverName;
@@ -50,6 +52,15 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
             // TODO: Handle success (e.g., show snackbar, navigate, etc.)
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
+            );
+          } else if (state is TagSubmissionSessionExpired) {
+            // Clear tokens and navigate to login
+            TokenStorage.clearAll();
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const LoginScreen(),
+              ),
+              (route) => false,
             );
           } else if (state is TagSubmissionError) {
             // TODO: Handle error (e.g., show error dialog)

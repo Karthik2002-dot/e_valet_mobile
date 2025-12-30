@@ -44,7 +44,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     await _performCameraInitialization(emit);
   }
 
-  Future<void> _performCameraInitialization(Emitter<CarCameraState> emit) async {
+  Future<void> _performCameraInitialization(
+      Emitter<CarCameraState> emit) async {
     // Dispose existing camera controller if any
     await _cameraController?.dispose();
     _cameraController = null;
@@ -61,7 +62,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
 
       if (status == PermissionStatus.permanentlyDenied) {
         emit(const CarCameraInitializationError(
-          message: 'Camera permission is permanently denied. Please enable camera permission in app settings.',
+          message:
+              'Camera permission is permanently denied. Please enable camera permission in app settings.',
         ));
         return;
       } else if (status != PermissionStatus.granted) {
@@ -151,6 +153,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
           message: validationResult.errorMessage ??
               TextConstants.errorValidatingImage,
           result: validationResult,
+          cameraController: _cameraController!,
+          isFlashOn: _isFlashOn,
         ));
       }
     } catch (e) {
@@ -161,6 +165,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
           hasNumberPlate: false,
           errorMessage: TextConstants.errorValidatingImage,
         ),
+        cameraController: _cameraController!,
+        isFlashOn: _isFlashOn,
       ));
     }
   }
@@ -169,11 +175,15 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     ValidationReset event,
     Emitter<CarCameraState> emit,
   ) {
-    // Dispose camera controller to ensure clean reinitialization
-    _cameraController?.dispose();
-    _cameraController = null;
-    _isFlashOn = false;
-    emit(const CarCameraInitial());
+    // Reset to initialized state to allow retaking photo
+    if (_cameraController != null) {
+      emit(CarCameraInitialized(
+        cameraController: _cameraController!,
+        isFlashOn: _isFlashOn,
+      ));
+    } else {
+      emit(const CarCameraInitial());
+    }
   }
 
   Future<ImageValidationResult> _validateImage(String imagePath) async {

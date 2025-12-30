@@ -33,14 +33,18 @@ class CarCameraValidationSuccess extends CarCameraState {
 class CarCameraValidationError extends CarCameraState {
   final String message;
   final ImageValidationResult result;
+  final CameraController cameraController;
+  final bool isFlashOn;
 
   const CarCameraValidationError({
     required this.message,
     required this.result,
+    required this.cameraController,
+    required this.isFlashOn,
   });
 
   @override
-  List<Object?> get props => [message, result];
+  List<Object?> get props => [message, result, cameraController, isFlashOn];
 }
 
 class CarCameraInitialized extends CarCameraState {

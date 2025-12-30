@@ -19,7 +19,8 @@ class CarCameraScreen extends StatefulWidget {
   State<CarCameraScreen> createState() => _CarCameraScreenState();
 }
 
-class _CarCameraScreenState extends State<CarCameraScreen> with WidgetsBindingObserver, RouteAware {
+class _CarCameraScreenState extends State<CarCameraScreen>
+    with WidgetsBindingObserver, RouteAware {
   late CarCameraBloc _cameraBloc;
   bool _isInitializing = false;
   RouteObserver<ModalRoute>? _routeObserver;
@@ -74,7 +75,8 @@ class _CarCameraScreenState extends State<CarCameraScreen> with WidgetsBindingOb
   }
 
   void _initializeCamera({bool force = false}) {
-    if (_isInitializing && !force) return; // Prevent multiple calls unless forced
+    if (_isInitializing && !force)
+      return; // Prevent multiple calls unless forced
 
     _isInitializing = true;
     if (force) {
@@ -143,13 +145,26 @@ class _CarCameraScreenState extends State<CarCameraScreen> with WidgetsBindingOb
         },
         child: BlocBuilder<CarCameraBloc, CarCameraState>(
           builder: (context, state) {
-            final isCameraInitialized = state is CarCameraInitialized;
-            final cameraController = state is CarCameraInitialized ? state.cameraController : null;
+            final isCameraInitialized = state is CarCameraInitialized ||
+                state is CarCameraValidationError ||
+                state is CarCameraFlashToggled;
+            final cameraController = state is CarCameraInitialized
+                ? state.cameraController
+                : state is CarCameraValidationError
+                    ? state.cameraController
+                    : state is CarCameraFlashToggled
+                        ? _cameraBloc.state is CarCameraInitialized
+                            ? (_cameraBloc.state as CarCameraInitialized)
+                                .cameraController
+                            : null
+                        : null;
             final isFlashOn = state is CarCameraInitialized
                 ? state.isFlashOn
-                : state is CarCameraFlashToggled
+                : state is CarCameraValidationError
                     ? state.isFlashOn
-                    : false;
+                    : state is CarCameraFlashToggled
+                        ? state.isFlashOn
+                        : false;
 
             return Scaffold(
               backgroundColor: Colors.black,

@@ -37,6 +37,9 @@ class LoginApiService {
 
       if (accessToken != null && accessToken.isNotEmpty) {
         await TokenStorage.saveAccessToken(accessToken);
+        // Assume access token expires in 15 minutes
+        final expiry = DateTime.now().add(const Duration(minutes: 15));
+        await TokenStorage.saveAccessTokenExpiry(expiry);
       }
       if (refreshToken != null && refreshToken.isNotEmpty) {
         await TokenStorage.saveRefreshToken(refreshToken);

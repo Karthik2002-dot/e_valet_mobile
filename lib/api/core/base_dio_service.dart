@@ -92,8 +92,12 @@ class BaseDioService {
               isRetry: true,
             );
           } catch (refreshError) {
-            // If refresh fails, throw the original 401 error
-            throw apiException;
+            // If refresh fails, throw session expired error instead of unauthorized
+            throw ApiException(
+              'Your session has expired. Please login again.',
+              code: 'session_expired',
+              statusCode: 401,
+            );
           }
         }
       }
@@ -132,8 +136,12 @@ class BaseDioService {
               isRetry: true,
             );
           } catch (refreshError) {
-            // If refresh fails, throw the original 401 error
-            throw apiException;
+            // If refresh fails, throw session expired error instead of unauthorized
+            throw ApiException(
+              'Your session has expired. Please login again.',
+              code: 'session_expired',
+              statusCode: 401,
+            );
           }
         }
       }
@@ -172,8 +180,12 @@ class BaseDioService {
               isRetry: true,
             );
           } catch (refreshError) {
-            // If refresh fails, throw the original 401 error
-            throw apiException;
+            // If refresh fails, throw session expired error instead of unauthorized
+            throw ApiException(
+              'Your session has expired. Please login again.',
+              code: 'session_expired',
+              statusCode: 401,
+            );
           }
         }
       }
@@ -198,28 +210,37 @@ class BaseDioService {
 
       if (newAccessToken == null) return null;
 
-      final cookieParts = <String>[];
-      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
-        cookieParts.add('refreshToken=$newRefreshToken');
-      }
-      cookieParts.add('accessToken=$newAccessToken');
+      // Check if the base service uses Authorization headers or Cookie headers
+      final baseHeaders = dio.options.headers;
+      if (baseHeaders.containsKey('Authorization')) {
+        // Use Bearer token authentication
+        return Options(
+          headers: {
+            ...baseHeaders,
+            'Authorization': 'Bearer $newAccessToken',
+          },
+        );
+      } else {
+        // Use Cookie authentication (for refresh endpoint)
+        final cookieParts = <String>[];
+        if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+          cookieParts.add('refreshToken=$newRefreshToken');
+        }
+        cookieParts.add('accessToken=$newAccessToken');
 
-      return Options(
-        headers: {
-          ...dio.options.headers,
-          'Cookie': cookieParts.join('; '),
-        },
-      );
+        return Options(
+          headers: {
+            ...baseHeaders,
+            'Cookie': cookieParts.join('; '),
+          },
+        );
+      }
     }
 
     // Update existing options
     final headers = Map<String, dynamic>.from(options.headers ?? {});
+    final authHeader = headers['Authorization'] ?? headers['authorization'];
     final cookieHeader = headers['Cookie'] ?? headers['cookie'];
-
-    if (cookieHeader == null ||
-        !cookieHeader.toString().contains('accessToken=')) {
-      return options;
-    }
 
     // Get new tokens
     final newAccessToken = await TokenStorage.getAccessToken();
@@ -227,15 +248,21 @@ class BaseDioService {
 
     if (newAccessToken == null) return options;
 
-    // Rebuild cookie string with new tokens
-    final cookieParts = <String>[];
-    if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
-      cookieParts.add('refreshToken=$newRefreshToken');
-    }
-    cookieParts.add('accessToken=$newAccessToken');
-
     final updatedHeaders = Map<String, dynamic>.from(headers);
-    updatedHeaders['Cookie'] = cookieParts.join('; ');
+
+    if (authHeader != null && authHeader.toString().startsWith('Bearer ')) {
+      // Update Authorization header
+      updatedHeaders['Authorization'] = 'Bearer $newAccessToken';
+    } else if (cookieHeader != null &&
+        cookieHeader.toString().contains('accessToken=')) {
+      // Update Cookie header
+      final cookieParts = <String>[];
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        cookieParts.add('refreshToken=$newRefreshToken');
+      }
+      cookieParts.add('accessToken=$newAccessToken');
+      updatedHeaders['Cookie'] = cookieParts.join('; ');
+    }
 
     return options.copyWith(headers: updatedHeaders);
   }

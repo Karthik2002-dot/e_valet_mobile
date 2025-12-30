@@ -8,6 +8,7 @@ class TokenStorage {
 
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _accessTokenExpiryKey = 'access_token_expiry';
   static const String _firstNameKey = 'user_first_name';
   static const String _lastNameKey = 'user_last_name';
   static const String _phoneNumberKey = 'user_phone_number';
@@ -49,11 +50,45 @@ class TokenStorage {
     }
   }
 
+  static Future<void> saveAccessTokenExpiry(DateTime expiry) async {
+    try {
+      await _box.put(_accessTokenExpiryKey, expiry.toIso8601String());
+    } catch (e) {
+      print('[TokenStorage] Error saving access token expiry: $e');
+      rethrow;
+    }
+  }
+
+  static Future<DateTime?> getAccessTokenExpiry() async {
+    try {
+      final expiryStr = _box.get(_accessTokenExpiryKey) as String?;
+      if (expiryStr == null) return null;
+      return DateTime.parse(expiryStr);
+    } catch (e) {
+      print('[TokenStorage] Error retrieving access token expiry: $e');
+      return null;
+    }
+  }
+
   static Future<void> clearAccessToken() async {
     try {
       await _box.delete(_accessTokenKey);
+      await _box.delete(_accessTokenExpiryKey);
     } catch (e) {
       print('[TokenStorage] Error clearing access token: $e');
+    }
+  }
+
+  static Future<bool> isAccessTokenExpiredOrExpiringSoon() async {
+    try {
+      final expiry = await getAccessTokenExpiry();
+      if (expiry == null) return true; // If no expiry, consider expired
+      final now = DateTime.now();
+      // Consider expired if less than 2 minutes left
+      return now.isAfter(expiry.subtract(const Duration(minutes: 2)));
+    } catch (e) {
+      print('[TokenStorage] Error checking token expiry: $e');
+      return true; // On error, assume expired
     }
   }
 
