@@ -126,11 +126,17 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         _isFlashOn ? FlashMode.torch : FlashMode.off,
       );
 
-      emit(CarCameraFlashToggled(isFlashOn: _isFlashOn));
+      emit(CarCameraFlashToggled(
+        isFlashOn: _isFlashOn,
+        cameraController: _cameraController!,
+      ));
     } catch (e) {
       // If there's an error, revert the flash state
       _isFlashOn = !_isFlashOn;
-      emit(CarCameraFlashToggled(isFlashOn: _isFlashOn));
+      emit(CarCameraFlashToggled(
+        isFlashOn: _isFlashOn,
+        cameraController: _cameraController!,
+      ));
     }
   }
 

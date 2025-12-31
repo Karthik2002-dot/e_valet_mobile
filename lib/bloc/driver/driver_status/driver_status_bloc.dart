@@ -7,8 +7,8 @@ import 'package:niloufer_valet_mobile/models/driver/status/clock_in_request.dart
 import 'package:niloufer_valet_mobile/models/driver/status/clock_out_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/break_start_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/break_end_request.dart';
-import 'package:niloufer_valet_mobile/models/driver/status/driver_status.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
   DriverStatusBloc() : super(const DriverStatusInitial()) {
@@ -74,11 +74,31 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
     // Emit loading state to disable toggle during API call
     emit(const DriverStatusLoading());
 
-    // Get current location before updating status
+    // Get stored location or fetch new one
     try {
-      final coordinates = await LocationService.getCurrentCoordinates();
-      final latitude = coordinates['latitude']!;
-      final longitude = coordinates['longitude']!;
+      var locationData = await TokenStorage.getCurrentLocation();
+      
+      double latitude;
+      double longitude;
+      
+      if (locationData != null) {
+        latitude = locationData['latitude'] as double;
+        longitude = locationData['longitude'] as double;
+      } else {
+        // Fallback: Get current location if stored location not available
+        final coordinates = await LocationService.getCurrentCoordinates();
+        latitude = coordinates['latitude']!;
+        longitude = coordinates['longitude']!;
+        
+        // Save for future use
+        final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+        await TokenStorage.saveCurrentLocation(
+          latitude: latitude,
+          longitude: longitude,
+          location: location,
+        );
+      }
+      
       final address = LocationService.getAddressFromCoordinates(
         latitude,
         longitude,
@@ -180,11 +200,31 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
     // Emit loading state to disable toggle during API call
     emit(const DriverStatusLoading());
 
-    // Get current location before updating break status
+    // Get stored location or fetch new one
     try {
-      final coordinates = await LocationService.getCurrentCoordinates();
-      final latitude = coordinates['latitude']!;
-      final longitude = coordinates['longitude']!;
+      var locationData = await TokenStorage.getCurrentLocation();
+      
+      double latitude;
+      double longitude;
+      
+      if (locationData != null) {
+        latitude = locationData['latitude'] as double;
+        longitude = locationData['longitude'] as double;
+      } else {
+        // Fallback: Get current location if stored location not available
+        final coordinates = await LocationService.getCurrentCoordinates();
+        latitude = coordinates['latitude']!;
+        longitude = coordinates['longitude']!;
+        
+        // Save for future use
+        final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+        await TokenStorage.saveCurrentLocation(
+          latitude: latitude,
+          longitude: longitude,
+          location: location,
+        );
+      }
+      
       final address = LocationService.getAddressFromCoordinates(
         latitude,
         longitude,

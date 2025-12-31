@@ -1,5 +1,5 @@
 class AssignedSession {
-  final String sessionId;
+  final String id;
   final int cardNumber;
   final Map<String, dynamic> status;
   final String outletName;
@@ -9,7 +9,7 @@ class AssignedSession {
   final List<AssignedSessionPhoto> photos;
 
   AssignedSession({
-    required this.sessionId,
+    required this.id,
     required this.cardNumber,
     required this.status,
     required this.outletName,
@@ -22,7 +22,7 @@ class AssignedSession {
   factory AssignedSession.fromJson(Map<String, dynamic> json) {
     final rawStatus = json['status'];
     return AssignedSession(
-      sessionId: (json['sessionId'] ?? '').toString(),
+      id: (json['sessionId'] ?? json['id'] ?? '').toString(),
       cardNumber: json['cardNumber'] as int? ?? 0,
       status: (rawStatus is Map<String, dynamic>) ? rawStatus : const {},
       outletName: (json['outletName'] ?? '').toString(),
@@ -45,9 +45,12 @@ class AssignedSession {
 
   String? get photoUrl => photos.isNotEmpty ? photos.first.url : null;
 
+  // Add a field to store pending photo path
+  String? pendingPhotoPath;
+
   Map<String, dynamic> toJson() {
     return {
-      'sessionId': sessionId,
+      'id': id,
       'cardNumber': cardNumber,
       'status': status,
       'outletName': outletName,

@@ -12,7 +12,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 
-class DriverQrScannerContent extends StatelessWidget {
+class DriverQrScannerContent extends StatefulWidget {
   final double screenWidth;
   final double screenHeight;
   final bool isTablet;
@@ -29,6 +29,11 @@ class DriverQrScannerContent extends StatelessWidget {
   });
 
   @override
+  State<DriverQrScannerContent> createState() => _DriverQrScannerContentState();
+}
+
+class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => QrBloc(),
@@ -42,7 +47,7 @@ class DriverQrScannerContent extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const CarCameraScreen(),
+                builder: (context) => CarCameraScreen(sessionId: null),
               ),
             );
           }
@@ -51,26 +56,26 @@ class DriverQrScannerContent extends StatelessWidget {
           children: [
             // QR Scanner Area
             QrReaderWidget(
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-              isTablet: isTablet,
-              isDesktop: isDesktop,
+              screenWidth: widget.screenWidth,
+              screenHeight: widget.screenHeight,
+              isTablet: widget.isTablet,
+              isDesktop: widget.isDesktop,
             ),
-            SizedBox(height: screenHeight * 0.02),
+            SizedBox(height: widget.screenHeight * 0.02),
             // Switch to manual entry link
-            if (onSwitchToManualEntry != null)
+            if (widget.onSwitchToManualEntry != null)
               GestureDetector(
-                onTap: onSwitchToManualEntry,
+                onTap: widget.onSwitchToManualEntry,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextComponent(
                     labelText: TextConstants.enterTagNumberLink,
-                    fontSize: isDesktop
-                        ? screenWidth * 0.012
-                        : isTablet
-                            ? screenWidth * 0.02
-                            : screenWidth * 0.035,
+                    fontSize: widget.isDesktop
+                        ? widget.screenWidth * 0.012
+                        : widget.isTablet
+                            ? widget.screenWidth * 0.02
+                            : widget.screenWidth * 0.035,
                     fontWeight: FontWeight.w400,
                     color: AppColors.mutedText,
                     textAlign: TextAlign.center,
@@ -78,7 +83,7 @@ class DriverQrScannerContent extends StatelessWidget {
                   ),
                 ),
               ),
-            SizedBox(height: screenHeight * 0.02),
+            SizedBox(height: widget.screenHeight * 0.02),
             // Submit Button
             BlocBuilder<QrBloc, QrState>(
               builder: (context, qrState) {
@@ -89,11 +94,11 @@ class DriverQrScannerContent extends StatelessWidget {
 
                     return SizedBox(
                       width: double.infinity,
-                      height: isDesktop
-                          ? screenHeight * 0.06
-                          : isTablet
-                              ? screenHeight * 0.07
-                              : screenHeight * 0.062,
+                      height: widget.isDesktop
+                          ? widget.screenHeight * 0.06
+                          : widget.isTablet
+                              ? widget.screenHeight * 0.07
+                              : widget.screenHeight * 0.062,
                       child: ElevatedButton(
                         onPressed: (hasValidQrData && !isLoading)
                             ? () {
@@ -107,22 +112,22 @@ class DriverQrScannerContent extends StatelessWidget {
                           disabledBackgroundColor: AppColors.greyLight,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(screenWidth * 0.02),
+                                BorderRadius.circular(widget.screenWidth * 0.02),
                           ),
                           elevation: 0,
                         ),
                         child: isLoading
                             ? SizedBox(
-                                width: isDesktop
-                                    ? screenWidth * 0.015
-                                    : isTablet
-                                        ? screenWidth * 0.025
-                                        : screenWidth * 0.045,
-                                height: isDesktop
-                                    ? screenWidth * 0.015
-                                    : isTablet
-                                        ? screenWidth * 0.025
-                                        : screenWidth * 0.045,
+                                width: widget.isDesktop
+                                    ? widget.screenWidth * 0.015
+                                    : widget.isTablet
+                                        ? widget.screenWidth * 0.025
+                                        : widget.screenWidth * 0.045,
+                                height: widget.isDesktop
+                                    ? widget.screenWidth * 0.015
+                                    : widget.isTablet
+                                        ? widget.screenWidth * 0.025
+                                        : widget.screenWidth * 0.045,
                                 child: const CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -135,23 +140,23 @@ class DriverQrScannerContent extends StatelessWidget {
                                 children: [
                                   TextComponent(
                                     labelText: TextConstants.submitButton,
-                                    fontSize: isDesktop
-                                        ? screenWidth * 0.014
-                                        : isTablet
-                                            ? screenWidth * 0.022
-                                            : screenWidth * 0.04,
+                                    fontSize: widget.isDesktop
+                                        ? widget.screenWidth * 0.014
+                                        : widget.isTablet
+                                            ? widget.screenWidth * 0.022
+                                            : widget.screenWidth * 0.04,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.white,
                                   ),
-                                  SizedBox(width: screenWidth * 0.02),
+                                  SizedBox(width: widget.screenWidth * 0.02),
                                   Icon(
                                     Icons.arrow_forward,
                                     color: AppColors.white,
-                                    size: isDesktop
-                                        ? screenWidth * 0.015
-                                        : isTablet
-                                            ? screenWidth * 0.025
-                                            : screenWidth * 0.045,
+                                    size: widget.isDesktop
+                                        ? widget.screenWidth * 0.015
+                                        : widget.isTablet
+                                            ? widget.screenWidth * 0.025
+                                            : widget.screenWidth * 0.045,
                                   ),
                                 ],
                               ),

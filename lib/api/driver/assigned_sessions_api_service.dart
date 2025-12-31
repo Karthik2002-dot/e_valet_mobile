@@ -24,10 +24,11 @@ class AssignedSessionsApiService {
     );
 
     try {
-      print('Fetching assigned sessions from API...');
+      print('📥 [GET API] Fetching assigned sessions from API...');
       final response = await base.get('/sessions/assigned-to-me');
+      print('📊 [GET API] HTTP Status Code: ${response.statusCode}');
       final data = response.data;
-      print('API response data: $data');
+      print('📄 [GET API] API response data: $data');
 
       if (data is! Map<String, dynamic>) {
         throw ApiException(
@@ -42,16 +43,17 @@ class AssignedSessionsApiService {
               .toList() ??
           [];
 
-      print('Parsed sessions: ${sessions.length} items');
-      // Commented out detailed session prints to prevent potential performance issues
-      // for (var i = 0; i < sessions.length; i++) {
-      //   print('Session $i: ${sessions[i].toJson()}');
-      // }
+      print('📋 Parsed sessions: ${sessions.length} items');
+      for (var i = 0; i < sessions.length; i++) {
+        print('🎫 Session $i: ID=${sessions[i].id}, Status=${sessions[i].status}, Card=${sessions[i].cardNumber}');
+      }
       return sessions;
-    } on ApiException {
+    } on ApiException catch (e) {
+      print('❌ [GET API] HTTP Status Code: ${e.statusCode ?? 'N/A'}');
+      print('❌ [GET API] Error: ${e.message}');
       rethrow;
     } catch (e) {
-      print('Error fetching assigned sessions: $e');
+      print('❌ [GET API] Unexpected error: $e');
       throw ApiException(
         'Failed to load assigned sessions.',
         code: 'unknown_error',

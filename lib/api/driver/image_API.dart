@@ -13,11 +13,12 @@ class ImageApiService {
   /// POST /api/v1/sessions/{id}/park
   static Future<Map<String, dynamic>> uploadParkingPhoto({
     required String imagePath,
+    String? sessionId, // Optional: if not provided, use from TokenStorage
   }) async {
-    // Get session ID from Hive storage
-    final sessionId = await TokenStorage.getSessionId();
+    // Get session ID from parameter or Hive storage
+    final actualSessionId = sessionId ?? await TokenStorage.getSessionId();
 
-    if (sessionId == null || sessionId.isEmpty) {
+    if (actualSessionId == null || actualSessionId.isEmpty) {
       print('❌ No session ID found!');
       throw ApiException(
         'No active session. Please check in first.',
@@ -51,14 +52,19 @@ class ImageApiService {
         // description is optional, so we don't send it
       });
 
+      print('📸 Uploading parking photo for session: $actualSessionId');
+
       // Make the API call
       final response = await base.post(
-        '/sessions/$sessionId/park',
+        '/sessions/$actualSessionId/park',
         data: formData,
       );
 
+      final responseData = response.data as Map<String, dynamic>;
+      print('✅ Park API response: $responseData');
+
       // Return the response data
-      return response.data as Map<String, dynamic>;
+      return responseData;
     } on DioException catch (e) {
       print('❌ DioException caught:');
       print('Status Code: ${e.response?.statusCode}');

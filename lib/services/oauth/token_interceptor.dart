@@ -14,6 +14,15 @@ class TokenStorage {
   static const String _phoneNumberKey = 'user_phone_number';
   static const String _resetTokenKey = 'reset_token';
   static const String _sessionIdKey = 'session_id';
+  static const String _pendingPhotoKey = 'pending_photo_path';
+  static const String _sessionIdFromGetApiKey = 'session_id_from_get_api';
+  static const String _assignedSessionDataKey = 'assigned_session_data';
+  static const String _arrivalLocationKey = 'arrival_location';
+  static const String _arrivalLatitudeKey = 'arrival_latitude';
+  static const String _arrivalLongitudeKey = 'arrival_longitude';
+  static const String _currentLocationKey = 'current_location';
+  static const String _currentLatitudeKey = 'current_latitude';
+  static const String _currentLongitudeKey = 'current_longitude';
 
   /// Must be called once at app start (after Hive.initFlutter()).
   static Future<void> init() async {
@@ -244,6 +253,195 @@ class TokenStorage {
   static Future<bool> hasSessionId() async {
     final sessionId = await getSessionId();
     return sessionId != null && sessionId.isNotEmpty;
+  }
+
+  // Pending photo management
+  static Future<void> savePendingPhotoPath(String photoPath) async {
+    try {
+      await _box.put(_pendingPhotoKey, photoPath);
+      print('[TokenStorage] Saved pending photo path: $photoPath');
+    } catch (e) {
+      print('[TokenStorage] Error saving pending photo path: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getPendingPhotoPath() async {
+    try {
+      return _box.get(_pendingPhotoKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error retrieving pending photo path: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearPendingPhotoPath() async {
+    try {
+      await _box.delete(_pendingPhotoKey);
+      print('[TokenStorage] Cleared pending photo path');
+    } catch (e) {
+      print('[TokenStorage] Error clearing pending photo path: $e');
+    }
+  }
+
+  // Session ID from GET API management
+  static Future<void> saveSessionIdFromGetApi(String sessionId) async {
+    try {
+      await _box.put(_sessionIdFromGetApiKey, sessionId);
+      print('[TokenStorage] 📥 Saved sessionId from GET API: $sessionId');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving sessionId from GET API: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getSessionIdFromGetApi() async {
+    try {
+      final sessionId = _box.get(_sessionIdFromGetApiKey) as String?;
+      print('[TokenStorage] 📤 Retrieved sessionId from GET API: $sessionId');
+      return sessionId;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving sessionId from GET API: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearSessionIdFromGetApi() async {
+    try {
+      await _box.delete(_sessionIdFromGetApiKey);
+      print('[TokenStorage] 🗑️ Cleared sessionId from GET API');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing sessionId from GET API: $e');
+    }
+  }
+
+  // Assigned Session Data management
+  static Future<void> saveAssignedSessionData(Map<String, dynamic> sessionData) async {
+    try {
+      await _box.put(_assignedSessionDataKey, sessionData);
+      print('[TokenStorage] 💾 Saved assigned session data');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving assigned session data: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getAssignedSessionData() async {
+    try {
+      final data = _box.get(_assignedSessionDataKey) as Map<String, dynamic>?;
+      print('[TokenStorage] 📤 Retrieved assigned session data');
+      return data;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving assigned session data: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearAssignedSessionData() async {
+    try {
+      await _box.delete(_assignedSessionDataKey);
+      print('[TokenStorage] 🗑️ Cleared assigned session data');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing assigned session data: $e');
+    }
+  }
+
+  // Arrival Location management
+  static Future<void> saveArrivalLocation({
+    required double latitude,
+    required double longitude,
+    required String location,
+  }) async {
+    try {
+      await _box.put(_arrivalLatitudeKey, latitude);
+      await _box.put(_arrivalLongitudeKey, longitude);
+      await _box.put(_arrivalLocationKey, location);
+      print('[TokenStorage] 💾 Saved arrival location: $location (lat: $latitude, lng: $longitude)');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving arrival location: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getArrivalLocation() async {
+    try {
+      final latitude = _box.get(_arrivalLatitudeKey) as double?;
+      final longitude = _box.get(_arrivalLongitudeKey) as double?;
+      final location = _box.get(_arrivalLocationKey) as String?;
+
+      if (latitude != null && longitude != null && location != null) {
+        print('[TokenStorage] 📤 Retrieved arrival location: $location (lat: $latitude, lng: $longitude)');
+        return {
+          'latitude': latitude,
+          'longitude': longitude,
+          'location': location,
+        };
+      }
+      return null;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving arrival location: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearArrivalLocation() async {
+    try {
+      await _box.delete(_arrivalLatitudeKey);
+      await _box.delete(_arrivalLongitudeKey);
+      await _box.delete(_arrivalLocationKey);
+      print('[TokenStorage] 🗑️ Cleared arrival location');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing arrival location: $e');
+    }
+  }
+
+  // Current Location management (used for accept, arrived, handover APIs)
+  static Future<void> saveCurrentLocation({
+    required double latitude,
+    required double longitude,
+    required String location,
+  }) async {
+    try {
+      await _box.put(_currentLatitudeKey, latitude);
+      await _box.put(_currentLongitudeKey, longitude);
+      await _box.put(_currentLocationKey, location);
+      print('[TokenStorage] 💾 Saved current location: $location (lat: $latitude, lng: $longitude)');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving current location: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getCurrentLocation() async {
+    try {
+      final latitude = _box.get(_currentLatitudeKey) as double?;
+      final longitude = _box.get(_currentLongitudeKey) as double?;
+      final location = _box.get(_currentLocationKey) as String?;
+
+      if (latitude != null && longitude != null && location != null) {
+        print('[TokenStorage] 📤 Retrieved current location: $location (lat: $latitude, lng: $longitude)');
+        return {
+          'latitude': latitude,
+          'longitude': longitude,
+          'location': location,
+        };
+      }
+      return null;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving current location: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearCurrentLocation() async {
+    try {
+      await _box.delete(_currentLatitudeKey);
+      await _box.delete(_currentLongitudeKey);
+      await _box.delete(_currentLocationKey);
+      print('[TokenStorage] 🗑️ Cleared current location');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing current location: $e');
+    }
   }
 
   // Bulk helpers

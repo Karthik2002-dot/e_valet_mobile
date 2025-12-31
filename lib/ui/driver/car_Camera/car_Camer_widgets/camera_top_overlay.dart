@@ -5,13 +5,11 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 class CameraTopOverlay extends StatelessWidget {
   final bool isFlashOn;
   final VoidCallback onFlashToggle;
-  final VoidCallback onBack;
 
   const CameraTopOverlay({
     super.key,
     required this.isFlashOn,
     required this.onFlashToggle,
-    required this.onBack,
   });
 
   @override
@@ -41,19 +39,10 @@ class CameraTopOverlay extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back button and Flash button row
+            // Flash button row
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Back button
-                IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: AppColors.white,
-                    size: screenWidth * 0.06,
-                  ),
-                  onPressed: onBack,
-                ),
                 // Flash button
                 IconButton(
                   icon: Icon(

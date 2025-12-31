@@ -71,9 +71,13 @@ class CarCameraInitializationError extends CarCameraState {
 
 class CarCameraFlashToggled extends CarCameraState {
   final bool isFlashOn;
+  final CameraController cameraController;
 
-  const CarCameraFlashToggled({required this.isFlashOn});
+  const CarCameraFlashToggled({
+    required this.isFlashOn,
+    required this.cameraController,
+  });
 
   @override
-  List<Object?> get props => [isFlashOn];
+  List<Object?> get props => [isFlashOn, cameraController];
 }

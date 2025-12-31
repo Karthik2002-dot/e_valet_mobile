@@ -26,31 +26,110 @@ class QrReaderWidget extends StatefulWidget {
   State<QrReaderWidget> createState() => _QrReaderWidgetState();
 }
 
-class _QrReaderWidgetState extends State<QrReaderWidget> {
-  late MobileScannerController controller;
+class _QrReaderWidgetState extends State<QrReaderWidget>
+    with WidgetsBindingObserver {
+  MobileScannerController? controller;
+  bool _needsReinitialization = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeController();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    // Widget was reactivated (came back from another route)
+    // Reinitialize the controller
+    if (_needsReinitialization || controller == null) {
+      _initializeController();
+    } else {
+      // Just restart the existing controller
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted && controller != null) {
+          try {
+            controller!.start();
+          } catch (e) {
+            // If start fails, reinitialize
+            _initializeController();
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  void deactivate() {
+    // Widget is being deactivated (navigating away)
+    controller?.stop();
+    _needsReinitialization = true;
+    super.deactivate();
+  }
+
+  void _initializeController() {
+    // Dispose existing controller if any
+    controller?.dispose();
+    
+    // Create new controller
     controller = MobileScannerController(
       formats: const [BarcodeFormat.qrCode], // QR only
       detectionSpeed: DetectionSpeed.noDuplicates,
       facing: CameraFacing.back,
-      autoStart: true,
+      autoStart: false, // Manual start for better control
     );
+    
+    // Start the controller
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted && controller != null) {
+        controller!.start();
+      }
+    });
+    
+    _needsReinitialization = false;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Mark for reinitialization and rebuild
+      setState(() {
+        _needsReinitialization = true;
+      });
+      _initializeController();
+    } else if (state == AppLifecycleState.paused) {
+      // Stop controller when app goes to background
+      controller?.stop();
+    }
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    controller?.dispose();
     super.dispose();
   }
 
-  void _handleStateChange(BuildContext context, QrState state) {
-    if (state.isProcessing || state.shouldStopScanner) {
-      controller.stop();
-    } else {
-      controller.start();
+  void _handleStateChange(BuildContext context, QrState state) async {
+    if (controller == null) return;
+    
+    try {
+      if (state.isProcessing || state.shouldStopScanner) {
+        await controller!.stop();
+      } else {
+        // Ensure controller is started when not processing
+        await controller!.start();
+      }
+    } catch (e) {
+      // If start/stop fails, reinitialize controller
+      if (mounted) {
+        setState(() {
+          _needsReinitialization = true;
+        });
+        _initializeController();
+      }
     }
   }
 
@@ -88,11 +167,58 @@ class _QrReaderWidgetState extends State<QrReaderWidget> {
               builder: (context, state) {
                 final isProcessing = state.isProcessing;
 
+                // Show loading if controller is not initialized
+                if (controller == null) {
+                  return Container(
+                    color: Colors.black,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
+                  );
+                }
+
                 return Stack(
                   alignment: Alignment.center,
                   children: [
                     MobileScanner(
-                      controller: controller,
+                      controller: controller!,
+                      errorBuilder: (context, error, child) {
+                        // If there's an error, try to restart the controller
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (mounted) {
+                            setState(() {
+                              _needsReinitialization = true;
+                            });
+                            _initializeController();
+                          }
+                        });
+                        return Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Camera error. Reinitializing...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: widget.screenWidth * 0.04,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                       onDetect: (capture) {
                         if (isProcessing || state.shouldStopScanner) return;
                         final List<Barcode> barcodes = capture.barcodes;
