@@ -51,7 +51,7 @@ class _DashboardContentState extends State<DashboardContent> {
               TextComponent(
                 labelText: TextConstants.dashboardOverview,
                 color: AppColors.black,
-                fontWeight: FontWeight.bold,
+                fontSize: MediaQuery.of(context).size.width * 0.02,
               ),
               const SizedBox(height: 24),
               BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
@@ -61,52 +61,103 @@ class _DashboardContentState extends State<DashboardContent> {
                       child: CircularProgressIndicator(),
                     );
                   } else if (state is OperatorDashboardLoaded) {
+                    final isPortrait = MediaQuery.of(context).orientation ==
+                        Orientation.portrait;
+
                     return Column(
                       children: [
-                        // First Row: Available Tags and Available Valets
-                        Row(
-                          children: [
-                            Expanded(
-                              child: KpiCard(
-                                title: 'Available Tags',
-                                value:
-                                    '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                color: Colors.blue,
+                        if (isPortrait)
+                          // Portrait: 2 cards per row
+                          Column(
+                            children: [
+                              // First Row: Available Tags and Available Valets
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: KpiCard(
+                                      title: 'Available Tags',
+                                      value:
+                                          '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: KpiCard(
+                                      title: 'Available Valets',
+                                      value:
+                                          '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: KpiCard(
-                                title: 'Available Valets',
-                                value:
-                                    '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                color: Colors.green,
+                              const SizedBox(height: 12),
+                              // Second Row: Vehicles In Transit and Total Vehicles Parked
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: KpiCard(
+                                      title: 'Vehicles In Transit',
+                                      value: state.kpis.vehiclesInTransit
+                                          .toString(),
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: KpiCard(
+                                      title: 'Total Vehicles Parked',
+                                      value: state.kpis.totalVehiclesParked
+                                          .toString(),
+                                      color: Colors.purple,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        // Second Row: Vehicles In Transit and Total Vehicles Parked
-                        Row(
-                          children: [
-                            Expanded(
-                              child: KpiCard(
-                                title: 'Vehicles In Transit',
-                                value: state.kpis.vehiclesInTransit.toString(),
-                                color: Colors.orange,
+                            ],
+                          )
+                        else
+                          // Landscape: all 4 cards in one row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: KpiCard(
+                                  title: 'Available Tags',
+                                  value:
+                                      '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
+                                  color: Colors.blue,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: KpiCard(
-                                title: 'Total Vehicles Parked',
-                                value:
-                                    state.kpis.totalVehiclesParked.toString(),
-                                color: Colors.purple,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: KpiCard(
+                                  title: 'Available Valets',
+                                  value:
+                                      '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
+                                  color: Colors.green,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: KpiCard(
+                                  title: 'Vehicles In Transit',
+                                  value:
+                                      state.kpis.vehiclesInTransit.toString(),
+                                  color: Colors.orange,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: KpiCard(
+                                  title: 'Total Vehicles Parked',
+                                  value:
+                                      state.kpis.totalVehiclesParked.toString(),
+                                  color: Colors.purple,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     );
                   } else if (state is OperatorDashboardError) {
@@ -115,7 +166,8 @@ class _DashboardContentState extends State<DashboardContent> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextComponent(
-                            labelText: '${TextConstants.errorLabel}: ${state.message}',
+                            labelText:
+                                '${TextConstants.errorLabel}: ${state.message}',
                             color: Colors.red,
                             textAlign: TextAlign.center,
                           ),
