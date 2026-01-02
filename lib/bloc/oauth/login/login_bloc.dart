@@ -54,12 +54,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: _pin,
       );
 
-      final success = await LoginApiService.verifyPhonePasswordLogin(request);
+      final profile = await LoginApiService.verifyPhonePasswordLogin(request);
 
-      if (success) {
-        emit(const LoginSuccess());
+      if (profile.roles.isNotEmpty) {
+        emit(LoginSuccess(profile));
       } else {
-        emit(const LoginFailure('Invalid phone number or password'));
+        emit(const LoginFailure('No roles assigned to your account'));
       }
     } on ApiException catch (e) {
       emit(LoginFailure(e.message));

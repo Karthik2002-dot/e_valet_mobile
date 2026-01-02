@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login_form.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,13 +39,25 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // Navigate to Driver Home screen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const DriverHomeScreen(),
-              ),
-            );
+            final roles = state.profile.roles.map((r) => r.toLowerCase()).toList();
+            if (roles.contains('driver')) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DriverHomeScreen(),
+                ),
+              );
+            } else if (roles.contains('operator')) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OperatorHomeScreen(),
+                ),
+              );
+            } else {
+              // Unknown role - show error
+              SnackBars.showErrorSnackBar(context, 'Access denied. No supported role found.');
+            }
           } else if (state is LoginFailure) {
             SnackBars.showErrorSnackBar(context, state.message);
           }

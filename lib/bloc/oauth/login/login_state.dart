@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 
 abstract class LoginState extends Equatable {
   const LoginState();
@@ -16,7 +17,12 @@ class LoginLoading extends LoginState {
 }
 
 class LoginSuccess extends LoginState {
-  const LoginSuccess();
+  final Profile profile;
+
+  const LoginSuccess(this.profile);
+
+  @override
+  List<Object?> get props => [profile];
 }
 
 class LoginFailure extends LoginState {
