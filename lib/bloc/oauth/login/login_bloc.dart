@@ -59,12 +59,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (profile.roles.isNotEmpty) {
         emit(LoginSuccess(profile));
       } else {
-        emit(const LoginFailure('No roles assigned to your account'));
+        emit(
+          const LoginFailure(
+            'No roles are assigned to your account. Please contact your administrator to request access.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       emit(LoginFailure(e.message));
     } catch (_) {
-      emit(const LoginFailure('Something went wrong. Please try again.'));
+      emit(
+        const LoginFailure(
+          'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 

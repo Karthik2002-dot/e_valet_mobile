@@ -58,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
             } else {
               // Unknown role - show error
               SnackBars.showErrorSnackBar(
-                  context, 'Access denied. No supported role found.');
+                context,
+                'Your account does not have the required permissions to access this application. Please contact your administrator.',
+              );
             }
           } else if (state is LoginFailure) {
             SnackBars.showErrorSnackBar(context, state.message);

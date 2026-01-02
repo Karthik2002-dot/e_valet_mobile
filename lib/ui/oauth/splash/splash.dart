@@ -49,9 +49,6 @@ class _SplashScreenState extends State<SplashScreen>
             final isOperator = state.roles.any((r) => r.contains('operator'));
             final isDriver = state.roles.any((r) => r.contains('driver'));
 
-            debugPrint(
-                'Splash: Routing - isOperator=$isOperator, isDriver=$isDriver');
-
             // Prefer operator when both roles exist
             if (isOperator) {
               Navigator.pushReplacement(
@@ -66,7 +63,9 @@ class _SplashScreenState extends State<SplashScreen>
             } else {
               // Unknown/unsupported role — show error and send to login
               SnackBars.showErrorSnackBar(
-                  context, 'Access denied. No supported role found.');
+                context,
+                'Your account does not have the required permissions to access this app. Please contact your administrator.',
+              );
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),

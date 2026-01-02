@@ -77,11 +77,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     try {
       final profile = await ProfileApiService.getProfile();
       roles = profile.normalizedRoles;
-      print('Splash: Fetched profile with raw roles: ${profile.roles}');
-      print('Splash: Normalized roles for routing: $roles');
     } catch (e) {
       // Ignore profile fetch failure; fallback to empty roles
       print('Splash: Profile fetch failed: $e');
+      emit(const SplashCompleted(isAuthenticated: false, roles: []));
+      return;
     }
 
     emit(SplashCompleted(isAuthenticated: isAuthenticated, roles: roles));
