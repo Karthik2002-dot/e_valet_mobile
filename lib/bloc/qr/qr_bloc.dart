@@ -26,6 +26,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
       successMessage: null,
       errorMessage: null,
       shouldStopScanner: false,
+      cameraShouldBeActive: false, // Stop camera while processing
     ));
 
     try {
@@ -42,6 +43,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
         errorMessage: null,
         shouldStopScanner:
             true, // Stop scanner when data is successfully parsed
+        cameraShouldBeActive: false, // Keep camera stopped when data exists
       ));
     } catch (e) {
       // On error, also stop scanner and show error message
@@ -52,6 +54,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
         successMessage: null,
         errorMessage: 'Invalid QR code format. Please scan again.',
         shouldStopScanner: true, // Stop scanner on error too
+        cameraShouldBeActive: false, // Keep camera stopped on error
       ));
     }
   }
@@ -60,6 +63,8 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     QrResetRequested event,
     Emitter<QrState> emit,
   ) {
-    emit(const QrState());
+    emit(const QrState(
+      cameraShouldBeActive: true, // Camera should be active when reset
+    ));
   }
 }

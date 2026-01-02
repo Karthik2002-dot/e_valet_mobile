@@ -80,8 +80,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   }
 
   void _initializeCamera({bool force = false}) {
-    if (_isInitializing && !force)
-      return; // Prevent multiple calls unless forced
+    // Prevent multiple simultaneous initializations, even for force requests
+    if (_isInitializing) return;
 
     _isInitializing = true;
     if (force) {
@@ -91,8 +91,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       _cameraBloc.add(const InitializeCameraRequested());
     }
 
-    // Reset flag after a delay to allow for potential reinitialization
-    Future.delayed(const Duration(seconds: 15), () {
+    // Reset flag after a shorter delay to allow for proper reinitialization
+    Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         _isInitializing = false;
       }

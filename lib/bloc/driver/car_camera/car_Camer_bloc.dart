@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
   CameraController? _cameraController;
   bool _isFlashOn = false;
+  bool _isInitializing = false;
 
   CarCameraBloc() : super(const CarCameraInitial()) {
     on<ValidateImageRequested>(_onValidateImageRequested);
@@ -24,6 +25,9 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     InitializeCameraRequested event,
     Emitter<CarCameraState> emit,
   ) async {
+    // Prevent multiple simultaneous initializations
+    if (_isInitializing) return;
+
     // Check if we already have a valid camera controller
     if (_cameraController != null && _cameraController!.value.isInitialized) {
       emit(CarCameraInitialized(
@@ -40,23 +44,28 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     ForceReinitializeCameraRequested event,
     Emitter<CarCameraState> emit,
   ) async {
+    // Prevent multiple simultaneous initializations
+    if (_isInitializing) return;
+
     // Always reinitialize, regardless of current state
     await _performCameraInitialization(emit);
   }
 
   Future<void> _performCameraInitialization(
       Emitter<CarCameraState> emit) async {
-    // Dispose existing camera controller if any
-    await _cameraController?.dispose();
-    _cameraController = null;
-
-    // Reset flash state
-    _isFlashOn = false;
-
-    // Emit initial state to show loading
-    emit(const CarCameraInitial());
+    _isInitializing = true;
 
     try {
+      // Dispose existing camera controller if any
+      await _cameraController?.dispose();
+      _cameraController = null;
+
+      // Reset flash state
+      _isFlashOn = false;
+
+      // Emit initial state to show loading
+      emit(const CarCameraInitial());
+
       // Request camera permission first
       final status = await Permission.camera.request();
 
@@ -110,6 +119,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
       emit(CarCameraInitializationError(
         message: '${TextConstants.errorInitializingCamera}: $e',
       ));
+    } finally {
+      _isInitializing = false;
     }
   }
 

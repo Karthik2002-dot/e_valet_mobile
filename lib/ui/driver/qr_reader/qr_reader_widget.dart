@@ -27,114 +27,250 @@ class QrReaderWidget extends StatefulWidget {
 }
 
 class _QrReaderWidgetState extends State<QrReaderWidget>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   MobileScannerController? controller;
-  bool _needsReinitialization = false;
+  bool _isInitializing = false;
+  bool _initialCameraCheckDone = false;
+  RouteObserver<ModalRoute>? _routeObserver;
 
   @override
   void initState() {
     super.initState();
+    _routeObserver = RouteObserver<ModalRoute>();
     WidgetsBinding.instance.addObserver(this);
     _initializeController();
+  }
+
+  void _checkAndStartCameraForInitialState() {
+    // This is called after widget is built to ensure camera starts for initial state
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      // Get current QR state from BLoC
+      final qrBloc = context.read<QrBloc>();
+      final currentState = qrBloc.state;
+
+      // Use BLoC's decision on whether camera should be active
+      if (currentState.cameraShouldBeActive && !_isInitializing) {
+        _ensureCameraReady(currentState);
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Only ensure camera if widget is becoming visible and no QR data exists
+    // We'll let the state change handler manage this instead
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // When returning to screen, let state change handler manage camera
+    // Don't force camera start here as it might conflict with existing data
+  }
+
+  @override
+  void didUpdateWidget(covariant QrReaderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Widget updated, let state change handler manage camera state
   }
 
   @override
   void activate() {
     super.activate();
-    // Widget was reactivated (came back from another route)
-    // Reinitialize the controller
-    if (_needsReinitialization || controller == null) {
-      _initializeController();
-    } else {
-      // Just restart the existing controller
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted && controller != null) {
-          try {
-            controller!.start();
-          } catch (e) {
-            // If start fails, reinitialize
-            _initializeController();
-          }
-        }
-      });
-    }
+    // Widget reactivated, let state change handler manage camera based on current state
   }
 
   @override
   void deactivate() {
     // Widget is being deactivated (navigating away)
     controller?.stop();
-    _needsReinitialization = true;
     super.deactivate();
   }
 
-  void _initializeController() {
-    // Dispose existing controller if any
-    controller?.dispose();
+  void _ensureCameraReady([QrState? state]) {
+    // Only ensure camera is ready if BLoC says camera should be active
+    if (!mounted) return;
 
-    // Create new controller
-    controller = MobileScannerController(
-      formats: const [BarcodeFormat.qrCode], // QR only
-      detectionSpeed: DetectionSpeed.noDuplicates,
-      facing: CameraFacing.back,
-      autoStart: false, // Manual start for better control
-    );
+    // If we have state info, check if camera should be active according to BLoC
+    if (state != null && !state.cameraShouldBeActive) return;
 
-    // Start the controller
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted && controller != null) {
+    // If already initializing, don't start another initialization
+    if (_isInitializing) return;
+
+    _isInitializing = true;
+
+    try {
+      if (controller == null) {
+        // No controller exists, create one
+        _initializeController();
+      } else {
+        // Controller exists, try to start it
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && controller != null) {
+            try {
+              controller!.start();
+            } catch (e) {
+              // If start fails, reinitialize
+              _initializeController();
+            }
+          }
+        });
+      }
+    } finally {
+      // Reset flag after a reasonable delay
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _isInitializing = false;
+        }
+      });
+    }
+  }
+
+  void _initializeController({bool force = false}) {
+    // Prevent multiple simultaneous initializations
+    if (_isInitializing && !force) return;
+
+    _isInitializing = true;
+
+    try {
+      // Dispose existing controller if any (always dispose on force, or if controller is null)
+      if (force || controller == null) {
+        controller?.dispose();
+        controller = null;
+
+        // Create new controller
+        controller = MobileScannerController(
+          formats: const [BarcodeFormat.qrCode], // QR only
+          detectionSpeed: DetectionSpeed.noDuplicates,
+          facing: CameraFacing.back,
+          autoStart: false, // Manual start for better control
+        );
+
+        // Check current state and start controller if needed
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final qrBloc = context.read<QrBloc>();
+            final currentState = qrBloc.state;
+
+            // Use BLoC's decision on whether camera should be active
+            if (currentState.cameraShouldBeActive) {
+              _startControllerWithRetry();
+            }
+          }
+        });
+      }
+    } finally {
+      // Reset flag after a reasonable delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          _isInitializing = false;
+        }
+      });
+    }
+  }
+
+  void _startControllerWithRetry() {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted || controller == null) return;
+
+      try {
         controller!.start();
+      } catch (e) {
+        // Retry after a short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && controller != null) {
+            try {
+              controller!.start();
+            } catch (e2) {
+              // If still failing, reinitialize
+              if (mounted) {
+                _initializeController(force: true);
+              }
+            }
+          }
+        });
       }
     });
-
-    _needsReinitialization = false;
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed && mounted) {
-      // Mark for reinitialization and rebuild
-      setState(() {
-        _needsReinitialization = true;
+      // When app resumes, check current state and start camera if needed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final qrBloc = context.read<QrBloc>();
+          final currentState = qrBloc.state;
+
+          // Use BLoC's decision on whether camera should be active
+          if (currentState.cameraShouldBeActive && !_isInitializing) {
+            _ensureCameraReady(currentState);
+          }
+        }
       });
-      _initializeController();
     } else if (state == AppLifecycleState.paused) {
       // Stop controller when app goes to background
+      controller?.stop();
+    } else if (state == AppLifecycleState.inactive) {
+      // Stop controller when app becomes inactive
       controller?.stop();
     }
   }
 
   @override
   void dispose() {
+    _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     controller?.dispose();
+    _initialCameraCheckDone = false; // Reset for next initialization
     super.dispose();
   }
 
   void _handleStateChange(BuildContext context, QrState state) async {
-    if (controller == null) return;
-
-    try {
-      if (state.isProcessing || state.shouldStopScanner) {
-        await controller!.stop();
-      } else {
-        // Ensure controller is started when not processing
-        await controller!.start();
-      }
-    } catch (e) {
-      // If start/stop fails, reinitialize controller
-      if (mounted) {
-        setState(() {
-          _needsReinitialization = true;
-        });
+    if (controller == null) {
+      // If no controller but camera should be active, initialize it
+      if (state.cameraShouldBeActive) {
         _initializeController();
       }
+      return;
+    }
+
+    try {
+      if (state.cameraShouldBeActive) {
+        // Camera should be active according to BLoC state
+        await controller!.start();
+      } else {
+        // Camera should be stopped according to BLoC state
+        await controller!.stop();
+      }
+    } catch (e) {
+      // If camera operation fails, try to recover based on current state
+      if (mounted) {
+        _handleCameraError(state);
+      }
+    }
+  }
+
+  void _handleCameraError(QrState state) {
+    // Only try to restart camera if BLoC says it should be active
+    if (state.cameraShouldBeActive) {
+      _ensureCameraReady(state);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Ensure initial camera state check is done only once
+    if (!_initialCameraCheckDone) {
+      _initialCameraCheckDone = true;
+      _checkAndStartCameraForInitialState();
+    }
+
     final scannerHeight = widget.isDesktop
         ? widget.screenHeight * 0.35
         : widget.isTablet
@@ -185,13 +321,10 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                     MobileScanner(
                       controller: controller!,
                       errorBuilder: (context, error, child) {
-                        // If there's an error, try to restart the controller
+                        // If there's an error, ensure camera is ready
                         Future.delayed(const Duration(milliseconds: 500), () {
                           if (mounted) {
-                            setState(() {
-                              _needsReinitialization = true;
-                            });
-                            _initializeController();
+                            _ensureCameraReady();
                           }
                         });
                         return Container(
