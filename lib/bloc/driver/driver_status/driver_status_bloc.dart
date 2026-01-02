@@ -77,10 +77,10 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
     // Get stored location or fetch new one
     try {
       var locationData = await TokenStorage.getCurrentLocation();
-      
+
       double latitude;
       double longitude;
-      
+
       if (locationData != null) {
         latitude = locationData['latitude'] as double;
         longitude = locationData['longitude'] as double;
@@ -89,16 +89,17 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         final coordinates = await LocationService.getCurrentCoordinates();
         latitude = coordinates['latitude']!;
         longitude = coordinates['longitude']!;
-        
+
         // Save for future use
-        final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+        final location =
+            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
         await TokenStorage.saveCurrentLocation(
           latitude: latitude,
           longitude: longitude,
           location: location,
         );
       }
-      
+
       final address = LocationService.getAddressFromCoordinates(
         latitude,
         longitude,
@@ -203,10 +204,10 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
     // Get stored location or fetch new one
     try {
       var locationData = await TokenStorage.getCurrentLocation();
-      
+
       double latitude;
       double longitude;
-      
+
       if (locationData != null) {
         latitude = locationData['latitude'] as double;
         longitude = locationData['longitude'] as double;
@@ -215,16 +216,17 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         final coordinates = await LocationService.getCurrentCoordinates();
         latitude = coordinates['latitude']!;
         longitude = coordinates['longitude']!;
-        
+
         // Save for future use
-        final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+        final location =
+            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
         await TokenStorage.saveCurrentLocation(
           latitude: latitude,
           longitude: longitude,
           location: location,
         );
       }
-      
+
       final address = LocationService.getAddressFromCoordinates(
         latitude,
         longitude,

@@ -52,8 +52,6 @@ class ImageApiService {
         // description is optional, so we don't send it
       });
 
-      print('📸 Uploading parking photo for session: $actualSessionId');
-
       // Make the API call
       final response = await base.post(
         '/sessions/$actualSessionId/park',
@@ -61,7 +59,6 @@ class ImageApiService {
       );
 
       final responseData = response.data as Map<String, dynamic>;
-      print('✅ Park API response: $responseData');
 
       // Return the response data
       return responseData;

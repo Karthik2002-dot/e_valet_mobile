@@ -24,11 +24,8 @@ class AssignedSessionsApiService {
     );
 
     try {
-      print('📥 [GET API] Fetching assigned sessions from API...');
       final response = await base.get('/sessions/assigned-to-me');
-      print('📊 [GET API] HTTP Status Code: ${response.statusCode}');
       final data = response.data;
-      print('📄 [GET API] API response data: $data');
 
       if (data is! Map<String, dynamic>) {
         throw ApiException(
@@ -43,10 +40,6 @@ class AssignedSessionsApiService {
               .toList() ??
           [];
 
-      print('📋 Parsed sessions: ${sessions.length} items');
-      for (var i = 0; i < sessions.length; i++) {
-        print('🎫 Session $i: ID=${sessions[i].id}, Status=${sessions[i].status}, Card=${sessions[i].cardNumber}');
-      }
       return sessions;
     } on ApiException catch (e) {
       print('❌ [GET API] HTTP Status Code: ${e.statusCode ?? 'N/A'}');

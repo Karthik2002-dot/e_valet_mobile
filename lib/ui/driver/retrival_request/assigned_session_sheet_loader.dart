@@ -16,11 +16,11 @@ class AssignedSessionSheetLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RetrivalRequestBloc()..add(const FetchRetrivalRequests()),
+      create: (context) =>
+          RetrivalRequestBloc()..add(const FetchRetrivalRequests()),
       child: BlocListener<RetrivalRequestBloc, RetrivalRequestState>(
         listener: (context, state) {
           if (state is RetrivalRequestAccepted) {
-            print('✅ Accept API successful! Message: ${state.message}');
             SnackBars.showSuccessSnackBar(context, state.message);
             // Close the bottom sheet after successful acceptance
             Navigator.of(context).pop();
@@ -38,31 +38,23 @@ class AssignedSessionSheetLoader extends StatelessWidget {
               return const RetrievalRequestSheet(isLoading: true);
             }
 
-        if (snapshot.hasError) {
-          print('Error in FutureBuilder: ${snapshot.error}');
-          return RetrievalRequestSheet(
-            message: snapshot.error.toString(),
-          );
-        }
+            if (snapshot.hasError) {
+              return RetrievalRequestSheet(
+                message: snapshot.error.toString(),
+              );
+            }
 
             final assignedSession = snapshot.data;
-            print('📄 Assigned session data: $assignedSession');
             if (assignedSession != null) {
-              print('🎯 Session ID from GET API: ${assignedSession.id}');
-              print('📊 Session Status: ${assignedSession.status}');
-              print('🔢 Card Number: ${assignedSession.cardNumber}');
-
               // Store the sessionId from GET API in shared preferences
-              TokenStorage.saveSessionIdFromGetApi(assignedSession.id).then((_) {
-                print('💾 Stored sessionId from GET API in shared preferences: ${assignedSession.id}');
-              }).catchError((error) {
+              TokenStorage.saveSessionIdFromGetApi(assignedSession.id)
+                  .catchError((error) {
                 print('❌ Failed to store sessionId from GET API: $error');
               });
 
               // Store the full session data for use in confirm arrival screen
-              TokenStorage.saveAssignedSessionData(assignedSession.toJson()).then((_) {
-                print('💾 Stored assigned session data for confirm arrival screen');
-              }).catchError((error) {
+              TokenStorage.saveAssignedSessionData(assignedSession.toJson())
+                  .catchError((error) {
                 print('❌ Failed to store assigned session data: $error');
               });
             }
@@ -71,24 +63,29 @@ class AssignedSessionSheetLoader extends StatelessWidget {
               builder: (context, state) {
                 return RetrievalRequestSheet(
                   session: assignedSession,
-                  message: assignedSession == null ? 'No active retrieval requests' : null,
+                  message: assignedSession == null
+                      ? 'No active retrieval requests'
+                      : null,
                   isLoading: state is RetrivalRequestLoading,
-                  onAccept: assignedSession != null ? () {
-                    // Get the stored sessionId from GET API from shared preferences
-                    TokenStorage.getSessionIdFromGetApi().then((storedSessionId) {
-                      print('👆 Accept button clicked, retrieved sessionId from GET API: $storedSessionId');
-                      if (storedSessionId != null && storedSessionId.isNotEmpty) {
-                        if (context.mounted) {
-                          print('📤 Sending sessionId to accept API: $storedSessionId');
-                          context.read<RetrivalRequestBloc>().add(
-                            AcceptRetrivalRequest(storedSessionId),
-                          );
+                  onAccept: assignedSession != null
+                      ? () {
+                          // Get the stored sessionId from GET API from shared preferences
+                          TokenStorage.getSessionIdFromGetApi()
+                              .then((storedSessionId) {
+                            if (storedSessionId != null &&
+                                storedSessionId.isNotEmpty) {
+                              if (context.mounted) {
+                                context.read<RetrivalRequestBloc>().add(
+                                      AcceptRetrivalRequest(storedSessionId),
+                                    );
+                              }
+                            } else {
+                              print(
+                                  '❌ No stored sessionId from GET API found in shared preferences');
+                            }
+                          });
                         }
-                      } else {
-                        print('❌ No stored sessionId from GET API found in shared preferences');
-                      }
-                    });
-                  } : null,
+                      : null,
                 );
               },
             );
@@ -104,7 +101,6 @@ class AssignedSessionSheetLoader extends StatelessWidget {
     if (sessionData != null) {
       try {
         final session = AssignedSession.fromJson(sessionData);
-        print('📱 Navigating to Confirm Arrival screen with session data');
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ConfirmArrivalScreen(session: session),

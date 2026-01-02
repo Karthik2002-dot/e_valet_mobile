@@ -111,8 +111,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                           backgroundColor: AppColors.primary,
                           disabledBackgroundColor: AppColors.greyLight,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(widget.screenWidth * 0.02),
+                            borderRadius: BorderRadius.circular(
+                                widget.screenWidth * 0.02),
                           ),
                           elevation: 0,
                         ),

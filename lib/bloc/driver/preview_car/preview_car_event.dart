@@ -20,5 +20,3 @@ class SubmitPhotoRequested extends PreviewCarEvent {
 class ResetSubmission extends PreviewCarEvent {
   const ResetSubmission();
 }
-
-

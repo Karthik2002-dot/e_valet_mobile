@@ -16,7 +16,7 @@ class HandoverResponse {
   factory HandoverResponse.fromJson(Map<String, dynamic> json) {
     final rawStatus = json['status'];
     Map<String, dynamic> statusMap;
-    
+
     if (rawStatus is Map<String, dynamic>) {
       statusMap = rawStatus;
     } else if (rawStatus is String) {
@@ -34,4 +34,3 @@ class HandoverResponse {
     );
   }
 }
-

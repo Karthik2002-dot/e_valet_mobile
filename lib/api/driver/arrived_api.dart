@@ -15,9 +15,6 @@ class ArrivedApiService {
     required double longitude,
     required String location,
   }) async {
-    print('🔄 Starting confirm arrival API call for sessionId: $sessionId');
-    print('📍 Location: $location (lat: $latitude, lng: $longitude)');
-
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       print('❌ No access token found');
@@ -27,38 +24,24 @@ class ArrivedApiService {
       );
     }
 
-    print('✅ Access token found, making API call...');
-
     final base = BaseDioService(
       _baseUrl,
       ApiConfig.authorizedHeaders(accessToken),
     );
 
     try {
-      print('📡 [ARRIVED API] Making POST request to: $_baseUrl/sessions/$sessionId/arrived');
-
       final requestBody = {
         'latitude': latitude,
         'longitude': longitude,
         'location': location,
       };
 
-      print('📤 [ARRIVED API] Request body: $requestBody');
-
       final response = await base.post(
         '/sessions/$sessionId/arrived',
         data: requestBody,
       );
 
-      print('📊 [ARRIVED API] HTTP Status Code: ${response.statusCode}');
       final data = response.data as Map<String, dynamic>;
-      print('✅ [ARRIVED API] API Call Successful!');
-      print('📄 [ARRIVED API] Full API Response: $data');
-      print('🎯 [ARRIVED API] Session ID: ${data['sessionId']}');
-      print('📊 [ARRIVED API] Status: ${data['status']}');
-      print('🔢 [ARRIVED API] Card Number: ${data['cardNumber']}');
-      print('⏰ [ARRIVED API] Arrived At: ${data['arrivedAt']}');
-      print('💬 [ARRIVED API] Message: ${data['message']}');
 
       return ArrivedResponse.fromJson(data);
     } on ApiException catch (e) {
@@ -74,4 +57,3 @@ class ArrivedApiService {
     }
   }
 }
-

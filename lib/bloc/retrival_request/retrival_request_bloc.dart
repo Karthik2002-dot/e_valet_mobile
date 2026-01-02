@@ -34,32 +34,30 @@ class RetrivalRequestBloc
   ) async {
     emit(const RetrivalRequestLoading());
     try {
-      print('🚀 Attempting to accept session: ${event.sessionId}');
-      
       // Get stored location or fetch new one
       var locationData = await TokenStorage.getCurrentLocation();
-      
+
       if (locationData == null) {
-        print('📍 No stored location found, getting current location...');
         // Request permission if needed
         LocationPermission permission = await LocationService.checkPermission();
         if (permission == LocationPermission.denied) {
           permission = await LocationService.requestPermission();
         }
-        
-        if (permission != LocationPermission.denied && 
+
+        if (permission != LocationPermission.denied &&
             permission != LocationPermission.deniedForever) {
           final position = await LocationService.getCurrentLocation();
           final latitude = position.latitude;
           final longitude = position.longitude;
-          final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-          
+          final location =
+              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
           locationData = {
             'latitude': latitude,
             'longitude': longitude,
             'location': location,
           };
-          
+
           // Save for future use
           await TokenStorage.saveCurrentLocation(
             latitude: latitude,
@@ -70,26 +68,28 @@ class RetrivalRequestBloc
           throw Exception('Location permission is required to accept session');
         }
       }
-      
+
       final response = await RetrievalAcceptApiService.acceptSession(
         sessionId: event.sessionId,
         latitude: locationData['latitude'] as double,
         longitude: locationData['longitude'] as double,
         location: locationData['location'] as String,
       );
-      print('✅ Accept API succeeded: ${response.message}');
       emit(RetrivalRequestAccepted(response.message));
     } catch (e) {
-      final errorMsg = (e is Exception) ? e.toString() : 'Failed to accept request';
+      final errorMsg =
+          (e is Exception) ? e.toString() : 'Failed to accept request';
       print('❌ Accept API failed: $errorMsg');
 
       // If the session is already in a processed state, treat it as accepted
-      if (errorMsg.contains('RETRIEVING') && errorMsg.contains('expected ASSIGNED')) {
-        print('⚠️ Session already in RETRIEVING status, treating as accepted');
-        emit(const RetrivalRequestAccepted('Request accepted (session was already in progress)'));
-      } else if (errorMsg.contains('ARRIVED') && errorMsg.contains('expected ASSIGNED')) {
-        print('⚠️ Session already in ARRIVED status, treating as accepted');
-        emit(const RetrivalRequestAccepted('Request already processed (session has arrived)'));
+      if (errorMsg.contains('RETRIEVING') &&
+          errorMsg.contains('expected ASSIGNED')) {
+        emit(const RetrivalRequestAccepted(
+            'Request accepted (session was already in progress)'));
+      } else if (errorMsg.contains('ARRIVED') &&
+          errorMsg.contains('expected ASSIGNED')) {
+        emit(const RetrivalRequestAccepted(
+            'Request already processed (session has arrived)'));
       } else {
         emit(RetrivalRequestError(errorMsg));
       }

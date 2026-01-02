@@ -15,9 +15,6 @@ class HandoverApiService {
     required double longitude,
     required String location,
   }) async {
-    print('🔄 [HANDOVER API] Starting confirm handover API call for sessionId: $sessionId');
-    print('📍 [HANDOVER API] Location: $location (lat: $latitude, lng: $longitude)');
-
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       print('❌ [HANDOVER API] No access token found');
@@ -27,38 +24,24 @@ class HandoverApiService {
       );
     }
 
-    print('✅ [HANDOVER API] Access token found, making API call...');
-
     final base = BaseDioService(
       _baseUrl,
       ApiConfig.authorizedHeaders(accessToken),
     );
 
     try {
-      print('📡 [HANDOVER API] Making POST request to: $_baseUrl/sessions/$sessionId/handover');
-
       final requestBody = {
         'latitude': latitude,
         'longitude': longitude,
         'location': location,
       };
 
-      print('📤 [HANDOVER API] Request body: $requestBody');
-
       final response = await base.post(
         '/sessions/$sessionId/handover',
         data: requestBody,
       );
 
-      print('📊 [HANDOVER API] HTTP Status Code: ${response.statusCode}');
       final data = response.data as Map<String, dynamic>;
-      print('✅ [HANDOVER API] API Call Successful!');
-      print('📄 [HANDOVER API] Full API Response: $data');
-      print('🎯 [HANDOVER API] Session ID: ${data['sessionId']}');
-      print('📊 [HANDOVER API] Status: ${data['status']}');
-      print('🔢 [HANDOVER API] Card Number: ${data['cardNumber']}');
-      print('⏰ [HANDOVER API] Handed Over At: ${data['handedOverAt']}');
-      print('💬 [HANDOVER API] Message: ${data['message']}');
 
       return HandoverResponse.fromJson(data);
     } on ApiException catch (e) {
@@ -74,4 +57,3 @@ class HandoverApiService {
     }
   }
 }
-

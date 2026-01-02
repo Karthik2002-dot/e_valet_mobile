@@ -71,7 +71,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
   void _initializeController() {
     // Dispose existing controller if any
     controller?.dispose();
-    
+
     // Create new controller
     controller = MobileScannerController(
       formats: const [BarcodeFormat.qrCode], // QR only
@@ -79,14 +79,14 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
       facing: CameraFacing.back,
       autoStart: false, // Manual start for better control
     );
-    
+
     // Start the controller
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted && controller != null) {
         controller!.start();
       }
     });
-    
+
     _needsReinitialization = false;
   }
 
@@ -114,7 +114,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
 
   void _handleStateChange(BuildContext context, QrState state) async {
     if (controller == null) return;
-    
+
     try {
       if (state.isProcessing || state.shouldStopScanner) {
         await controller!.stop();

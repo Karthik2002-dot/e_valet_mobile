@@ -43,189 +43,198 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-              SizedBox(height: screenHeight * 0.02),
-              // Title
-              Center(
-                child: Text(
-                  'Retrieval Request',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-
-              // Car Information Card
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow10,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Car Image
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(18),
-                      ),
-                      child: Image(
-                        image: widget.session.photoUrl != null
-                            ? NetworkImage(widget.session.photoUrl!)
-                            : const AssetImage('assets/images/car.png')
-                                as ImageProvider,
-                        width: double.infinity,
-                        height: screenWidth * 0.6,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            'assets/images/car.png',
-                            width: double.infinity,
-                            height: screenWidth * 0.6,
-                            fit: BoxFit.cover,
-                          );
-                        },
+                    SizedBox(height: screenHeight * 0.02),
+                    // Title
+                    Center(
+                      child: Text(
+                        'Retrieval Request',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.05,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
                       ),
                     ),
+                    SizedBox(height: screenHeight * 0.02),
 
-                    // Details Section
-                    Padding(
-                      padding: EdgeInsets.all(screenWidth * 0.04),
+                    // Car Information Card
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadow10,
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Badge Number
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.directions_car,
-                                size: screenWidth * 0.06,
-                                color: AppColors.secondary,
-                              ),
-                              SizedBox(width: screenWidth * 0.03),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Badge Number',
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.035,
-                                        color: AppColors.grey,
-                                      ),
-                                    ),
-                                    SizedBox(height: screenHeight * 0.005),
-                                    Text(
-                                      widget.session.cardNumber.toString(),
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.05,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: screenHeight * 0.02),
-
-                          Divider(
-                            color: AppColors.greyLight,
-                            thickness: 1,
-                            height: 1,
-                          ),
-
-                          SizedBox(height: screenHeight * 0.02),
-
-                          // Parked By
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.badge,
-                                size: screenWidth * 0.06,
-                                color: AppColors.secondary,
-                              ),
-                              SizedBox(width: screenWidth * 0.03),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Parked By',
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.035,
-                                        color: AppColors.grey,
-                                      ),
-                                    ),
-                                    SizedBox(height: screenHeight * 0.005),
-                                    Text(
-                                      widget.session.parkedBy?.name ?? 'Unknown',
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.04,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Phone Icon
-                              IconButton(
-                                onPressed: () {
-                                  // TODO: Implement phone call functionality
-                                },
-                                icon: Icon(
-                                  Icons.phone,
-                                  color: AppColors.secondary,
-                                  size: screenWidth * 0.06,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: screenHeight * 0.02),
-
-                          // Locate Car Button
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.015,
+                          // Car Image
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(18),
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppColors.greyLight,
-                                width: 1,
-                              ),
+                            child: Image(
+                              image: widget.session.photoUrl != null
+                                  ? NetworkImage(widget.session.photoUrl!)
+                                  : const AssetImage('assets/images/car.png')
+                                      as ImageProvider,
+                              width: double.infinity,
+                              height: screenWidth * 0.6,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/images/car.png',
+                                  width: double.infinity,
+                                  height: screenWidth * 0.6,
+                                  fit: BoxFit.cover,
+                                );
+                              },
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                          ),
+
+                          // Details Section
+                          Padding(
+                            padding: EdgeInsets.all(screenWidth * 0.04),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.remove_red_eye,
-                                  size: screenWidth * 0.05,
-                                  color: AppColors.secondary,
+                                // Badge Number
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.directions_car,
+                                      size: screenWidth * 0.06,
+                                      color: AppColors.secondary,
+                                    ),
+                                    SizedBox(width: screenWidth * 0.03),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Badge Number',
+                                            style: TextStyle(
+                                              fontSize: screenWidth * 0.035,
+                                              color: AppColors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height: screenHeight * 0.005),
+                                          Text(
+                                            widget.session.cardNumber
+                                                .toString(),
+                                            style: TextStyle(
+                                              fontSize: screenWidth * 0.05,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: screenWidth * 0.02),
-                                Text(
-                                  'LOCATE CAR USING THE PHOTO',
-                                  style: TextStyle(
-                                    fontSize: screenWidth * 0.035,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.black,
+
+                                SizedBox(height: screenHeight * 0.02),
+
+                                Divider(
+                                  color: AppColors.greyLight,
+                                  thickness: 1,
+                                  height: 1,
+                                ),
+
+                                SizedBox(height: screenHeight * 0.02),
+
+                                // Parked By
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.badge,
+                                      size: screenWidth * 0.06,
+                                      color: AppColors.secondary,
+                                    ),
+                                    SizedBox(width: screenWidth * 0.03),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Parked By',
+                                            style: TextStyle(
+                                              fontSize: screenWidth * 0.035,
+                                              color: AppColors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height: screenHeight * 0.005),
+                                          Text(
+                                            widget.session.parkedBy?.name ??
+                                                'Unknown',
+                                            style: TextStyle(
+                                              fontSize: screenWidth * 0.04,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Phone Icon
+                                    IconButton(
+                                      onPressed: () {
+                                        // TODO: Implement phone call functionality
+                                      },
+                                      icon: Icon(
+                                        Icons.phone,
+                                        color: AppColors.secondary,
+                                        size: screenWidth * 0.06,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: screenHeight * 0.02),
+
+                                // Locate Car Button
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: screenHeight * 0.015,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.greyLight,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.remove_red_eye,
+                                        size: screenWidth * 0.05,
+                                        color: AppColors.secondary,
+                                      ),
+                                      SizedBox(width: screenWidth * 0.02),
+                                      Text(
+                                        'LOCATE CAR USING THE PHOTO',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.black,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -234,9 +243,6 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-                  ),
                   ],
                 ),
               ),
@@ -273,28 +279,28 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
     try {
       // Get stored location or fetch new one
       var locationData = await TokenStorage.getCurrentLocation();
-      
+
       if (locationData == null) {
-        print('📍 No stored location found, getting current location...');
         // Request permission if needed
         LocationPermission permission = await LocationService.checkPermission();
         if (permission == LocationPermission.denied) {
           permission = await LocationService.requestPermission();
         }
-        
-        if (permission != LocationPermission.denied && 
+
+        if (permission != LocationPermission.denied &&
             permission != LocationPermission.deniedForever) {
           final position = await LocationService.getCurrentLocation();
           final latitude = position.latitude;
           final longitude = position.longitude;
-          final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-          
+          final location =
+              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
           locationData = {
             'latitude': latitude,
             'longitude': longitude,
             'location': location,
           };
-          
+
           // Save for future use
           await TokenStorage.saveCurrentLocation(
             latitude: latitude,
@@ -313,8 +319,6 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       final longitude = locationData['longitude'] as double;
       final location = locationData['location'] as String;
 
-      print('✅ Using stored location: $location');
-
       final response = await ArrivedApiService.confirmArrival(
         sessionId: widget.session.id,
         latitude: latitude,
@@ -329,23 +333,22 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
         location: location,
       );
 
-      print('✅ Arrival confirmed successfully: ${response.message}');
-
       if (mounted) {
         SnackBars.showSuccessSnackBar(context, response.message);
         // Navigate to confirm handover screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => ConfirmHandoverScreen(session: widget.session),
+            builder: (context) =>
+                ConfirmHandoverScreen(session: widget.session),
           ),
         );
       }
     } on ApiException catch (e) {
       print('❌ Arrival API failed: ${e.message}');
-      
+
       // If session is already ARRIVED, treat it as success
-      if (e.message.contains('ARRIVED') && e.message.contains('expected RETRIEVING')) {
-        print('⚠️ Session already in ARRIVED status, treating as success');
+      if (e.message.contains('ARRIVED') &&
+          e.message.contains('expected RETRIEVING')) {
         if (mounted) {
           SnackBars.showSuccessSnackBar(
             context,
@@ -354,7 +357,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
           // Navigate to confirm handover screen
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => ConfirmHandoverScreen(session: widget.session),
+              builder: (context) =>
+                  ConfirmHandoverScreen(session: widget.session),
             ),
           );
         }
@@ -411,7 +415,8 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
       onHorizontalDragUpdate: (details) {
         if (!_isConfirmed && !widget.isLoading) {
           setState(() {
-            _dragPosition = (_dragPosition + details.delta.dx).clamp(0.0, maxDrag);
+            _dragPosition =
+                (_dragPosition + details.delta.dx).clamp(0.0, maxDrag);
             if (_dragPosition >= maxDrag * 0.9) {
               _isConfirmed = true;
               widget.onConfirm();
@@ -484,4 +489,3 @@ class _SlideToConfirmButtonState extends State<_SlideToConfirmButton> {
     );
   }
 }
-

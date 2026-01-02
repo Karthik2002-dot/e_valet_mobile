@@ -77,7 +77,8 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
 
                     // Instruction Text
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       child: Text(
                         'Enter the 2-digit code provided by the user to complete the handover.',
                         textAlign: TextAlign.center,
@@ -96,7 +97,8 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(2, (index) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02),
                           child: _CodeInputField(
                             controller: _controllers[index],
                             focusNode: _focusNodes[index],
@@ -118,7 +120,6 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
                     GestureDetector(
                       onTap: () {
                         // TODO: Handle customer has no phone
-                        print('Customer has no phone clicked');
                       },
                       child: Text(
                         'Customer has no phone?',
@@ -182,7 +183,6 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       // TODO: Handle customer missing
-                      print('Customer Missing clicked');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.white,
@@ -251,37 +251,36 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
     });
 
     try {
-      print('🔐 Confirm Handover clicked with code: $code');
-
       // Get stored current location (used for accept, arrived, handover)
       var locationData = await TokenStorage.getCurrentLocation();
-      
+
       if (locationData == null) {
         // Fallback: Try arrival location for backward compatibility
         locationData = await TokenStorage.getArrivalLocation();
-        
+
         if (locationData == null) {
           // Last resort: Get current location
-          print('📍 No stored location found, getting current location...');
           // Request permission if needed
-          LocationPermission permission = await LocationService.checkPermission();
+          LocationPermission permission =
+              await LocationService.checkPermission();
           if (permission == LocationPermission.denied) {
             permission = await LocationService.requestPermission();
           }
-          
-          if (permission != LocationPermission.denied && 
+
+          if (permission != LocationPermission.denied &&
               permission != LocationPermission.deniedForever) {
             final position = await LocationService.getCurrentLocation();
             final latitude = position.latitude;
             final longitude = position.longitude;
-            final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-            
+            final location =
+                '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
             locationData = {
               'latitude': latitude,
               'longitude': longitude,
               'location': location,
             };
-            
+
             // Save for future use
             await TokenStorage.saveCurrentLocation(
               latitude: latitude,
@@ -296,12 +295,10 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
           }
         }
       }
-      
+
       final latitude = locationData['latitude'] as double;
       final longitude = locationData['longitude'] as double;
       final location = locationData['location'] as String;
-      
-      print('📍 Using stored location: $location (lat: $latitude, lng: $longitude)');
 
       // Call handover API
       final response = await HandoverApiService.confirmHandover(
@@ -310,8 +307,6 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
         longitude: longitude,
         location: location,
       );
-
-      print('✅ Handover confirmed successfully: ${response.message}');
 
       if (mounted) {
         SnackBars.showSuccessSnackBar(context, response.message);
@@ -392,4 +387,3 @@ class _CodeInputField extends StatelessWidget {
     );
   }
 }
-

@@ -18,14 +18,8 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     emit(const PreviewCarSubmitting());
 
     try {
-      print('🖼️ Starting photo submission process...');
-      print('📋 Session ID: ${event.sessionId}');
-
       // Save the photo path for later upload during accept
       await TokenStorage.savePendingPhotoPath(event.imagePath);
-
-      print('✅ Photo path saved for later upload: ${event.imagePath}');
-      print('📸 Photo will be uploaded when accept is clicked');
 
       emit(const PreviewCarSuccess());
     } on ApiException catch (e) {
@@ -45,5 +39,3 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     emit(const PreviewCarInitial());
   }
 }
-
-

@@ -259,7 +259,6 @@ class TokenStorage {
   static Future<void> savePendingPhotoPath(String photoPath) async {
     try {
       await _box.put(_pendingPhotoKey, photoPath);
-      print('[TokenStorage] Saved pending photo path: $photoPath');
     } catch (e) {
       print('[TokenStorage] Error saving pending photo path: $e');
       rethrow;
@@ -278,7 +277,6 @@ class TokenStorage {
   static Future<void> clearPendingPhotoPath() async {
     try {
       await _box.delete(_pendingPhotoKey);
-      print('[TokenStorage] Cleared pending photo path');
     } catch (e) {
       print('[TokenStorage] Error clearing pending photo path: $e');
     }
@@ -288,7 +286,6 @@ class TokenStorage {
   static Future<void> saveSessionIdFromGetApi(String sessionId) async {
     try {
       await _box.put(_sessionIdFromGetApiKey, sessionId);
-      print('[TokenStorage] 📥 Saved sessionId from GET API: $sessionId');
     } catch (e) {
       print('[TokenStorage] ❌ Error saving sessionId from GET API: $e');
       rethrow;
@@ -298,7 +295,6 @@ class TokenStorage {
   static Future<String?> getSessionIdFromGetApi() async {
     try {
       final sessionId = _box.get(_sessionIdFromGetApiKey) as String?;
-      print('[TokenStorage] 📤 Retrieved sessionId from GET API: $sessionId');
       return sessionId;
     } catch (e) {
       print('[TokenStorage] ❌ Error retrieving sessionId from GET API: $e');
@@ -309,17 +305,16 @@ class TokenStorage {
   static Future<void> clearSessionIdFromGetApi() async {
     try {
       await _box.delete(_sessionIdFromGetApiKey);
-      print('[TokenStorage] 🗑️ Cleared sessionId from GET API');
     } catch (e) {
       print('[TokenStorage] ❌ Error clearing sessionId from GET API: $e');
     }
   }
 
   // Assigned Session Data management
-  static Future<void> saveAssignedSessionData(Map<String, dynamic> sessionData) async {
+  static Future<void> saveAssignedSessionData(
+      Map<String, dynamic> sessionData) async {
     try {
       await _box.put(_assignedSessionDataKey, sessionData);
-      print('[TokenStorage] 💾 Saved assigned session data');
     } catch (e) {
       print('[TokenStorage] ❌ Error saving assigned session data: $e');
       rethrow;
@@ -329,7 +324,6 @@ class TokenStorage {
   static Future<Map<String, dynamic>?> getAssignedSessionData() async {
     try {
       final data = _box.get(_assignedSessionDataKey) as Map<String, dynamic>?;
-      print('[TokenStorage] 📤 Retrieved assigned session data');
       return data;
     } catch (e) {
       print('[TokenStorage] ❌ Error retrieving assigned session data: $e');
@@ -340,7 +334,6 @@ class TokenStorage {
   static Future<void> clearAssignedSessionData() async {
     try {
       await _box.delete(_assignedSessionDataKey);
-      print('[TokenStorage] 🗑️ Cleared assigned session data');
     } catch (e) {
       print('[TokenStorage] ❌ Error clearing assigned session data: $e');
     }
@@ -356,7 +349,6 @@ class TokenStorage {
       await _box.put(_arrivalLatitudeKey, latitude);
       await _box.put(_arrivalLongitudeKey, longitude);
       await _box.put(_arrivalLocationKey, location);
-      print('[TokenStorage] 💾 Saved arrival location: $location (lat: $latitude, lng: $longitude)');
     } catch (e) {
       print('[TokenStorage] ❌ Error saving arrival location: $e');
       rethrow;
@@ -370,7 +362,6 @@ class TokenStorage {
       final location = _box.get(_arrivalLocationKey) as String?;
 
       if (latitude != null && longitude != null && location != null) {
-        print('[TokenStorage] 📤 Retrieved arrival location: $location (lat: $latitude, lng: $longitude)');
         return {
           'latitude': latitude,
           'longitude': longitude,
@@ -389,7 +380,6 @@ class TokenStorage {
       await _box.delete(_arrivalLatitudeKey);
       await _box.delete(_arrivalLongitudeKey);
       await _box.delete(_arrivalLocationKey);
-      print('[TokenStorage] 🗑️ Cleared arrival location');
     } catch (e) {
       print('[TokenStorage] ❌ Error clearing arrival location: $e');
     }
@@ -405,7 +395,6 @@ class TokenStorage {
       await _box.put(_currentLatitudeKey, latitude);
       await _box.put(_currentLongitudeKey, longitude);
       await _box.put(_currentLocationKey, location);
-      print('[TokenStorage] 💾 Saved current location: $location (lat: $latitude, lng: $longitude)');
     } catch (e) {
       print('[TokenStorage] ❌ Error saving current location: $e');
       rethrow;
@@ -419,7 +408,6 @@ class TokenStorage {
       final location = _box.get(_currentLocationKey) as String?;
 
       if (latitude != null && longitude != null && location != null) {
-        print('[TokenStorage] 📤 Retrieved current location: $location (lat: $latitude, lng: $longitude)');
         return {
           'latitude': latitude,
           'longitude': longitude,
@@ -438,7 +426,6 @@ class TokenStorage {
       await _box.delete(_currentLatitudeKey);
       await _box.delete(_currentLongitudeKey);
       await _box.delete(_currentLocationKey);
-      print('[TokenStorage] 🗑️ Cleared current location');
     } catch (e) {
       print('[TokenStorage] ❌ Error clearing current location: $e');
     }

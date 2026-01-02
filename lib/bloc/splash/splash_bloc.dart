@@ -21,41 +21,35 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
     // Request location permission and get location
     try {
-      print('📍 [SPLASH] Requesting location permission...');
-      
       // Check and request location permission
       LocationPermission permission = await LocationService.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await LocationService.requestPermission();
       }
 
-      if (permission == LocationPermission.denied || 
+      if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        print('⚠️ [SPLASH] Location permission denied, will request later');
         // Continue without location for now, will request when needed
       } else {
         // Get current location and store it
-        print('📍 [SPLASH] Getting current location...');
         try {
           final position = await LocationService.getCurrentLocation();
           final latitude = position.latitude;
           final longitude = position.longitude;
-          final location = '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-          
+          final location =
+              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
           // Store location for use in accept, arrived, and handover APIs
           await TokenStorage.saveCurrentLocation(
             latitude: latitude,
             longitude: longitude,
             location: location,
           );
-          print('✅ [SPLASH] Location saved: $location');
         } catch (e) {
-          print('⚠️ [SPLASH] Failed to get location: $e');
           // Continue without location, will request when needed
         }
       }
     } catch (e) {
-      print('⚠️ [SPLASH] Error during location setup: $e');
       // Continue without location, will request when needed
     }
 

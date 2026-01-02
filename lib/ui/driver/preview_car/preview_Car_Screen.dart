@@ -84,7 +84,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                           onSubmit: isSubmitting
                               ? () {}
                               : () => context.read<PreviewCarBloc>().add(
-                                    SubmitPhotoRequested(widget.imagePath, sessionId: widget.sessionId),
+                                    SubmitPhotoRequested(widget.imagePath,
+                                        sessionId: widget.sessionId),
                                   ),
                         ),
 
