@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
@@ -50,8 +51,9 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
         listener: (context, state) {
           if (state is TagSubmissionSuccess) {
             // TODO: Handle success (e.g., show snackbar, navigate, etc.)
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+            SnackBars.showSuccessSnackBar(
+              context,
+              state.message,
             );
           } else if (state is TagSubmissionSessionExpired) {
             // Clear tokens and navigate to login
@@ -64,11 +66,9 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
             );
           } else if (state is TagSubmissionError) {
             // TODO: Handle error (e.g., show error dialog)
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              state.message,
             );
           }
         },

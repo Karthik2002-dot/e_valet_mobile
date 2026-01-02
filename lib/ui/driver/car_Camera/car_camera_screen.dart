@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_Screen.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
@@ -121,28 +122,17 @@ class _CarCameraScreenState extends State<CarCameraScreen>
             );
           } else if (state is CarCameraValidationError) {
             // Show error message at bottom of screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-                duration: const Duration(seconds: 3),
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.only(
-                  bottom: screenHeight * 0.15,
-                  left: screenWidth * 0.05,
-                  right: screenWidth * 0.05,
-                ),
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              state.message,
             );
             // Reset validation state so user can try again
             context.read<CarCameraBloc>().add(const ValidationReset());
           } else if (state is CarCameraInitializationError) {
             // Show camera initialization error
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              state.message,
             );
           } else if (state is CarCameraInitial) {
             // Reset initialization flag when state is reset
@@ -204,11 +194,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   Future<void> _capturePhoto(BuildContext blocContext) async {
     final state = blocContext.read<CarCameraBloc>().state;
     if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
-      ScaffoldMessenger.of(blocContext).showSnackBar(
-        const SnackBar(
-          content: Text(TextConstants.cameraNotReady),
-          backgroundColor: AppColors.error,
-        ),
+      SnackBars.showErrorSnackBar(
+        blocContext,
+        TextConstants.cameraNotReady,
       );
       return;
     }
@@ -248,11 +236,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(blocContext).showSnackBar(
-          SnackBar(
-            content: Text('${TextConstants.errorCapturingPhoto}: $e'),
-            backgroundColor: AppColors.error,
-          ),
+        SnackBars.showErrorSnackBar(
+          blocContext,
+          '${TextConstants.errorCapturingPhoto}: $e',
         );
       }
     }

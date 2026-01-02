@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -51,11 +52,9 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
       final cardNumber = int.tryParse(tagNumber);
       if (cardNumber == null) {
         // Show error if tag number is not a valid number
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a valid tag number'),
-            backgroundColor: AppColors.error,
-          ),
+        SnackBars.showErrorSnackBar(
+          context,
+          TextConstants.validationEnterValidTagNumber,
         );
         return;
       }
@@ -133,17 +132,17 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     ),
                   ),
                   TextFieldComponent(
-                    labelText: '',
+                    labelText: TextConstants.emptyText,
                     hintText: TextConstants.tagNumberHint,
                     controller: _tagNumberController,
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter the tag number';
+                        return TextConstants.validationEnterTagNumber;
                       }
                       final cardNumber = int.tryParse(value.trim());
                       if (cardNumber == null) {
-                        return 'Please enter a valid number';
+                        return TextConstants.validationEnterValidNumber;
                       }
                       return null;
                     },

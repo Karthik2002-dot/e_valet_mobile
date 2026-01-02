@@ -1,6 +1,7 @@
 class TextConstants {
   TextConstants._();
 
+  static const emptyText = '';
   static const headerWelcome = 'Welcome,';
   static const headerName = 'Sample Name';
   static const headerOnBreak = 'On Break';
@@ -186,4 +187,55 @@ class TextConstants {
       'Location permission is required to confirm handover';
   static const String locationPermissionRequiredArrival =
       'Location permission is required to confirm arrival';
+
+  // Phone Number
+  static const String countryCode = '+91';
+
+  // Car Success Screen
+  static const String successfullyParked = 'Successfully Parked';
+  static const String returnToHome = 'Return To Home';
+
+  // Validation Messages (Manual Entry)
+  static const String validationEnterValidTagNumber =
+      'Please enter a valid tag number';
+  static const String validationEnterTagNumber = 'Please enter the tag number';
+  static const String validationEnterValidNumber =
+      'Please enter a valid number';
+
+  // Dashboard (Operator)
+  static const String dashboardOverview = 'Dashboard Overview';
+  static const String retryButton = 'Retry';
+
+  // Car Logs Screen (Operator)
+  static const String carLogsTitle = 'Car Logs';
+  static const String carLogsDescription = 'View vehicle activity logs';
+  static const String totalTrips = 'Total Trips';
+  static const String totalDistance = 'Total Distance';
+  static const String totalTripsValue = '456';
+  static const String totalDistanceValue = '2340 km';
+
+  // Drivers Screen (Operator)
+  static const String driversTitle = 'Drivers';
+  static const String driversDescription = 'Manage and monitor all drivers';
+  static const String totalDrivers = 'Total Drivers';
+  static const String activeToday = 'Active Today';
+  static const String totalDriversValue = '24';
+  static const String activeTodayValue = '18';
+
+  // Slots Screen (Operator)
+  static const String parkingSlotsTitle = 'Parking Slots';
+  static const String parkingSlotsDescription =
+      'Manage and monitor parking slots';
+  static const String available = 'Available';
+  static const String occupied = 'Occupied';
+  static const String availableValue = '12';
+  static const String occupiedValue = '8';
+
+  // QR Reader
+  static const String cameraErrorReinitializing =
+      'Camera error. Reinitializing...';
+
+  // Operator Home (Legacy)
+  static const String operatorHomeTitle = 'Operator Home';
+  static const String welcomeOperator = 'Welcome, Operator! (Menu: ';
 }

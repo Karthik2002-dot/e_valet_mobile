@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CameraTopOverlay extends StatelessWidget {
   final bool isFlashOn;
@@ -57,14 +58,12 @@ class CameraTopOverlay extends StatelessWidget {
             SizedBox(height: screenHeight * 0.01),
             // Instruction text
             Center(
-              child: Text(
-                TextConstants.captureCarInstruction,
+              child: TextComponent(
+                labelText: TextConstants.captureCarInstruction,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: screenWidth * 0.04,
-                  fontWeight: FontWeight.w400,
-                ),
+                color: AppColors.white,
+                fontSize: screenWidth * 0.04,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
