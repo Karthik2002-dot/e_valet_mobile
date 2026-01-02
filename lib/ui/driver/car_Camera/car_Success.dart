@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
 class CarSuccessScreen extends StatelessWidget {
   const CarSuccessScreen({super.key});
@@ -54,8 +55,15 @@ class CarSuccessScreen extends StatelessWidget {
                 height: screenHeight * 0.06,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate back to home screen
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // Navigate back to the driver home and show the retrieval sheet
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const DriverHomeScreen(
+                          showAssignedSessionSheet: true,
+                        ),
+                      ),
+                      (route) => false,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,

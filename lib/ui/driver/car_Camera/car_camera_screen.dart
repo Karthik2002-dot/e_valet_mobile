@@ -13,26 +13,90 @@ import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/cam
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_bottom_overlay.dart';
 
 class CarCameraScreen extends StatefulWidget {
-  const CarCameraScreen({super.key});
+  final String? sessionId;
+
+  const CarCameraScreen({
+    super.key,
+    this.sessionId,
+  });
 
   @override
   State<CarCameraScreen> createState() => _CarCameraScreenState();
 }
 
-class _CarCameraScreenState extends State<CarCameraScreen> {
+class _CarCameraScreenState extends State<CarCameraScreen>
+    with WidgetsBindingObserver, RouteAware {
+  late CarCameraBloc _cameraBloc;
+  bool _isInitializing = false;
+  RouteObserver<ModalRoute>? _routeObserver;
+
   @override
   void initState() {
     super.initState();
-    // Initialize camera through BLoC
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CarCameraBloc>().add(const InitializeCameraRequested());
-    });
+    _cameraBloc = CarCameraBloc();
+    _routeObserver = RouteObserver<ModalRoute>();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Only initialize if not already initializing
+    if (!_isInitializing) {
+      _initializeCamera();
+    }
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Force reinitialize when returning to this screen
+    _initializeCamera(force: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant CarCameraScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Force reinitialize when widget is updated
+    if (!_isInitializing) {
+      _initializeCamera();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isInitializing) {
+      _initializeCamera();
+    }
   }
 
   @override
   void dispose() {
-    context.read<CarCameraBloc>().dispose();
+    _routeObserver?.unsubscribe(this);
+    WidgetsBinding.instance.removeObserver(this);
+    _cameraBloc.dispose();
     super.dispose();
+  }
+
+  void _initializeCamera({bool force = false}) {
+    if (_isInitializing && !force)
+      return; // Prevent multiple calls unless forced
+
+    _isInitializing = true;
+    if (force) {
+      // Force reinitialization by disposing existing controller first
+      _cameraBloc.add(const ForceReinitializeCameraRequested());
+    } else {
+      _cameraBloc.add(const InitializeCameraRequested());
+    }
+
+    // Reset flag after a delay to allow for potential reinitialization
+    Future.delayed(const Duration(seconds: 15), () {
+      if (mounted) {
+        _isInitializing = false;
+      }
+    });
   }
 
   @override
@@ -40,8 +104,8 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return BlocProvider(
-      create: (context) => CarCameraBloc(),
+    return BlocProvider<CarCameraBloc>.value(
+      value: _cameraBloc,
       child: BlocListener<CarCameraBloc, CarCameraState>(
         listener: (context, state) {
           if (state is CarCameraValidationSuccess) {
@@ -51,6 +115,7 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
               MaterialPageRoute(
                 builder: (context) => PreviewCarScreen(
                   imagePath: state.imagePath,
+                  sessionId: widget.sessionId,
                 ),
               ),
             );
@@ -79,18 +144,30 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
                 backgroundColor: AppColors.error,
               ),
             );
+          } else if (state is CarCameraInitial) {
+            // Reset initialization flag when state is reset
+            _isInitializing = false;
           }
         },
         child: BlocBuilder<CarCameraBloc, CarCameraState>(
           builder: (context, state) {
-            final isCameraInitialized = state is CarCameraInitialized;
-            final cameraController =
-                state is CarCameraInitialized ? state.cameraController : null;
+            final isCameraInitialized = state is CarCameraInitialized ||
+                state is CarCameraValidationError ||
+                state is CarCameraFlashToggled;
+            final cameraController = state is CarCameraInitialized
+                ? state.cameraController
+                : state is CarCameraValidationError
+                    ? state.cameraController
+                    : state is CarCameraFlashToggled
+                        ? state.cameraController
+                        : null;
             final isFlashOn = state is CarCameraInitialized
                 ? state.isFlashOn
-                : state is CarCameraFlashToggled
+                : state is CarCameraValidationError
                     ? state.isFlashOn
-                    : false;
+                    : state is CarCameraFlashToggled
+                        ? state.isFlashOn
+                        : false;
 
             return Scaffold(
               backgroundColor: Colors.black,
@@ -103,13 +180,12 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
                     cameraController: cameraController,
                   ),
 
-                  // Top Overlay (Back button, Flash button, Instructions)
+                  // Top Overlay (Flash button, Instructions)
                   CameraTopOverlay(
                     isFlashOn: isFlashOn,
                     onFlashToggle: () => context
                         .read<CarCameraBloc>()
                         .add(const ToggleFlashRequested()),
-                    onBack: () => Navigator.pop(context),
                   ),
 
                   // Bottom Overlay (Photo button and text)
@@ -127,7 +203,7 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
 
   Future<void> _capturePhoto(BuildContext blocContext) async {
     final state = blocContext.read<CarCameraBloc>().state;
-    if (state is! CarCameraInitialized) {
+    if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
       ScaffoldMessenger.of(blocContext).showSnackBar(
         const SnackBar(
           content: Text(TextConstants.cameraNotReady),
@@ -138,18 +214,17 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
     }
 
     try {
-      final cameraController = state.cameraController;
-      final isFlashOn = state.isFlashOn;
+      final cameraController = state is CarCameraInitialized
+          ? state.cameraController
+          : (state as CarCameraFlashToggled).cameraController;
+      final isFlashOn = state is CarCameraInitialized
+          ? state.isFlashOn
+          : (state as CarCameraFlashToggled).isFlashOn;
 
       // Ensure the camera is initialized
       // The camera is already initialized when we reach this state
 
-      // Turn off flash if it's on
-      if (isFlashOn) {
-        await cameraController.setFlashMode(FlashMode.off);
-      }
-
-      // Set flash mode for the photo
+      // Set flash mode for the photo capture
       await cameraController.setFlashMode(
         isFlashOn ? FlashMode.always : FlashMode.off,
       );
@@ -157,10 +232,13 @@ class _CarCameraScreenState extends State<CarCameraScreen> {
       // Take the picture
       final image = await cameraController.takePicture();
 
-      // Restore flash mode if it was on
-      if (isFlashOn) {
-        await cameraController.setFlashMode(FlashMode.torch);
-      }
+      // Restore flash mode for preview (torch for continuous flash, off for no flash)
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.torch : FlashMode.off,
+      );
+
+      // Reset camera state before navigating
+      blocContext.read<CarCameraBloc>().add(const ValidationReset());
 
       // Trigger validation in background
       if (mounted) {

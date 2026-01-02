@@ -7,12 +7,61 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bl
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
+import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 
-class DriverHomeScreen extends StatelessWidget {
-  const DriverHomeScreen({super.key});
+class DriverHomeScreen extends StatefulWidget {
+  final bool showAssignedSessionSheet;
+
+  const DriverHomeScreen({
+    super.key,
+    this.showAssignedSessionSheet = false,
+  });
+
+  @override
+  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
+}
+
+class _DriverHomeScreenState extends State<DriverHomeScreen> {
+  bool _sheetPresented = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tryShowAssignedSessionSheet();
+  }
+
+  @override
+  void didUpdateWidget(covariant DriverHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.showAssignedSessionSheet != oldWidget.showAssignedSessionSheet) {
+      _tryShowAssignedSessionSheet();
+    }
+  }
+
+  void _tryShowAssignedSessionSheet() {
+    if (!widget.showAssignedSessionSheet || _sheetPresented) return;
+    _sheetPresented = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _presentAssignedSessionSheet();
+    });
+  }
+
+  void _presentAssignedSessionSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const FractionallySizedBox(
+        heightFactor: 0.6,
+        alignment: Alignment.bottomCenter,
+        child: AssignedSessionSheetLoader(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -89,7 +89,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CarCameraScreen(),
+              builder: (context) => CarCameraScreen(sessionId: null),
             ),
           );
         }

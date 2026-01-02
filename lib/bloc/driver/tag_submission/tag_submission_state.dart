@@ -32,3 +32,7 @@ class TagSubmissionError extends TagSubmissionState {
   @override
   List<Object?> get props => [message];
 }
+
+class TagSubmissionSessionExpired extends TagSubmissionState {
+  const TagSubmissionSessionExpired();
+}

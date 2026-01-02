@@ -13,10 +13,12 @@ import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.
 
 class PreviewCarScreen extends StatefulWidget {
   final String imagePath;
+  final String? sessionId;
 
   const PreviewCarScreen({
     super.key,
     required this.imagePath,
+    this.sessionId,
   });
 
   @override
@@ -82,7 +84,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                           onSubmit: isSubmitting
                               ? () {}
                               : () => context.read<PreviewCarBloc>().add(
-                                    SubmitPhotoRequested(widget.imagePath),
+                                    SubmitPhotoRequested(widget.imagePath,
+                                        sessionId: widget.sessionId),
                                   ),
                         ),
 

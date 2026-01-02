@@ -35,7 +35,11 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
 
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
-      emit(TagSubmissionError(e.message));
+      if (e.code == 'session_expired') {
+        emit(const TagSubmissionSessionExpired());
+      } else {
+        emit(TagSubmissionError(e.message));
+      }
     } catch (e) {
       emit(TagSubmissionError(
         'Failed to submit QR code. Please try again.',
@@ -65,7 +69,11 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
 
       emit(TagSubmissionSuccess(response.message));
     } on ApiException catch (e) {
-      emit(TagSubmissionError(e.message));
+      if (e.code == 'session_expired') {
+        emit(const TagSubmissionSessionExpired());
+      } else {
+        emit(TagSubmissionError(e.message));
+      }
     } catch (e) {
       emit(TagSubmissionError(
         'Failed to submit tag number. Please try again.',
