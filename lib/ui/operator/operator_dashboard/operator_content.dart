@@ -6,7 +6,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/kpi_card.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -60,97 +60,7 @@ class _DashboardContentState extends State<DashboardContent> {
                       child: CircularProgressIndicator(),
                     );
                   } else if (state is OperatorDashboardLoaded) {
-                    final isPortrait = MediaQuery.of(context).orientation ==
-                        Orientation.portrait;
-
-                    return Column(
-                      children: [
-                        if (isPortrait)
-                          // Portrait: 2 cards per row
-                          Column(
-                            children: [
-                              // First Row: Available Tags and Available Valets
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Available Tags',
-                                      value:
-                                          '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Available Valets',
-                                      value:
-                                          '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Second Row: Vehicles In Transit and Total Vehicles Parked
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Vehicles In Transit',
-                                      value: state.kpis.vehiclesInTransit
-                                          .toString(),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Total Vehicles Parked',
-                                      value: state.kpis.totalVehiclesParked
-                                          .toString(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )
-                        else
-                          // Landscape: all 4 cards in one row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Available Tags',
-                                  value:
-                                      '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Available Valets',
-                                  value:
-                                      '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Vehicles In Transit',
-                                  value:
-                                      state.kpis.vehiclesInTransit.toString(),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Total Vehicles Parked',
-                                  value:
-                                      state.kpis.totalVehiclesParked.toString(),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    );
+                    return DashboardKpiGrid(kpis: state.kpis);
                   } else if (state is OperatorDashboardError) {
                     return Center(
                       child: Column(

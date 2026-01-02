@@ -1,4 +1,5 @@
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_dashboard_kpis_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_available_drivers_response.dart';
 
 abstract class OperatorDashboardState {
   const OperatorDashboardState();
@@ -14,10 +15,14 @@ class OperatorDashboardLoading extends OperatorDashboardState {
 
 class OperatorDashboardLoaded extends OperatorDashboardState {
   final OperatorDashboardKpisResponse kpis;
+  final OperatorAvailableDriversResponse availableDrivers;
 
-  const OperatorDashboardLoaded(this.kpis);
+  const OperatorDashboardLoaded({
+    required this.kpis,
+    required this.availableDrivers,
+  });
 
-  List<Object> get props => [kpis];
+  List<Object> get props => [kpis, availableDrivers];
 }
 
 class OperatorDashboardError extends OperatorDashboardState {
