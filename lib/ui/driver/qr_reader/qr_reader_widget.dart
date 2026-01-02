@@ -50,12 +50,8 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
       final qrBloc = context.read<QrBloc>();
       final currentState = qrBloc.state;
 
-      // If no QR data and scanner should be active, ensure camera is ready
-      final shouldStartCamera = currentState.qrData == null &&
-          !currentState.shouldStopScanner &&
-          !currentState.isProcessing;
-
-      if (shouldStartCamera && !_isInitializing) {
+      // Use BLoC's decision on whether camera should be active
+      if (currentState.cameraShouldBeActive && !_isInitializing) {
         _ensureCameraReady(currentState);
       }
     });
@@ -96,16 +92,11 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
   }
 
   void _ensureCameraReady([QrState? state]) {
-    // Only ensure camera is ready if there's no QR data and scanner should be active
+    // Only ensure camera is ready if BLoC says camera should be active
     if (!mounted) return;
 
-    // If we have state info, check if camera should be active
-    if (state != null) {
-      final shouldHaveCameraActive = state.qrData == null &&
-          !state.shouldStopScanner &&
-          !state.isProcessing;
-      if (!shouldHaveCameraActive) return;
-    }
+    // If we have state info, check if camera should be active according to BLoC
+    if (state != null && !state.cameraShouldBeActive) return;
 
     // If already initializing, don't start another initialization
     if (_isInitializing) return;
@@ -164,11 +155,9 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
           if (mounted) {
             final qrBloc = context.read<QrBloc>();
             final currentState = qrBloc.state;
-            final shouldStartCamera = currentState.qrData == null &&
-                !currentState.shouldStopScanner &&
-                !currentState.isProcessing;
 
-            if (shouldStartCamera) {
+            // Use BLoC's decision on whether camera should be active
+            if (currentState.cameraShouldBeActive) {
               _startControllerWithRetry();
             }
           }
@@ -217,11 +206,9 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
         if (mounted) {
           final qrBloc = context.read<QrBloc>();
           final currentState = qrBloc.state;
-          final shouldStartCamera = currentState.qrData == null &&
-              !currentState.shouldStopScanner &&
-              !currentState.isProcessing;
 
-          if (shouldStartCamera && !_isInitializing) {
+          // Use BLoC's decision on whether camera should be active
+          if (currentState.cameraShouldBeActive && !_isInitializing) {
             _ensureCameraReady(currentState);
           }
         }
@@ -246,29 +233,20 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
 
   void _handleStateChange(BuildContext context, QrState state) async {
     if (controller == null) {
-      // If no controller but we need camera, initialize it
-      final shouldHaveCamera = state.qrData == null &&
-          !state.shouldStopScanner &&
-          !state.isProcessing;
-      if (shouldHaveCamera) {
+      // If no controller but camera should be active, initialize it
+      if (state.cameraShouldBeActive) {
         _initializeController();
       }
       return;
     }
 
     try {
-      // Camera should be stopped when:
-      // 1. Currently processing a scan
-      // 2. Scanner should be stopped (data already scanned)
-      // 3. There's QR data available
-      final shouldStopCamera =
-          state.isProcessing || state.shouldStopScanner || state.qrData != null;
-
-      if (shouldStopCamera) {
-        await controller!.stop();
-      } else {
-        // Only start camera when there's no data and scanner should be active
+      if (state.cameraShouldBeActive) {
+        // Camera should be active according to BLoC state
         await controller!.start();
+      } else {
+        // Camera should be stopped according to BLoC state
+        await controller!.stop();
       }
     } catch (e) {
       // If camera operation fails, try to recover based on current state
@@ -279,11 +257,8 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
   }
 
   void _handleCameraError(QrState state) {
-    // Only try to restart camera if there's no QR data and scanner should be active
-    final shouldHaveCameraActive =
-        state.qrData == null && !state.shouldStopScanner && !state.isProcessing;
-
-    if (shouldHaveCameraActive) {
+    // Only try to restart camera if BLoC says it should be active
+    if (state.cameraShouldBeActive) {
       _ensureCameraReady(state);
     }
   }

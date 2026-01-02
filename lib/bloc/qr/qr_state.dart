@@ -8,6 +8,7 @@ class QrState extends Equatable {
   final String? successMessage;
   final String? errorMessage;
   final bool shouldStopScanner;
+  final bool cameraShouldBeActive;
 
   const QrState({
     this.scannedCode,
@@ -16,6 +17,7 @@ class QrState extends Equatable {
     this.successMessage,
     this.errorMessage,
     this.shouldStopScanner = false,
+    this.cameraShouldBeActive = true, // Camera active by default when no data
   });
 
   QrState copyWith({
@@ -25,6 +27,7 @@ class QrState extends Equatable {
     String? successMessage,
     String? errorMessage,
     bool? shouldStopScanner,
+    bool? cameraShouldBeActive,
   }) {
     return QrState(
       scannedCode: scannedCode ?? this.scannedCode,
@@ -33,6 +36,7 @@ class QrState extends Equatable {
       successMessage: successMessage,
       errorMessage: errorMessage,
       shouldStopScanner: shouldStopScanner ?? this.shouldStopScanner,
+      cameraShouldBeActive: cameraShouldBeActive ?? this.cameraShouldBeActive,
     );
   }
 
@@ -44,5 +48,6 @@ class QrState extends Equatable {
         successMessage,
         errorMessage,
         shouldStopScanner,
+        cameraShouldBeActive,
       ];
 }
