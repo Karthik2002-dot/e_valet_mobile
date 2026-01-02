@@ -27,86 +27,167 @@ class QrReaderWidget extends StatefulWidget {
 }
 
 class _QrReaderWidgetState extends State<QrReaderWidget>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   MobileScannerController? controller;
-  bool _needsReinitialization = false;
+  bool _isInitializing = false;
+  RouteObserver<ModalRoute>? _routeObserver;
 
   @override
   void initState() {
     super.initState();
+    _routeObserver = RouteObserver<ModalRoute>();
     WidgetsBinding.instance.addObserver(this);
     _initializeController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Always try to ensure camera is ready when dependencies change
+    _ensureCameraReady();
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Force reinitialize when returning to this screen
+    _ensureCameraReady();
+  }
+
+  @override
+  void didUpdateWidget(covariant QrReaderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Ensure camera is ready when widget is updated
+    _ensureCameraReady();
   }
 
   @override
   void activate() {
     super.activate();
     // Widget was reactivated (came back from another route)
-    // Reinitialize the controller
-    if (_needsReinitialization || controller == null) {
-      _initializeController();
-    } else {
-      // Just restart the existing controller
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted && controller != null) {
-          try {
-            controller!.start();
-          } catch (e) {
-            // If start fails, reinitialize
-            _initializeController();
-          }
-        }
-      });
-    }
+    // Always ensure camera is ready
+    _ensureCameraReady();
   }
 
   @override
   void deactivate() {
     // Widget is being deactivated (navigating away)
     controller?.stop();
-    _needsReinitialization = true;
     super.deactivate();
   }
 
-  void _initializeController() {
-    // Dispose existing controller if any
-    controller?.dispose();
+  void _ensureCameraReady() {
+    // Always try to ensure camera is ready, regardless of current state
+    if (!mounted) return;
 
-    // Create new controller
-    controller = MobileScannerController(
-      formats: const [BarcodeFormat.qrCode], // QR only
-      detectionSpeed: DetectionSpeed.noDuplicates,
-      facing: CameraFacing.back,
-      autoStart: false, // Manual start for better control
-    );
+    // If already initializing, don't start another initialization
+    if (_isInitializing) return;
 
-    // Start the controller
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted && controller != null) {
+    _isInitializing = true;
+
+    try {
+      if (controller == null) {
+        // No controller exists, create one
+        _initializeController();
+      } else {
+        // Controller exists, try to start it
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && controller != null) {
+            try {
+              controller!.start();
+            } catch (e) {
+              // If start fails, reinitialize
+              _initializeController();
+            }
+          }
+        });
+      }
+    } finally {
+      // Reset flag after a reasonable delay
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _isInitializing = false;
+        }
+      });
+    }
+  }
+
+  void _initializeController({bool force = false}) {
+    // Prevent multiple simultaneous initializations
+    if (_isInitializing && !force) return;
+
+    _isInitializing = true;
+
+    try {
+      // Dispose existing controller if any (always dispose on force, or if controller is null)
+      if (force || controller == null) {
+        controller?.dispose();
+        controller = null;
+
+        // Create new controller
+        controller = MobileScannerController(
+          formats: const [BarcodeFormat.qrCode], // QR only
+          detectionSpeed: DetectionSpeed.noDuplicates,
+          facing: CameraFacing.back,
+          autoStart: false, // Manual start for better control
+        );
+
+        // Start the controller with retry mechanism
+        _startControllerWithRetry();
+      }
+    } finally {
+      // Reset flag after a reasonable delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          _isInitializing = false;
+        }
+      });
+    }
+  }
+
+  void _startControllerWithRetry() {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted || controller == null) return;
+
+      try {
         controller!.start();
+      } catch (e) {
+        // Retry after a short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && controller != null) {
+            try {
+              controller!.start();
+            } catch (e2) {
+              // If still failing, reinitialize
+              if (mounted) {
+                _initializeController(force: true);
+              }
+            }
+          }
+        });
       }
     });
-
-    _needsReinitialization = false;
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed && mounted) {
-      // Mark for reinitialization and rebuild
-      setState(() {
-        _needsReinitialization = true;
-      });
-      _initializeController();
+      // Always ensure camera is ready when app resumes
+      _ensureCameraReady();
     } else if (state == AppLifecycleState.paused) {
       // Stop controller when app goes to background
+      controller?.stop();
+    } else if (state == AppLifecycleState.inactive) {
+      // Stop controller when app becomes inactive
       controller?.stop();
     }
   }
 
   @override
   void dispose() {
+    _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     controller?.dispose();
     super.dispose();
@@ -123,18 +204,22 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
         await controller!.start();
       }
     } catch (e) {
-      // If start/stop fails, reinitialize controller
+      // If start/stop fails, ensure camera is ready
       if (mounted) {
-        setState(() {
-          _needsReinitialization = true;
-        });
-        _initializeController();
+        _ensureCameraReady();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Ensure camera is ready when building the widget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _ensureCameraReady();
+      }
+    });
+
     final scannerHeight = widget.isDesktop
         ? widget.screenHeight * 0.35
         : widget.isTablet
@@ -185,13 +270,10 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                     MobileScanner(
                       controller: controller!,
                       errorBuilder: (context, error, child) {
-                        // If there's an error, try to restart the controller
+                        // If there's an error, ensure camera is ready
                         Future.delayed(const Duration(milliseconds: 500), () {
                           if (mounted) {
-                            setState(() {
-                              _needsReinitialization = true;
-                            });
-                            _initializeController();
+                            _ensureCameraReady();
                           }
                         });
                         return Container(
