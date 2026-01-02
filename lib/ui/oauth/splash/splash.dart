@@ -53,7 +53,8 @@ class _SplashScreenState extends State<SplashScreen>
             if (isOperator) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const OperatorDashboardScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const OperatorDashboardScreen()),
               );
             } else if (isDriver) {
               Navigator.pushReplacement(

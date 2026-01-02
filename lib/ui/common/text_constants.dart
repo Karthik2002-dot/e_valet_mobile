@@ -196,9 +196,11 @@ class TextConstants {
   static const String returnToHome = 'Return To Home';
 
   // Validation Messages (Manual Entry)
-  static const String validationEnterValidTagNumber = 'Please enter a valid tag number';
+  static const String validationEnterValidTagNumber =
+      'Please enter a valid tag number';
   static const String validationEnterTagNumber = 'Please enter the tag number';
-  static const String validationEnterValidNumber = 'Please enter a valid number';
+  static const String validationEnterValidNumber =
+      'Please enter a valid number';
 
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
@@ -222,14 +224,16 @@ class TextConstants {
 
   // Slots Screen (Operator)
   static const String parkingSlotsTitle = 'Parking Slots';
-  static const String parkingSlotsDescription = 'Manage and monitor parking slots';
+  static const String parkingSlotsDescription =
+      'Manage and monitor parking slots';
   static const String available = 'Available';
   static const String occupied = 'Occupied';
   static const String availableValue = '12';
   static const String occupiedValue = '8';
 
   // QR Reader
-  static const String cameraErrorReinitializing = 'Camera error. Reinitializing...';
+  static const String cameraErrorReinitializing =
+      'Camera error. Reinitializing...';
 
   // Operator Home (Legacy)
   static const String operatorHomeTitle = 'Operator Home';

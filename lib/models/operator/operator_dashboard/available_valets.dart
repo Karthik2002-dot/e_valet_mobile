@@ -1,4 +1,3 @@
-
 class AvailableValets {
   final int available;
   final int total;

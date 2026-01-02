@@ -342,7 +342,8 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                                 ),
                                 const SizedBox(height: 16),
                                 TextComponent(
-                                  labelText: TextConstants.cameraErrorReinitializing,
+                                  labelText:
+                                      TextConstants.cameraErrorReinitializing,
                                   color: Colors.white,
                                   fontSize: widget.screenWidth * 0.04,
                                   textAlign: TextAlign.center,
