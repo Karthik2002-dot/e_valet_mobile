@@ -21,11 +21,12 @@ class SplashLoaded extends SplashState {
 
 class SplashCompleted extends SplashState {
   final bool isAuthenticated;
+  final List<String> roles;
 
-  const SplashCompleted({this.isAuthenticated = false});
+  const SplashCompleted({this.isAuthenticated = false, this.roles = const []});
 
   @override
-  List<Object?> get props => [isAuthenticated];
+  List<Object?> get props => [isAuthenticated, roles];
 }
 
 class SplashError extends SplashState {

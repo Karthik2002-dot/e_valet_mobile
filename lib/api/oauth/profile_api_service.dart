@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile_response.dart';
 
 class ProfileApiService {
   ProfileApiService._();
@@ -10,7 +11,7 @@ class ProfileApiService {
   static String get _baseUrl => ApiConfig.authBaseUrl;
   static String get _apiKey => ApiConfig.authApiKey;
 
-  static Future<Profile> getProfile() async {
+  static Future<ProfileResponse> getProfile() async {
     final accessToken = await TokenStorage.getAccessToken();
     final refreshToken = await TokenStorage.getRefreshToken();
     if (accessToken == null || accessToken.isEmpty) {
@@ -35,7 +36,8 @@ class ProfileApiService {
           await base.get('/auth/profile'); // wrapper from BaseDioService
 
       final data = response.data as Map<String, dynamic>;
-      return Profile.fromJson(data);
+      final profileResponse = ProfileResponse.fromJson(data);
+      return profileResponse;
     } on ApiException {
       rethrow;
     }

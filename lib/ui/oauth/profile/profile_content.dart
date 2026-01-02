@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -8,7 +8,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/reset_password_dialog.dar
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class ProfileContent extends StatelessWidget {
-  final Profile profile;
+  final ProfileResponse profile;
 
   const ProfileContent({
     super.key,

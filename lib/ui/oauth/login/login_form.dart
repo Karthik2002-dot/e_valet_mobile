@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/forgot_password/forgot_password_screen.dart';
+import 'dart:math' as math;
 
 class LoginForm extends StatelessWidget {
   final TextEditingController loginIdController;
@@ -32,156 +33,138 @@ class LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // White card with blue border
-          Container(
-            width: double.infinity,
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 1,
-            ),
-            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(
-                MediaQuery.of(context).size.width * 0.05,
-              ),
-              border: Border.all(
-                color: AppColors.primary, // Blue border
-                width: 2,
-              ),
-            ),
-            child: Column(
-              children: [
-                // Purple person icon
-                Icon(
-                  Icons.person_outline,
-                  color: AppColors.black,
-                  size: MediaQuery.of(context).size.width * 0.2,
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                // Login prompt
-                TextComponent(
-                  labelText: TextConstants.loginPrompt,
-                  fontSize: MediaQuery.of(context).size.width * 0.06,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                // Phone number with country code
-                PhoneNumberField(
-                  labelText: TextConstants.phoneNumberLabel,
-                  hintText: TextConstants.phoneNumberHint,
-                  controller: loginIdController,
-                  focusNode: loginIdFocusNode,
-                  textInputAction: TextInputAction.next,
-                  initialCountryCode: 'IN',
-                  disableCountryPicker: true,
-                  onSubmitted: (_) {
-                    FocusScope.of(context).requestFocus(pinFocusNode);
-                  },
-                  onChanged: (value) =>
-                      context.read<LoginBloc>().add(LoginIdChanged(value)),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                // Password field
-                PasswordTextField(
-                  controller: pinController,
-                  focusNode: pinFocusNode,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _handleLogin(context),
-                  labelText: TextConstants.passwordLabel,
-                  hintText: TextConstants.passwordHint,
-                  onChanged: (value) =>
-                      context.read<LoginBloc>().add(PinChanged(value)),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                // Login button
-                BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    final isLoading = state is LoginLoading;
-                    void handlePress() {
-                      if (!isLoading) {
-                        _handleLogin(context);
-                      }
-                    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxCardWidth = math.min(constraints.maxWidth * 0.9, 600.0);
+        final iconSize = math.min(maxCardWidth * 0.2, 120.0);
+        final titleFontSize = math.min(maxCardWidth * 0.06, 28.0);
+        final borderRadius = math.min(maxCardWidth * 0.05, 20.0);
+        const verticalSpacing = 16.0;
 
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButtonComponent(
-                        labelText: isLoading
-                            ? TextConstants.loginButtonLoading
-                            : TextConstants.loginButton,
-                        onPressed: handlePress,
-                        elevatedButtonBackgroundColor:
-                            AppColors.accent, // Orange
-                        radius: 8,
-                        fontSize: 16,
-                        fontColor: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                        padding: EdgeInsets.symmetric(
-                          vertical: MediaQuery.of(context).size.height * 0.02,
-                        ),
-                        icon: isLoading
-                            ? SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.05,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.02,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.white,
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(maxWidth: maxCardWidth),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: Border.all(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    color: AppColors.black,
+                    size: iconSize,
+                  ),
+                  const SizedBox(height: verticalSpacing),
+                  TextComponent(
+                    labelText: TextConstants.loginPrompt,
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: verticalSpacing),
+                  PhoneNumberField(
+                    labelText: TextConstants.phoneNumberLabel,
+                    hintText: TextConstants.phoneNumberHint,
+                    controller: loginIdController,
+                    focusNode: loginIdFocusNode,
+                    textInputAction: TextInputAction.next,
+                    initialCountryCode: 'IN',
+                    disableCountryPicker: true,
+                    onSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(pinFocusNode);
+                    },
+                    onChanged: (value) =>
+                        context.read<LoginBloc>().add(LoginIdChanged(value)),
+                  ),
+                  const SizedBox(height: verticalSpacing),
+                  PasswordTextField(
+                    controller: pinController,
+                    focusNode: pinFocusNode,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleLogin(context),
+                    labelText: TextConstants.passwordLabel,
+                    hintText: TextConstants.passwordHint,
+                    onChanged: (value) =>
+                        context.read<LoginBloc>().add(PinChanged(value)),
+                  ),
+                  const SizedBox(height: verticalSpacing),
+                  BlocBuilder<LoginBloc, LoginState>(
+                    builder: (context, state) {
+                      final isLoading = state is LoginLoading;
+                      void handlePress() {
+                        if (!isLoading) {
+                          _handleLogin(context);
+                        }
+                      }
+
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButtonComponent(
+                          labelText: isLoading
+                              ? TextConstants.loginButtonLoading
+                              : TextConstants.loginButton,
+                          onPressed: handlePress,
+                          elevatedButtonBackgroundColor: AppColors.accent,
+                          radius: 8,
+                          fontSize: 16,
+                          fontColor: AppColors.white,
+                          fontWeight: FontWeight.w600,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          icon: isLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.white,
+                                    ),
                                   ),
+                                )
+                              : const Icon(
+                                  Icons.arrow_forward,
+                                  color: AppColors.white,
+                                  size: 24,
                                 ),
-                              )
-                            : Icon(
-                                Icons.arrow_forward,
-                                color: AppColors.white,
-                                size: MediaQuery.of(context).size.width * 0.05,
-                              ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: verticalSpacing),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      TextButtonComponent(
+                        labelText: TextConstants.forgotPassword,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen(),
+                            ),
+                          );
+                        },
+                        fontSize: 14,
+                        fontColor: AppColors.primary,
+                        fontWeight: FontWeight.w500,
                       ),
-                    );
-                  },
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                // Forgot Password link
-                Row(
-                  children: [
-                    Spacer(),
-                    TextButtonComponent(
-                      labelText: TextConstants.forgotPassword,
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const ForgotPasswordScreen(),
-                          ),
-                        );
-                      },
-                      fontSize: 14,
-                      fontColor: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

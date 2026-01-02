@@ -54,17 +54,25 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: _pin,
       );
 
-      final success = await LoginApiService.verifyPhonePasswordLogin(request);
+      final profile = await LoginApiService.verifyPhonePasswordLogin(request);
 
-      if (success) {
-        emit(const LoginSuccess());
+      if (profile.roles.isNotEmpty) {
+        emit(LoginSuccess(profile));
       } else {
-        emit(const LoginFailure('Invalid phone number or password'));
+        emit(
+          const LoginFailure(
+            'No roles are assigned to your account. Please contact your administrator to request access.',
+          ),
+        );
       }
     } on ApiException catch (e) {
       emit(LoginFailure(e.message));
     } catch (_) {
-      emit(const LoginFailure('Something went wrong. Please try again.'));
+      emit(
+        const LoginFailure(
+          'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 
