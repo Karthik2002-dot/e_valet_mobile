@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
 
@@ -65,6 +66,24 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   ) async {
     // Check if user is already logged in
     final isAuthenticated = await SessionManager.isUserLoggedIn();
-    emit(SplashCompleted(isAuthenticated: isAuthenticated));
+
+    if (!isAuthenticated) {
+      emit(const SplashCompleted(isAuthenticated: false, roles: []));
+      return;
+    }
+
+    // If authenticated, try to fetch the profile to determine roles.
+    List<String> roles = [];
+    try {
+      final profile = await ProfileApiService.getProfile();
+      roles = profile.normalizedRoles;
+      print('Splash: Fetched profile with raw roles: ${profile.roles}');
+      print('Splash: Normalized roles for routing: $roles');
+    } catch (e) {
+      // Ignore profile fetch failure; fallback to empty roles
+      print('Splash: Profile fetch failed: $e');
+    }
+
+    emit(SplashCompleted(isAuthenticated: isAuthenticated, roles: roles));
   }
 }

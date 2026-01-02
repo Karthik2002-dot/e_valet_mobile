@@ -7,7 +7,9 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -43,13 +45,31 @@ class _SplashScreenState extends State<SplashScreen>
       listener: (context, state) {
         if (state is SplashCompleted) {
           if (state.isAuthenticated) {
-            // User is already logged in, navigate to home
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const DriverHomeScreen(),
-              ),
-            );
+            // Route based on roles
+            final isOperator = state.roles.any((r) => r.contains('operator'));
+            final isDriver = state.roles.any((r) => r.contains('driver'));
+
+            debugPrint('Splash: Routing - isOperator=$isOperator, isDriver=$isDriver');
+
+            // Prefer operator when both roles exist
+            if (isOperator) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const OperatorHomeScreen()),
+              );
+            } else if (isDriver) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+              );
+            } else {
+              // Unknown/unsupported role — show error and send to login
+              SnackBars.showErrorSnackBar(context, 'Access denied. No supported role found.');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            }
           } else {
             // User is not logged in, navigate to login
             Navigator.pushReplacement(

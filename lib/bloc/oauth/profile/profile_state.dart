@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile_response.dart';
 
 abstract class ProfileState extends Equatable {
   const ProfileState();
@@ -17,7 +17,7 @@ class ProfileLoading extends ProfileState {
 }
 
 class ProfileLoaded extends ProfileState {
-  final Profile profile;
+  final ProfileResponse profile;
 
   const ProfileLoaded(this.profile);
 
