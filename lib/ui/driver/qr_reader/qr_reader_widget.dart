@@ -30,6 +30,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     with WidgetsBindingObserver, RouteAware {
   MobileScannerController? controller;
   bool _isInitializing = false;
+  bool _initialCameraCheckDone = false;
   RouteObserver<ModalRoute>? _routeObserver;
 
   @override
@@ -40,34 +41,51 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     _initializeController();
   }
 
+  void _checkAndStartCameraForInitialState() {
+    // This is called after widget is built to ensure camera starts for initial state
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      // Get current QR state from BLoC
+      final qrBloc = context.read<QrBloc>();
+      final currentState = qrBloc.state;
+
+      // If no QR data and scanner should be active, ensure camera is ready
+      final shouldStartCamera = currentState.qrData == null &&
+          !currentState.shouldStopScanner &&
+          !currentState.isProcessing;
+
+      if (shouldStartCamera && !_isInitializing) {
+        _ensureCameraReady(currentState);
+      }
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _routeObserver?.subscribe(this, ModalRoute.of(context)!);
-    // Always try to ensure camera is ready when dependencies change
-    _ensureCameraReady();
+    // Only ensure camera if widget is becoming visible and no QR data exists
+    // We'll let the state change handler manage this instead
   }
 
   @override
   void didPopNext() {
     super.didPopNext();
-    // Force reinitialize when returning to this screen
-    _ensureCameraReady();
+    // When returning to screen, let state change handler manage camera
+    // Don't force camera start here as it might conflict with existing data
   }
 
   @override
   void didUpdateWidget(covariant QrReaderWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Ensure camera is ready when widget is updated
-    _ensureCameraReady();
+    // Widget updated, let state change handler manage camera state
   }
 
   @override
   void activate() {
     super.activate();
-    // Widget was reactivated (came back from another route)
-    // Always ensure camera is ready
-    _ensureCameraReady();
+    // Widget reactivated, let state change handler manage camera based on current state
   }
 
   @override
@@ -77,9 +95,17 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     super.deactivate();
   }
 
-  void _ensureCameraReady() {
-    // Always try to ensure camera is ready, regardless of current state
+  void _ensureCameraReady([QrState? state]) {
+    // Only ensure camera is ready if there's no QR data and scanner should be active
     if (!mounted) return;
+
+    // If we have state info, check if camera should be active
+    if (state != null) {
+      final shouldHaveCameraActive = state.qrData == null &&
+          !state.shouldStopScanner &&
+          !state.isProcessing;
+      if (!shouldHaveCameraActive) return;
+    }
 
     // If already initializing, don't start another initialization
     if (_isInitializing) return;
@@ -133,8 +159,20 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
           autoStart: false, // Manual start for better control
         );
 
-        // Start the controller with retry mechanism
-        _startControllerWithRetry();
+        // Check current state and start controller if needed
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final qrBloc = context.read<QrBloc>();
+            final currentState = qrBloc.state;
+            final shouldStartCamera = currentState.qrData == null &&
+                !currentState.shouldStopScanner &&
+                !currentState.isProcessing;
+
+            if (shouldStartCamera) {
+              _startControllerWithRetry();
+            }
+          }
+        });
       }
     } finally {
       // Reset flag after a reasonable delay
@@ -174,8 +212,20 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed && mounted) {
-      // Always ensure camera is ready when app resumes
-      _ensureCameraReady();
+      // When app resumes, check current state and start camera if needed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final qrBloc = context.read<QrBloc>();
+          final currentState = qrBloc.state;
+          final shouldStartCamera = currentState.qrData == null &&
+              !currentState.shouldStopScanner &&
+              !currentState.isProcessing;
+
+          if (shouldStartCamera && !_isInitializing) {
+            _ensureCameraReady(currentState);
+          }
+        }
+      });
     } else if (state == AppLifecycleState.paused) {
       // Stop controller when app goes to background
       controller?.stop();
@@ -190,35 +240,61 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     controller?.dispose();
+    _initialCameraCheckDone = false; // Reset for next initialization
     super.dispose();
   }
 
   void _handleStateChange(BuildContext context, QrState state) async {
-    if (controller == null) return;
+    if (controller == null) {
+      // If no controller but we need camera, initialize it
+      final shouldHaveCamera = state.qrData == null &&
+          !state.shouldStopScanner &&
+          !state.isProcessing;
+      if (shouldHaveCamera) {
+        _initializeController();
+      }
+      return;
+    }
 
     try {
-      if (state.isProcessing || state.shouldStopScanner) {
+      // Camera should be stopped when:
+      // 1. Currently processing a scan
+      // 2. Scanner should be stopped (data already scanned)
+      // 3. There's QR data available
+      final shouldStopCamera =
+          state.isProcessing || state.shouldStopScanner || state.qrData != null;
+
+      if (shouldStopCamera) {
         await controller!.stop();
       } else {
-        // Ensure controller is started when not processing
+        // Only start camera when there's no data and scanner should be active
         await controller!.start();
       }
     } catch (e) {
-      // If start/stop fails, ensure camera is ready
+      // If camera operation fails, try to recover based on current state
       if (mounted) {
-        _ensureCameraReady();
+        _handleCameraError(state);
       }
+    }
+  }
+
+  void _handleCameraError(QrState state) {
+    // Only try to restart camera if there's no QR data and scanner should be active
+    final shouldHaveCameraActive =
+        state.qrData == null && !state.shouldStopScanner && !state.isProcessing;
+
+    if (shouldHaveCameraActive) {
+      _ensureCameraReady(state);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Ensure camera is ready when building the widget
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _ensureCameraReady();
-      }
-    });
+    // Ensure initial camera state check is done only once
+    if (!_initialCameraCheckDone) {
+      _initialCameraCheckDone = true;
+      _checkAndStartCameraForInitialState();
+    }
 
     final scannerHeight = widget.isDesktop
         ? widget.screenHeight * 0.35
