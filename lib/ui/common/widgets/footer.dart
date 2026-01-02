@@ -8,30 +8,48 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.05,
-        vertical: MediaQuery.of(context).size.height * 0.02,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextComponent(
-            labelText: TextConstants.poweredBy,
-            fontSize: MediaQuery.of(context).size.width * 0.03,
-            color: AppColors.mutedText,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = constraints.maxWidth >= 600;
+        final horizontalPadding = isTablet
+            ? 24.0
+            : MediaQuery.of(context).size.width * 0.05;
+        final verticalPadding = isTablet
+            ? 12.0
+            : MediaQuery.of(context).size.height * 0.02;
+        final poweredByFontSize = isTablet
+            ? 12.0
+            : MediaQuery.of(context).size.width * 0.03;
+        final spacerWidth = isTablet
+            ? 12.0
+            : MediaQuery.of(context).size.width * 0.02;
+        final logoHeight = MediaQuery.of(context).size.width *
+            (isTablet ? 0.02 : 0.04);
+
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.02,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextComponent(
+                labelText: TextConstants.poweredBy,
+                fontSize: poweredByFontSize,
+                color: AppColors.mutedText,
+              ),
+              SizedBox(width: spacerWidth),
+              // Yathi logo
+              Image.asset(
+                'assets/images/YathiLogo.png',
+                height: logoHeight,
+                fit: BoxFit.contain,
+              ),
+            ],
           ),
-          // Yathi logo
-          Image.asset(
-            'assets/images/YathiLogo.png',
-            height: MediaQuery.of(context).size.width * 0.04,
-            fit: BoxFit.contain,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
