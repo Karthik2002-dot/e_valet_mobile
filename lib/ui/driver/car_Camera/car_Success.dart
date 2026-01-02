@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
 class CarSuccessScreen extends StatelessWidget {
@@ -22,13 +23,11 @@ class CarSuccessScreen extends StatelessWidget {
                 top: screenHeight * 0.06,
                 bottom: screenHeight * 0.04,
               ),
-              child: Text(
-                'Successfully Parked',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: screenWidth * 0.055,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: TextComponent(
+                labelText: 'Successfully Parked',
+                color: AppColors.white,
+                fontSize: screenWidth * 0.055,
+                fontWeight: FontWeight.w500,
               ),
             ),
 
@@ -72,13 +71,11 @@ class CarSuccessScreen extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    'Return To Home',
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: TextComponent(
+                    labelText: 'Return To Home',
+                    color: AppColors.black,
+                    fontSize: screenWidth * 0.04,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

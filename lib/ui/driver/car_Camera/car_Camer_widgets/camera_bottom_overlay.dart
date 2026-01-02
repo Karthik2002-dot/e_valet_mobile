@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CameraBottomOverlay extends StatelessWidget {
   final Function(BuildContext) onCapture;
@@ -57,14 +58,12 @@ class CameraBottomOverlay extends StatelessWidget {
             ),
             SizedBox(height: screenHeight * 0.01),
             // Photo mode text
-            Text(
-              TextConstants.photoMode,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: screenWidth * 0.035,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 1.2,
-              ),
+            TextComponent(
+              labelText: TextConstants.photoMode,
+              color: AppColors.white,
+              fontSize: screenWidth * 0.035,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1.2,
             ),
           ],
         ),

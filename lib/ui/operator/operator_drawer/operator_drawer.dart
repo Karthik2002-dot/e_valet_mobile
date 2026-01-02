@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'operator_drawer_item.dart';
 
 class OperatorDrawer extends StatelessWidget {
@@ -68,9 +69,10 @@ class OperatorDrawer extends StatelessWidget {
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  'v${"0.2.0"}', // placeholder version display
-                  style: const TextStyle(color: AppColors.white, fontSize: 12),
+                child: TextComponent(
+                  labelText: 'v${"0.2.0"}', // placeholder version display
+                  color: AppColors.white,
+                  fontSize: 12,
                 ),
               ),
               const SizedBox(height: 12),

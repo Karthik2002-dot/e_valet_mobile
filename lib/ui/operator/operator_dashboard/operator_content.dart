@@ -1,103 +1,145 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/kpi_card.dart';
 
-class DashboardContent extends StatelessWidget {
+class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
 
   @override
+  State<DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<DashboardContent> {
+  late OperatorDashboardBloc _dashboardBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _dashboardBloc = OperatorDashboardBloc();
+    // Fetch data when widget initializes
+    // TODO: Replace with actual outletId from session/profile
+    _dashboardBloc.add(
+      const FetchDashboardKpis(
+        outletId: '1',
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _dashboardBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Dashboard',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: AppColors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Welcome to operator dashboard',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return BlocProvider.value(
+      value: _dashboardBloc,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextComponent(
+                labelText: 'Dashboard Overview',
+                color: AppColors.black,
+                fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 24),
+              BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
+                builder: (context, state) {
+                  if (state is OperatorDashboardLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (state is OperatorDashboardLoaded) {
+                    return Column(
                       children: [
-                        Text(
-                          '12',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
+                        // First Row: Available Tags and Available Valets
+                        Row(
+                          children: [
+                            Expanded(
+                              child: KpiCard(
+                                title: 'Available Tags',
+                                value:
+                                    '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
                                 color: Colors.blue,
-                                fontWeight: FontWeight.bold,
                               ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Active Slots',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.grey,
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '8',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: KpiCard(
+                                title: 'Available Valets',
+                                value:
+                                    '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
                                 color: Colors.green,
-                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Drivers',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.grey,
-                                  ),
+                        const SizedBox(height: 12),
+                        // Second Row: Vehicles In Transit and Total Vehicles Parked
+                        Row(
+                          children: [
+                            Expanded(
+                              child: KpiCard(
+                                title: 'Vehicles In Transit',
+                                value: state.kpis.vehiclesInTransit.toString(),
+                                color: Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: KpiCard(
+                                title: 'Total Vehicles Parked',
+                                value:
+                                    state.kpis.totalVehiclesParked.toString(),
+                                color: Colors.purple,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                    );
+                  } else if (state is OperatorDashboardError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextComponent(
+                            labelText: 'Error: ${state.message}',
+                            color: Colors.red,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              _dashboardBloc.add(
+                                const FetchDashboardKpis(
+                                  outletId: '1',
+                                ),
+                              );
+                            },
+                            child: const TextComponent(
+                              labelText: 'Retry',
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

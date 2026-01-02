@@ -85,20 +85,18 @@ class QrStatusOverlayWidget extends StatelessWidget {
               ),
               SizedBox(width: screenWidth * 0.02),
               Flexible(
-                child: Text(
-                  isSuccess
+                child: TextComponent(
+                  labelText: isSuccess
                       ? TextConstants.scannedSuccess
                       : (state.errorMessage ?? TextConstants.errorLabel),
-                  style: TextStyle(
-                    fontSize: isDesktop
-                        ? screenWidth * 0.012
-                        : isTablet
-                            ? screenWidth * 0.018
-                            : screenWidth * 0.026,
-                    fontWeight: FontWeight.w700,
-                    color: isSuccess ? successColor : errorColor,
-                    letterSpacing: 0.3,
-                  ),
+                  fontSize: isDesktop
+                      ? screenWidth * 0.012
+                      : isTablet
+                          ? screenWidth * 0.018
+                          : screenWidth * 0.026,
+                  fontWeight: FontWeight.w700,
+                  color: isSuccess ? successColor : errorColor,
+                  letterSpacing: 0.3,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

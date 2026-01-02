@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_header.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
@@ -44,12 +45,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             );
           } else if (state is PreviewCarError) {
             // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-                duration: const Duration(seconds: 4),
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              state.message,
             );
           }
         },

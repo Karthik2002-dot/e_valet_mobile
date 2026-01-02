@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class OperatorDrawerItem extends StatelessWidget {
   final String asset;
@@ -55,15 +56,12 @@ class OperatorDrawerItem extends StatelessWidget {
                     height: 44,
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.only(left: 20),
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        color: isSelected
-                            ? AppColors.primaryDark
-                            : AppColors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: TextComponent(
+                      labelText: title,
+                      color:
+                          isSelected ? AppColors.primaryDark : AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

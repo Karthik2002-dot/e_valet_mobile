@@ -128,13 +128,11 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 16, right: 8),
-                      child: Text(
-                        '+91',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: TextComponent(
+                        labelText: '+91',
+                        fontSize: 14,
+                        color: AppColors.black,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Expanded(
@@ -185,12 +183,10 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 12),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.error,
-                    ),
+                  child: TextComponent(
+                    labelText: _errorMessage!,
+                    fontSize: 12,
+                    color: AppColors.error,
                   ),
                 ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class OperatorCarLogsScreen extends StatelessWidget {
   const OperatorCarLogsScreen({super.key});
@@ -12,19 +13,15 @@ class OperatorCarLogsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Car Logs',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: AppColors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+            TextComponent(
+              labelText: 'Car Logs',
+              color: AppColors.black,
+              fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 8),
-            Text(
-              'View vehicle activity logs',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                  ),
+            TextComponent(
+              labelText: 'View vehicle activity logs',
+              color: AppColors.grey,
             ),
             const SizedBox(height: 24),
             Row(
@@ -39,19 +36,13 @@ class OperatorCarLogsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '456',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        TextComponent(
+                          labelText: '456',
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          'Total Trips',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.grey,
-                              ),
+                        TextComponent(
+                          labelText: 'Total Trips',
+                          color: AppColors.grey,
                         ),
                       ],
                     ),
@@ -68,19 +59,15 @@ class OperatorCarLogsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '2340 km',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        TextComponent(
+                          labelText: '2340 km',
+                          color: Colors.purple,
+                          fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          'Total Distance',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.grey,
-                              ),
+                        TextComponent(
+                          labelText: 'Total Distance',
+                          color: AppColors.grey,
                         ),
                       ],
                     ),
