@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrival_widgets/session_card.dart';
 
 class RetrievalRequestSheet extends StatelessWidget {
   final AssignedSession? session;
@@ -49,13 +52,11 @@ class RetrievalRequestSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Text(
-                'Retrieval Request',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.045,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
+              TextComponent(
+                labelText: TextConstants.retrievalRequest,
+                fontSize: screenWidth * 0.045,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
               ),
               const SizedBox(height: 12),
               if (isLoading) ...[
@@ -64,27 +65,23 @@ class RetrievalRequestSheet extends StatelessWidget {
               ] else if (message != null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    message!,
+                  child: TextComponent(
+                    labelText: message!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      color: AppColors.mutedText,
-                    ),
+                    fontSize: screenWidth * 0.04,
+                    color: AppColors.mutedText,
                   ),
                 ),
               ] else if (session != null) ...[
-                _SessionCard(session: session!, onAccept: onAccept),
+                SessionCard(session: session!, onAccept: onAccept),
               ] else ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    'No active retrieval requests',
+                  child: TextComponent(
+                    labelText: TextConstants.noActiveRetrievalRequests,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      color: AppColors.mutedText,
-                    ),
+                    fontSize: screenWidth * 0.04,
+                    color: AppColors.mutedText,
                   ),
                 ),
               ],
@@ -106,13 +103,11 @@ class RetrievalRequestSheet extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Accept Request',
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.black,
-                            ),
+                          TextComponent(
+                            labelText: TextConstants.acceptRequest,
+                            fontSize: screenWidth * 0.045,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
                           ),
                           const SizedBox(width: 8),
                           const Icon(Icons.arrow_forward,
@@ -126,170 +121,6 @@ class RetrievalRequestSheet extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SessionCard extends StatelessWidget {
-  final AssignedSession session;
-  final VoidCallback? onAccept;
-
-  const _SessionCard({required this.session, this.onAccept});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow10,
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(18)),
-                child: Stack(
-                  children: [
-                    Image(
-                      image: session.photoUrl != null
-                          ? NetworkImage(session.photoUrl!)
-                          : const AssetImage('assets/images/car.png')
-                              as ImageProvider,
-                      width: double.infinity,
-                      height: screenWidth * 0.5,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/images/car.png',
-                          width: double.infinity,
-                          height: screenWidth * 0.5,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                    if (session.hasPhotos)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: AppColors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.directions_car,
-                          size: 20,
-                          color: AppColors.secondary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Badge Number',
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.035,
-                                  color: AppColors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                session.cardNumber.toString(),
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.05,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Divider(
-                      color: AppColors.greyLight,
-                      thickness: 1,
-                      height: 1,
-                    ),
-                    const SizedBox(height: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.badge,
-                              size: 20,
-                              color: AppColors.secondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Parked By ${session.parkedBy?.name ?? 'Unknown'}',
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.04,
-                                  color: AppColors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Icon(
-                              Icons.phone,
-                              color: AppColors.secondary,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
     );
   }
 }

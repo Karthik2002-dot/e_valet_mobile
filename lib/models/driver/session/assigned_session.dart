@@ -1,3 +1,6 @@
+import 'assigned_session_parked_by.dart';
+import 'assigned_session_photo.dart';
+
 class AssignedSession {
   final String id;
   final int cardNumber;
@@ -58,72 +61,6 @@ class AssignedSession {
       'customerPhone': customerPhone,
       'parkedBy': parkedBy?.toJson(),
       'photos': photos.map((photo) => photo.toJson()).toList(),
-    };
-  }
-}
-
-class AssignedSessionParkedBy {
-  final String userId;
-  final String name;
-  final String phone;
-
-  AssignedSessionParkedBy({
-    required this.userId,
-    required this.name,
-    required this.phone,
-  });
-
-  factory AssignedSessionParkedBy.fromJson(Map<String, dynamic> json) {
-    return AssignedSessionParkedBy(
-      userId: (json['userId'] ?? '').toString(),
-      name: (json['name'] ?? '').toString(),
-      phone: (json['phone'] ?? '').toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'name': name,
-      'phone': phone,
-    };
-  }
-}
-
-class AssignedSessionPhoto {
-  final int id;
-  final String url;
-  final String description;
-  final DateTime? takenAt;
-
-  AssignedSessionPhoto({
-    required this.id,
-    required this.url,
-    required this.description,
-    required this.takenAt,
-  });
-
-  factory AssignedSessionPhoto.fromJson(Map<String, dynamic> json) {
-    final takenAtRaw = json['takenAt'];
-    DateTime? parsedTakenAt;
-    if (takenAtRaw is String && takenAtRaw.isNotEmpty) {
-      parsedTakenAt = DateTime.tryParse(takenAtRaw);
-    }
-
-    return AssignedSessionPhoto(
-      id: json['id'] as int? ?? 0,
-      url: (json['url'] ?? '').toString(),
-      description: (json['description'] ?? '').toString(),
-      takenAt: parsedTakenAt,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'url': url,
-      'description': description,
-      'takenAt': takenAt?.toIso8601String(),
     };
   }
 }

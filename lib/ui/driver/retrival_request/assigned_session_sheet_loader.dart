@@ -32,7 +32,9 @@ class AssignedSessionSheetLoader extends StatelessWidget {
           }
         },
         child: FutureBuilder<AssignedSession?>(
-          future: AssignedSessionsApiService.fetchFirstAssignedSession(),
+          future: AssignedSessionsApiService.fetchAssignedSessions().then(
+            (sessions) => sessions.isNotEmpty ? sessions.first : null,
+          ),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const RetrievalRequestSheet(isLoading: true);

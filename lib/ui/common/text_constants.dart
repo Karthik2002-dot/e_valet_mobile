@@ -159,4 +159,31 @@ class TextConstants {
   static const String numberPlateNotFound = 'Vehicle number plate not found';
   static const String errorValidatingImage = 'Error validating image';
   static const String errorProcessingImage = 'Error processing image';
+
+  // Session/Retrieval Related
+  static const String badgeNumber = 'Badge Number';
+  static const String parkedBy = 'Parked By';
+  static const String unknown = 'Unknown';
+  static const String retrievalRequest = 'Retrieval Request';
+  static const String noActiveRetrievalRequests =
+      'No active retrieval requests';
+  static const String acceptRequest = 'Accept Request';
+
+  // Handover Related
+  static const String confirmHandover = 'Confirm Handover';
+  static const String customerMissing = 'Customer Missing';
+  static const String confirmationHandover = 'Confirmation Handover';
+  static const String enterTwoDigitCode =
+      'Enter the 2-digit code provided by the user to complete the handover.';
+  static const String customerHasNoPhone = 'Customer has no phone?';
+
+  // Arrival Related
+  static const String slideToConfirmArrival = 'Slide to Confirm Arrival';
+  static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';
+
+  // Permission Messages
+  static const String locationPermissionRequiredHandover =
+      'Location permission is required to confirm handover';
+  static const String locationPermissionRequiredArrival =
+      'Location permission is required to confirm arrival';
 }

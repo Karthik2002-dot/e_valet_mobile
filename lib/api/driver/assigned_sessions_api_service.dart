@@ -53,10 +53,4 @@ class AssignedSessionsApiService {
       );
     }
   }
-
-  static Future<AssignedSession?> fetchFirstAssignedSession() async {
-    final sessions = await fetchAssignedSessions();
-    if (sessions.isEmpty) return null;
-    return sessions.first;
-  }
 }
