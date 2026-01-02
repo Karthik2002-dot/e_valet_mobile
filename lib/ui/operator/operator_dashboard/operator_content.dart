@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -78,7 +77,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                       title: 'Available Tags',
                                       value:
                                           '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                      color: Colors.blue,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -87,7 +85,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                       title: 'Available Valets',
                                       value:
                                           '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                      color: Colors.green,
                                     ),
                                   ),
                                 ],
@@ -101,7 +98,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                       title: 'Vehicles In Transit',
                                       value: state.kpis.vehiclesInTransit
                                           .toString(),
-                                      color: Colors.orange,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -110,7 +106,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                       title: 'Total Vehicles Parked',
                                       value: state.kpis.totalVehiclesParked
                                           .toString(),
-                                      color: Colors.purple,
                                     ),
                                   ),
                                 ],
@@ -126,7 +121,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                   title: 'Available Tags',
                                   value:
                                       '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                  color: Colors.blue,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -135,7 +129,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                   title: 'Available Valets',
                                   value:
                                       '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                  color: Colors.green,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -144,7 +137,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                   title: 'Vehicles In Transit',
                                   value:
                                       state.kpis.vehiclesInTransit.toString(),
-                                  color: Colors.orange,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -153,7 +145,6 @@ class _DashboardContentState extends State<DashboardContent> {
                                   title: 'Total Vehicles Parked',
                                   value:
                                       state.kpis.totalVehiclesParked.toString(),
-                                  color: Colors.purple,
                                 ),
                               ),
                             ],

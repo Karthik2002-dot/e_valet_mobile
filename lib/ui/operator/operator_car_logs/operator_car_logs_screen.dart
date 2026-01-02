@@ -39,6 +39,7 @@ class OperatorCarLogsScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.totalTripsValue,
+                          color: AppColors.black,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
