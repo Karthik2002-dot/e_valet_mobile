@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorDriversScreen extends StatelessWidget {
   const OperatorDriversScreen({super.key});
@@ -14,13 +15,13 @@ class OperatorDriversScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextComponent(
-              labelText: 'Drivers',
+              labelText: TextConstants.driversTitle,
               color: AppColors.black,
               fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: 'Manage and monitor all drivers',
+              labelText: TextConstants.driversDescription,
               color: AppColors.grey,
             ),
             const SizedBox(height: 24),
@@ -37,13 +38,13 @@ class OperatorDriversScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '24',
+                          labelText: TextConstants.totalDriversValue,
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Total Drivers',
+                          labelText: TextConstants.totalDrivers,
                           color: AppColors.grey,
                         ),
                       ],
@@ -62,13 +63,13 @@ class OperatorDriversScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '18',
-                          color: Colors.green,
+                          labelText: TextConstants.activeTodayValue,
+                          color: Colors.purple,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Active Today',
+                          labelText: TextConstants.activeToday,
                           color: AppColors.grey,
                         ),
                       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 
 class OperatorHomeView extends StatefulWidget {
@@ -26,7 +27,7 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
           selectedIndex: _selectedIndex, onItemSelected: _onMenuItemSelected),
       appBar: AppBar(
         title: const TextComponent(
-          labelText: 'Operator Home',
+          labelText: TextConstants.operatorHomeTitle,
         ),
         actions: [
           IconButton(
@@ -40,7 +41,7 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
       ),
       body: Center(
         child: TextComponent(
-          labelText: 'Welcome, Operator! (Menu: $_selectedIndex)',
+          labelText: '${TextConstants.welcomeOperator}$_selectedIndex)',
         ),
       ),
     );

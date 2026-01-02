@@ -54,7 +54,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
         // Show error if tag number is not a valid number
         SnackBars.showErrorSnackBar(
           context,
-          'Please enter a valid tag number',
+          TextConstants.validationEnterValidTagNumber,
         );
         return;
       }
@@ -132,17 +132,17 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     ),
                   ),
                   TextFieldComponent(
-                    labelText: '',
+                    labelText: TextConstants.emptyText,
                     hintText: TextConstants.tagNumberHint,
                     controller: _tagNumberController,
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter the tag number';
+                        return TextConstants.validationEnterTagNumber;
                       }
                       final cardNumber = int.tryParse(value.trim());
                       if (cardNumber == null) {
-                        return 'Please enter a valid number';
+                        return TextConstants.validationEnterValidNumber;
                       }
                       return null;
                     },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorCarLogsScreen extends StatelessWidget {
   const OperatorCarLogsScreen({super.key});
@@ -14,13 +15,13 @@ class OperatorCarLogsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextComponent(
-              labelText: 'Car Logs',
+              labelText: TextConstants.carLogsTitle,
               color: AppColors.black,
               fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: 'View vehicle activity logs',
+              labelText: TextConstants.carLogsDescription,
               color: AppColors.grey,
             ),
             const SizedBox(height: 24),
@@ -37,11 +38,11 @@ class OperatorCarLogsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '456',
+                          labelText: TextConstants.totalTripsValue,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Total Trips',
+                          labelText: TextConstants.totalTrips,
                           color: AppColors.grey,
                         ),
                       ],
@@ -60,13 +61,13 @@ class OperatorCarLogsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '2340 km',
+                          labelText: TextConstants.totalDistanceValue,
                           color: Colors.purple,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Total Distance',
+                          labelText: TextConstants.totalDistance,
                           color: AppColors.grey,
                         ),
                       ],

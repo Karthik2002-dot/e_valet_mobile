@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
@@ -48,7 +49,7 @@ class _DashboardContentState extends State<DashboardContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextComponent(
-                labelText: 'Dashboard Overview',
+                labelText: TextConstants.dashboardOverview,
                 color: AppColors.black,
                 fontWeight: FontWeight.bold,
               ),
@@ -114,7 +115,7 @@ class _DashboardContentState extends State<DashboardContent> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextComponent(
-                            labelText: 'Error: ${state.message}',
+                            labelText: '${TextConstants.errorLabel}: ${state.message}',
                             color: Colors.red,
                             textAlign: TextAlign.center,
                           ),
@@ -128,7 +129,7 @@ class _DashboardContentState extends State<DashboardContent> {
                               );
                             },
                             child: const TextComponent(
-                              labelText: 'Retry',
+                              labelText: TextConstants.retryButton,
                             ),
                           ),
                         ],

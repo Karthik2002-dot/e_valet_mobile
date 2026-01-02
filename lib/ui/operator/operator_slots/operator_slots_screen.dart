@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class OperatorSlotsScreen extends StatelessWidget {
   const OperatorSlotsScreen({super.key});
@@ -14,13 +15,13 @@ class OperatorSlotsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextComponent(
-              labelText: 'Parking Slots',
+              labelText: TextConstants.parkingSlotsTitle,
               color: AppColors.black,
               fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: 'Manage and monitor parking slots',
+              labelText: TextConstants.parkingSlotsDescription,
               color: AppColors.grey,
             ),
             const SizedBox(height: 24),
@@ -37,13 +38,13 @@ class OperatorSlotsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '12',
+                          labelText: TextConstants.availableValue,
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Available',
+                          labelText: TextConstants.available,
                           color: AppColors.grey,
                         ),
                       ],
@@ -62,13 +63,13 @@ class OperatorSlotsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: '8',
+                          labelText: TextConstants.occupiedValue,
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
                         TextComponent(
-                          labelText: 'Occupied',
+                          labelText: TextConstants.occupied,
                           color: AppColors.grey,
                         ),
                       ],

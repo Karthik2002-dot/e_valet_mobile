@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number%20validation.dart';
 import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class PhoneNumberFieldState extends State<PhoneNumberField> {
   late FocusNode _internalFocusNode;
@@ -129,7 +130,7 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                     Padding(
                       padding: const EdgeInsets.only(left: 16, right: 8),
                       child: TextComponent(
-                        labelText: '+91',
+                        labelText: TextConstants.countryCode,
                         fontSize: 14,
                         color: AppColors.black,
                         fontWeight: FontWeight.w500,
@@ -154,8 +155,9 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                           });
 
                           if (widget.onChanged != null) {
-                            // Always prepend +91 since country picker is disabled
-                            widget.onChanged!('+91$value');
+                            // Always prepend country code since country picker is disabled
+                            widget.onChanged!(
+                                '${TextConstants.countryCode}$value');
                           }
                         },
                         decoration: inputDecoration.copyWith(

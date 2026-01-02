@@ -5,6 +5,7 @@ import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_status_overlay_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/scanner_brackets_painter.dart';
@@ -341,7 +342,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                                 ),
                                 const SizedBox(height: 16),
                                 TextComponent(
-                                  labelText: 'Camera error. Reinitializing...',
+                                  labelText: TextConstants.cameraErrorReinitializing,
                                   color: Colors.white,
                                   fontSize: widget.screenWidth * 0.04,
                                   textAlign: TextAlign.center,
