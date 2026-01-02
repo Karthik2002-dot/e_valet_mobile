@@ -7,7 +7,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_home/operator_home.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 
@@ -53,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
             if (isOperator) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const OperatorHomeScreen()),
+                MaterialPageRoute(builder: (_) => const OperatorDashboardScreen()),
               );
             } else if (isDriver) {
               Navigator.pushReplacement(
