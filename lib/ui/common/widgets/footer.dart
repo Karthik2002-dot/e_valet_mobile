@@ -11,20 +11,16 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isTablet = constraints.maxWidth >= 600;
-        final horizontalPadding = isTablet
-            ? 24.0
-            : MediaQuery.of(context).size.width * 0.05;
-        final verticalPadding = isTablet
-            ? 12.0
-            : MediaQuery.of(context).size.height * 0.02;
-        final poweredByFontSize = isTablet
-            ? 12.0
-            : MediaQuery.of(context).size.width * 0.03;
-        final spacerWidth = isTablet
-            ? 12.0
-            : MediaQuery.of(context).size.width * 0.02;
-        final logoHeight = MediaQuery.of(context).size.width *
-            (isTablet ? 0.02 : 0.04);
+        final horizontalPadding =
+            isTablet ? 24.0 : MediaQuery.of(context).size.width * 0.05;
+        final verticalPadding =
+            isTablet ? 12.0 : MediaQuery.of(context).size.height * 0.02;
+        final poweredByFontSize =
+            isTablet ? 12.0 : MediaQuery.of(context).size.width * 0.03;
+        final spacerWidth =
+            isTablet ? 12.0 : MediaQuery.of(context).size.width * 0.02;
+        final logoHeight =
+            MediaQuery.of(context).size.width * (isTablet ? 0.02 : 0.04);
 
         return Padding(
           padding: EdgeInsets.symmetric(

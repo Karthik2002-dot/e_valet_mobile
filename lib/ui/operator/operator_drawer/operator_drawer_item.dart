@@ -58,7 +58,9 @@ class OperatorDrawerItem extends StatelessWidget {
                     child: Text(
                       title,
                       style: TextStyle(
-                        color: isSelected ? AppColors.primaryDark : AppColors.white,
+                        color: isSelected
+                            ? AppColors.primaryDark
+                            : AppColors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),

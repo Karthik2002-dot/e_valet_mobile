@@ -49,12 +49,15 @@ class LoginApiService {
 
       // Extract and save user information if available
       final userJson = responseData['user'] as Map<String, dynamic>? ?? {};
-      final application = responseData['application'] as Map<String, dynamic>? ?? {};
+      final application =
+          responseData['application'] as Map<String, dynamic>? ?? {};
 
       // Build Profile object (application contains id/name/roles)
       final user = UserProfile.fromJson(userJson);
       final applicationId = (application['id'] ?? '').toString();
-      final rolesList = (application['roles'] as List<dynamic>? ?? []).map((r) => r.toString()).toList();
+      final rolesList = (application['roles'] as List<dynamic>? ?? [])
+          .map((r) => r.toString())
+          .toList();
 
       // Save display name if available
       if (user.firstName.isNotEmpty && user.lastName.isNotEmpty) {

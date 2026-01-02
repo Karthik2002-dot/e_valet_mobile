@@ -18,7 +18,7 @@ class ProfileResponse {
 
     // Roles can be at top-level or nested under application
     List<dynamic> rolesList = [];
-    
+
     // Try top-level roles first (most common in actual responses)
     if (json['roles'] is List<dynamic>) {
       rolesList = json['roles'] as List<dynamic>;

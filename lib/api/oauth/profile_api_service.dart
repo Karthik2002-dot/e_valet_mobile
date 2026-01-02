@@ -38,7 +38,8 @@ class ProfileApiService {
       final data = response.data as Map<String, dynamic>;
       debugPrint('ProfileApiService: Raw response data: $data');
       final profileResponse = ProfileResponse.fromJson(data);
-      debugPrint('ProfileApiService: Parsed roles: ${profileResponse.roles}, normalized: ${profileResponse.normalizedRoles}');
+      debugPrint(
+          'ProfileApiService: Parsed roles: ${profileResponse.roles}, normalized: ${profileResponse.normalizedRoles}');
       return profileResponse;
     } on ApiException {
       rethrow;

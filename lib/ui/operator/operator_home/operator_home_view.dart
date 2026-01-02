@@ -21,7 +21,8 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: OperatorDrawer(selectedIndex: _selectedIndex, onItemSelected: _onMenuItemSelected),
+      drawer: OperatorDrawer(
+          selectedIndex: _selectedIndex, onItemSelected: _onMenuItemSelected),
       appBar: AppBar(
         title: const Text('Operator Home'),
         actions: [

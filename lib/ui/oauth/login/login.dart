@@ -39,7 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            final roles = state.profile.roles.map((r) => r.toLowerCase()).toList();
+            final roles =
+                state.profile.roles.map((r) => r.toLowerCase()).toList();
             if (roles.contains('driver')) {
               Navigator.pushReplacement(
                 context,
@@ -56,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
               );
             } else {
               // Unknown role - show error
-              SnackBars.showErrorSnackBar(context, 'Access denied. No supported role found.');
+              SnackBars.showErrorSnackBar(
+                  context, 'Access denied. No supported role found.');
             }
           } else if (state is LoginFailure) {
             SnackBars.showErrorSnackBar(context, state.message);
