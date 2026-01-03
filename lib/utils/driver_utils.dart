@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
 class DriverUtils {
   DriverUtils._();
@@ -25,15 +26,15 @@ class DriverUtils {
     switch (status.toLowerCase()) {
       case 'free':
       case 'available':
-        return Colors.green;
+        return AppColors.success;
       case 'busy':
       case 'occupied':
-        return Colors.orange;
+        return AppColors.primary;
       case 'offline':
       case 'unavailable':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.grey;
     }
   }
 }

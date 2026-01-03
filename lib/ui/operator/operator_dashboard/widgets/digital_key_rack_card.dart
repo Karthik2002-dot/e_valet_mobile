@@ -23,7 +23,7 @@ class DigitalKeyRackCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(cardRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: AppColors.black.withOpacity(0.15),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -40,26 +40,26 @@ class DigitalKeyRackCard extends StatelessWidget {
                 fit: BoxFit.fill,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: Colors.grey[900],
+                    color: AppColors.grey,
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.directions_car,
                       size: size.width * 0.09,
-                      color: Colors.grey[500],
+                      color: AppColors.grey,
                     ),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Container(
-                    color: Colors.grey[900],
+                    color: AppColors.grey,
                     alignment: Alignment.center,
                     child: const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white70,
+                        color: AppColors.white,
                       ),
                     ),
                   );
@@ -75,8 +75,8 @@ class DigitalKeyRackCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.transparent,
-                      Colors.black54,
+                      AppColors.transparent,
+                      AppColors.black,
                     ],
                   ),
                 ),
@@ -99,7 +99,7 @@ class DigitalKeyRackCard extends StatelessWidget {
                 child: TextComponent(
                   labelText: '#${keyRackItem.cardNumber}',
                   fontSize: size.width * 0.02,
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),

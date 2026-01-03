@@ -24,7 +24,7 @@ class CameraPreviewWidget extends StatelessWidget {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: AppColors.black,
         child: const Center(
           child: CircularProgressIndicator(
             color: AppColors.primary,

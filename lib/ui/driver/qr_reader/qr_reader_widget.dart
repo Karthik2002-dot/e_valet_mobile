@@ -308,10 +308,10 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                 // Show loading if controller is not initialized
                 if (controller == null) {
                   return Container(
-                    color: Colors.black,
+                    color: AppColors.black,
                     child: const Center(
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   );
@@ -330,21 +330,21 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                           }
                         });
                         return Container(
-                          color: Colors.black,
+                          color: AppColors.black,
                           child: Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const Icon(
                                   Icons.error_outline,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   size: 48,
                                 ),
                                 const SizedBox(height: 16),
                                 TextComponent(
                                   labelText:
                                       TextConstants.cameraErrorReinitializing,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   fontSize: widget.screenWidth * 0.04,
                                   textAlign: TextAlign.center,
                                 ),

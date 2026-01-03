@@ -17,11 +17,11 @@ class KpiCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: AppColors.black.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -34,7 +34,7 @@ class KpiCard extends StatelessWidget {
             labelText: title,
             textAlign: TextAlign.center,
             color: AppColors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.012,
+            fontSize: MediaQuery.of(context).size.width * 0.01,
             fontWeight: FontWeight.w500,
           ),
           const SizedBox(
@@ -44,7 +44,7 @@ class KpiCard extends StatelessWidget {
             labelText: value,
             textAlign: TextAlign.center,
             color: AppColors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.02,
+            fontSize: MediaQuery.of(context).size.width * 0.015,
             fontWeight: FontWeight.bold,
           ),
         ],

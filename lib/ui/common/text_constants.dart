@@ -247,4 +247,13 @@ class TextConstants {
   static const String retrievalRequests = 'Retrieval Requests';
   static const String availableDrivers = 'Available Drivers';
   static const String digitalKeyRack = 'Digital Key Rack';
+  static const String noPendingRetrievalRequests =
+      'No pending retrieval requests';
+  static const String noAvailableDrivers = 'No available drivers at the moment';
+  static const String noVehiclesInKeyRack = 'No vehicles in key rack';
+
+  // Assign Driver Dialog
+  static const String assignDriverTitle = 'Assign Driver';
+  static const String selectDriverInstruction =
+      'Select a driver to assign this retrieval request';
 }

@@ -31,7 +31,7 @@ class OperatorSlotsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: AppColors.success.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -39,7 +39,7 @@ class OperatorSlotsScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.availableValue,
-                          color: Colors.green,
+                          color: AppColors.success,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
@@ -56,7 +56,7 @@ class OperatorSlotsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -64,7 +64,7 @@ class OperatorSlotsScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.occupiedValue,
-                          color: Colors.orange,
+                          color: AppColors.error,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),

@@ -32,8 +32,8 @@ class CameraTopOverlay extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black.withOpacity(0.6),
-              Colors.transparent,
+              AppColors.black.withOpacity(0.6),
+              AppColors.transparent,
             ],
           ),
         ),

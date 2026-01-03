@@ -25,13 +25,13 @@ class AvailableDriversCard extends StatelessWidget {
         vertical: MediaQuery.of(context).size.height * 0.01,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(
           12,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -68,7 +68,7 @@ class AvailableDriversCard extends StatelessWidget {
                 TextComponent(
                   labelText: driver.phone,
                   fontSize: MediaQuery.of(context).size.width * 0.013,
-                  color: Colors.grey[600] ?? Colors.grey,
+                  color: AppColors.grey,
                 ),
               ],
             ),

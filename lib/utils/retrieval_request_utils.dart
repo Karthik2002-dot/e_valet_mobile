@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 
 class RetrievalRequestUtils {
@@ -12,11 +13,11 @@ class RetrievalRequestUtils {
     final minutes = int.tryParse(minutesStr) ?? 0;
 
     if (minutes >= 30) {
-      return Colors.red;
+      return AppColors.error;
     } else if (minutes >= 15) {
-      return Colors.orange;
+      return AppColors.primary;
     }
-    return Colors.green;
+    return AppColors.success;
   }
 
   /// Get priority label based on waiting time

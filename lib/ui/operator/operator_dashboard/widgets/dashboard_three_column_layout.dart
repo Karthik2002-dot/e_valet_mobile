@@ -13,12 +13,14 @@ class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final DigitalKeyRackResponse digitalKeyRack;
+  final VoidCallback onAssignmentComplete;
 
   const DashboardThreeColumnLayout({
     super.key,
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.digitalKeyRack,
+    required this.onAssignmentComplete,
   });
 
   @override
@@ -49,13 +51,14 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No pending retrieval requests',
+                              labelText:
+                                  TextConstants.noPendingRetrievalRequests,
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),
@@ -64,7 +67,11 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                         itemCount: retrievalRequests.requests.length,
                         itemBuilder: (context, index) {
                           final request = retrievalRequests.requests[index];
-                          return RetrievalRequestCard(request: request);
+                          return RetrievalRequestCard(
+                            request: request,
+                            availableDrivers: availableDrivers.drivers,
+                            onAssignmentComplete: onAssignmentComplete,
+                          );
                         },
                       ),
               ),
@@ -97,13 +104,13 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No available drivers at the moment',
+                              labelText: TextConstants.noAvailableDrivers,
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),
@@ -143,13 +150,13 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No vehicles in key rack',
+                              labelText: TextConstants.noVehiclesInKeyRack,
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),
