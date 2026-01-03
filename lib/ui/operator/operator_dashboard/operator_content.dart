@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_three_column_layout.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/manual_request_widget.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -110,6 +111,16 @@ class _DashboardContentState extends State<DashboardContent> {
                     return const SizedBox();
                   },
                 ),
+              ),
+              ManualRequestWidget(
+                onRequestCreated: () {
+                  // Refresh the dashboard
+                  _dashboardBloc.add(
+                    const FetchDashboardKpis(
+                      outletId: '2',
+                    ),
+                  );
+                },
               ),
             ],
           ),
