@@ -344,7 +344,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                                 TextComponent(
                                   labelText:
                                       TextConstants.cameraErrorReinitializing,
-                                  color:  AppColors.white,
+                                  color: AppColors.white,
                                   fontSize: widget.screenWidth * 0.04,
                                   textAlign: TextAlign.center,
                                 ),

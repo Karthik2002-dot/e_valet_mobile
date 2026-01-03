@@ -55,7 +55,8 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No pending retrieval requests',
+                              labelText:
+                                  TextConstants.noPendingRetrievalRequests,
                               fontSize: 14,
                               color: AppColors.grey,
                             ),
@@ -107,7 +108,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No available drivers at the moment',
+                              labelText: TextConstants.noAvailableDrivers,
                               fontSize: 14,
                               color: AppColors.grey,
                             ),
@@ -153,7 +154,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
-                              labelText: 'No vehicles in key rack',
+                              labelText: TextConstants.noVehiclesInKeyRack,
                               fontSize: 14,
                               color: AppColors.grey,
                             ),

@@ -3,6 +3,7 @@ import 'package:niloufer_valet_mobile/api/operator/operator_assign_retrieval_api
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
 
@@ -87,7 +88,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const TextComponent(
-                  labelText: 'Assign Driver',
+                  labelText: TextConstants.assignDriverTitle,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -101,7 +102,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: 'Select a driver to assign this retrieval request',
+              labelText: TextConstants.selectDriverInstruction,
               fontSize: 14,
               color: AppColors.grey,
             ),
@@ -111,7 +112,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
                   child: TextComponent(
-                    labelText: 'No available drivers at the moment',
+                    labelText: TextConstants.noAvailableDrivers,
                     color: AppColors.grey,
                   ),
                 ),
