@@ -76,6 +76,14 @@ class _DashboardContentState extends State<DashboardContent> {
                               retrievalRequests: state.retrievalRequests,
                               availableDrivers: state.availableDrivers,
                               digitalKeyRack: state.digitalKeyRack,
+                              onAssignmentComplete: () {
+                                // Refresh the dashboard
+                                _dashboardBloc.add(
+                                  const FetchDashboardKpis(
+                                    outletId: '2',
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],

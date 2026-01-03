@@ -13,12 +13,14 @@ class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final DigitalKeyRackResponse digitalKeyRack;
+  final VoidCallback onAssignmentComplete;
 
   const DashboardThreeColumnLayout({
     super.key,
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.digitalKeyRack,
+    required this.onAssignmentComplete,
   });
 
   @override
@@ -64,7 +66,11 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                         itemCount: retrievalRequests.requests.length,
                         itemBuilder: (context, index) {
                           final request = retrievalRequests.requests[index];
-                          return RetrievalRequestCard(request: request);
+                          return RetrievalRequestCard(
+                            request: request,
+                            availableDrivers: availableDrivers.drivers,
+                            onAssignmentComplete: onAssignmentComplete,
+                          );
                         },
                       ),
               ),
