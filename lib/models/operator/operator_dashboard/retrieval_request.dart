@@ -1,3 +1,6 @@
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/parked_by.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/vehicle.dart';
+
 class RetrievalRequest {
   final String sessionId;
   final int cardNumber;
@@ -38,48 +41,6 @@ class RetrievalRequest {
       'requestedAt': requestedAt,
       'vehicle': vehicle.toJson(),
       'parkedBy': parkedBy.toJson(),
-    };
-  }
-}
-
-class Vehicle {
-  final String photo;
-
-  Vehicle({required this.photo});
-
-  factory Vehicle.fromJson(Map<String, dynamic> json) {
-    return Vehicle(
-      photo: json['photo'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'photo': photo,
-    };
-  }
-}
-
-class ParkedBy {
-  final String name;
-  final String? phone;
-
-  ParkedBy({
-    required this.name,
-    this.phone,
-  });
-
-  factory ParkedBy.fromJson(Map<String, dynamic> json) {
-    return ParkedBy(
-      name: json['name'] ?? 'Unknown',
-      phone: json['phone'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      if (phone != null) 'phone': phone,
     };
   }
 }

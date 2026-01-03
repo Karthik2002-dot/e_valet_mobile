@@ -10,7 +10,8 @@ class OperatorAvailableDriversResponse {
   factory OperatorAvailableDriversResponse.fromJson(Map<String, dynamic> json) {
     return OperatorAvailableDriversResponse(
       drivers: (json['drivers'] as List<dynamic>?)
-              ?.map((driver) => AvailableDriver.fromJson(driver as Map<String, dynamic>))
+              ?.map((driver) =>
+                  AvailableDriver.fromJson(driver as Map<String, dynamic>))
               .toList() ??
           [],
     );

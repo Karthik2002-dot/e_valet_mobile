@@ -1,4 +1,3 @@
-
 class AvailableDriver {
   final String userId;
   final String name;
