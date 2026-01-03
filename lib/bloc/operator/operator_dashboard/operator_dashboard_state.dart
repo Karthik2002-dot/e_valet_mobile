@@ -1,6 +1,7 @@
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_dashboard_kpis_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
 
 abstract class OperatorDashboardState {
   const OperatorDashboardState();
@@ -18,14 +19,17 @@ class OperatorDashboardLoaded extends OperatorDashboardState {
   final OperatorDashboardKpisResponse kpis;
   final OperatorAvailableDriversResponse availableDrivers;
   final RetrievalRequestsResponse retrievalRequests;
+  final DigitalKeyRackResponse digitalKeyRack;
 
   const OperatorDashboardLoaded({
     required this.kpis,
     required this.availableDrivers,
     required this.retrievalRequests,
+    required this.digitalKeyRack,
   });
 
-  List<Object> get props => [kpis, availableDrivers, retrievalRequests];
+  List<Object> get props =>
+      [kpis, availableDrivers, retrievalRequests, digitalKeyRack];
 }
 
 class OperatorDashboardError extends OperatorDashboardState {

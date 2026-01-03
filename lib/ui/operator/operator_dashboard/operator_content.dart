@@ -43,7 +43,7 @@ class _DashboardContentState extends State<DashboardContent> {
     return BlocProvider.value(
       value: _dashboardBloc,
       child: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,56 +54,62 @@ class _DashboardContentState extends State<DashboardContent> {
                 fontSize: MediaQuery.of(context).size.width * 0.02,
               ),
               const SizedBox(height: 24),
-              BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
-                builder: (context, state) {
-                  if (state is OperatorDashboardLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (state is OperatorDashboardLoaded) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DashboardKpiGrid(kpis: state.kpis),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.03,
-                        ),
-                        DashboardThreeColumnLayout(
-                          retrievalRequests: state.retrievalRequests,
-                          availableDrivers: state.availableDrivers,
-                        ),
-                      ],
-                    );
-                  } else if (state is OperatorDashboardError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+              Expanded(
+                child:
+                    BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
+                  builder: (context, state) {
+                    if (state is OperatorDashboardLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is OperatorDashboardLoaded) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextComponent(
-                            labelText:
-                                '${TextConstants.errorLabel}: ${state.message}',
-                            color: Colors.red,
-                            textAlign: TextAlign.center,
+                          DashboardKpiGrid(kpis: state.kpis),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
                           ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              _dashboardBloc.add(
-                                const FetchDashboardKpis(
-                                  outletId: '2',
-                                ),
-                              );
-                            },
-                            child: const TextComponent(
-                              labelText: TextConstants.retryButton,
+                          Expanded(
+                            child: DashboardThreeColumnLayout(
+                              retrievalRequests: state.retrievalRequests,
+                              availableDrivers: state.availableDrivers,
+                              digitalKeyRack: state.digitalKeyRack,
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  }
-                  return const SizedBox();
-                },
+                      );
+                    } else if (state is OperatorDashboardError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextComponent(
+                              labelText:
+                                  '${TextConstants.errorLabel}: ${state.message}',
+                              color: Colors.red,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                _dashboardBloc.add(
+                                  const FetchDashboardKpis(
+                                    outletId: '2',
+                                  ),
+                                );
+                              },
+                              child: const TextComponent(
+                                labelText: TextConstants.retryButton,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
               ),
             ],
           ),
