@@ -6,6 +6,6 @@ class FetchDashboardKpis extends OperatorDashboardEvent {
   final String outletId;
 
   const FetchDashboardKpis({
-    this.outletId = '1',
+    this.outletId = '2',
   });
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -7,7 +6,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/kpi_card.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_three_column_layout.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -27,7 +27,7 @@ class _DashboardContentState extends State<DashboardContent> {
     // TODO: Replace with actual outletId from session/profile
     _dashboardBloc.add(
       const FetchDashboardKpis(
-        outletId: '1',
+        outletId: '2',
       ),
     );
   }
@@ -43,7 +43,7 @@ class _DashboardContentState extends State<DashboardContent> {
     return BlocProvider.value(
       value: _dashboardBloc,
       child: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,142 +54,62 @@ class _DashboardContentState extends State<DashboardContent> {
                 fontSize: MediaQuery.of(context).size.width * 0.02,
               ),
               const SizedBox(height: 24),
-              BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
-                builder: (context, state) {
-                  if (state is OperatorDashboardLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (state is OperatorDashboardLoaded) {
-                    final isPortrait = MediaQuery.of(context).orientation ==
-                        Orientation.portrait;
-
-                    return Column(
-                      children: [
-                        if (isPortrait)
-                          // Portrait: 2 cards per row
-                          Column(
-                            children: [
-                              // First Row: Available Tags and Available Valets
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Available Tags',
-                                      value:
-                                          '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Available Valets',
-                                      value:
-                                          '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Second Row: Vehicles In Transit and Total Vehicles Parked
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Vehicles In Transit',
-                                      value: state.kpis.vehiclesInTransit
-                                          .toString(),
-                                      color: Colors.orange,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: KpiCard(
-                                      title: 'Total Vehicles Parked',
-                                      value: state.kpis.totalVehiclesParked
-                                          .toString(),
-                                      color: Colors.purple,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )
-                        else
-                          // Landscape: all 4 cards in one row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Available Tags',
-                                  value:
-                                      '${state.kpis.availableTags.available}/${state.kpis.availableTags.total}',
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Available Valets',
-                                  value:
-                                      '${state.kpis.availableValets.available}/${state.kpis.availableValets.total}',
-                                  color: Colors.green,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Vehicles In Transit',
-                                  value:
-                                      state.kpis.vehiclesInTransit.toString(),
-                                  color: Colors.orange,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: KpiCard(
-                                  title: 'Total Vehicles Parked',
-                                  value:
-                                      state.kpis.totalVehiclesParked.toString(),
-                                  color: Colors.purple,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    );
-                  } else if (state is OperatorDashboardError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+              Expanded(
+                child:
+                    BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
+                  builder: (context, state) {
+                    if (state is OperatorDashboardLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is OperatorDashboardLoaded) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextComponent(
-                            labelText:
-                                '${TextConstants.errorLabel}: ${state.message}',
-                            color: Colors.red,
-                            textAlign: TextAlign.center,
+                          DashboardKpiGrid(kpis: state.kpis),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
                           ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              _dashboardBloc.add(
-                                const FetchDashboardKpis(
-                                  outletId: '1',
-                                ),
-                              );
-                            },
-                            child: const TextComponent(
-                              labelText: TextConstants.retryButton,
+                          Expanded(
+                            child: DashboardThreeColumnLayout(
+                              retrievalRequests: state.retrievalRequests,
+                              availableDrivers: state.availableDrivers,
+                              digitalKeyRack: state.digitalKeyRack,
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  }
-                  return const SizedBox();
-                },
+                      );
+                    } else if (state is OperatorDashboardError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextComponent(
+                              labelText:
+                                  '${TextConstants.errorLabel}: ${state.message}',
+                              color: Colors.red,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                _dashboardBloc.add(
+                                  const FetchDashboardKpis(
+                                    outletId: '2',
+                                  ),
+                                );
+                              },
+                              child: const TextComponent(
+                                labelText: TextConstants.retryButton,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
               ),
             ],
           ),

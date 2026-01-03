@@ -1,5 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_available_drivers_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_retrieval_requests_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_digital_key_rack_api_service.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';
 
@@ -15,10 +18,33 @@ class OperatorDashboardBloc
   ) async {
     emit(const OperatorDashboardLoading());
     try {
-      final kpis = await OperatorDashboardApiService.getDashboardKpis(
-        outletId: event.outletId,
-      );
-      emit(OperatorDashboardLoaded(kpis));
+      // Fetch KPIs, available drivers, retrieval requests, and digital key rack in parallel
+      final results = await Future.wait([
+        OperatorDashboardApiService.getDashboardKpis(
+          outletId: event.outletId,
+        ),
+        OperatorAvailableDriversApiService.getAvailableDrivers(
+          outletId: event.outletId,
+        ),
+        OperatorRetrievalRequestsApiService.getRetrievalRequests(
+          outletId: event.outletId,
+        ),
+        OperatorDigitalKeyRackApiService.getDigitalKeyRack(
+          outletId: event.outletId,
+        ),
+      ]);
+
+      final kpis = results[0] as dynamic;
+      final availableDrivers = results[1] as dynamic;
+      final retrievalRequests = results[2] as dynamic;
+      final digitalKeyRack = results[3] as dynamic;
+
+      emit(OperatorDashboardLoaded(
+        kpis: kpis,
+        availableDrivers: availableDrivers,
+        retrievalRequests: retrievalRequests,
+        digitalKeyRack: digitalKeyRack,
+      ));
     } catch (e) {
       emit(OperatorDashboardError(e.toString()));
     }

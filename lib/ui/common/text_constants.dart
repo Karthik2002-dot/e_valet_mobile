@@ -205,6 +205,10 @@ class TextConstants {
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
   static const String retryButton = 'Retry';
+  static const String availableTags = 'Available Tags';
+  static const String availableValets = 'Available Valets';
+  static const String vehiclesInTransit = 'Vehicles In Transit';
+  static const String totalVehiclesParked = 'Total Vehicles Parked';
 
   // Car Logs Screen (Operator)
   static const String carLogsTitle = 'Car Logs';
@@ -238,4 +242,9 @@ class TextConstants {
   // Operator Home (Legacy)
   static const String operatorHomeTitle = 'Operator Home';
   static const String welcomeOperator = 'Welcome, Operator! (Menu: ';
+
+  // Operator Dashboard Data
+  static const String retrievalRequests = 'Retrieval Requests';
+  static const String availableDrivers = 'Available Drivers';
+  static const String digitalKeyRack = 'Digital Key Rack';
 }

@@ -5,13 +5,11 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class KpiCard extends StatelessWidget {
   final String title;
   final String value;
-  final Color color;
 
   const KpiCard({
     super.key,
     required this.title,
     required this.value,
-    required this.color,
   });
 
   @override

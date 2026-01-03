@@ -19,7 +19,7 @@ class BaseHttpService {
     String path, {
     Map<String, String>? headers,
     Object? body,
-    Duration timeout = const Duration(seconds: 30),
+    Duration timeout = const Duration(seconds: 60),
     bool retryOn401 = true,
   }) async {
     return _executePostWithRetry(
