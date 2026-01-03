@@ -107,7 +107,6 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
 
       if (event.status.toUpperCase() == 'ONLINE') {
         // Clock in - go online
-        // Always use outletId = 1 as requested
         final clockInRequest = ClockInRequest(
           outletId: 2,
           latitude: latitude,

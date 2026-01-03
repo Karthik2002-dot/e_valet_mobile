@@ -7,6 +7,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_three_column_layout.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -26,7 +27,7 @@ class _DashboardContentState extends State<DashboardContent> {
     // TODO: Replace with actual outletId from session/profile
     _dashboardBloc.add(
       const FetchDashboardKpis(
-        outletId: '1',
+        outletId: '2',
       ),
     );
   }
@@ -60,7 +61,18 @@ class _DashboardContentState extends State<DashboardContent> {
                       child: CircularProgressIndicator(),
                     );
                   } else if (state is OperatorDashboardLoaded) {
-                    return DashboardKpiGrid(kpis: state.kpis);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DashboardKpiGrid(kpis: state.kpis),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03,
+                        ),
+                        DashboardThreeColumnLayout(
+                          retrievalRequests: state.retrievalRequests,
+                        ),
+                      ],
+                    );
                   } else if (state is OperatorDashboardError) {
                     return Center(
                       child: Column(
@@ -77,7 +89,7 @@ class _DashboardContentState extends State<DashboardContent> {
                             onPressed: () {
                               _dashboardBloc.add(
                                 const FetchDashboardKpis(
-                                  outletId: '1',
+                                  outletId: '2',
                                 ),
                               );
                             },

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_available_drivers_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_retrieval_requests_api_service.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';
 
@@ -16,7 +17,7 @@ class OperatorDashboardBloc
   ) async {
     emit(const OperatorDashboardLoading());
     try {
-      // Fetch both KPIs and available drivers in parallel
+      // Fetch KPIs, available drivers, and retrieval requests in parallel
       final results = await Future.wait([
         OperatorDashboardApiService.getDashboardKpis(
           outletId: event.outletId,
@@ -24,14 +25,19 @@ class OperatorDashboardBloc
         OperatorAvailableDriversApiService.getAvailableDrivers(
           outletId: event.outletId,
         ),
+        OperatorRetrievalRequestsApiService.getRetrievalRequests(
+          outletId: event.outletId,
+        ),
       ]);
 
       final kpis = results[0] as dynamic;
       final availableDrivers = results[1] as dynamic;
+      final retrievalRequests = results[2] as dynamic;
 
       emit(OperatorDashboardLoaded(
         kpis: kpis,
         availableDrivers: availableDrivers,
+        retrievalRequests: retrievalRequests,
       ));
     } catch (e) {
       emit(OperatorDashboardError(e.toString()));

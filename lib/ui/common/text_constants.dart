@@ -242,4 +242,9 @@ class TextConstants {
   // Operator Home (Legacy)
   static const String operatorHomeTitle = 'Operator Home';
   static const String welcomeOperator = 'Welcome, Operator! (Menu: ';
+
+  // Operator Dashboard Data
+  static const String retrievalRequests = 'Retrieval Requests';
+  static const String availableDrivers = 'Available Drivers';
+  static const String digitalKeyRack = 'Digital Key Rack';
 }

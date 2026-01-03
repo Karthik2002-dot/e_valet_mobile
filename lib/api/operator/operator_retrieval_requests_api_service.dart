@@ -2,14 +2,14 @@ import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 
-class OperatorAvailableDriversApiService {
-  OperatorAvailableDriversApiService._();
+class OperatorRetrievalRequestsApiService {
+  OperatorRetrievalRequestsApiService._();
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static Future<OperatorAvailableDriversResponse> getAvailableDrivers({
+  static Future<RetrievalRequestsResponse> getRetrievalRequests({
     required String outletId,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
@@ -28,26 +28,26 @@ class OperatorAvailableDriversApiService {
 
     try {
       final response = await base.get(
-        '/operators/dashboard/available-drivers',
+        '/operators/dashboard/retrieval-requests',
         queryParameters: {'outletId': outletId},
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final drivers = OperatorAvailableDriversResponse.fromJson(data);
-        return drivers;
+        final retrievalRequests = RetrievalRequestsResponse.fromJson(data);
+        return retrievalRequests;
       } else {
         throw ApiException(
-          'Failed to load available drivers',
-          code: 'available_drivers_error',
+          'Failed to load retrieval requests',
+          code: 'retrieval_requests_error',
         );
       }
     } on ApiException {
       rethrow;
     } catch (e) {
       throw ApiException(
-        'Error fetching available drivers: $e',
-        code: 'available_drivers_exception',
+        'Error fetching retrieval requests: $e',
+        code: 'retrieval_requests_exception',
       );
     }
   }
