@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/available_drivers_card.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/retrieval_request_card.dart';
 
 class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
+  final OperatorAvailableDriversResponse availableDrivers;
 
   const DashboardThreeColumnLayout({
     super.key,
     required this.retrievalRequests,
+    required this.availableDrivers,
   });
 
   @override
@@ -65,7 +69,9 @@ class DashboardThreeColumnLayout extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: MediaQuery.of(context).size.width * 0.02,),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.02,
+          ),
           // Available Drivers Column
           Expanded(
             flex: 1,
@@ -81,19 +87,32 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: TextComponent(
-                        labelText: 'Coming soon',
-                        color: Colors.grey[600] ?? Colors.grey,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+                  child: availableDrivers.drivers.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 48,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 8),
+                              TextComponent(
+                                labelText: 'No available drivers at the moment',
+                                fontSize: 14,
+                                color: Colors.grey[600] ?? Colors.grey,
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: availableDrivers.drivers.length,
+                          itemBuilder: (context, index) {
+                            final driver = availableDrivers.drivers[index];
+                            return AvailableDriversCard(driver: driver);
+                          },
+                        ),
                 ),
               ],
             ),

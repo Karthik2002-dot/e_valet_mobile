@@ -70,6 +70,7 @@ class _DashboardContentState extends State<DashboardContent> {
                         ),
                         DashboardThreeColumnLayout(
                           retrievalRequests: state.retrievalRequests,
+                          availableDrivers: state.availableDrivers,
                         ),
                       ],
                     );
