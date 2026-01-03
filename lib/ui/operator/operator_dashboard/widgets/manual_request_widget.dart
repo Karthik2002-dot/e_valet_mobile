@@ -37,7 +37,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a card number'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -48,7 +48,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a valid card number'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -73,7 +73,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
 
@@ -88,7 +88,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to create request: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -122,7 +122,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
               decoration: InputDecoration(
                 hintText: 'Enter Card Number.',
                 hintStyle: const TextStyle(
-                  color: Colors.black87,
+                  color: AppColors.black,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -130,7 +130,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                 fillColor: const Color(0xFFE0E0E0),
                 prefixIcon: const Icon(
                   Icons.credit_card,
-                  color: Colors.black87,
+                  color: AppColors.black,
                   size: 20,
                 ),
                 border: OutlineInputBorder(
@@ -152,7 +152,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
               ),
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.black,
+                color: AppColors.black,
               ),
               onFieldSubmitted: (_) => _handleManualRequest(),
             ),

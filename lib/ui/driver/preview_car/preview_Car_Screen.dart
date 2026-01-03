@@ -96,7 +96,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   // Loading overlay when submitting
                   if (isSubmitting)
                     Container(
-                      color: Colors.black.withOpacity(0.5),
+                      color: AppColors.black.withOpacity(0.5),
                       child: const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,

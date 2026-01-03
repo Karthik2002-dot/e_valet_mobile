@@ -31,7 +31,7 @@ class OperatorCarLogsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -55,7 +55,7 @@ class OperatorCarLogsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
+                      color: AppColors.purple.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -63,7 +63,7 @@ class OperatorCarLogsScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.totalDistanceValue,
-                          color: Colors.purple,
+                          color: AppColors.purple,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),

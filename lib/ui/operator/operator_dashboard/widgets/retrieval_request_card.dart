@@ -40,7 +40,7 @@ class RetrievalRequestCard extends StatelessWidget {
           vertical: MediaQuery.of(context).size.height * 0.01,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(
             12,
           ),
@@ -50,7 +50,7 @@ class RetrievalRequestCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: AppColors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -70,11 +70,11 @@ class RetrievalRequestCard extends StatelessWidget {
                   return Container(
                     width: MediaQuery.of(context).size.width * 0.15,
                     height: MediaQuery.of(context).size.width * 0.15,
-                    color: Colors.grey[300],
+                    color: AppColors.grey,
                     child: Icon(
                       Icons.directions_car,
                       size: MediaQuery.of(context).size.width * 0.08,
-                      color: Colors.grey,
+                      color: AppColors.grey,
                     ),
                   );
                 },
@@ -83,7 +83,7 @@ class RetrievalRequestCard extends StatelessWidget {
                   return Container(
                     width: MediaQuery.of(context).size.width * 0.15,
                     height: MediaQuery.of(context).size.width * 0.15,
-                    color: Colors.grey[300],
+                    color: AppColors.grey,
                     child: const Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -116,7 +116,7 @@ class RetrievalRequestCard extends StatelessWidget {
                     labelText: RetrievalRequestUtils.getPriorityLabel(
                         request.waitingTime),
                     fontSize: MediaQuery.of(context).size.width * 0.014,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -128,13 +128,13 @@ class RetrievalRequestCard extends StatelessWidget {
                 Icon(
                   Icons.access_time,
                   size: MediaQuery.of(context).size.width * 0.016,
-                  color: Colors.red,
+                  color: AppColors.error,
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.008),
                 TextComponent(
                   labelText: request.waitingTime,
                   fontSize: MediaQuery.of(context).size.width * 0.014,
-                  color: Colors.red,
+                  color: AppColors.error,
                   fontWeight: FontWeight.w500,
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.02),
@@ -142,7 +142,7 @@ class RetrievalRequestCard extends StatelessWidget {
                   labelText:
                       'Requested at ${RetrievalRequestUtils.formatTime(request.requestedAt)}',
                   fontSize: MediaQuery.of(context).size.width * 0.012,
-                  color: Colors.grey[600] ?? Colors.grey,
+                  color: AppColors.grey,
                 ),
               ],
             ),

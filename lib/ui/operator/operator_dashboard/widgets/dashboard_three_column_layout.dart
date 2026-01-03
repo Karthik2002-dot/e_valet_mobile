@@ -51,13 +51,13 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
                               labelText: 'No pending retrieval requests',
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),
@@ -103,13 +103,13 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
                               labelText: 'No available drivers at the moment',
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),
@@ -149,13 +149,13 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppColors.grey,
                             ),
                             const SizedBox(height: 8),
                             TextComponent(
                               labelText: 'No vehicles in key rack',
                               fontSize: 14,
-                              color: Colors.grey[600] ?? Colors.grey,
+                              color: AppColors.grey,
                             ),
                           ],
                         ),

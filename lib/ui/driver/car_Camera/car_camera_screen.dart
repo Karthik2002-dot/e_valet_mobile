@@ -160,7 +160,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                         : false;
 
             return Scaffold(
-              backgroundColor: Colors.black,
+              backgroundColor: AppColors.black,
               appBar: const CustomAppBar(),
               body: Stack(
                 children: [

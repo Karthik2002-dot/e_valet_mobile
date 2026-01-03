@@ -1,10 +1,9 @@
+import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-
-import '../core/api_config.dart';
 
 class OperatorManualRetrievalApiService {
   static String get _baseUrl => ApiConfig.valetBaseUrl;

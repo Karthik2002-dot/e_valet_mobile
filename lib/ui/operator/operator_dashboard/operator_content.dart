@@ -96,7 +96,7 @@ class _DashboardContentState extends State<DashboardContent> {
                             TextComponent(
                               labelText:
                                   '${TextConstants.errorLabel}: ${state.message}',
-                              color: Colors.red,
+                              color: AppColors.error,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),

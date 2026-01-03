@@ -31,7 +31,7 @@ class OperatorDriversScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -39,7 +39,7 @@ class OperatorDriversScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.totalDriversValue,
-                          color: Colors.blue,
+                          color: AppColors.blue,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),
@@ -56,7 +56,7 @@ class OperatorDriversScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: AppColors.success.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -64,7 +64,7 @@ class OperatorDriversScreen extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: TextConstants.activeTodayValue,
-                          color: Colors.purple,
+                          color: AppColors.purple,
                           fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 6),

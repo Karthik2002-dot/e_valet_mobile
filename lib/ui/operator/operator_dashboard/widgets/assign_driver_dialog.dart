@@ -45,7 +45,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
         widget.onAssignmentComplete();
@@ -58,7 +58,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to assign driver: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
