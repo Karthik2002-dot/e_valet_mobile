@@ -3,7 +3,6 @@ import 'package:niloufer_valet_mobile/api/driver/image_API.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
-import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
   PreviewCarBloc() : super(const PreviewCarInitial()) {
@@ -18,8 +17,11 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     emit(const PreviewCarSubmitting());
 
     try {
-      // Save the photo path for later upload during accept
-      await TokenStorage.savePendingPhotoPath(event.imagePath);
+      // Upload parking photo directly to park API
+      await ImageApiService.uploadParkingPhoto(
+        imagePath: event.imagePath,
+        sessionId: event.sessionId,
+      );
 
       emit(const PreviewCarSuccess());
     } on ApiException catch (e) {
