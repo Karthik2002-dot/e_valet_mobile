@@ -57,7 +57,6 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     try {
       final assignedSessions =
           await AssignedSessionsApiService.fetchAssignedSessions();
-      print('📊 Assigned sessions polled: ${assignedSessions.length} sessions');
 
       // Only reflect/show data when we successfully get it
       _handleAssignedSessionsUpdate(assignedSessions);
@@ -65,7 +64,6 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       // Restart the timer when we get data
       _startPolling();
     } catch (e) {
-      print('❌ Failed to poll assigned sessions: $e');
       // Even on error, restart the timer to continue polling
       _startPolling();
     }
@@ -74,19 +72,6 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
   void _handleAssignedSessionsUpdate(List<dynamic> assignedSessions) {
     // Here you can update UI or perform actions only when data is received
     // For example: show a snackbar, update state, navigate, etc.
-    print(
-        '✅ Data received - Assigned sessions: ${assignedSessions.length} sessions');
-
-    // Example: Show a brief visual indicator when data is received
-    // You can uncomment and modify this to show actual UI feedback
-    /*
-    if (mounted) {
-      SnackBars.showSuccessSnackBar(
-        context,
-        'Sessions updated: ${assignedSessions.length} assigned',
-      );
-    }
-    */
   }
 
   @override
