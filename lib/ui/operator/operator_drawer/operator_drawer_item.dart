@@ -18,7 +18,7 @@ class OperatorDrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -27,8 +27,8 @@ class OperatorDrawerItem extends StatelessWidget {
             const SizedBox(width: 12),
             Image.asset(
               asset,
-              width: 22,
-              height: 22,
+              width: 35,
+              height: 35,
               color: isSelected ? AppColors.primaryDark : AppColors.white,
             ),
             const SizedBox(width: 12),
@@ -60,7 +60,7 @@ class OperatorDrawerItem extends StatelessWidget {
                       labelText: title,
                       color:
                           isSelected ? AppColors.primaryDark : AppColors.white,
-                      fontSize: 16,
+                      fontSize: 22,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
