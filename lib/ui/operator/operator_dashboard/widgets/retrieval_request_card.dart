@@ -63,7 +63,7 @@ class RetrievalRequestCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 request.vehicle.photo,
-                width: MediaQuery.of(context).size.width * 1,
+                width: MediaQuery.of(context).size.width * 0.25,
                 height: MediaQuery.of(context).size.width * 0.15,
                 fit: BoxFit.fill,
                 errorBuilder: (context, error, stackTrace) {

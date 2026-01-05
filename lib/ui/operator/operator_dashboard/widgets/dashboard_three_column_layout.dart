@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
-import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/available_drivers_card.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/retrieval_request_card.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/digital_key_rack_card.dart';
 
 class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
-  final DigitalKeyRackResponse digitalKeyRack;
   final VoidCallback onAssignmentComplete;
 
   const DashboardThreeColumnLayout({
     super.key,
     required this.retrievalRequests,
     required this.availableDrivers,
-    required this.digitalKeyRack,
     required this.onAssignmentComplete,
   });
 
@@ -120,52 +116,6 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final driver = availableDrivers.drivers[index];
                           return AvailableDriversCard(driver: driver);
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-        // Digital Key Rack Column
-        Expanded(
-          flex: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextComponent(
-                labelText: TextConstants.digitalKeyRack,
-                color: AppColors.black,
-                fontSize: MediaQuery.of(context).size.width * 0.018,
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
-              ),
-              Expanded(
-                child: digitalKeyRack.keyRack.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 48,
-                              color: AppColors.grey,
-                            ),
-                            const SizedBox(height: 8),
-                            TextComponent(
-                              labelText: TextConstants.noVehiclesInKeyRack,
-                              fontSize: 14,
-                              color: AppColors.grey,
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: digitalKeyRack.keyRack.length,
-                        itemBuilder: (context, index) {
-                          final keyRackItem = digitalKeyRack.keyRack[index];
-                          return DigitalKeyRackCard(keyRackItem: keyRackItem);
                         },
                       ),
               ),

@@ -75,7 +75,6 @@ class _DashboardContentState extends State<DashboardContent> {
                             child: DashboardThreeColumnLayout(
                               retrievalRequests: state.retrievalRequests,
                               availableDrivers: state.availableDrivers,
-                              digitalKeyRack: state.digitalKeyRack,
                               onAssignmentComplete: () {
                                 // Refresh the dashboard
                                 _dashboardBloc.add(

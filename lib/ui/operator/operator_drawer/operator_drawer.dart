@@ -66,16 +66,31 @@ class OperatorDrawer extends StatelessWidget {
                   onItemSelected?.call(3);
                 },
               ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextComponent(
-                  labelText: 'v${"0.2.0"}', // placeholder version display
-                  color: AppColors.white,
-                  fontSize: 12,
-                ),
+              Spacer(),
+              Divider(
+                color: AppColors.black,
+                thickness: 2,
+                indent: 16,
+                endIndent: 16,
               ),
-              const SizedBox(height: 12),
+              OperatorDrawerItem(
+                asset: 'assets/images/profile.png',
+                title: 'Profile',
+                isSelected: selectedIndex == 4,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(4);
+                },
+              ),
+              OperatorDrawerItem(
+                asset: 'assets/images/logout.png',
+                title: 'Logout',
+                isSelected: selectedIndex == 5,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(5);
+                },
+              ),
             ],
           ),
         ),
