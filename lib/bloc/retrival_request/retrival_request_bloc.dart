@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'retrival_request_event.dart';
@@ -12,6 +13,7 @@ class RetrivalRequestBloc
   RetrivalRequestBloc() : super(const RetrivalRequestInitial()) {
     on<FetchRetrivalRequests>(_onFetch);
     on<AcceptRetrivalRequest>(_onAccept);
+    on<UpdateAssignedSessions>(_onUpdateSessions);
   }
 
   Future<void> _onFetch(
@@ -26,6 +28,14 @@ class RetrivalRequestBloc
       final msg = (e is Exception) ? e.toString() : 'Failed to load requests';
       emit(RetrivalRequestError(msg));
     }
+  }
+
+  void _onUpdateSessions(
+    UpdateAssignedSessions event,
+    Emitter<RetrivalRequestState> emit,
+  ) {
+    // Update the UI with polled data silently
+    emit(RetrivalRequestLoaded(event.sessions));
   }
 
   Future<void> _onAccept(
