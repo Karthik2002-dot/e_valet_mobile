@@ -51,7 +51,6 @@ class _AssignedSessionSheetLoaderState
   Future<void> _pollAssignedSessions() async {
     try {
       final sessions = await AssignedSessionsApiService.fetchAssignedSessions();
-      print('📊 Assigned sessions polled: ${sessions.length} sessions');
 
       // Only update UI if sessions data has actually changed
       if (_hasSessionsChanged(sessions)) {
