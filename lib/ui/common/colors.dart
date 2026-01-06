@@ -57,4 +57,5 @@ class AppColors {
 
   // Manual Request
   static const Color manualRequestFillColor = Color(0xFFE0E0E0);
+  static const Color orange = Color(0xFFFFA500);
 }
