@@ -5,11 +5,15 @@ import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
 
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
-  SplashBloc() : super(const SplashInitial()) {
+  final WebSocketBloc? webSocketBloc;
+
+  SplashBloc({this.webSocketBloc}) : super(const SplashInitial()) {
     on<SplashStarted>(_onSplashStarted);
     on<SplashAnimationCompleted>(_onSplashAnimationCompleted);
   }
@@ -74,9 +78,29 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
     // If authenticated, try to fetch the profile to determine roles.
     List<String> roles = [];
+    String? outletId;
+    String? userId;
+
     try {
       final profile = await ProfileApiService.getProfile();
       roles = profile.normalizedRoles;
+      userId = profile.user?.id;
+
+      // Get outletId if user is an operator
+      final isOperator = roles.any((r) => r.contains('operator'));
+      if (isOperator) {
+        outletId = '2';
+      }
+
+      // Initialize WebSocket connection if user is authenticated
+      if (webSocketBloc != null && userId != null) {
+        await WebSocketHelper.connectAfterLogin(
+          webSocketBloc: webSocketBloc!,
+          outletId: outletId,
+          operatorId: isOperator ? userId : null,
+          driverId: roles.any((r) => r.contains('driver')) ? userId : null,
+        );
+      }
     } catch (e) {
       // Ignore profile fetch failure; fallback to empty roles
       print('Splash: Profile fetch failed: $e');

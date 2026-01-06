@@ -9,6 +9,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_three_column_layout.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/manual_request_widget.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -19,16 +20,25 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent> {
   late OperatorDashboardBloc _dashboardBloc;
+  final String _outletId = '2';
 
   @override
   void initState() {
     super.initState();
-    _dashboardBloc = OperatorDashboardBloc();
+
+    // Get WebSocketBloc from context if available
+    final webSocketBloc = context.read<WebSocketBloc?>();
+
+    // Initialize OperatorDashboardBloc with WebSocketBloc for real-time updates
+    _dashboardBloc = OperatorDashboardBloc(
+      webSocketBloc: webSocketBloc,
+      outletId: _outletId,
+    );
+
     // Fetch data when widget initializes
-    // TODO: Replace with actual outletId from session/profile
     _dashboardBloc.add(
-      const FetchDashboardKpis(
-        outletId: '2',
+      FetchDashboardKpis(
+        outletId: _outletId,
       ),
     );
   }
@@ -78,8 +88,8 @@ class _DashboardContentState extends State<DashboardContent> {
                               onAssignmentComplete: () {
                                 // Refresh the dashboard
                                 _dashboardBloc.add(
-                                  const FetchDashboardKpis(
-                                    outletId: '2',
+                                  FetchDashboardKpis(
+                                    outletId: _outletId,
                                   ),
                                 );
                               },
@@ -102,8 +112,8 @@ class _DashboardContentState extends State<DashboardContent> {
                             ElevatedButton(
                               onPressed: () {
                                 _dashboardBloc.add(
-                                  const FetchDashboardKpis(
-                                    outletId: '2',
+                                  FetchDashboardKpis(
+                                    outletId: _outletId,
                                   ),
                                 );
                               },
@@ -123,8 +133,8 @@ class _DashboardContentState extends State<DashboardContent> {
                 onRequestCreated: () {
                   // Refresh the dashboard
                   _dashboardBloc.add(
-                    const FetchDashboardKpis(
-                      outletId: '2',
+                    FetchDashboardKpis(
+                      outletId: _outletId,
                     ),
                   );
                 },

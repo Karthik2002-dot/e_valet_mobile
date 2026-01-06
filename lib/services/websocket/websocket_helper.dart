@@ -1,0 +1,132 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
+import 'package:niloufer_valet_mobile/api/core/api_config.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+
+/// Helper class to manage WebSocket lifecycle during app flow
+class WebSocketHelper {
+  /// Initialize WebSocket connection after login
+  /// Call this after successful login or when restoring session from cache
+  static Future<void> connectAfterLogin({
+    required WebSocketBloc webSocketBloc,
+    String? outletId,
+    String? driverId,
+    String? operatorId,
+  }) async {
+    try {
+      // Get access token
+      final accessToken = await TokenStorage.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        print('Cannot connect WebSocket: No access token');
+        return;
+      }
+
+      // Get base URL and construct WebSocket URL
+      final baseUrl = ApiConfig.websocketBaseUrl;
+      if (baseUrl.isEmpty) {
+        print('Cannot connect WebSocket: Base URL is empty');
+        return;
+      }
+
+      final notificationsUrl = baseUrl;
+
+      // Connect to WebSocket with authentication
+      // Pass token as query parameter for better compatibility
+      webSocketBloc.add(ConnectWebSocket(
+        url: notificationsUrl,
+        query: {'token': accessToken},
+      ));
+
+      // Wait for connection to actually establish by listening to connection stream
+      final connectionCompleter = Completer<void>();
+      late final StreamSubscription connectionSubscription;
+
+      connectionSubscription =
+          webSocketBloc.service.connectionStream.listen((isConnected) {
+        if (isConnected && !connectionCompleter.isCompleted) {
+          connectionCompleter.complete();
+          connectionSubscription.cancel();
+        }
+      });
+
+      // Wait for connection with timeout
+      try {
+        await connectionCompleter.future.timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            print('WebSocket connection timeout after 10 seconds');
+            connectionSubscription.cancel();
+          },
+        );
+      } catch (e) {
+        print('Error waiting for WebSocket connection: $e');
+        connectionSubscription.cancel();
+        // Continue anyway to attempt room joins
+      }
+
+      // Join outlet room only (driver/operator rooms are auto-joined by backend based on user roles)
+      if (outletId != null) {
+        webSocketBloc.add(JoinRoom.outlet(outletId));
+      }
+    } catch (e) {
+      print('Error connecting WebSocket after login: $e');
+    }
+  }
+
+  /// Disconnect WebSocket on logout
+  /// Call this before clearing auth tokens during logout
+  static Future<void> disconnectOnLogout({
+    required WebSocketBloc webSocketBloc,
+  }) async {
+    try {
+      // Disconnect from WebSocket
+      webSocketBloc.add(const DisconnectWebSocket());
+
+      // Wait a moment for cleanup
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (e) {
+      print('Error disconnecting WebSocket on logout: $e');
+    }
+  }
+
+  /// Join additional rooms dynamically (e.g., when outlet changes)
+  static void joinRoom({
+    required WebSocketBloc webSocketBloc,
+    required String roomType,
+    required String roomId,
+  }) {
+    try {
+      switch (roomType) {
+        case 'outlet':
+          webSocketBloc.add(JoinRoom.outlet(roomId));
+          break;
+        default:
+          print('Unknown room type: $roomType');
+      }
+    } catch (e) {
+      print('Error joining room: $e');
+    }
+  }
+
+  /// Leave a room dynamically
+  static void leaveRoom({
+    required WebSocketBloc webSocketBloc,
+    required String roomType,
+    required String roomId,
+  }) {
+    try {
+      switch (roomType) {
+        case 'outlet':
+          webSocketBloc.add(LeaveRoom.outlet(roomId));
+          break;
+        default:
+          print('Unknown room type: $roomType');
+      }
+    } catch (e) {
+      print('Error leaving room: $e');
+    }
+  }
+}
