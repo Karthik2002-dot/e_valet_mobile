@@ -45,7 +45,7 @@ class ValetListView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextComponent(
-                  labelText: 'Error: ${state.message}',
+                  labelText: '${TextConstants.errorLabel}: ${state.message}',
                   color: AppColors.error,
                   textAlign: TextAlign.center,
                 ),

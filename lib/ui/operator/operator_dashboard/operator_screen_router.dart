@@ -4,7 +4,8 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_driv
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/operator_car_logs_screen.dart';
 
 class OperatorScreenRouter {
-  static Widget getScreen(int selectedIndex, Widget dashboardContent, int refreshKey) {
+  static Widget getScreen(
+      int selectedIndex, Widget dashboardContent, int refreshKey) {
     switch (selectedIndex) {
       case 0:
         return dashboardContent;

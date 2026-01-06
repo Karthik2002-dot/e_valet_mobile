@@ -88,7 +88,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextComponent(
-                            labelText: 'Error: ${state.message}',
+                            labelText:
+                                '${TextConstants.errorLabel}: ${state.message}',
                             color: AppColors.error,
                             textAlign: TextAlign.center,
                           ),
@@ -100,7 +101,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                               );
                             },
                             child: const TextComponent(
-                              labelText: 'Retry',
+                              labelText: TextConstants.retryButton,
                             ),
                           ),
                         ],

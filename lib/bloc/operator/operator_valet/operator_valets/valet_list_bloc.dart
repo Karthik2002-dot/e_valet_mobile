@@ -14,7 +14,8 @@ class ValetListBloc extends Bloc<ValetListEvent, ValetListState> {
   ) async {
     emit(ValetListLoading());
     try {
-      final response = await ValetListApiService.getValets(outletId: event.outletId);
+      final response =
+          await ValetListApiService.getValets(outletId: event.outletId);
       emit(ValetListLoaded(response: response));
     } catch (e) {
       emit(ValetListError(message: e.toString()));
