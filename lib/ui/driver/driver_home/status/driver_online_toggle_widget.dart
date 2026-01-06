@@ -80,9 +80,7 @@ class DriverOnlineToggleWidget extends StatelessWidget {
                       onChanged: (value) {
                         // Only call API, don't update local state immediately
                         // The toggle will update automatically when API succeeds
-                        final newStatus = value
-                            ? TextConstants.statusValueOnline
-                            : TextConstants.statusValueOffline;
+                        final newStatus = value ? 'ONLINE' : 'OFFLINE';
                         context
                             .read<DriverStatusBloc>()
                             .add(DriverStatusUpdated(newStatus));
