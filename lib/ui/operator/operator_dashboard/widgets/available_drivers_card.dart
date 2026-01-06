@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
-import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
-import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
@@ -64,7 +62,9 @@ class AvailableDriversCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.003),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.003,
+                ),
                 TextComponent(
                   labelText: driver.phone,
                   fontSize: MediaQuery.of(context).size.width * 0.013,
