@@ -6,10 +6,13 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_kpi_grid.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dashboard_three_column_layout.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/manual_request_widget.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -69,11 +72,74 @@ class _DashboardContentState extends State<DashboardContent> {
                 child:
                     BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
                   builder: (context, state) {
-                    if (state is OperatorDashboardLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
+                    final isLoading = state is OperatorDashboardLoading;
+                    final isLoaded = state is OperatorDashboardLoaded;
+
+                    if (isLoading) {
+                      // Show skeleton loaders for KPIs and columns
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // KPI Skeleton Grid
+                          GridView.count(
+                            shrinkWrap: true,
+                            crossAxisCount: 4,
+                            crossAxisSpacing: MediaQuery.of(context).size.width * 0.02,
+                            mainAxisSpacing: MediaQuery.of(context).size.height * 0.02,
+                            childAspectRatio: 2.5,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: List.generate(
+                              4,
+                              (index) => Container(
+                                padding: EdgeInsets.all(
+                                  MediaQuery.of(context).size.width * 0.015,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.grey.withOpacity(0.1),
+                                      spreadRadius: 1,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SkeletonLoader(
+                                      height: MediaQuery.of(context).size.height * 0.025,
+                                      width: MediaQuery.of(context).size.width * 0.05,
+                                      borderRadius: 4,
+                                    ),
+                                    SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                                    SkeletonLoader(
+                                      height: MediaQuery.of(context).size.height * 0.015,
+                                      width: MediaQuery.of(context).size.width * 0.08,
+                                      borderRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03,
+                          ),
+                          Expanded(
+                            child: DashboardThreeColumnLayout(
+                              retrievalRequests: RetrievalRequestsResponse(requests: []),
+                              availableDrivers: OperatorAvailableDriversResponse(drivers: []),
+                              onAssignmentComplete: () {},
+                              isLoading: true,
+                            ),
+                          ),
+                        ],
                       );
-                    } else if (state is OperatorDashboardLoaded) {
+                    } else if (isLoaded) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -93,6 +159,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                   ),
                                 );
                               },
+                              isLoading: false,
                             ),
                           ),
                         ],
