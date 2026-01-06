@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 /// App Color Scheme
 class AppColors {
@@ -49,4 +48,13 @@ class AppColors {
       Color(0x80000000); // black.withOpacity(0.5)
   static const Color qrSuccessBorderLight =
       Color(0x4D4CAF50); // green.withOpacity(0.3)
+
+  // Additional QR Scanner colors
+  static const Color qrSuccessColor = Color(0xFF10B981); // Bright green
+  static const Color qrErrorColor = Color(0xFFEF4444); // Bright red
+  static const Color qrSuccessBg = Color(0xFFECFDF5); // Light green background
+  static const Color qrErrorBg = Color(0xFFFEF2F2); // Light red background
+
+  // Manual Request
+  static const Color manualRequestFillColor = Color(0xFFE0E0E0);
 }

@@ -5,10 +5,8 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_qr_scanner_content.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_manual_entry_content.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
@@ -33,16 +31,6 @@ class DriverOnlineContent extends StatefulWidget {
 }
 
 class _DriverOnlineContentState extends State<DriverOnlineContent> {
-  bool _isManualEntry = false;
-
-  void _toggleEntryMode(BuildContext context) {
-    setState(() {
-      _isManualEntry = !_isManualEntry;
-    });
-    // Reset tag submission state when switching modes
-    context.read<TagSubmissionBloc>().add(const TagSubmissionReset());
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -89,9 +77,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
             ),
             SizedBox(height: widget.screenHeight * 0.01),
             TextComponent(
-              labelText: _isManualEntry
-                  ? TextConstants.enterTagNumberTitle
-                  : TextConstants.scanKeyTagInstruction,
+              labelText: TextConstants.scanKeyTagInstruction,
               fontSize: widget.isDesktop
                   ? widget.screenWidth * 0.012
                   : widget.isTablet
@@ -102,29 +88,13 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: widget.screenHeight * 0.03),
-            // Conditional content: QR Scanner or Manual Entry
-            Builder(
-              builder: (context) {
-                if (_isManualEntry) {
-                  return DriverManualEntryContent(
-                    screenWidth: widget.screenWidth,
-                    screenHeight: widget.screenHeight,
-                    isTablet: widget.isTablet,
-                    isDesktop: widget.isDesktop,
-                    onSwitchToQrScanner: () => _toggleEntryMode(context),
-                  );
-                } else {
-                  return DriverQrScannerContent(
-                    screenWidth: widget.screenWidth,
-                    screenHeight: widget.screenHeight,
-                    isTablet: widget.isTablet,
-                    isDesktop: widget.isDesktop,
-                    onSwitchToManualEntry: () => _toggleEntryMode(context),
-                  );
-                }
-              },
+            // QR Scanner with integrated manual entry
+            DriverQrScannerContent(
+              screenWidth: widget.screenWidth,
+              screenHeight: widget.screenHeight,
+              isTablet: widget.isTablet,
+              isDesktop: widget.isDesktop,
             ),
-            SizedBox(height: widget.screenHeight * 0.03),
           ],
         ),
       ),

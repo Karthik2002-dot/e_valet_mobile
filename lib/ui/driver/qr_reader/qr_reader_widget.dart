@@ -8,7 +8,6 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_status_overlay_widget.dart';
-import 'package:niloufer_valet_mobile/ui/driver/qr_reader/scanner_brackets_painter.dart';
 
 class QrReaderWidget extends StatefulWidget {
   final double screenWidth;
@@ -274,13 +273,11 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     }
 
     final scannerHeight = widget.isDesktop
-        ? widget.screenHeight * 0.35
+        ? widget.screenHeight * 0.25
         : widget.isTablet
-            ? widget.screenHeight * 0.38
-            : widget.screenHeight * 0.35;
+            ? widget.screenHeight * 0.28
+            : widget.screenHeight * 0.25;
 
-    final scannerContentWidth = widget.screenWidth * 0.75;
-    final scannerContentHeight = scannerHeight * 0.7;
     final borderWidth = widget.screenWidth * 0.005;
     final borderRadius = widget.screenWidth * 0.03;
     final scannerContainerWidth = widget.screenWidth * 0.85;
@@ -365,27 +362,6 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                         }
                       },
                     ),
-                    // Overlay with L-shaped corner brackets
-                    CustomPaint(
-                      size: Size(scannerContentWidth, scannerContentHeight),
-                      painter: ScannerBracketsPainter(
-                        strokeWidth: borderWidth * 2,
-                        cornerLength: widget.screenWidth * 0.1,
-                      ),
-                    ),
-                    // Scanning lines overlay
-                    Container(
-                      width: scannerContentWidth,
-                      height: scannerContentHeight,
-                      decoration: BoxDecoration(
-                        border: Border.symmetric(
-                          horizontal: BorderSide(
-                            color: AppColors.primary.withOpacity(0.5),
-                            width: borderWidth,
-                          ),
-                        ),
-                      ),
-                    ),
                     if (isProcessing)
                       Container(
                         color: AppColors.qrProcessingOverlay,
@@ -401,9 +377,10 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                     if (state.shouldStopScanner &&
                         (state.qrData != null || state.errorMessage != null))
                       Positioned(
-                        top: scannerHeight * 0.2,
-                        left: scannerContainerWidth * 0.1,
-                        right: scannerContainerWidth * 0.1,
+                        top: 0, // No top margin - full height from top
+                        left: 0, // No left margin - full width
+                        right: 0, // No right margin - full width
+                        bottom: 0, // Extend to bottom - full height
                         child: QrStatusOverlayWidget(
                           state: state,
                           screenWidth: widget.screenWidth,

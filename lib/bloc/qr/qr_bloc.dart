@@ -45,6 +45,9 @@ class QrBloc extends Bloc<QrEvent, QrState> {
             true, // Stop scanner when data is successfully parsed
         cameraShouldBeActive: false, // Keep camera stopped when data exists
       ));
+
+      // Automatically submit the QR data
+      // This will be handled by the UI layer when qrData is not null
     } catch (e) {
       // On error, also stop scanner and show error message
       emit(state.copyWith(

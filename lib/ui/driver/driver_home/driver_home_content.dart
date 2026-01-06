@@ -48,9 +48,8 @@ class DriverHomeContent extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Header Content Section (welcome message, on break toggle, status card)
+          // Header Content Section (status card)
           DriverHeaderWidget(
-            driverName: driverName,
             isOnline: isOnline,
             screenWidth: screenWidth,
             screenHeight: screenHeight,

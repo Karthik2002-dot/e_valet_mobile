@@ -58,7 +58,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to assign driver: $e'),
+            content: Text('${TextConstants.failedToAssignDriver}: $e'),
             backgroundColor: AppColors.error,
           ),
         );
