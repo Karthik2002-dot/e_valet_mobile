@@ -1,14 +1,10 @@
-import 'dart:convert';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_kpis_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:http/http.dart' as http;
 
 class ValetKpisApiService {
-    static String get _baseUrl => ApiConfig.valetBaseUrl;
-
   /// Get valet KPIs for a specific outlet
   static Future<ValetKpisResponse> getValetKpis({
     required String outletId,
