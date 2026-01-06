@@ -10,8 +10,25 @@ class TextConstants {
   static const statusOnline = 'Online';
   static const statusOffline = 'Offline';
 
+  // Status values for API communication
+  static const statusValueOnline = 'online';
+  static const statusValueOffline = 'offline';
+
+  // QR Scanner
+  static const orEnterKey = 'Or Enter Key';
+
+  // Manual Request
+  static const pleaseEnterCardNumber = 'Please enter a card number';
+  static const pleaseEnterValidCardNumber = 'Please enter a valid card number';
+  static const manualRequest = 'MANUAL REQUEST';
+  static const processingText = 'PROCESSING...';
+  static const failedToCreateRequest = 'Failed to create request';
+
+  // Assign Driver
+  static const failedToAssignDriver = 'Failed to assign driver';
+
   static const welcomeTitle = 'Welcome to Café Niloufer Valet Service';
-  static const welcomeSubtitle = "I\'m Sample Name, your valet for today.";
+  static const welcomeSubtitle = "I'm Sample Name, your valet for today.";
   static const qrInstruction =
       'Please scan this QR code so I can take care of your car and keep you updated on WhatsApp.';
 

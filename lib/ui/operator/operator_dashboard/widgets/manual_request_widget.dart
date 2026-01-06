@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
@@ -36,7 +37,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
     if (cardNumberText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a card number'),
+          content: Text(TextConstants.pleaseEnterCardNumber),
           backgroundColor: AppColors.error,
         ),
       );
@@ -47,7 +48,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
     if (cardNumber == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid card number'),
+          content: Text(TextConstants.pleaseEnterValidCardNumber),
           backgroundColor: AppColors.error,
         ),
       );
@@ -87,7 +88,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create request: $e'),
+            content: Text('${TextConstants.failedToCreateRequest}: $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -127,7 +128,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                   fontWeight: FontWeight.w500,
                 ),
                 filled: true,
-                fillColor: const Color(0xFFE0E0E0),
+                fillColor: AppColors.manualRequestFillColor,
                 prefixIcon: const Icon(
                   Icons.credit_card,
                   color: AppColors.black,
@@ -163,7 +164,9 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
           // Manual Request button
           ElevatedButtonComponent(
             onPressed: _isLoading ? () {} : _handleManualRequest,
-            labelText: _isLoading ? 'PROCESSING...' : 'MANUAL REQUEST',
+            labelText: _isLoading
+                ? TextConstants.processingText
+                : TextConstants.manualRequest,
             fontColor: AppColors.black,
             fontSize: MediaQuery.of(context).size.width * 0.015,
             elevatedButtonBackgroundColor:

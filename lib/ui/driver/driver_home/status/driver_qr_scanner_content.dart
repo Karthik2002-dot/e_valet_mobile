@@ -130,7 +130,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
             // "Or Enter Key" text
             TextComponent(
-              labelText: 'Or Enter Key',
+              labelText: TextConstants.orEnterKey,
               fontSize: widget.isDesktop
                   ? widget.screenWidth * 0.012
                   : widget.isTablet

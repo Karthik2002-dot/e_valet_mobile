@@ -28,10 +28,10 @@ class QrStatusOverlayWidget extends StatelessWidget {
     final isSuccess = state.qrData != null;
 
     // Brighter colors for better visibility
-    final successColor = const Color(0xFF10B981); // Bright green
-    final errorColor = const Color(0xFFEF4444); // Bright red
-    final successBg = const Color(0xFFECFDF5); // Light green background
-    final errorBg = const Color(0xFFFEF2F2); // Light red background
+    final successColor = AppColors.qrSuccessColor;
+    final errorColor = AppColors.qrErrorColor;
+    final successBg = AppColors.qrSuccessBg;
+    final errorBg = AppColors.qrErrorBg;
 
     return Container(
       padding: EdgeInsets.symmetric(
