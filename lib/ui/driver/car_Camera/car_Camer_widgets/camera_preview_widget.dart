@@ -15,10 +15,24 @@ class CameraPreviewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isCameraInitialized && cameraController != null) {
+      final size = MediaQuery.of(context).size;
+      final orientation = MediaQuery.of(context).orientation;
+
+      // Calculate aspect ratio based on orientation
+      double aspectRatio;
+      if (orientation == Orientation.portrait) {
+        aspectRatio = size.width / size.height;
+      } else {
+        aspectRatio = size.height / size.width;
+      }
+
       return SizedBox(
         width: double.infinity,
         height: double.infinity,
-        child: CameraPreview(cameraController!),
+        child: AspectRatio(
+          aspectRatio: aspectRatio,
+          child: CameraPreview(cameraController!),
+        ),
       );
     } else {
       return Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -30,6 +31,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   late CarCameraBloc _cameraBloc;
   bool _isInitializing = false;
   RouteObserver<ModalRoute>? _routeObserver;
+  Orientation? _currentOrientation;
 
   @override
   void initState() {
@@ -37,6 +39,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     _cameraBloc = CarCameraBloc();
     _routeObserver = RouteObserver<ModalRoute>();
     WidgetsBinding.instance.addObserver(this);
+    // Set preferred orientations to allow landscape
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   @override
@@ -77,7 +86,26 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _cameraBloc.dispose();
+    // Reset preferred orientations when leaving camera screen
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    // Handle orientation changes
+    final orientation = MediaQuery.of(context).orientation;
+    if (_currentOrientation != orientation) {
+      _currentOrientation = orientation;
+      // Reinitialize camera when orientation changes
+      if (!_isInitializing) {
+        _initializeCamera(force: true);
+      }
+    }
   }
 
   void _initializeCamera({bool force = false}) {
@@ -102,8 +130,10 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    // Get screen dimensions and orientation for potential future use
+    // final screenHeight = MediaQuery.of(context).size.height;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final orientation = MediaQuery.of(context).orientation;
 
     return BlocProvider<CarCameraBloc>.value(
       value: _cameraBloc,
