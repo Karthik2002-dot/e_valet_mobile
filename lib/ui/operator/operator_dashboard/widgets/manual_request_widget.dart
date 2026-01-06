@@ -5,8 +5,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 
 class ManualRequestWidget extends StatefulWidget {
   final VoidCallback onRequestCreated;
@@ -35,23 +34,14 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
   Future<void> _handleManualRequest() async {
     final cardNumberText = _cardNumberController.text.trim();
     if (cardNumberText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(TextConstants.pleaseEnterCardNumber),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      SnackBars.showErrorSnackBar(context, TextConstants.pleaseEnterCardNumber);
       return;
     }
 
     final cardNumber = int.tryParse(cardNumberText);
     if (cardNumber == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(TextConstants.pleaseEnterValidCardNumber),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      SnackBars.showErrorSnackBar(
+          context, TextConstants.pleaseEnterValidCardNumber);
       return;
     }
 
@@ -71,12 +61,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        SnackBars.showSuccessSnackBar(context, response.message);
 
         // Clear the field after successful request
         _cardNumberController.clear();
@@ -86,12 +71,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${TextConstants.failedToCreateRequest}: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        SnackBars.showErrorSnackBar(
+            context, '${TextConstants.failedToCreateRequest}: $e');
       }
     } finally {
       if (mounted) {

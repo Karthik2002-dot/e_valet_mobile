@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
 
@@ -43,12 +44,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        SnackBars.showSuccessSnackBar(context, response.message);
         widget.onAssignmentComplete();
       }
     } catch (e) {
@@ -56,12 +52,8 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${TextConstants.failedToAssignDriver}: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        SnackBars.showErrorSnackBar(
+            context, '${TextConstants.failedToAssignDriver}: $e');
       }
     }
   }
