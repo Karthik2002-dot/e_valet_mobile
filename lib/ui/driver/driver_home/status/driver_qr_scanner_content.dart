@@ -144,7 +144,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
             // Manual entry section
             Container(
-              width: widget.screenWidth * 0.85, // Same width as QR reader container
+              width: widget.screenWidth *
+                  0.85, // Same width as QR reader container
               padding: EdgeInsets.all(widget.screenWidth * 0.025),
               decoration: BoxDecoration(
                 color: AppColors.white,
@@ -218,7 +219,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         backgroundColor: AppColors.primary,
                         disabledBackgroundColor: AppColors.greyLight,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(widget.screenWidth * 0.02),
+                          borderRadius:
+                              BorderRadius.circular(widget.screenWidth * 0.02),
                         ),
                         elevation: 0,
                       ),
@@ -236,8 +238,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                                       : widget.screenWidth * 0.045,
                               child: const CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(AppColors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.white),
                               ),
                             )
                           : Row(
@@ -270,7 +272,6 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                 },
               ),
             ),
-
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
@@ -6,7 +7,12 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
 class CarSuccessScreen extends StatelessWidget {
-  const CarSuccessScreen({super.key});
+  final String imagePath;
+
+  const CarSuccessScreen({
+    super.key,
+    required this.imagePath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +38,30 @@ class CarSuccessScreen extends StatelessWidget {
               ),
             ),
 
-            // Car image (already has checkmark inside)
+            // Captured car image with rounded corners
             Expanded(
-              child: Center(
-                child: Image.asset(
-                  'assets/images/car.png',
-                  width: screenWidth * 0.95,
-                  height: screenHeight * 0.55,
-                  fit: BoxFit.contain,
+              child: Padding(
+                padding: EdgeInsets.all(screenWidth * 0.03),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(screenWidth * 0.04),
+                  child: Image.file(
+                    File(imagePath),
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to static logo if image loading fails
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(screenWidth * 0.04),
+                        child: Image.asset(
+                          'assets/images/car.png',
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

@@ -84,10 +84,12 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       child: BlocListener<PreviewCarBloc, PreviewCarState>(
         listener: (context, state) {
           if (state is PreviewCarSuccess) {
-            // Navigate to success screen
+            // Navigate to success screen with the captured image
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const CarSuccessScreen(),
+                builder: (context) => CarSuccessScreen(
+                  imagePath: widget.imagePath,
+                ),
               ),
             );
           } else if (state is PreviewCarError) {

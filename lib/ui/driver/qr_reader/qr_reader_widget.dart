@@ -377,9 +377,9 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                     if (state.shouldStopScanner &&
                         (state.qrData != null || state.errorMessage != null))
                       Positioned(
-                        top: 0,   // No top margin - full height from top
-                        left: 0,   // No left margin - full width
-                        right: 0,  // No right margin - full width
+                        top: 0, // No top margin - full height from top
+                        left: 0, // No left margin - full width
+                        right: 0, // No right margin - full width
                         bottom: 0, // Extend to bottom - full height
                         child: QrStatusOverlayWidget(
                           state: state,

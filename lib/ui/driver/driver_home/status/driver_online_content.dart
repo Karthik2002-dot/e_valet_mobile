@@ -31,7 +31,6 @@ class DriverOnlineContent extends StatefulWidget {
 }
 
 class _DriverOnlineContentState extends State<DriverOnlineContent> {
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
