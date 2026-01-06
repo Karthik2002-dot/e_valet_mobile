@@ -92,32 +92,42 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
               Expanded(
-                child: availableDrivers.drivers.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 48,
-                              color: AppColors.grey,
+                child: Builder(
+                  builder: (context) {
+                    // Filter to only show drivers with 'free' status
+                    final freeDrivers = availableDrivers.drivers
+                        .where((driver) =>
+                            driver.status.toLowerCase() == 'free')
+                        .toList();
+
+                    return freeDrivers.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 48,
+                                  color: AppColors.grey,
+                                ),
+                                const SizedBox(height: 8),
+                                TextComponent(
+                                  labelText: TextConstants.noAvailableDrivers,
+                                  fontSize: 14,
+                                  color: AppColors.grey,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            TextComponent(
-                              labelText: TextConstants.noAvailableDrivers,
-                              fontSize: 14,
-                              color: AppColors.grey,
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: availableDrivers.drivers.length,
-                        itemBuilder: (context, index) {
-                          final driver = availableDrivers.drivers[index];
-                          return AvailableDriversCard(driver: driver);
-                        },
-                      ),
+                          )
+                        : ListView.builder(
+                            itemCount: freeDrivers.length,
+                            itemBuilder: (context, index) {
+                              final driver = freeDrivers[index];
+                              return AvailableDriversCard(driver: driver);
+                            },
+                          );
+                  },
+                ),
               ),
             ],
           ),

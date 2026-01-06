@@ -117,7 +117,7 @@ class OperatorDashboardBloc
     }
   }
 
-  /// Refresh KPIs silently without showing loading state
+  /// Refresh KPIs and available drivers silently without showing loading state
   /// Used for real-time WebSocket updates
   Future<void> _onRefreshDashboardKpisSilently(
     RefreshDashboardKpisSilently event,
@@ -131,22 +131,30 @@ class OperatorDashboardBloc
     final currentState = state as OperatorDashboardLoaded;
 
     try {
-      // Fetch KPIs silently in the background
-      final kpis = await OperatorDashboardApiService.getDashboardKpis(
-        outletId: event.outletId,
-      );
+      // Fetch KPIs and available drivers silently in the background
+      final results = await Future.wait([
+        OperatorDashboardApiService.getDashboardKpis(
+          outletId: event.outletId,
+        ),
+        OperatorAvailableDriversApiService.getAvailableDrivers(
+          outletId: event.outletId,
+        ),
+      ]);
 
-      // Emit updated state with new KPIs, keeping other data the same
+      final kpis = results[0] as dynamic;
+      final availableDrivers = results[1] as dynamic;
+
+      // Emit updated state with new KPIs and available drivers
       emit(OperatorDashboardLoaded(
         kpis: kpis,
-        availableDrivers: currentState.availableDrivers,
+        availableDrivers: availableDrivers,
         retrievalRequests: currentState.retrievalRequests,
         digitalKeyRack: currentState.digitalKeyRack,
       ));
     } catch (e) {
       // Silently fail - don't show error for background updates
       // Just keep the current state
-      developer.log('Silent KPI refresh failed: $e', error: e);
+      print('Silent KPI and available drivers refresh failed: $e');
     }
   }
 
