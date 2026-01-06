@@ -40,7 +40,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
 
   Widget _getBodyWidget() {
     return OperatorScreenRouter.getScreen(
-        _selectedIndex, DashboardContent(key: ValueKey(_refreshKey)));
+        _selectedIndex, DashboardContent(key: ValueKey(_refreshKey)), _refreshKey);
   }
 
   @override

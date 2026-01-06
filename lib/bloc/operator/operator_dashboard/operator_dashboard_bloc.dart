@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_dashboard_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_available_drivers_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_retrieval_requests_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_digital_key_rack_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_dashboard_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_available_drivers_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_retrieval_requests_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';

@@ -273,4 +273,13 @@ class TextConstants {
   static const String assignDriverTitle = 'Assign Driver';
   static const String selectDriverInstruction =
       'Select a driver to assign this retrieval request';
+
+  // Valet Dashboard
+  static const String valetDashboardTitle = 'Valet Dashboard';
+  static const String valetDashboardDescription = 'Monitor and manage your valet team';
+  static const String totalValets = 'Total Valets';
+  static const String onavailableValets = 'Available';
+  static const String onDutyValets = 'On Duty';
+  static const String onBreakValets = 'On Break';
+  static const String offlineValets = 'Offline';
 }
