@@ -3,14 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/valet_kpis_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/valet_kpis_event.dart';
-import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/valet_kpis_state.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_kpi_card.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_kpis/valet_kpis_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_kpis/valet_kpis_event.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_kpis/valet_kpis_state.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_event.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_kpis_grid.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_list_view.dart';
 
 class OperatorDriversScreen extends StatefulWidget {
   final VoidCallback? onRefresh;
-  
+
   const OperatorDriversScreen({
     super.key,
     this.onRefresh,
@@ -22,29 +25,39 @@ class OperatorDriversScreen extends StatefulWidget {
 
 class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
   late ValetKpisBloc _valetKpisBloc;
+  late ValetListBloc _valetListBloc;
   final String _outletId = '2';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _valetKpisBloc = ValetKpisBloc();
     _valetKpisBloc.add(FetchValetKpis(outletId: _outletId));
+    _valetListBloc = ValetListBloc();
+    _valetListBloc.add(FetchValetList(outletId: _outletId));
   }
 
   void refresh() {
     _valetKpisBloc.add(FetchValetKpis(outletId: _outletId));
+    _valetListBloc.add(FetchValetList(outletId: _outletId));
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     _valetKpisBloc.close();
+    _valetListBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _valetKpisBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _valetKpisBloc),
+        BlocProvider.value(value: _valetListBloc),
+      ],
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -95,43 +108,74 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                     );
                   }
 
-                  return GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 5,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 2,
-                    children: [
-                      ValetKpiCard(
-                        value: isLoaded ? '${state.kpis.totalValets}' : '0',
-                        label: TextConstants.totalValets,
-                        isLoading: isLoading,
-                      ),
-                      ValetKpiCard(
-                        value: isLoaded ? '${state.kpis.availableValets}' : '0',
-                        label: TextConstants.onavailableValets,
-                        isLoading: isLoading,
-                      ),
-                      ValetKpiCard(
-                        value: isLoaded ? '${state.kpis.onDutyValets}' : '0',
-                        label: TextConstants.onDutyValets,
-                        isLoading: isLoading,
-                      ),
-                      ValetKpiCard(
-                        value: isLoaded ? '${state.kpis.onBreakValets}' : '0',
-                        label: TextConstants.onBreakValets,
-                        isLoading: isLoading,
-                      ),
-                      ValetKpiCard(
-                        value: isLoaded ? '${state.kpis.offlineValets}' : '0',
-                        label: TextConstants.offlineValets,
-                        isLoading: isLoading,
-                      ),
-                    ],
+                  return ValetKpisGrid(
+                    kpis: isLoaded ? state.kpis : null,
+                    isLoading: isLoading,
                   );
                 },
               ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border:
+                            Border.all(color: AppColors.grey.withOpacity(0.3)),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: TextConstants.searchByNameOrPhone,
+                          hintStyle: TextStyle(
+                            color: AppColors.grey,
+                            fontSize: MediaQuery.of(context).size.width * 0.013,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.grey,
+                            size: 20,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.013,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border:
+                          Border.all(color: AppColors.grey.withOpacity(0.3)),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.filter_list,
+                        color: AppColors.grey,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        // TODO: Implement filter functionality
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ValetListView(outletId: _outletId),
             ],
           ),
         ),

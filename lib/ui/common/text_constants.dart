@@ -4,15 +4,6 @@ class TextConstants {
   static const emptyText = '';
   static const headerWelcome = 'Welcome,';
   static const headerName = 'Sample Name';
-  static const headerOnBreak = 'On Break';
-
-  static const statusLabel = 'Status';
-  static const statusOnline = 'Online';
-  static const statusOffline = 'Offline';
-
-  // Status values for API communication
-  static const statusValueOnline = 'online';
-  static const statusValueOffline = 'offline';
 
   // QR Scanner
   static const orEnterKey = 'Or Enter Key';
@@ -276,10 +267,30 @@ class TextConstants {
 
   // Valet Dashboard
   static const String valetDashboardTitle = 'Valet Dashboard';
-  static const String valetDashboardDescription = 'Monitor and manage your valet team';
+  static const String valetDashboardDescription =
+      'Monitor and manage your valet team';
   static const String totalValets = 'Total Valets';
   static const String onavailableValets = 'Available';
   static const String onDutyValets = 'On Duty';
   static const String onBreakValets = 'On Break';
   static const String offlineValets = 'Offline';
+  static const String searchByNameOrPhone = 'Search By Name Or Phone...';
+
+  // Valet Status Labels
+  static const String statusAvailable = 'Available';
+  static const String statusOnDuty = 'On Duty';
+  static const String statusOnBreak = 'On Break';
+  static const String statusOffline = 'Offline';
+  static const headerOnBreak = 'On Break';
+  static const statusLabel = 'Status';
+  static const statusOnline = 'Online';
+  static const statusValueOnline = 'online';
+  static const statusValueOffline = 'offline';
+
+  // Valet Card Labels
+  static const String carsPickedUpLabel = 'Cars Picked Up : ';
+  static const String carsHandedOverLabel = 'Cars Hand overed:';
+  static const String onBreakDurationLabel = 'On-Break Duration: ';
+  static const String minsLabel = ' mins';
+  static const String noValetsFound = 'No valets found';
 }
