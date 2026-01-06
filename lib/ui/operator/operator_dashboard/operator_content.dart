@@ -84,8 +84,10 @@ class _DashboardContentState extends State<DashboardContent> {
                           GridView.count(
                             shrinkWrap: true,
                             crossAxisCount: 4,
-                            crossAxisSpacing: MediaQuery.of(context).size.width * 0.02,
-                            mainAxisSpacing: MediaQuery.of(context).size.height * 0.02,
+                            crossAxisSpacing:
+                                MediaQuery.of(context).size.width * 0.02,
+                            mainAxisSpacing:
+                                MediaQuery.of(context).size.height * 0.02,
                             childAspectRatio: 2.5,
                             physics: const NeverScrollableScrollPhysics(),
                             children: List.generate(
@@ -111,14 +113,23 @@ class _DashboardContentState extends State<DashboardContent> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     SkeletonLoader(
-                                      height: MediaQuery.of(context).size.height * 0.025,
-                                      width: MediaQuery.of(context).size.width * 0.05,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.025,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.05,
                                       borderRadius: 4,
                                     ),
-                                    SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.01),
                                     SkeletonLoader(
-                                      height: MediaQuery.of(context).size.height * 0.015,
-                                      width: MediaQuery.of(context).size.width * 0.08,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.015,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.08,
                                       borderRadius: 4,
                                     ),
                                   ],
@@ -131,8 +142,10 @@ class _DashboardContentState extends State<DashboardContent> {
                           ),
                           Expanded(
                             child: DashboardThreeColumnLayout(
-                              retrievalRequests: RetrievalRequestsResponse(requests: []),
-                              availableDrivers: OperatorAvailableDriversResponse(drivers: []),
+                              retrievalRequests:
+                                  RetrievalRequestsResponse(requests: []),
+                              availableDrivers:
+                                  OperatorAvailableDriversResponse(drivers: []),
                               onAssignmentComplete: () {},
                               isLoading: true,
                             ),
