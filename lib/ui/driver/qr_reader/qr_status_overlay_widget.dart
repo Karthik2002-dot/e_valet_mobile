@@ -35,7 +35,7 @@ class QrStatusOverlayWidget extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.04,
+        horizontal: screenWidth * 0.06,
         vertical: screenHeight * 0.02,
       ),
       decoration: BoxDecoration(
@@ -109,8 +109,8 @@ class QrStatusOverlayWidget extends StatelessWidget {
             SizedBox(height: screenHeight * 0.015),
             Container(
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.03,
-                vertical: screenHeight * 0.012,
+                horizontal: screenWidth * 0.05,
+                vertical: screenHeight * 0.015,
               ),
               decoration: BoxDecoration(
                 color: AppColors.white,
@@ -134,20 +134,20 @@ class QrStatusOverlayWidget extends StatelessWidget {
                   TextComponent(
                     labelText: TextConstants.cardLabel,
                     fontSize: isDesktop
-                        ? screenWidth * 0.014
+                        ? screenWidth * 0.016
                         : isTablet
-                            ? screenWidth * 0.02
-                            : screenWidth * 0.028,
+                            ? screenWidth * 0.024
+                            : screenWidth * 0.035,
                     fontWeight: FontWeight.w600,
                     color: AppColors.mutedText,
                   ),
                   TextComponent(
                     labelText: state.qrData!.cardNumber.toString(),
                     fontSize: isDesktop
-                        ? screenWidth * 0.018
+                        ? screenWidth * 0.022
                         : isTablet
-                            ? screenWidth * 0.026
-                            : screenWidth * 0.038,
+                            ? screenWidth * 0.032
+                            : screenWidth * 0.048,
                     fontWeight: FontWeight.w800,
                     color: successColor,
                   ),
