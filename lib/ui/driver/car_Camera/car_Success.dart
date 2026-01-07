@@ -80,9 +80,7 @@ class CarSuccessScreen extends StatelessWidget {
                     // Navigate back to the driver home and show the retrieval sheet
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (_) => const DriverHomeScreen(
-                          showAssignedSessionSheet: true,
-                        ),
+                        builder: (_) => const DriverHomeScreen(),
                       ),
                       (route) => false,
                     );

@@ -38,87 +38,85 @@ class RetrievalRequestSheet extends StatelessWidget {
             ),
           ],
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                width: screenWidth * 0.16,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.greyLight,
-                  borderRadius: BorderRadius.circular(2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: screenWidth * 0.16,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppColors.greyLight,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            TextComponent(
+              labelText: TextConstants.retrievalRequest,
+              fontSize: screenWidth * 0.045,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+            ),
+            const SizedBox(height: 12),
+            if (isLoading) ...[
+              const Center(child: CircularProgressIndicator()),
+              const SizedBox(height: 16),
+            ] else if (message != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: TextComponent(
+                  labelText: message!,
+                  textAlign: TextAlign.center,
+                  fontSize: screenWidth * 0.04,
+                  color: AppColors.mutedText,
                 ),
               ),
-              TextComponent(
-                labelText: TextConstants.retrievalRequest,
-                fontSize: screenWidth * 0.045,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
+            ] else if (session != null) ...[
+              SessionCard(session: session!, onAccept: onAccept),
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: TextComponent(
+                  labelText: TextConstants.noActiveRetrievalRequests,
+                  textAlign: TextAlign.center,
+                  fontSize: screenWidth * 0.04,
+                  color: AppColors.mutedText,
+                ),
               ),
-              const SizedBox(height: 12),
-              if (isLoading) ...[
-                const Center(child: CircularProgressIndicator()),
-                const SizedBox(height: 16),
-              ] else if (message != null) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: TextComponent(
-                    labelText: message!,
-                    textAlign: TextAlign.center,
-                    fontSize: screenWidth * 0.04,
-                    color: AppColors.mutedText,
-                  ),
-                ),
-              ] else if (session != null) ...[
-                SessionCard(session: session!, onAccept: onAccept),
-              ] else ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: TextComponent(
-                    labelText: TextConstants.noActiveRetrievalRequests,
-                    textAlign: TextAlign.center,
-                    fontSize: screenWidth * 0.04,
-                    color: AppColors.mutedText,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 8),
-              if (session != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: onAccept ?? () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+            ],
+            const SizedBox(height: 8),
+            if (session != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: onAccept ?? () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextComponent(
+                          labelText: TextConstants.acceptRequest,
+                          fontSize: screenWidth * 0.045,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextComponent(
-                            labelText: TextConstants.acceptRequest,
-                            fontSize: screenWidth * 0.045,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward,
-                              color: AppColors.black),
-                        ],
-                      ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward,
+                            color: AppColors.black),
+                      ],
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

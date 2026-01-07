@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
@@ -14,11 +16,8 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 
 class DriverHomeScreen extends StatefulWidget {
-  final bool showAssignedSessionSheet;
-
   const DriverHomeScreen({
     super.key,
-    this.showAssignedSessionSheet = false,
   });
 
   @override
@@ -26,42 +25,94 @@ class DriverHomeScreen extends StatefulWidget {
 }
 
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
-  bool _sheetPresented = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _tryShowAssignedSessionSheet();
-  }
-
-  @override
-  void didUpdateWidget(covariant DriverHomeScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.showAssignedSessionSheet != oldWidget.showAssignedSessionSheet) {
-      _tryShowAssignedSessionSheet();
-    }
-  }
-
-  void _tryShowAssignedSessionSheet() {
-    if (!widget.showAssignedSessionSheet || _sheetPresented) return;
-    _sheetPresented = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _presentAssignedSessionSheet();
-    });
-  }
+  Timer? _dismissTimer;
+  final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
 
   void _presentAssignedSessionSheet() {
+    // Reset dismiss state
+    _dismissNotifier.value = false;
+
+    // Cancel any existing timer
+    _dismissTimer?.cancel();
+
+    // Set timer to allow dismissal after 60 seconds
+    _dismissTimer = Timer(const Duration(seconds: 60), () {
+      if (mounted) {
+        _dismissNotifier.value = true;
+      }
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
-      builder: (context) => const FractionallySizedBox(
-        heightFactor: 0.6,
-        alignment: Alignment.bottomCenter,
-        child: AssignedSessionSheetLoader(),
+      isDismissible: _dismissNotifier.value, // Controlled by ValueNotifier
+      enableDrag: false, // Disable drag to dismiss
+      builder: (BuildContext modalContext) => ValueListenableBuilder<bool>(
+        valueListenable: _dismissNotifier,
+        builder: (context, canDismiss, _) {
+          return Stack(
+            children: [
+              // Invisible barrier that captures taps when dismissible
+              if (canDismiss)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(modalContext).pop();
+                      _cleanupTimer();
+                    },
+                    child: Container(
+                      color: Colors.black
+                          .withOpacity(0.001), // Nearly invisible but tappable
+                    ),
+                  ),
+                ),
+              // The actual bottom sheet content
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: FractionallySizedBox(
+                  heightFactor: 0.6,
+                  child: Stack(
+                    children: [
+                      const AssignedSessionSheetLoader(),
+                      // Invisible overlay that captures taps when dismissible
+                      if (canDismiss)
+                        Positioned.fill(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(modalContext).pop();
+                              _cleanupTimer();
+                            },
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
-    );
+    ).then((_) {
+      // Cleanup when sheet is closed
+      _cleanupTimer();
+    });
+  }
+
+  void _cleanupTimer() {
+    _dismissTimer?.cancel();
+    _dismissTimer = null;
+    _dismissNotifier.value = false;
+  }
+
+  @override
+  void dispose() {
+    _cleanupTimer();
+    _dismissNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,12 +120,27 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => DriverMenuBloc()),
+        BlocProvider(create: (_) => AssignedSessionsBackgroundBloc()),
         BlocProvider(
             create: (_) =>
                 DriverStatusBloc()..add(const DriverStatusStarted())),
       ],
       child: MultiBlocListener(
         listeners: [
+          BlocListener<AssignedSessionsBackgroundBloc,
+              AssignedSessionsBackgroundState>(
+            listener: (context, state) {
+              if (state is AssignedSessionsBackgroundData &&
+                  state.hasSessions) {
+                // Show bottom sheet when new assigned sessions data arrives
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+                    _presentAssignedSessionSheet();
+                  }
+                });
+              }
+            },
+          ),
           BlocListener<DriverMenuBloc, DriverMenuState>(
             listener: (context, state) {
               if (state is DriverMenuLogoutSuccess) {

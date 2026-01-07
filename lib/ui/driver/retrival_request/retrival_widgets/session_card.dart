@@ -41,13 +41,13 @@ class SessionCard extends StatelessWidget {
                           : const AssetImage('assets/images/car.png')
                               as ImageProvider,
                       width: double.infinity,
-                      height: screenWidth * 0.5,
+                      height: screenWidth * 0.35,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
                           'assets/images/car.png',
                           width: double.infinity,
-                          height: screenWidth * 0.5,
+                          height: screenWidth * 0.35,
                           fit: BoxFit.cover,
                         );
                       },

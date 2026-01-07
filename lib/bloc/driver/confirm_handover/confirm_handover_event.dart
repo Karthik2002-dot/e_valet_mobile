@@ -13,13 +13,11 @@ class ConfirmHandoverStarted extends ConfirmHandoverEvent {
 
 class ConfirmHandoverRequested extends ConfirmHandoverEvent {
   final String sessionId;
-  final String code;
 
   const ConfirmHandoverRequested({
     required this.sessionId,
-    required this.code,
   });
 
   @override
-  List<Object?> get props => [sessionId, code];
+  List<Object?> get props => [sessionId];
 }
