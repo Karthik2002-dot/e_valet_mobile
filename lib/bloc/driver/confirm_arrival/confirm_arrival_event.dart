@@ -19,3 +19,12 @@ class ConfirmArrivalRequested extends ConfirmArrivalEvent {
   @override
   List<Object?> get props => [sessionId];
 }
+
+class ConfirmHandoverRequested extends ConfirmArrivalEvent {
+  final String sessionId;
+
+  const ConfirmHandoverRequested({required this.sessionId});
+
+  @override
+  List<Object?> get props => [sessionId];
+}

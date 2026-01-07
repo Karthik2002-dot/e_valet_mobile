@@ -74,7 +74,8 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
 
                             // Handover instruction
                             TextComponent(
-                              labelText: 'Please handover the key to the customer and click on the confirm handover button',
+                              labelText:
+                                  'Please handover the key to the customer and click on the confirm handover button',
                               textAlign: TextAlign.center,
                               fontSize: screenWidth * 0.045,
                               color: AppColors.black,
