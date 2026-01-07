@@ -1,6 +1,13 @@
 class TextConstants {
   TextConstants._();
 
+  static const dashboard = 'Dashboard';
+  static const slots = 'Slots';
+  static const valets = 'Valets';
+  static const carLogs = 'Car Logs';
+  static const profile = 'Profile';
+  static const logout = 'Logout';
+
   static const emptyText = '';
   static const headerWelcome = 'Welcome,';
   static const headerName = 'Sample Name';

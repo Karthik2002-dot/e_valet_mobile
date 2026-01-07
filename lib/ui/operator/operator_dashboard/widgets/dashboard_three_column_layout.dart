@@ -169,7 +169,7 @@ class _DashboardThreeColumnLayoutState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextComponent(
-                labelText: TextConstants.availableDrivers,
+                labelText: TextConstants.availableValets,
                 color: AppColors.black,
                 fontSize: MediaQuery.of(context).size.width * 0.018,
               ),

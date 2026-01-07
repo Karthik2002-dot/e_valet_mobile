@@ -34,7 +34,7 @@ class KpiCard extends StatelessWidget {
             labelText: title,
             textAlign: TextAlign.center,
             color: AppColors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.01,
+            fontSize: MediaQuery.of(context).size.width * 0.012,
             fontWeight: FontWeight.w500,
           ),
           const SizedBox(
