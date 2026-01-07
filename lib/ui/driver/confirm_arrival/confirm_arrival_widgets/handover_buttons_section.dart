@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_action_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/slider_action_button.dart';
 
 class HandoverButtonsSection extends StatelessWidget {
   final bool isLoading;
@@ -22,25 +22,27 @@ class HandoverButtonsSection extends StatelessWidget {
     return Column(
       children: [
         // Confirm Handover Slide Button
-        SlideActionButton(
-          text: TextConstants.slideToConfirmHandover,
+        SliderActionButton(
+          labelText: TextConstants.slideToConfirmHandover,
           isLoading: isLoading,
-          onConfirm: onConfirmHandover,
+          backgroundColor: AppColors.white,
+          onSlideComplete: onConfirmHandover,
           buttonColor: AppColors.primary,
-          textColor: AppColors.black,
-          icon: Icons.arrow_forward,
+          labelColor: AppColors.black,
+          icon: Icons.handshake,
         ),
 
         SizedBox(height: screenHeight * 0.02),
 
         // Customer Missing Slide Button
-        SlideActionButton(
-          text: TextConstants.slideToCustomerMissing,
+        SliderActionButton(
+          labelText: TextConstants.slideToCustomerMissing,
           isLoading: false, // Customer missing doesn't need loading state
-          onConfirm: onCustomerMissing ?? () {},
+          onSlideComplete: onCustomerMissing ?? () {},
           buttonColor: AppColors.error,
-          textColor: AppColors.error,
-          icon: Icons.arrow_forward,
+          backgroundColor: AppColors.white,
+          labelColor: AppColors.black,
+          icon: Icons.warning,
         ),
       ],
     );
