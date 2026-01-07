@@ -162,19 +162,6 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                       ),
                     );
                   },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: MediaQuery.of(context).size.width * 0.08,
-                      height: MediaQuery.of(context).size.width * 0.08,
-                      color: AppColors.grey.withOpacity(0.3),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
               SizedBox(

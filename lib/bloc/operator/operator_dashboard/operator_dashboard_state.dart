@@ -60,3 +60,23 @@ class AssignmentError extends OperatorDashboardState {
 
   List<Object> get props => [message];
 }
+
+class ManualRequestInProgress extends OperatorDashboardState {
+  const ManualRequestInProgress();
+}
+
+class ManualRequestSuccess extends OperatorDashboardState {
+  final String message;
+
+  const ManualRequestSuccess(this.message);
+
+  List<Object> get props => [message];
+}
+
+class ManualRequestError extends OperatorDashboardState {
+  final String message;
+
+  const ManualRequestError(this.message);
+
+  List<Object> get props => [message];
+}

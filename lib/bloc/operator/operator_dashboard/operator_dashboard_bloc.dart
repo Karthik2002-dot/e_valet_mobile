@@ -7,7 +7,9 @@ import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_a
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_retrieval_requests_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';
@@ -26,6 +28,7 @@ class OperatorDashboardBloc
     on<FetchDashboardKpis>(_onFetchDashboardKpis);
     on<RefreshDashboardKpisSilently>(_onRefreshDashboardKpisSilently);
     on<AssignDriverToRetrieval>(_onAssignDriverToRetrieval);
+    on<CreateManualRetrievalRequest>(_onCreateManualRetrievalRequest);
 
     // Setup WebSocket listeners if WebSocketBloc is provided
     _setupWebSocketListeners();
@@ -48,10 +51,14 @@ class OperatorDashboardBloc
 
       _sessionStatusSubscription = sessionStatusStream.listen(
         (data) {
-          // Silently refresh KPIs when session status changes
+          // Silently refresh KPIs and retrieval requests when session status changes
           add(
             RefreshDashboardKpisSilently(
               outletId: outletId,
+              refreshKpis: true,
+              refreshDrivers: true,
+              refreshRequests:
+                  true, // Session changes affect retrieval requests
             ),
           );
         },
@@ -66,10 +73,13 @@ class OperatorDashboardBloc
 
       _statsUpdateSubscription = statsStream.listen(
         (data) {
-          // Silently refresh KPIs when stats update is received
+          // Silently refresh only KPIs when stats update is received
           add(
             RefreshDashboardKpisSilently(
               outletId: outletId,
+              refreshKpis: true,
+              refreshDrivers: false,
+              refreshRequests: false, // Stats updates only affect KPIs
             ),
           );
         },
@@ -120,7 +130,7 @@ class OperatorDashboardBloc
     }
   }
 
-  /// Refresh KPIs and available drivers silently without showing loading state
+  /// Refresh KPIs, available drivers, and retrieval requests silently without showing loading state
   /// Used for real-time WebSocket updates
   Future<void> _onRefreshDashboardKpisSilently(
     RefreshDashboardKpisSilently event,
@@ -134,30 +144,57 @@ class OperatorDashboardBloc
     final currentState = state as OperatorDashboardLoaded;
 
     try {
-      // Fetch KPIs and available drivers silently in the background
-      final results = await Future.wait([
-        OperatorDashboardApiService.getDashboardKpis(
-          outletId: event.outletId,
-        ),
-        OperatorAvailableDriversApiService.getAvailableDrivers(
-          outletId: event.outletId,
-        ),
-      ]);
+      // Build list of futures based on what needs to be refreshed
+      final futures = <Future<dynamic>>[];
 
-      final kpis = results[0] as dynamic;
-      final availableDrivers = results[1] as dynamic;
+      if (event.refreshKpis) {
+        futures.add(OperatorDashboardApiService.getDashboardKpis(
+          outletId: event.outletId,
+        ));
+      }
 
-      // Emit updated state with new KPIs and available drivers
+      if (event.refreshDrivers) {
+        futures.add(OperatorAvailableDriversApiService.getAvailableDrivers(
+          outletId: event.outletId,
+        ));
+      }
+
+      if (event.refreshRequests) {
+        futures.add(OperatorRetrievalRequestsApiService.getRetrievalRequests(
+          outletId: event.outletId,
+        ));
+      }
+
+      // If nothing to refresh, return early
+      if (futures.isEmpty) {
+        return;
+      }
+
+      // Fetch selected data in parallel
+      final results = await Future.wait(futures);
+
+      // Extract results based on order
+      int resultIndex = 0;
+      final kpis =
+          event.refreshKpis ? results[resultIndex++] : currentState.kpis;
+      final availableDrivers = event.refreshDrivers
+          ? results[resultIndex++]
+          : currentState.availableDrivers;
+      final retrievalRequests = event.refreshRequests
+          ? results[resultIndex++]
+          : currentState.retrievalRequests;
+
+      // Emit updated state with new data
       emit(OperatorDashboardLoaded(
         kpis: kpis,
         availableDrivers: availableDrivers,
-        retrievalRequests: currentState.retrievalRequests,
+        retrievalRequests: retrievalRequests,
         digitalKeyRack: currentState.digitalKeyRack,
       ));
     } catch (e) {
       // Silently fail - don't show error for background updates
       // Just keep the current state
-      print('Silent KPI and available drivers refresh failed: $e');
+      print('Silent dashboard refresh failed: $e');
     }
   }
 
@@ -179,6 +216,51 @@ class OperatorDashboardBloc
       emit(AssignmentSuccess(response));
     } catch (e) {
       emit(AssignmentError(e.toString()));
+    }
+  }
+
+  Future<void> _onCreateManualRetrievalRequest(
+    CreateManualRetrievalRequest event,
+    Emitter<OperatorDashboardState> emit,
+  ) async {
+    // Store the current loaded state to restore after request
+    final previousState = state is OperatorDashboardLoaded
+        ? state as OperatorDashboardLoaded
+        : null;
+
+    emit(const ManualRequestInProgress());
+
+    try {
+      final apiService = OperatorManualRetrievalApiService();
+      final response = await apiService.createManualRetrievalRequest(
+        outletId: event.outletId,
+        request: ManualRetrievalRequest(
+          cardNumber: event.cardNumber,
+        ),
+      );
+
+      emit(ManualRequestSuccess(response.message));
+
+      // Restore the previous dashboard state immediately so UI doesn't go blank
+      if (previousState != null) {
+        emit(previousState);
+      }
+
+      // Explicitly trigger a silent refresh for retrieval requests only
+      // This ensures immediate update without waiting for websocket
+      add(RefreshDashboardKpisSilently(
+        outletId: event.outletId,
+        refreshKpis: false,
+        refreshDrivers: false,
+        refreshRequests: true,
+      ));
+    } catch (e) {
+      emit(ManualRequestError(e.toString()));
+
+      // Restore the previous dashboard state after error too
+      if (previousState != null) {
+        emit(previousState);
+      }
     }
   }
 
