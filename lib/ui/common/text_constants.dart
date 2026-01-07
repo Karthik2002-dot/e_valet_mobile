@@ -300,4 +300,8 @@ class TextConstants {
   static const String onBreakDurationLabel = 'On-Break Duration: ';
   static const String minsLabel = ' mins';
   static const String noValetsFound = 'No valets found';
+
+  static const String confirmAssignment = 'Confirm Assignment';
+  static const String cancelText = 'Cancel';
+  static const String confirm = 'Confirm';
 }

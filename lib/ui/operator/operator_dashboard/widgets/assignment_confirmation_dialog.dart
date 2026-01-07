@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
 
@@ -38,9 +39,11 @@ class AssignmentConfirmationDialog extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.01,
+                    ),
                     TextComponent(
-                      labelText: 'Confirm Assignment',
+                      labelText: TextConstants.confirmAssignment,
                       fontSize: MediaQuery.of(context).size.width * 0.015,
                       fontWeight: FontWeight.bold,
                       color: AppColors.black,
@@ -178,7 +181,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: 'Card Number',
+                          labelText: TextConstants.cardNumberLabel,
                           fontSize: MediaQuery.of(context).size.width * 0.012,
                           color: AppColors.grey,
                         ),
@@ -215,7 +218,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                       ),
                     ),
                     child: TextComponent(
-                      labelText: 'Cancel',
+                      labelText: TextConstants.cancelText,
                       fontSize: MediaQuery.of(context).size.width * 0.016,
                       color: AppColors.grey,
                       fontWeight: FontWeight.w600,
@@ -247,7 +250,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.01),
                         TextComponent(
-                          labelText: 'Confirm',
+                          labelText: TextConstants.confirm,
                           fontSize: MediaQuery.of(context).size.width * 0.016,
                           color: AppColors.white,
                           fontWeight: FontWeight.w600,

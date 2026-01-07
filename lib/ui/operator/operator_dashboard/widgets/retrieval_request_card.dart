@@ -6,6 +6,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/retrieval_request_utils.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/assignment_confirmation_dialog.dart';
@@ -41,25 +43,15 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
         listener: (context, state) {
           if (state is AssignmentSuccess) {
             Navigator.pop(dialogContext);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  state.response.message.isNotEmpty
-                      ? state.response.message
-                      : 'Successfully assigned ${driver.name} to Card #${widget.request.cardNumber}',
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 3),
-              ),
+            SnackBars.showSuccessSnackBar(
+              context,
+              'Successfully assigned ${driver.name} to Card #${widget.request.cardNumber}',
             );
             widget.onAssignmentComplete();
           } else if (state is AssignmentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to assign driver: ${state.message}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              'Failed to assign driver: ${state.message}',
             );
           }
         },
@@ -242,7 +234,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                     Row(
                       children: [
                         TextComponent(
-                          labelText: 'Parked by ',
+                          labelText: TextConstants.parkedBy,
                           fontSize: MediaQuery.of(context).size.width * 0.014,
                           color: AppColors.grey,
                         ),
