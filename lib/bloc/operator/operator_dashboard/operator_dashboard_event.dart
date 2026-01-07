@@ -19,3 +19,13 @@ class RefreshDashboardKpisSilently extends OperatorDashboardEvent {
     this.outletId = '2',
   });
 }
+
+class AssignDriverToRetrieval extends OperatorDashboardEvent {
+  final String driverUserId;
+  final String sessionId;
+
+  const AssignDriverToRetrieval({
+    required this.driverUserId,
+    required this.sessionId,
+  });
+}

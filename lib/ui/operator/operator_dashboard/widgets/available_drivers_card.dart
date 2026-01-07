@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/driver_card_content.dart';
 
 class AvailableDriversCard extends StatelessWidget {
   final AvailableDriver driver;
@@ -14,87 +13,77 @@ class AvailableDriversCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).size.height * 0.015,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.01,
-        vertical: MediaQuery.of(context).size.height * 0.01,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          12,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Avatar with Initials
-          CircleAvatar(
-            radius: MediaQuery.of(context).size.width * 0.025,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            child: TextComponent(
-              labelText: DriverUtils.getInitials(driver.name),
-              fontSize: MediaQuery.of(context).size.width * 0.016,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+    return LongPressDraggable<AvailableDriver>(
+      data: driver,
+      delay: const Duration(milliseconds: 300),
+      hapticFeedbackOnStart: true,
+      feedback: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: 0.8,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.3,
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.01,
+              vertical: MediaQuery.of(context).size.height * 0.01,
             ),
-          ),
-          SizedBox(width: MediaQuery.of(context).size.width * 0.015),
-          // Driver Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextComponent(
-                  labelText: driver.name,
-                  fontSize: MediaQuery.of(context).size.width * 0.016,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.003,
-                ),
-                TextComponent(
-                  labelText: driver.phone,
-                  fontSize: MediaQuery.of(context).size.width * 0.013,
-                  color: AppColors.grey,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
+            child: DriverCardContent(driver: driver),
           ),
-          // Status Badge
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.012,
-              vertical: MediaQuery.of(context).size.height * 0.004,
-            ),
-            decoration: BoxDecoration(
-              color: DriverUtils.getStatusColor(driver.status).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: DriverUtils.getStatusColor(driver.status),
-                width: 1,
-              ),
-            ),
-            child: TextComponent(
-              labelText: driver.status,
-              fontSize: MediaQuery.of(context).size.width * 0.012,
-              color: DriverUtils.getStatusColor(driver.status),
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.3,
+        child: Container(
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.015,
           ),
-        ],
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.01,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.grey.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DriverCardContent(driver: driver),
+        ),
+      ),
+      child: Container(
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height * 0.015,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.01,
+          vertical: MediaQuery.of(context).size.height * 0.01,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(
+            12,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: DriverCardContent(driver: driver),
       ),
     );
   }

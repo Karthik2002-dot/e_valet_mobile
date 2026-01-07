@@ -6,6 +6,8 @@ import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_d
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_available_drivers_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_retrieval_requests_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';
@@ -23,6 +25,7 @@ class OperatorDashboardBloc
   }) : super(const OperatorDashboardInitial()) {
     on<FetchDashboardKpis>(_onFetchDashboardKpis);
     on<RefreshDashboardKpisSilently>(_onRefreshDashboardKpisSilently);
+    on<AssignDriverToRetrieval>(_onAssignDriverToRetrieval);
 
     // Setup WebSocket listeners if WebSocketBloc is provided
     _setupWebSocketListeners();
@@ -155,6 +158,27 @@ class OperatorDashboardBloc
       // Silently fail - don't show error for background updates
       // Just keep the current state
       print('Silent KPI and available drivers refresh failed: $e');
+    }
+  }
+
+  Future<void> _onAssignDriverToRetrieval(
+    AssignDriverToRetrieval event,
+    Emitter<OperatorDashboardState> emit,
+  ) async {
+    emit(const AssignmentInProgress());
+
+    try {
+      final apiService = OperatorAssignRetrievalApiService();
+      final response = await apiService.assignRetrieval(
+        request: AssignRetrievalRequest(
+          driverUserId: event.driverUserId,
+          sessionId: event.sessionId,
+        ),
+      );
+
+      emit(AssignmentSuccess(response));
+    } catch (e) {
+      emit(AssignmentError(e.toString()));
     }
   }
 
