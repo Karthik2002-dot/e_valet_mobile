@@ -263,10 +263,25 @@ class _DashboardThreeColumnLayoutState
                     : Builder(
                         builder: (context) {
                           // Filter to only show drivers with 'free' status
-                          final freeDrivers = widget.availableDrivers.drivers
+                          var freeDrivers = widget.availableDrivers.drivers
                               .where((driver) =>
                                   driver.status.toLowerCase() == 'free')
                               .toList();
+
+                          // Find the recommended driver (who parked the first retrieval request)
+                          String? recommendedDriverName;
+                          if (widget.retrievalRequests.requests.isNotEmpty) {
+                            final firstRequest =
+                                widget.retrievalRequests.requests.first;
+                            recommendedDriverName = firstRequest.parkedBy.name;
+
+                            // Sort: recommended driver first, then others
+                            freeDrivers.sort((a, b) {
+                              if (a.name == recommendedDriverName) return -1;
+                              if (b.name == recommendedDriverName) return 1;
+                              return 0;
+                            });
+                          }
 
                           return freeDrivers.isEmpty
                               ? Center(
@@ -292,7 +307,12 @@ class _DashboardThreeColumnLayoutState
                                   itemCount: freeDrivers.length,
                                   itemBuilder: (context, index) {
                                     final driver = freeDrivers[index];
-                                    return AvailableDriversCard(driver: driver);
+                                    final isRecommended =
+                                        driver.name == recommendedDriverName;
+                                    return AvailableDriversCard(
+                                      driver: driver,
+                                      isRecommended: isRecommended,
+                                    );
                                   },
                                 );
                         },

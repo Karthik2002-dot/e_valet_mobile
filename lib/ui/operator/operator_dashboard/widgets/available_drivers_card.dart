@@ -5,10 +5,12 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/dri
 
 class AvailableDriversCard extends StatelessWidget {
   final AvailableDriver driver;
+  final bool isRecommended;
 
   const AvailableDriversCard({
     super.key,
     required this.driver,
+    this.isRecommended = false,
   });
 
   @override
@@ -71,19 +73,62 @@ class AvailableDriversCard extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(
-            12,
-          ),
+          borderRadius: BorderRadius.circular(12),
+          border: isRecommended
+              ? Border.all(
+                  color: AppColors.primary,
+                  width: 2,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
-              color: AppColors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
+              color: isRecommended
+                  ? AppColors.primary.withOpacity(0.2)
+                  : AppColors.grey.withOpacity(0.1),
+              spreadRadius: isRecommended ? 2 : 1,
+              blurRadius: isRecommended ? 6 : 4,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: DriverCardContent(driver: driver),
+        child: Column(
+          children: [
+            if (isRecommended)
+              Container(
+                margin: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).size.height * 0.008,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  vertical: MediaQuery.of(context).size.height * 0.004,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.recommend,
+                      size: MediaQuery.of(context).size.width * 0.014,
+                      color: AppColors.primary,
+                    ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.005),
+                    Text(
+                      'Recommended - Parked this vehicle',
+                      style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.012,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            DriverCardContent(driver: driver),
+          ],
+        ),
       ),
     );
   }

@@ -234,7 +234,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                     Row(
                       children: [
                         TextComponent(
-                          labelText: TextConstants.parkedBy,
+                          labelText: TextConstants.parkedByLabel,
                           fontSize: MediaQuery.of(context).size.width * 0.014,
                           color: AppColors.grey,
                         ),

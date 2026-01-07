@@ -304,4 +304,5 @@ class TextConstants {
   static const String confirmAssignment = 'Confirm Assignment';
   static const String cancelText = 'Cancel';
   static const String confirm = 'Confirm';
+  static const String parkedByLabel = 'Parked By ';
 }
