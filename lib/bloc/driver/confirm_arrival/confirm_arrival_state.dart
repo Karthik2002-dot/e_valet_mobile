@@ -36,3 +36,21 @@ class ConfirmArrivalError extends ConfirmArrivalState {
   @override
   List<Object?> get props => [message, shouldNavigateToHandover];
 }
+
+class ConfirmHandoverSuccess extends ConfirmArrivalState {
+  final String message;
+
+  const ConfirmHandoverSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class ConfirmHandoverError extends ConfirmArrivalState {
+  final String message;
+
+  const ConfirmHandoverError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

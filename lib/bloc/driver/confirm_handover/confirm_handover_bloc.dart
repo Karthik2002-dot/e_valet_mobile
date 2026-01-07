@@ -27,12 +27,6 @@ class ConfirmHandoverBloc
     ConfirmHandoverRequested event,
     Emitter<ConfirmHandoverState> emit,
   ) async {
-    // Validate code
-    if (event.code.length != 2) {
-      emit(ConfirmHandoverValidationError.codeRequired());
-      return;
-    }
-
     emit(const ConfirmHandoverLoading());
 
     try {

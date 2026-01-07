@@ -10,7 +10,6 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/conifrm_handover/confirm_handover_widgets/code_input_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/conifrm_handover/confirm_handover_widgets/handover_buttons_section.dart';
 
 class ConfirmHandoverScreen extends StatefulWidget {
@@ -26,8 +25,6 @@ class ConfirmHandoverScreen extends StatefulWidget {
 }
 
 class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
-  String _currentCode = '';
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -75,20 +72,17 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
 
                             SizedBox(height: screenHeight * 0.03),
 
-                            // Code Input Section
-                            CodeInputSection(
-                              onCodeChanged: (code) {
-                                // Defer setState to avoid calling it during build
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  setState(() {
-                                    _currentCode = code;
-                                  });
-                                });
-                              },
+                            // Handover instruction
+                            TextComponent(
+                              labelText:
+                                  'Please handover the key to the customer and click on the confirm handover button',
+                              textAlign: TextAlign.center,
+                              fontSize: screenWidth * 0.045,
+                              color: AppColors.black,
+                              height: 1.4,
                             ),
 
-                            SizedBox(height: screenHeight * 0.04),
+                            SizedBox(height: screenHeight * 0.02),
                           ],
                         ),
                       ),
@@ -107,7 +101,6 @@ class _ConfirmHandoverScreenState extends State<ConfirmHandoverScreen> {
                         context.read<ConfirmHandoverBloc>().add(
                               ConfirmHandoverRequested(
                                 sessionId: widget.session.id,
-                                code: _currentCode,
                               ),
                             );
                       },

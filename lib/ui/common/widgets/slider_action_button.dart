@@ -22,7 +22,7 @@ class SliderActionButton extends StatelessWidget {
     required this.labelText,
     required this.onSlideComplete,
     this.buttonColor = AppColors.success,
-    this.backgroundColor = AppColors.grey,
+    this.backgroundColor = AppColors.white,
     this.labelColor,
     this.icon = Icons.check_rounded,
     this.width,

@@ -11,16 +11,23 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
-import 'package:niloufer_valet_mobile/ui/driver/conifrm_handover/confirm_handover.dart';
 
-class ConfirmArrivalScreen extends StatelessWidget {
+class ConfirmArrivalScreen extends StatefulWidget {
   final AssignedSession session;
 
   const ConfirmArrivalScreen({
     super.key,
     required this.session,
   });
+
+  @override
+  State<ConfirmArrivalScreen> createState() => _ConfirmArrivalScreenState();
+}
+
+class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
+  bool _showHandoverButtons = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,24 +37,26 @@ class ConfirmArrivalScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is ConfirmArrivalSuccess) {
             SnackBars.showSuccessSnackBar(context, state.message);
-            // Navigate to confirm handover screen
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => ConfirmHandoverScreen(session: session),
-              ),
-            );
+            // Show handover buttons instead of navigating
+            setState(() {
+              _showHandoverButtons = true;
+            });
           } else if (state is ConfirmArrivalError) {
             if (state.shouldNavigateToHandover) {
               SnackBars.showSuccessSnackBar(context, state.message);
-              // Navigate to confirm handover screen
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => ConfirmHandoverScreen(session: session),
-                ),
-              );
+              // Show handover buttons instead of navigating
+              setState(() {
+                _showHandoverButtons = true;
+              });
             } else {
               SnackBars.showErrorSnackBar(context, state.message);
             }
+          } else if (state is ConfirmHandoverSuccess) {
+            SnackBars.showSuccessSnackBar(context, state.message);
+            // After handover success, navigate back to the same flow
+            Navigator.of(context).pop();
+          } else if (state is ConfirmHandoverError) {
+            SnackBars.showErrorSnackBar(context, state.message);
           }
         },
         child: BlocBuilder<ConfirmArrivalBloc, ConfirmArrivalState>(
@@ -82,28 +91,42 @@ class ConfirmArrivalScreen extends StatelessWidget {
                             SizedBox(height: screenHeight * 0.02),
 
                             // Car Information Card
-                            CarInformationCard(session: session),
+                            CarInformationCard(session: widget.session),
                           ],
                         ),
                       ),
                     ),
                   ),
 
-                  // Slide to Confirm Arrival Button at Bottom
+                  // Show either slide button or handover buttons based on state
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.04,
                       vertical: screenHeight * 0.02,
                     ),
-                    child: SlideToConfirmButton(
-                      sessionId: session.id,
-                      isLoading: isLoading,
-                      onConfirm: () {
-                        context.read<ConfirmArrivalBloc>().add(
-                              ConfirmArrivalRequested(sessionId: session.id),
-                            );
-                      },
-                    ),
+                    child: _showHandoverButtons
+                        ? HandoverButtonsSection(
+                            isLoading: isLoading,
+                            onConfirmHandover: () {
+                              context.read<ConfirmArrivalBloc>().add(
+                                    ConfirmHandoverRequested(
+                                        sessionId: widget.session.id),
+                                  );
+                            },
+                            onCustomerMissing: () {
+                              // TODO: Handle customer missing
+                            },
+                          )
+                        : SlideToConfirmButton(
+                            sessionId: widget.session.id,
+                            isLoading: isLoading,
+                            onConfirm: () {
+                              context.read<ConfirmArrivalBloc>().add(
+                                    ConfirmArrivalRequested(
+                                        sessionId: widget.session.id),
+                                  );
+                            },
+                          ),
                   ),
 
                   // Footer at Bottom
