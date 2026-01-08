@@ -60,7 +60,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
         if (state is ManualRequestSuccess) {
           SnackBars.showSuccessSnackBar(context, state.message);
           _cardNumberController.clear();
-          // Don't call widget.onRequestCreated() - let websocket handle the silent refresh
+          // Trigger soft refresh to update the UI
+          widget.onRequestCreated();
         } else if (state is ManualRequestError) {
           SnackBars.showErrorSnackBar(context,
               '${TextConstants.failedToCreateRequest}: ${state.message}');

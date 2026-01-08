@@ -21,7 +21,7 @@ class OperatorDashboardView extends StatefulWidget {
 class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
-  int _refreshKey = 0;
+  VoidCallback? _dashboardRefresh;
 
   void _onMenuItemSelected(int index) {
     if (index == 5) {
@@ -33,14 +33,19 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _refreshDashboard() {
-    setState(() {
-      _refreshKey++;
-    });
+    _dashboardRefresh?.call();
   }
 
   Widget _getBodyWidget() {
-    return OperatorScreenRouter.getScreen(_selectedIndex,
-        DashboardContent(key: ValueKey(_refreshKey)), _refreshKey);
+    return OperatorScreenRouter.getScreen(
+      _selectedIndex,
+      DashboardContent(
+        onRefreshReady: (refresh) {
+          _dashboardRefresh = refresh;
+        },
+      ),
+      0,
+    );
   }
 
   @override
