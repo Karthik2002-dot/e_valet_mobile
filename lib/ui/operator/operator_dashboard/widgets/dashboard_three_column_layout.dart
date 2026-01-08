@@ -8,7 +8,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/available_drivers_card.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/retrieval_request_card.dart';
 
-class DashboardThreeColumnLayout extends StatelessWidget {
+class DashboardThreeColumnLayout extends StatefulWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
@@ -21,6 +21,22 @@ class DashboardThreeColumnLayout extends StatelessWidget {
     required this.onAssignmentComplete,
     this.isLoading = false,
   });
+
+  @override
+  State<DashboardThreeColumnLayout> createState() =>
+      _DashboardThreeColumnLayoutState();
+}
+
+class _DashboardThreeColumnLayoutState
+    extends State<DashboardThreeColumnLayout> {
+  final ScrollController _retrievalRequestsScrollController =
+      ScrollController();
+
+  @override
+  void dispose() {
+    _retrievalRequestsScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +58,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
               Expanded(
-                child: isLoading
+                child: widget.isLoading
                     ? ListView.builder(
                         itemCount: 3,
                         itemBuilder: (context, index) {
@@ -91,7 +107,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                           );
                         },
                       )
-                    : retrievalRequests.requests.isEmpty
+                    : widget.retrievalRequests.requests.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -113,14 +129,29 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                               ],
                             ),
                           )
-                        : ListView.builder(
-                            itemCount: retrievalRequests.requests.length,
-                            itemBuilder: (context, index) {
-                              final request = retrievalRequests.requests[index];
-                              return RetrievalRequestCard(
-                                request: request,
-                                availableDrivers: availableDrivers.drivers,
-                                onAssignmentComplete: onAssignmentComplete,
+                        : DragTarget<Object>(
+                            onMove: (details) {
+                              _handleAutoScroll(details.offset);
+                            },
+                            onLeave: (data) {
+                              // Stop auto-scrolling when drag leaves
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              return ListView.builder(
+                                controller: _retrievalRequestsScrollController,
+                                itemCount:
+                                    widget.retrievalRequests.requests.length,
+                                itemBuilder: (context, index) {
+                                  final request =
+                                      widget.retrievalRequests.requests[index];
+                                  return RetrievalRequestCard(
+                                    request: request,
+                                    availableDrivers:
+                                        widget.availableDrivers.drivers,
+                                    onAssignmentComplete:
+                                        widget.onAssignmentComplete,
+                                  );
+                                },
                               );
                             },
                           ),
@@ -138,7 +169,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextComponent(
-                labelText: TextConstants.availableDrivers,
+                labelText: TextConstants.availableValets,
                 color: AppColors.black,
                 fontSize: MediaQuery.of(context).size.width * 0.018,
               ),
@@ -146,7 +177,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.02,
               ),
               Expanded(
-                child: isLoading
+                child: widget.isLoading
                     ? ListView.builder(
                         itemCount: 4,
                         itemBuilder: (context, index) {
@@ -232,10 +263,25 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                     : Builder(
                         builder: (context) {
                           // Filter to only show drivers with 'free' status
-                          final freeDrivers = availableDrivers.drivers
+                          var freeDrivers = widget.availableDrivers.drivers
                               .where((driver) =>
                                   driver.status.toLowerCase() == 'free')
                               .toList();
+
+                          // Find the recommended driver (who parked the first retrieval request)
+                          String? recommendedDriverName;
+                          if (widget.retrievalRequests.requests.isNotEmpty) {
+                            final firstRequest =
+                                widget.retrievalRequests.requests.first;
+                            recommendedDriverName = firstRequest.parkedBy.name;
+
+                            // Sort: recommended driver first, then others
+                            freeDrivers.sort((a, b) {
+                              if (a.name == recommendedDriverName) return -1;
+                              if (b.name == recommendedDriverName) return 1;
+                              return 0;
+                            });
+                          }
 
                           return freeDrivers.isEmpty
                               ? Center(
@@ -261,7 +307,12 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                                   itemCount: freeDrivers.length,
                                   itemBuilder: (context, index) {
                                     final driver = freeDrivers[index];
-                                    return AvailableDriversCard(driver: driver);
+                                    final isRecommended =
+                                        driver.name == recommendedDriverName;
+                                    return AvailableDriversCard(
+                                      driver: driver,
+                                      isRecommended: isRecommended,
+                                    );
                                   },
                                 );
                         },
@@ -272,5 +323,34 @@ class DashboardThreeColumnLayout extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _handleAutoScroll(Offset dragPosition) {
+    if (!_retrievalRequestsScrollController.hasClients) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    // Get the bounds of the scroll area
+    final scrollAreaHeight = renderBox.size.height;
+    final scrollThreshold = 100.0; // Pixels from edge to trigger scroll
+    final scrollSpeed = 10.0; // Pixels to scroll per frame
+
+    // Check if dragging near the top
+    if (dragPosition.dy < scrollThreshold) {
+      final newOffset = _retrievalRequestsScrollController.offset - scrollSpeed;
+      if (newOffset >= 0) {
+        _retrievalRequestsScrollController.jumpTo(newOffset);
+      }
+    }
+    // Check if dragging near the bottom
+    else if (dragPosition.dy > scrollAreaHeight - scrollThreshold) {
+      final maxScroll =
+          _retrievalRequestsScrollController.position.maxScrollExtent;
+      final newOffset = _retrievalRequestsScrollController.offset + scrollSpeed;
+      if (newOffset <= maxScroll) {
+        _retrievalRequestsScrollController.jumpTo(newOffset);
+      }
+    }
   }
 }

@@ -1,6 +1,13 @@
 class TextConstants {
   TextConstants._();
 
+  static const dashboard = 'Dashboard';
+  static const slots = 'Slots';
+  static const valets = 'Valets';
+  static const carLogs = 'Car Logs';
+  static const profile = 'Profile';
+  static const logout = 'Logout';
+
   static const emptyText = '';
   static const headerWelcome = 'Welcome,';
   static const headerName = 'Sample Name';
@@ -295,4 +302,9 @@ class TextConstants {
   static const String onBreakDurationLabel = 'On-Break Duration: ';
   static const String minsLabel = ' mins';
   static const String noValetsFound = 'No valets found';
+
+  static const String confirmAssignment = 'Confirm Assignment';
+  static const String cancelText = 'Cancel';
+  static const String confirm = 'Confirm';
+  static const String parkedByLabel = 'Parked By ';
 }

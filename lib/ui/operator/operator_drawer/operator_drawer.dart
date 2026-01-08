@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'operator_drawer_item.dart';
 
 class OperatorDrawer extends StatelessWidget {
@@ -22,8 +22,7 @@ class OperatorDrawer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              Center(
                 child: Image.asset(
                   'assets/images/niloufer.logo.png',
                   width: 140,
@@ -32,7 +31,7 @@ class OperatorDrawer extends StatelessWidget {
               const SizedBox(height: 24),
               OperatorDrawerItem(
                 asset: 'assets/images/dashboard.png',
-                title: 'Dashboard',
+                title: TextConstants.dashboard,
                 isSelected: selectedIndex == 0,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -41,7 +40,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/slots.png',
-                title: 'Slots',
+                title: TextConstants.slots,
                 isSelected: selectedIndex == 1,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -50,7 +49,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/drivers.png',
-                title: 'Drivers',
+                title: TextConstants.valets,
                 isSelected: selectedIndex == 2,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -59,7 +58,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/cars.png',
-                title: 'Car Logs',
+                title: TextConstants.carLogs,
                 isSelected: selectedIndex == 3,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -75,7 +74,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/profile.png',
-                title: 'Profile',
+                title: TextConstants.profile,
                 isSelected: selectedIndex == 4,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -84,7 +83,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/logout.png',
-                title: 'Logout',
+                title: TextConstants.logout,
                 isSelected: selectedIndex == 5,
                 onTap: () {
                   Navigator.of(context).pop();
