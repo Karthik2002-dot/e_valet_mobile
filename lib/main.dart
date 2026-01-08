@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: dotenv.env['APP_NAME'] ?? 'Niloufer Valet',
+        title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
         home: const SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),
