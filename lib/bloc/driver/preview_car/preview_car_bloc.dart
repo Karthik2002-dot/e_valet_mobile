@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/api/driver/re-park_api.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
 
 class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
   PreviewCarBloc() : super(const PreviewCarInitial()) {
@@ -19,10 +20,13 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
 
     try {
       if (event.isReparking) {
+        // Create repark photo request model
+        final reparkRequest = ReparkPhotoRequest(imagePath: event.imagePath);
+
         // Upload re-parked car photo to repark API
         await ReparkApiService.uploadReparkPhoto(
-          imagePath: event.imagePath,
           sessionId: event.sessionId!,
+          request: reparkRequest,
         );
       } else {
         // Upload parking photo directly to park API

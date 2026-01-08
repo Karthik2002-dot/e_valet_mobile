@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CustomerMissingDialog extends StatelessWidget {
@@ -80,7 +81,7 @@ class CustomerMissingDialog extends StatelessWidget {
 
             // Main Question
             TextComponent(
-              labelText: 'Are you sure to re-park the car?',
+              labelText: TextConstants.reparkConfirmationTitle,
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.w700,
               color: AppColors.black,
@@ -91,8 +92,7 @@ class CustomerMissingDialog extends StatelessWidget {
 
             // Explanatory Text
             TextComponent(
-              labelText:
-                  'This will cancel the retrieval and you must park the car again.',
+              labelText: TextConstants.reparkConfirmationMessage,
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w400,
               color: AppColors.grey,
@@ -121,7 +121,7 @@ class CustomerMissingDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextComponent(
-                      labelText: 'Proceed to Re-Park',
+                      labelText: TextConstants.proceedToRepark,
                       fontSize: screenWidth * 0.04,
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
@@ -146,7 +146,7 @@ class CustomerMissingDialog extends StatelessWidget {
                 onCancel?.call();
               },
               child: TextComponent(
-                labelText: 'Cancel',
+                labelText: TextConstants.cancel,
                 fontSize: screenWidth * 0.035,
                 fontWeight: FontWeight.w500,
                 color: AppColors.grey,

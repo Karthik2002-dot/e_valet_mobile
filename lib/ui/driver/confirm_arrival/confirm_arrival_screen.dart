@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/api/driver/re-park_request_api.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_state.dart';
-import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/driver/customer_missing_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
@@ -124,48 +122,14 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                               CustomerMissingDialog.show(
                                 context,
                                 onProceed: () async {
-                                  // Capture context before async call
-                                  final currentContext = context;
-
-                                  try {
-                                    // Call the re-park API
-                                    await ReparkApiService.requestRepark(
-                                      sessionId: widget.session.id,
-                                      reason: 'CUSTOMER_NO_SHOW',
-                                    );
-
-                                    // Check if widget is still mounted before using context
-                                    if (!mounted) return;
-
-                                    // Show success message
-                                    SnackBars.showSuccessSnackBar(
-                                      currentContext,
-                                      'Re-park request submitted successfully',
-                                    );
-
-                                    Navigator.of(currentContext)
-                                        .pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => CarCameraScreen(
-                                          sessionId: widget.session.id,
-                                          isReparking: true,
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    // Check if widget is still mounted before using context
-                                    if (!mounted) return;
-
-                                    if (e is ApiException) {
-                                      SnackBars.showErrorSnackBar(
-                                          currentContext, e.message);
-                                    } else {
-                                      SnackBars.showErrorSnackBar(
-                                        currentContext,
-                                        'Failed to submit re-park request. Please try again.',
-                                      );
-                                    }
-                                  }
+                                  await CustomerMissingService
+                                      .handleCustomerMissing(
+                                    context: context,
+                                    sessionId: widget.session.id,
+                                    onSuccess: () {
+                                      // Any additional success handling can be added here
+                                    },
+                                  );
                                 },
                                 onCancel: () {
                                   // Reset the customer missing button after cancel

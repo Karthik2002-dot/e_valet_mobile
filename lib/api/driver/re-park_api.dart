@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
+import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ReparkApiService {
@@ -11,10 +13,9 @@ class ReparkApiService {
 
   /// Upload re-parked car photo to the session
   /// POST /api/v1/sessions/{id}/repark
-  static Future<Map<String, dynamic>> uploadReparkPhoto({
-    required String imagePath,
+  static Future<ReparkPhotoResponse> uploadReparkPhoto({
     required String sessionId,
-    String? description, // Optional notes about re-parking location
+    required ReparkPhotoRequest request,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
@@ -34,11 +35,10 @@ class ReparkApiService {
       // Create multipart form data
       final formData = FormData.fromMap({
         'photo': await MultipartFile.fromFile(
-          imagePath,
-          filename: imagePath.split('/').last,
+          request.imagePath,
+          filename: request.filename,
         ),
-        if (description != null && description.isNotEmpty)
-          'description': description,
+        if (request.hasDescription) 'description': request.description,
       });
 
       // Make the API call
@@ -49,7 +49,7 @@ class ReparkApiService {
 
       final responseData = response.data as Map<String, dynamic>;
 
-      return responseData;
+      return ReparkPhotoResponse.fromJson(responseData);
     } on DioException catch (e) {
       print('❌ [RE-PARK UPLOAD] DioException caught:');
       print('Status Code: ${e.response?.statusCode}');
