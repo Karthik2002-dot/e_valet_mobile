@@ -16,7 +16,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retriev
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
-  
+
   const DashboardContent({super.key, this.onRefreshReady});
 
   @override
