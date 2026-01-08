@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -22,6 +25,25 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   VoidCallback? _dashboardRefresh;
+  late OperatorDashboardBloc _dashboardBloc;
+  final String _outletId = '2';
+
+  @override
+  void initState() {
+    super.initState();
+    final webSocketBloc = context.read<WebSocketBloc?>();
+    _dashboardBloc = OperatorDashboardBloc(
+      webSocketBloc: webSocketBloc,
+      outletId: _outletId,
+    );
+    _dashboardBloc.add(FetchDashboardKpis(outletId: _outletId));
+  }
+
+  @override
+  void dispose() {
+    _dashboardBloc.close();
+    super.dispose();
+  }
 
   void _onMenuItemSelected(int index) {
     if (index == 5) {
@@ -50,8 +72,11 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => OperatorMenuBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => OperatorMenuBloc()),
+        BlocProvider.value(value: _dashboardBloc),
+      ],
       child: BlocListener<OperatorMenuBloc, OperatorMenuState>(
         listener: (context, state) {
           if (state is OperatorMenuLogoutSuccess) {
