@@ -5,10 +5,12 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class PreviewSubmitButton extends StatelessWidget {
   final VoidCallback onSubmit;
+  final bool isReparking;
 
   const PreviewSubmitButton({
     super.key,
     required this.onSubmit,
+    this.isReparking = false,
   });
 
   @override
@@ -32,7 +34,7 @@ class PreviewSubmitButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextComponent(
-              labelText: TextConstants.submitButton,
+              labelText: isReparking ? TextConstants.submitRePark : TextConstants.submitButton,
               fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.w600,
               color: AppColors.white,

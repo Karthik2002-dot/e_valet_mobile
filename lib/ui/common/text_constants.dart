@@ -160,6 +160,8 @@ class TextConstants {
 
   // Preview/Review Screen
   static const String reviewEntry = 'Review Entry';
+  static const String reParkingEntryReview = 'Re-Parking Entry Review';
+  static const String submitRePark = 'Submit Re-Park';
   static const String retakeButton = 'Retake';
   static const String submittingCarPhoto = 'Submitting car photo...';
 

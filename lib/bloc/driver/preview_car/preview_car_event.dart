@@ -10,11 +10,15 @@ abstract class PreviewCarEvent extends Equatable {
 class SubmitPhotoRequested extends PreviewCarEvent {
   final String imagePath;
   final String? sessionId;
+  final bool isReparking;
 
-  const SubmitPhotoRequested(this.imagePath, {this.sessionId});
+  const SubmitPhotoRequested(this.imagePath, {
+    this.sessionId,
+    this.isReparking = false,
+  });
 
   @override
-  List<Object?> get props => [imagePath, sessionId];
+  List<Object?> get props => [imagePath, sessionId, isReparking];
 }
 
 class ResetSubmission extends PreviewCarEvent {
