@@ -143,7 +143,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                       'Re-park request submitted successfully',
                                     );
 
-                                    Navigator.of(currentContext).pushReplacement(
+                                    Navigator.of(currentContext)
+                                        .pushReplacement(
                                       MaterialPageRoute(
                                         builder: (context) => CarCameraScreen(
                                           sessionId: widget.session.id,
@@ -156,7 +157,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                     if (!mounted) return;
 
                                     if (e is ApiException) {
-                                      SnackBars.showErrorSnackBar(currentContext, e.message);
+                                      SnackBars.showErrorSnackBar(
+                                          currentContext, e.message);
                                     } else {
                                       SnackBars.showErrorSnackBar(
                                         currentContext,

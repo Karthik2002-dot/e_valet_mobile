@@ -12,7 +12,8 @@ class SubmitPhotoRequested extends PreviewCarEvent {
   final String? sessionId;
   final bool isReparking;
 
-  const SubmitPhotoRequested(this.imagePath, {
+  const SubmitPhotoRequested(
+    this.imagePath, {
     this.sessionId,
     this.isReparking = false,
   });

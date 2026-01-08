@@ -16,7 +16,9 @@ class PreviewHeader extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return TextComponent(
-      labelText: isReparking ? TextConstants.reParkingEntryReview : TextConstants.reviewEntry,
+      labelText: isReparking
+          ? TextConstants.reParkingEntryReview
+          : TextConstants.reviewEntry,
       fontSize: screenWidth * 0.05,
       fontWeight: FontWeight.w600,
       color: AppColors.black,

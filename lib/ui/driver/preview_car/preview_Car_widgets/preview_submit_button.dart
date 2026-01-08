@@ -34,7 +34,9 @@ class PreviewSubmitButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextComponent(
-              labelText: isReparking ? TextConstants.submitRePark : TextConstants.submitButton,
+              labelText: isReparking
+                  ? TextConstants.submitRePark
+                  : TextConstants.submitButton,
               fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.w600,
               color: AppColors.white,
