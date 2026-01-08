@@ -34,7 +34,7 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
             icon: const Icon(Icons.menu),
             onPressed: () {
               // Open the custom drawer (hamburger)
-              _scaffoldKey.currentState?.openDrawer();
+              _scaffoldKey.currentState?.openEndDrawer();
             },
           )
         ],

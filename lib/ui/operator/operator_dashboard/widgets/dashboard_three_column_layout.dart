@@ -270,11 +270,12 @@ class _DashboardThreeColumnLayoutState
 
                           // Find the recommended driver (who parked the first retrieval request)
                           String? recommendedDriverName;
+                          int? recommendedCardNumber;
                           if (widget.retrievalRequests.requests.isNotEmpty) {
                             final firstRequest =
                                 widget.retrievalRequests.requests.first;
                             recommendedDriverName = firstRequest.parkedBy.name;
-
+                            recommendedCardNumber = firstRequest.cardNumber;
                             // Sort: recommended driver first, then others
                             freeDrivers.sort((a, b) {
                               if (a.name == recommendedDriverName) return -1;
@@ -312,6 +313,8 @@ class _DashboardThreeColumnLayoutState
                                     return AvailableDriversCard(
                                       driver: driver,
                                       isRecommended: isRecommended,
+                                      recommendedCardNumber:
+                                          recommendedCardNumber,
                                     );
                                   },
                                 );

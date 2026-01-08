@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/driver_card_content.dart';
 
 class AvailableDriversCard extends StatelessWidget {
   final AvailableDriver driver;
   final bool isRecommended;
+  final int? recommendedCardNumber;
 
   const AvailableDriversCard({
     super.key,
     required this.driver,
     this.isRecommended = false,
+    this.recommendedCardNumber,
   });
 
   @override
@@ -114,14 +118,16 @@ class AvailableDriversCard extends StatelessWidget {
                       size: MediaQuery.of(context).size.width * 0.014,
                       color: AppColors.primary,
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.005),
-                    Text(
-                      'Recommended - Parked this vehicle',
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.012,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.005,
+                    ),
+                    TextComponent(
+                      labelText: recommendedCardNumber != null
+                          ? '${TextConstants.recommendedFor} $recommendedCardNumber ${TextConstants.cardNumberLabel}'
+                          : TextConstants.recommendedBy,
+                      fontSize: MediaQuery.of(context).size.width * 0.012,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ],
                 ),

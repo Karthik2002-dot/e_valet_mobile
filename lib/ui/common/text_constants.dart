@@ -317,4 +317,6 @@ class TextConstants {
   static const String cancelText = 'Cancel';
   static const String confirm = 'Confirm';
   static const String parkedByLabel = 'Parked By ';
+  static const String recommendedBy = 'Recommended - Parked this vehicle';
+  static const String recommendedFor = 'Recommended for';
 }

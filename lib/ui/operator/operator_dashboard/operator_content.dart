@@ -15,7 +15,9 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operato
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 
 class DashboardContent extends StatefulWidget {
-  const DashboardContent({super.key});
+  final void Function(VoidCallback)? onRefreshReady;
+
+  const DashboardContent({super.key, this.onRefreshReady});
 
   @override
   State<DashboardContent> createState() => _DashboardContentState();
@@ -42,6 +44,22 @@ class _DashboardContentState extends State<DashboardContent> {
     _dashboardBloc.add(
       FetchDashboardKpis(
         outletId: _outletId,
+      ),
+    );
+
+    // Expose silent refresh method to parent
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onRefreshReady?.call(_silentRefresh);
+    });
+  }
+
+  void _silentRefresh() {
+    _dashboardBloc.add(
+      RefreshDashboardKpisSilently(
+        outletId: _outletId,
+        refreshKpis: true,
+        refreshDrivers: true,
+        refreshRequests: true,
       ),
     );
   }

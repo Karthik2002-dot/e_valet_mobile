@@ -24,29 +24,21 @@ class OperatorDrawerItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           children: [
-            const SizedBox(width: 12),
-            Image.asset(
-              asset,
-              width: 35,
-              height: 35,
-              color: isSelected ? AppColors.primaryDark : AppColors.white,
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Stack(
                 children: [
                   if (isSelected)
                     Positioned.fill(
-                      right: 40,
+                      left: 20,
                       child: Align(
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.centerRight,
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(22),
-                              bottomRight: Radius.circular(22),
+                              topLeft: Radius.circular(22),
+                              bottomLeft: Radius.circular(22),
                             ),
                           ),
                         ),
@@ -54,18 +46,27 @@ class OperatorDrawerItem extends StatelessWidget {
                     ),
                   Container(
                     height: 44,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.only(left: 20),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
                     child: TextComponent(
                       labelText: title,
-                      color:
-                          isSelected ? AppColors.primaryDark : AppColors.white,
+                      color: isSelected ? AppColors.black : AppColors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(width: 12),
+            Image.asset(
+              asset,
+              width: 35,
+              height: 35,
+              color: isSelected ? AppColors.black : AppColors.white,
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.02,
             ),
           ],
         ),
