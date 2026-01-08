@@ -57,8 +57,7 @@ class OperatorDashboardBloc
               outletId: outletId,
               refreshKpis: true,
               refreshDrivers: true,
-              refreshRequests:
-                  true, // Session changes affect retrieval requests
+              refreshRequests: false,
             ),
           );
         },
