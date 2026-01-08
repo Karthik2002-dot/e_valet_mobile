@@ -74,7 +74,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         },
         child: Scaffold(
           key: _scaffoldKey,
-          drawer: OperatorDrawer(
+          endDrawer: OperatorDrawer(
             selectedIndex: _selectedIndex,
             onItemSelected: _onMenuItemSelected,
           ),
@@ -88,7 +88,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
               IconButton(
                 icon: const Icon(Icons.menu, color: AppColors.white),
                 onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  _scaffoldKey.currentState?.openEndDrawer();
                 },
               ),
             ],
