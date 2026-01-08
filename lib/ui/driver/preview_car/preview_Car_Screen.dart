@@ -17,11 +17,13 @@ import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.d
 class PreviewCarScreen extends StatefulWidget {
   final String imagePath;
   final String? sessionId;
+  final bool isReparking;
 
   const PreviewCarScreen({
     super.key,
     required this.imagePath,
     this.sessionId,
+    this.isReparking = false,
   });
 
   @override
@@ -115,7 +117,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Review Entry Header
-                        const PreviewHeader(),
+                        PreviewHeader(isReparking: widget.isReparking),
                         SizedBox(height: screenHeight * 0.02),
 
                         // Image Card with Retake Button
@@ -132,8 +134,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                               ? () {}
                               : () => context.read<PreviewCarBloc>().add(
                                     SubmitPhotoRequested(widget.imagePath,
-                                        sessionId: widget.sessionId),
+                                        sessionId: widget.sessionId,
+                                        isReparking: widget.isReparking),
                                   ),
+                          isReparking: widget.isReparking,
                         ),
 
                         // Footer with "Powered By" and logo

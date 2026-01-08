@@ -167,6 +167,8 @@ class TextConstants {
 
   // Preview/Review Screen
   static const String reviewEntry = 'Review Entry';
+  static const String reParkingEntryReview = 'Re-Parking Entry Review';
+  static const String submitRePark = 'Submit Re-Park';
   static const String retakeButton = 'Retake';
   static const String submittingCarPhoto = 'Submitting car photo...';
 
@@ -192,6 +194,14 @@ class TextConstants {
   static const String enterTwoDigitCode =
       'Enter the 2-digit code provided by the user to complete the handover.';
   static const String customerHasNoPhone = 'Customer has no phone?';
+
+  // Customer Missing Dialog
+  static const String reparkConfirmationTitle =
+      'Are you sure to re-park the car?';
+  static const String reparkConfirmationMessage =
+      'This will cancel the retrieval and you must park the car again.';
+  static const String proceedToRepark = 'Proceed to Re-Park';
+  static const String cancel = 'Cancel';
 
   // Arrival Related
   static const String slideToConfirmArrival = 'Slide to Confirm Arrival';

@@ -3,7 +3,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/slider_action_button.dart';
 
-class HandoverButtonsSection extends StatelessWidget {
+class HandoverButtonsSection extends StatefulWidget {
   final bool isLoading;
   final VoidCallback onConfirmHandover;
   final VoidCallback? onCustomerMissing;
@@ -16,6 +16,19 @@ class HandoverButtonsSection extends StatelessWidget {
   });
 
   @override
+  State<HandoverButtonsSection> createState() => HandoverButtonsSectionState();
+}
+
+class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
+  Key _customerMissingKey = UniqueKey();
+
+  void resetCustomerMissingButton() {
+    setState(() {
+      _customerMissingKey = UniqueKey();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -24,9 +37,9 @@ class HandoverButtonsSection extends StatelessWidget {
         // Confirm Handover Slide Button
         SliderActionButton(
           labelText: TextConstants.slideToConfirmHandover,
-          isLoading: isLoading,
+          isLoading: widget.isLoading,
           backgroundColor: AppColors.white,
-          onSlideComplete: onConfirmHandover,
+          onSlideComplete: widget.onConfirmHandover,
           buttonColor: AppColors.primary,
           labelColor: AppColors.black,
           icon: Icons.handshake,
@@ -36,9 +49,10 @@ class HandoverButtonsSection extends StatelessWidget {
 
         // Customer Missing Slide Button
         SliderActionButton(
+          key: _customerMissingKey,
           labelText: TextConstants.slideToCustomerMissing,
           isLoading: false, // Customer missing doesn't need loading state
-          onSlideComplete: onCustomerMissing ?? () {},
+          onSlideComplete: widget.onCustomerMissing ?? () {},
           buttonColor: AppColors.error,
           backgroundColor: AppColors.white,
           labelColor: AppColors.black,

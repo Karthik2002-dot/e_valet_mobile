@@ -16,10 +16,12 @@ import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/cam
 
 class CarCameraScreen extends StatefulWidget {
   final String? sessionId;
+  final bool isReparking;
 
   const CarCameraScreen({
     super.key,
     this.sessionId,
+    this.isReparking = false,
   });
 
   @override
@@ -38,6 +40,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     super.initState();
     _cameraBloc = CarCameraBloc();
     _routeObserver = RouteObserver<ModalRoute>();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addObserver(this);
     // Set preferred orientations to allow landscape
     SystemChrome.setPreferredOrientations([
@@ -147,6 +150,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                 builder: (context) => PreviewCarScreen(
                   imagePath: state.imagePath,
                   sessionId: widget.sessionId,
+                  isReparking: widget.isReparking,
                 ),
               ),
             );

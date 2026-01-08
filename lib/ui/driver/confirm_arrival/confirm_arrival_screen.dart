@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arriva
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_state.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/driver/customer_missing_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -13,6 +14,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
+import 'package:niloufer_valet_mobile/ui/driver/customer_missing/customer_missing_dialog.dart';
 
 class ConfirmArrivalScreen extends StatefulWidget {
   final AssignedSession session;
@@ -28,6 +30,8 @@ class ConfirmArrivalScreen extends StatefulWidget {
 
 class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   bool _showHandoverButtons = false;
+  final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
+      GlobalKey<HandoverButtonsSectionState>();
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +110,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                     ),
                     child: _showHandoverButtons
                         ? HandoverButtonsSection(
+                            key: _handoverButtonsKey,
                             isLoading: isLoading,
                             onConfirmHandover: () {
                               context.read<ConfirmArrivalBloc>().add(
@@ -114,7 +119,24 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                   );
                             },
                             onCustomerMissing: () {
-                              // TODO: Handle customer missing
+                              CustomerMissingDialog.show(
+                                context,
+                                onProceed: () async {
+                                  await CustomerMissingService
+                                      .handleCustomerMissing(
+                                    context: context,
+                                    sessionId: widget.session.id,
+                                    onSuccess: () {
+                                      // Any additional success handling can be added here
+                                    },
+                                  );
+                                },
+                                onCancel: () {
+                                  // Reset the customer missing button after cancel
+                                  _handoverButtonsKey.currentState
+                                      ?.resetCustomerMissingButton();
+                                },
+                              );
                             },
                           )
                         : SlideToConfirmButton(
