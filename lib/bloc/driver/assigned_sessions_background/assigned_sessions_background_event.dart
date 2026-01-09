@@ -12,6 +12,14 @@ class StopAssignedSessionsPolling extends AssignedSessionsBackgroundEvent {
   const StopAssignedSessionsPolling();
 }
 
+class RefreshAssignedSessions extends AssignedSessionsBackgroundEvent {
+  const RefreshAssignedSessions();
+}
+
+class ReinitializeWebSocket extends AssignedSessionsBackgroundEvent {
+  const ReinitializeWebSocket();
+}
+
 class _PollAssignedSessions extends AssignedSessionsBackgroundEvent {
   const _PollAssignedSessions();
 }
