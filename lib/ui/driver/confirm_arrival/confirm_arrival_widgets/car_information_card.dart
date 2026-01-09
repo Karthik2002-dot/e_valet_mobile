@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -70,24 +71,17 @@ class CarInformationCard extends StatelessWidget {
                       color: AppColors.secondary,
                     ),
                     SizedBox(width: screenWidth * 0.03),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextComponent(
-                            labelText: TextConstants.badgeNumber,
-                            fontSize: screenWidth * 0.035,
-                            color: AppColors.grey,
-                          ),
-                          SizedBox(height: screenHeight * 0.005),
-                          TextComponent(
-                            labelText: session.cardNumber.toString(),
-                            fontSize: screenWidth * 0.05,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                        ],
-                      ),
+                    TextComponent(
+                      labelText: TextConstants.badgeNumber,
+                      fontSize: screenWidth * 0.035,
+                      color: AppColors.grey,
+                    ),
+                    Spacer(),
+                    TextComponent(
+                      labelText: session.cardNumber.toString(),
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
                     ),
                   ],
                 ),
@@ -112,31 +106,24 @@ class CarInformationCard extends StatelessWidget {
                       color: AppColors.secondary,
                     ),
                     SizedBox(width: screenWidth * 0.03),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextComponent(
-                            labelText: TextConstants.parkedBy,
-                            fontSize: screenWidth * 0.035,
-                            color: AppColors.grey,
-                          ),
-                          SizedBox(height: screenHeight * 0.005),
-                          TextComponent(
-                            labelText:
-                                session.parkedBy?.name ?? TextConstants.unknown,
-                            fontSize: screenWidth * 0.04,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.black,
-                          ),
-                        ],
-                      ),
+                    TextComponent(
+                      labelText: TextConstants.parkedByLabel,
+                      fontSize: screenWidth * 0.035,
+                      color: AppColors.grey,
                     ),
+                    SizedBox(height: screenHeight * 0.01),
+                    TextComponent(
+                      labelText:
+                          session.parkedBy?.name ?? TextConstants.unknown,
+                      fontSize: screenWidth * 0.04,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.black,
+                    ),
+                    Spacer(),
                     // Phone Icon
                     IconButton(
-                      onPressed: () {
-                        // TODO: Implement phone call functionality
-                      },
+                      onPressed: () =>
+                          _makePhoneCall(session.parkedBy?.phone ?? ''),
                       icon: Icon(
                         Icons.phone,
                         color: AppColors.secondary,
@@ -166,7 +153,7 @@ class CarInformationCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.remove_red_eye,
+                        Icons.info_outline,
                         size: screenWidth * 0.05,
                         color: AppColors.secondary,
                       ),
@@ -186,5 +173,9 @@ class CarInformationCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    await FlutterPhoneDirectCaller.callNumber(phoneNumber);
   }
 }
