@@ -4,7 +4,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 
 class LocalNotificationService {
-  static final LocalNotificationService _instance = LocalNotificationService._internal();
+  static final LocalNotificationService _instance =
+      LocalNotificationService._internal();
   factory LocalNotificationService() => _instance;
   LocalNotificationService._internal();
 
@@ -24,7 +25,8 @@ class LocalNotificationService {
       log('Initializing local notifications...');
 
       // Android initialization settings
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       // iOS initialization settings
       const iosSettings = DarwinInitializationSettings(
@@ -156,8 +158,10 @@ class LocalNotificationService {
     try {
       // Determine channel based on notification type
       final effectiveChannelId = channelId ?? _getChannelId(payload?['type']);
-      final effectiveChannelName = channelName ?? _getChannelName(payload?['type']);
-      final effectiveChannelDescription = channelDescription ?? _getChannelDescription(payload?['type']);
+      final effectiveChannelName =
+          channelName ?? _getChannelName(payload?['type']);
+      final effectiveChannelDescription =
+          channelDescription ?? _getChannelDescription(payload?['type']);
 
       // Android notification details
       final androidDetails = AndroidNotificationDetails(
@@ -213,7 +217,8 @@ class LocalNotificationService {
       final androidDetails = AndroidNotificationDetails(
         'high_priority_channel',
         'High Priority Notifications',
-        channelDescription: 'This channel is used for high priority notifications',
+        channelDescription:
+            'This channel is used for high priority notifications',
         importance: Importance.high,
         priority: Priority.high,
         icon: '@mipmap/ic_launcher',
@@ -379,12 +384,12 @@ class LocalNotificationService {
   /// Callback when notification is tapped
   static void _onNotificationTapped(NotificationResponse response) {
     log('Notification tapped - ID: ${response.id}, Action: ${response.actionId}');
-    
+
     if (response.payload != null) {
       try {
         final payload = jsonDecode(response.payload!);
         log('Notification payload: $payload');
-        
+
         // Handle notification tap based on payload
         // This will be processed by the FirebaseMessagingService
       } catch (e) {

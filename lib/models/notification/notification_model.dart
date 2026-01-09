@@ -25,18 +25,21 @@ class NotificationModel extends Equatable {
   });
 
   /// Create from Firebase RemoteMessage data
-  factory NotificationModel.fromFirebase(Map<String, dynamic> data, {
+  factory NotificationModel.fromFirebase(
+    Map<String, dynamic> data, {
     String? title,
     String? body,
   }) {
     return NotificationModel(
-      id: data['id'] ?? data['messageId'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: data['id'] ??
+          data['messageId'] ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: title ?? data['title'] ?? 'Notification',
       body: body ?? data['body'] ?? '',
       type: NotificationType.fromString(data['type']),
       data: data,
-      timestamp: data['timestamp'] != null 
-          ? DateTime.parse(data['timestamp']) 
+      timestamp: data['timestamp'] != null
+          ? DateTime.parse(data['timestamp'])
           : DateTime.now(),
       isRead: false,
       imageUrl: data['image_url'],
@@ -251,7 +254,8 @@ class NotificationSettings extends Equatable {
   }) {
     return NotificationSettings(
       enabled: enabled ?? this.enabled,
-      retrievalRequestEnabled: retrievalRequestEnabled ?? this.retrievalRequestEnabled,
+      retrievalRequestEnabled:
+          retrievalRequestEnabled ?? this.retrievalRequestEnabled,
       driverUpdatesEnabled: driverUpdatesEnabled ?? this.driverUpdatesEnabled,
       vehicleStatusEnabled: vehicleStatusEnabled ?? this.vehicleStatusEnabled,
       systemAlertsEnabled: systemAlertsEnabled ?? this.systemAlertsEnabled,

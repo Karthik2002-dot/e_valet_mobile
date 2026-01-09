@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is LoginSuccess) {
             final roles =
                 state.profile.roles.map((r) => r.toLowerCase()).toList();
-            
+
             // Only request permissions for drivers
             if (roles.contains('driver')) {
               _requestDriverPermissions(context);

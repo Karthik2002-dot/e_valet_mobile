@@ -17,13 +17,15 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class FirebaseMessagingService implements NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final LocalNotificationService _localNotificationService = LocalNotificationService();
-  
+  final LocalNotificationService _localNotificationService =
+      LocalNotificationService();
+
   final StreamController<Map<String, dynamic>> _messageStreamController =
       StreamController<Map<String, dynamic>>.broadcast();
 
   // Navigation key for global navigation
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   @override
   Future<void> initialize() async {
@@ -80,7 +82,8 @@ class FirebaseMessagingService implements NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         log('User granted notification permission');
-      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      } else if (settings.authorizationStatus ==
+          AuthorizationStatus.provisional) {
         log('User granted provisional notification permission');
       } else {
         log('User declined or has not accepted notification permission');
@@ -104,19 +107,20 @@ class FirebaseMessagingService implements NotificationService {
   }
 
   @override
-  Stream<Map<String, dynamic>> get onMessageReceived => _messageStreamController.stream;
+  Stream<Map<String, dynamic>> get onMessageReceived =>
+      _messageStreamController.stream;
 
   @override
   Future<void> handleBackgroundMessage(Map<String, dynamic> message) async {
     try {
       log('Handling background message: $message');
-      
+
       // Process the message based on type
       final notificationType = message['type'] as String?;
-      
+
       // Add to stream for BLoC to handle
       _messageStreamController.add(message);
-      
+
       // Navigate if needed based on notification type
       _handleNavigation(notificationType, message);
     } catch (e) {
@@ -148,7 +152,7 @@ class FirebaseMessagingService implements NotificationService {
   void _handleForegroundMessage(RemoteMessage message) {
     try {
       log('Processing foreground message...');
-      
+
       final notification = message.notification;
       final data = message.data;
 
@@ -180,7 +184,7 @@ class FirebaseMessagingService implements NotificationService {
   void _handleNotificationTap(RemoteMessage message) {
     try {
       log('Processing notification tap...');
-      
+
       final data = message.data;
       final notificationType = data['type'] as String?;
 
@@ -205,14 +209,15 @@ class FirebaseMessagingService implements NotificationService {
   /// Check if app was opened from a terminated state by tapping notification
   Future<void> _checkInitialMessage() async {
     try {
-      final RemoteMessage? message = await _firebaseMessaging.getInitialMessage();
-      
+      final RemoteMessage? message =
+          await _firebaseMessaging.getInitialMessage();
+
       if (message != null) {
         log('App opened from terminated state via notification: ${message.messageId}');
-        
+
         // Delay to ensure app is fully initialized
         await Future.delayed(const Duration(seconds: 2));
-        
+
         _handleNotificationTap(message);
       }
     } catch (e) {
@@ -226,7 +231,7 @@ class FirebaseMessagingService implements NotificationService {
 
     try {
       log('Navigating based on notification type: $type');
-      
+
       switch (type) {
         case 'retrieval_request':
           _navigateToRetrievalRequest(data);
@@ -256,7 +261,7 @@ class FirebaseMessagingService implements NotificationService {
   void _navigateToRetrievalRequest(Map<String, dynamic> data) {
     final requestId = data['request_id'] as String?;
     if (requestId == null) return;
-    
+
     log('Navigating to retrieval request: $requestId');
     // TODO: Implement navigation to retrieval request screen
     // navigatorKey.currentState?.pushNamed('/retrieval-request', arguments: requestId);
@@ -265,7 +270,7 @@ class FirebaseMessagingService implements NotificationService {
   void _navigateToDriverDetails(Map<String, dynamic> data) {
     final driverId = data['driver_id'] as String?;
     if (driverId == null) return;
-    
+
     log('Navigating to driver details: $driverId');
     // TODO: Implement navigation to driver details screen
     // navigatorKey.currentState?.pushNamed('/driver-details', arguments: driverId);
@@ -274,7 +279,7 @@ class FirebaseMessagingService implements NotificationService {
   void _navigateToVehicleStatus(Map<String, dynamic> data) {
     final vehicleId = data['vehicle_id'] as String?;
     if (vehicleId == null) return;
-    
+
     log('Navigating to vehicle status: $vehicleId');
     // TODO: Implement navigation to vehicle status screen
     // navigatorKey.currentState?.pushNamed('/vehicle-status', arguments: vehicleId);
@@ -283,7 +288,7 @@ class FirebaseMessagingService implements NotificationService {
   void _navigateToDeliveryConfirmation(Map<String, dynamic> data) {
     final deliveryId = data['delivery_id'] as String?;
     if (deliveryId == null) return;
-    
+
     log('Navigating to delivery confirmation: $deliveryId');
     // TODO: Implement navigation to delivery confirmation screen
     // navigatorKey.currentState?.pushNamed('/delivery-confirmation', arguments: deliveryId);

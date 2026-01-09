@@ -11,27 +11,27 @@ import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
-  
+
   // Initialize Hive for local storage
   await Hive.initFlutter();
   await TokenStorage.init();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp();
-  
+
   // Initialize Firebase Messaging Service
   final firebaseMessagingService = FirebaseMessagingService();
   await firebaseMessagingService.initialize();
-  
+
   runApp(MyApp(firebaseMessagingService: firebaseMessagingService));
 }
 
 class MyApp extends StatelessWidget {
   final FirebaseMessagingService firebaseMessagingService;
-  
+
   const MyApp({super.key, required this.firebaseMessagingService});
 
   @override
