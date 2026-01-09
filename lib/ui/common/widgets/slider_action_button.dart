@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:slider_button/slider_button.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -89,31 +89,26 @@ class SliderActionButton extends StatelessWidget {
             ? buttonHeight / 2 // Round: radius = half of height
             : (radius ?? 12); // Square/rounded: use provided radius or default
 
-        return SliderButton(
-          action: () async {
+        return SlideAction(
+          onSubmit: () {
             onSlideComplete();
-            return true;
+            return null;
           },
-          label: TextComponent(
-            labelText: labelText,
+          text: labelText,
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: labelColor ?? AppColors.white,
-            textAlign: TextAlign.center,
           ),
-          icon: Icon(
+          sliderButtonIcon: Icon(
             icon,
             color: AppColors.white,
             size: 24,
           ),
-          width: buttonWidth,
           height: buttonHeight,
-          buttonSize: sliderButtonSize,
-          radius: calculatedRadius,
-          buttonColor: buttonColor,
-          backgroundColor: backgroundColor,
-          highlightedColor: AppColors.white,
-          baseColor: buttonColor,
+          borderRadius: calculatedRadius,
+          innerColor: buttonColor,
+          outerColor: backgroundColor,
         );
       },
     );
