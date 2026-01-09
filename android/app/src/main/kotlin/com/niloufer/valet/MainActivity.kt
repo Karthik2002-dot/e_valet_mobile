@@ -1,4 +1,4 @@
-package com.example.niloufer_valet_mobile
+package com.niloufer.valet
 
 import io.flutter.embedding.android.FlutterActivity
 

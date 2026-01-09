@@ -51,5 +51,9 @@
 	<string>This app needs access to your location to track your status when going online or offline.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to your location to track your status when going online or offline.</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>We need notification permission to send you updates about your valet requests, driver assignments, and vehicle status.</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 </dict>
 </plist>
