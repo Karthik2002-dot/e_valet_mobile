@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
@@ -87,10 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
       context,
       listen: false,
     );
+    
+    // Get WebSocketBloc from context
+    final webSocketBloc = context.read<WebSocketBloc>();
 
     return BlocProvider(
       create: (context) => LoginBloc(
         firebaseMessagingService: firebaseMessagingService,
+        webSocketBloc: webSocketBloc,
       ),
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {

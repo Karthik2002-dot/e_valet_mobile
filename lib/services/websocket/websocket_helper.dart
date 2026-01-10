@@ -15,8 +15,13 @@ class WebSocketHelper {
     String? outletId,
     String? driverId,
     String? operatorId,
+    Duration? initialDelay,
   }) async {
     try {
+      // Add a small delay to ensure everything is initialized
+      // This helps avoid race conditions on first app launch
+      await Future.delayed(initialDelay ?? const Duration(milliseconds: 500));
+
       // Get access token
       final accessToken = await TokenStorage.getAccessToken();
       if (accessToken == null || accessToken.isEmpty) {
@@ -31,6 +36,8 @@ class WebSocketHelper {
         return;
       }
 
+      print('Attempting to connect WebSocket to: $baseUrl');
+
       final notificationsUrl = baseUrl;
 
       // Connect to WebSocket with authentication
@@ -43,32 +50,42 @@ class WebSocketHelper {
       // Wait for connection to actually establish by listening to connection stream
       final connectionCompleter = Completer<void>();
       late final StreamSubscription connectionSubscription;
+      Timer? timeoutTimer;
 
       connectionSubscription =
           webSocketBloc.service.connectionStream.listen((isConnected) {
         if (isConnected && !connectionCompleter.isCompleted) {
+          print('WebSocket connected successfully');
+          connectionCompleter.complete();
+          timeoutTimer?.cancel();
+          connectionSubscription.cancel();
+        }
+      });
+
+      // Set up timeout timer
+      timeoutTimer = Timer(const Duration(seconds: 15), () {
+        if (!connectionCompleter.isCompleted) {
+          print('WebSocket connection timeout after 15 seconds - continuing anyway');
           connectionCompleter.complete();
           connectionSubscription.cancel();
         }
       });
 
-      // Wait for connection with timeout
+      // Wait for connection (or timeout)
       try {
-        await connectionCompleter.future.timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            print('WebSocket connection timeout after 10 seconds');
-            connectionSubscription.cancel();
-          },
-        );
+        await connectionCompleter.future;
       } catch (e) {
         print('Error waiting for WebSocket connection: $e');
         connectionSubscription.cancel();
-        // Continue anyway to attempt room joins
+        timeoutTimer?.cancel();
       }
 
+      // Small delay before joining rooms
+      await Future.delayed(const Duration(milliseconds: 300));
+
       // Join outlet room only (driver/operator rooms are auto-joined by backend based on user roles)
-      if (outletId != null) {
+      if (outletId != null && webSocketBloc.service.isConnected) {
+        print('Joining outlet room: $outletId');
         webSocketBloc.add(JoinRoom.outlet(outletId));
       }
     } catch (e) {
