@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -87,24 +88,17 @@ class SessionCard extends StatelessWidget {
                           color: AppColors.secondary,
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextComponent(
-                                labelText: TextConstants.badgeNumber,
-                                fontSize: screenWidth * 0.035,
-                                color: AppColors.grey,
-                              ),
-                              const SizedBox(height: 4),
-                              TextComponent(
-                                labelText: session.cardNumber.toString(),
-                                fontSize: screenWidth * 0.05,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.black,
-                              ),
-                            ],
-                          ),
+                        TextComponent(
+                          labelText: TextConstants.badgeNumber,
+                          fontSize: screenWidth * 0.035,
+                          color: AppColors.grey,
+                        ),
+                        Spacer(),
+                        TextComponent(
+                          labelText: session.cardNumber.toString(),
+                          fontSize: screenWidth * 0.05,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
                         ),
                       ],
                     ),
@@ -119,7 +113,7 @@ class SessionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
                               Icons.badge,
@@ -133,19 +127,26 @@ class SessionCard extends StatelessWidget {
                                     '${TextConstants.parkedBy} ${session.parkedBy?.name ?? TextConstants.unknown}',
                                 fontSize: screenWidth * 0.04,
                                 color: AppColors.black,
+                                maxLines: 2,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Icon(
-                              Icons.phone,
-                              color: AppColors.secondary,
-                              size: 20,
+                            InkWell(
+                              onTap: () =>
+                                  _makePhoneCall(session.parkedBy?.phone ?? ''),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.phone,
+                                  color: AppColors.secondary,
+                                  size: 20,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -160,5 +161,9 @@ class SessionCard extends StatelessWidget {
         const SizedBox(height: 16),
       ],
     );
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    await FlutterPhoneDirectCaller.callNumber(phoneNumber);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
@@ -8,12 +9,39 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+
+class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
+  static final DriverHomeRouteObserver _instance =
+      DriverHomeRouteObserver._internal();
+  factory DriverHomeRouteObserver() => _instance;
+  DriverHomeRouteObserver._internal();
+
+  void Function()? _onRouteChanged;
+
+  void setOnRouteChanged(void Function() callback) {
+    _onRouteChanged = callback;
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    _onRouteChanged?.call();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _onRouteChanged?.call();
+  }
+}
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({
@@ -24,9 +52,15 @@ class DriverHomeScreen extends StatefulWidget {
   State<DriverHomeScreen> createState() => _DriverHomeScreenState();
 }
 
-class _DriverHomeScreenState extends State<DriverHomeScreen> {
+class _DriverHomeScreenState extends State<DriverHomeScreen>
+    with WidgetsBindingObserver, RouteAware {
   Timer? _dismissTimer;
   final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
+  final DriverHomeRouteObserver _routeObserver = DriverHomeRouteObserver();
+  Timer? _webSocketCheckTimer;
+
+  // Store bloc references to avoid context issues in timer callbacks
+  AssignedSessionsBackgroundBloc? _assignedBloc;
 
   void _presentAssignedSessionSheet() {
     // Reset dismiss state
@@ -109,7 +143,97 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _routeObserver.setOnRouteChanged(_onRouteChanged);
+
+    // Start periodic WebSocket health check
+    _startWebSocketHealthCheck();
+  }
+
+  void _onRouteChanged() {
+    // The Builder widget in build() will handle the refresh
+  }
+
+  void _startWebSocketHealthCheck() {
+    _webSocketCheckTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        _checkWebSocketHealth();
+      }
+    });
+  }
+
+  void _checkWebSocketHealth() {
+    try {
+      // Use stored bloc reference instead of context.read() to avoid Provider errors
+      if (_assignedBloc == null) {
+        return;
+      }
+
+      final webSocketBloc = context.read<WebSocketBloc>();
+
+      // If WebSocket is connected but we don't have sessions, refresh
+      if (webSocketBloc.isConnected &&
+          _assignedBloc!.state is AssignedSessionsBackgroundInitial) {
+        _assignedBloc!.add(const RefreshAssignedSessions());
+      }
+    } catch (e) {
+      print('WebSocket health check error: $e');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      // App came back to foreground - check WebSocket
+      _checkWebSocketOnResume();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant DriverHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Builder widget in build() will handle refresh on widget update
+  }
+
+  void _checkWebSocketOnResume() {
+    // The Builder widget in build() will handle the refresh when app resumes
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Subscribe to route changes
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      _routeObserver.subscribe(this, route);
+    }
+
+    // Builder widget in build() will handle WebSocket checks
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Builder widget in build() will handle refresh
+  }
+
+  @override
+  void didPush() {
+    super.didPush();
+    // Builder widget in build() will handle refresh
+  }
+
+  @override
   void dispose() {
+    _webSocketCheckTimer?.cancel();
+    _routeObserver.unsubscribe(this);
+    WidgetsBinding.instance.removeObserver(this);
+    _assignedBloc = null; // Clear bloc reference
     _cleanupTimer();
     _dismissNotifier.dispose();
     super.dispose();
@@ -120,93 +244,136 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => DriverMenuBloc()),
-        BlocProvider(create: (_) => AssignedSessionsBackgroundBloc()),
+        BlocProvider(
+            create: (context) => AssignedSessionsBackgroundBloc(
+                  webSocketBloc: context.read<WebSocketBloc>(),
+                )),
         BlocProvider(
             create: (_) =>
                 DriverStatusBloc()..add(const DriverStatusStarted())),
       ],
-      child: MultiBlocListener(
-        listeners: [
-          BlocListener<AssignedSessionsBackgroundBloc,
-              AssignedSessionsBackgroundState>(
-            listener: (context, state) {
-              if (state is AssignedSessionsBackgroundData &&
-                  state.hasSessions) {
-                // Show bottom sheet when new assigned sessions data arrives
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-                    _presentAssignedSessionSheet();
+      child: Builder(
+        builder: (context) {
+          // Now we can safely access the blocs since we're inside the MultiBlocProvider
+          try {
+            final assignedBloc = context.read<AssignedSessionsBackgroundBloc>();
+            // Store the bloc reference for use in timer callbacks
+            _assignedBloc = assignedBloc;
+
+            // Force immediate refresh on every build
+            assignedBloc.add(const RefreshAssignedSessions());
+
+            // WebSocket listeners are automatically set up in bloc constructor
+          } catch (e) {
+            _assignedBloc = null;
+          }
+
+          return MultiBlocListener(
+            listeners: [
+              BlocListener<AssignedSessionsBackgroundBloc,
+                  AssignedSessionsBackgroundState>(
+                listener: (context, state) {
+                  if (state is AssignedSessionsBackgroundData) {
+                    if (state.hasSessions) {
+                      // Show bottom sheet when new assigned sessions data arrives
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          _presentAssignedSessionSheet();
+                        }
+                      });
+                    }
                   }
-                });
-              }
-            },
-          ),
-          BlocListener<DriverMenuBloc, DriverMenuState>(
-            listener: (context, state) {
-              if (state is DriverMenuLogoutSuccess) {
-                // Show success message
-                SnackBars.showSuccessSnackBar(context, state.response.message);
-                // Navigate to login screen
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const LoginScreen(),
-                  ),
-                  (route) => false,
-                );
-                // Reset state
-                context.read<DriverMenuBloc>().add(const DriverMenuReset());
-              } else if (state is DriverMenuLogoutFailure) {
-                // Show error message
-                SnackBars.showErrorSnackBar(context, state.message);
-                // Still navigate to login screen even on failure (tokens are cleared locally)
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const LoginScreen(),
-                  ),
-                  (route) => false,
-                );
-                // Reset state
-                context.read<DriverMenuBloc>().add(const DriverMenuReset());
-              } else if (state is DriverMenuAction) {
-                switch (state.action) {
-                  case DriverMenuActionType.profile:
-                    Navigator.of(context).push(
+                },
+              ),
+              // Add WebSocket connection monitoring
+              BlocListener<WebSocketBloc, WebSocketState>(
+                listener: (context, state) {
+                  // WebSocket state monitoring (no debug prints needed)
+                },
+              ),
+              BlocListener<DriverMenuBloc, DriverMenuState>(
+                listener: (context, state) {
+                  if (state is DriverMenuLogoutSuccess) {
+                    // Show success message
+                    SnackBars.showSuccessSnackBar(
+                        context, state.response.message);
+                    // Navigate to login screen
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (_) => const ProfileScreen(),
+                        builder: (_) => const LoginScreen(),
                       ),
+                      (route) => false,
                     );
-                    // Reset state so the same action can be handled again later
+                    // Reset state
                     context.read<DriverMenuBloc>().add(const DriverMenuReset());
-                    break;
-                  case DriverMenuActionType.logout:
-                    // This case is now handled by DriverMenuLogoutSuccess/Failure
-                    break;
+                  } else if (state is DriverMenuLogoutFailure) {
+                    // Show error message
+                    SnackBars.showErrorSnackBar(context, state.message);
+                    // Still navigate to login screen even on failure (tokens are cleared locally)
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                      (route) => false,
+                    );
+                    // Reset state
+                    context.read<DriverMenuBloc>().add(const DriverMenuReset());
+                  } else if (state is DriverMenuAction) {
+                    switch (state.action) {
+                      case DriverMenuActionType.profile:
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                        // Reset state so the same action can be handled again later
+                        context
+                            .read<DriverMenuBloc>()
+                            .add(const DriverMenuReset());
+                        break;
+                      case DriverMenuActionType.logout:
+                        // This case is now handled by DriverMenuLogoutSuccess/Failure
+                        break;
+                    }
+                  }
+                },
+              ),
+              BlocListener<DriverStatusBloc, DriverStatusState>(
+                listener: (context, state) {
+                  if (state is DriverStatusClockInSuccess) {
+                    // Show success snackbar with message from API
+                    SnackBars.showSuccessSnackBar(context, state.message);
+                  } else if (state is DriverStatusClockOutSuccess) {
+                    // Show success snackbar with message from API
+                    SnackBars.showSuccessSnackBar(context, state.message);
+                  } else if (state is DriverBreakStartSuccess) {
+                    // Show success snackbar with message from API
+                    SnackBars.showSuccessSnackBar(context, state.message);
+                  } else if (state is DriverBreakEndSuccess) {
+                    // Show success snackbar with message from API
+                    SnackBars.showSuccessSnackBar(context, state.message);
+                  } else if (state is DriverStatusError) {
+                    // Show error snackbar
+                    SnackBars.showErrorSnackBar(context, state.message);
+                  }
+                },
+              ),
+            ],
+            child: GestureDetector(
+              onTap: () {
+                try {
+                  final assignedBloc =
+                      context.read<AssignedSessionsBackgroundBloc>();
+                  assignedBloc.add(const RefreshAssignedSessions());
+                } catch (e) {
+                  print('Manual WebSocket refresh failed: $e');
                 }
-              }
-            },
-          ),
-          BlocListener<DriverStatusBloc, DriverStatusState>(
-            listener: (context, state) {
-              if (state is DriverStatusClockInSuccess) {
-                // Show success snackbar with message from API
-                SnackBars.showSuccessSnackBar(context, state.message);
-              } else if (state is DriverStatusClockOutSuccess) {
-                // Show success snackbar with message from API
-                SnackBars.showSuccessSnackBar(context, state.message);
-              } else if (state is DriverBreakStartSuccess) {
-                // Show success snackbar with message from API
-                SnackBars.showSuccessSnackBar(context, state.message);
-              } else if (state is DriverBreakEndSuccess) {
-                // Show success snackbar with message from API
-                SnackBars.showSuccessSnackBar(context, state.message);
-              } else if (state is DriverStatusError) {
-                // Show error snackbar
-                SnackBars.showErrorSnackBar(context, state.message);
-              }
-            },
-          ),
-        ],
-        child: const DriverHomeView(),
+              },
+              child: const DriverHomeView(),
+            ),
+          );
+        },
       ),
     );
   }

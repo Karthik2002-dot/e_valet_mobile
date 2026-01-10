@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "369380969472",
+    "project_id": "niloufer-9351a",
+    "storage_bucket": "niloufer-9351a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369380969472:android:d905e9c63e789117e55ce5",
+        "android_client_info": {
+          "package_name": "com.niloufer.valet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCt-yTPq8Yvv8UsoKOIdrZRZ5RNbOvIGJc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
