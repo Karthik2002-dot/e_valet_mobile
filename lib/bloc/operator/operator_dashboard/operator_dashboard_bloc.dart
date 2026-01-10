@@ -57,7 +57,7 @@ class OperatorDashboardBloc
               outletId: outletId,
               refreshKpis: true,
               refreshDrivers: true,
-              refreshRequests: false,
+              refreshRequests: true,
             ),
           );
         },
