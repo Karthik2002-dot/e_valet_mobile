@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/oauth/login_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/oauth/phone_password_login_request.dart';
+import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginInitial()) {
+  final FirebaseMessagingService? firebaseMessagingService;
+
+  LoginBloc({this.firebaseMessagingService}) : super(const LoginInitial()) {
     on<LoginIdChanged>(_onLoginIdChanged);
     on<PinChanged>(_onPinChanged);
     on<LoginSubmitted>(_onLoginSubmitted);
@@ -57,6 +61,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final profile = await LoginApiService.verifyPhonePasswordLogin(request);
 
       if (profile.roles.isNotEmpty) {
+        // Register FCM token after successful login
+        try {
+          await firebaseMessagingService?.registerFcmTokenAfterLogin();
+          log('FCM token registration initiated after login');
+        } catch (e) {
+          log('Failed to register FCM token after login: $e');
+          // Don't fail the login if FCM registration fails
+        }
+
         emit(LoginSuccess(profile));
       } else {
         emit(

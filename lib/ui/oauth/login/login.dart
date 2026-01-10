@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_state.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -80,8 +82,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get FirebaseMessagingService from Provider
+    final firebaseMessagingService = Provider.of<FirebaseMessagingService>(
+      context,
+      listen: false,
+    );
+
     return BlocProvider(
-      create: (context) => LoginBloc(),
+      create: (context) => LoginBloc(
+        firebaseMessagingService: firebaseMessagingService,
+      ),
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
