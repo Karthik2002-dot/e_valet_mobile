@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/api/notification/notification_api_service.dart';
+import 'package:niloufer_valet_mobile/models/notification/fcm_register_request.dart';
+import 'package:niloufer_valet_mobile/services/device/device_info_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'notification_service.dart';
 import 'local_notification_service.dart';
 
@@ -19,6 +23,8 @@ class FirebaseMessagingService implements NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final LocalNotificationService _localNotificationService =
       LocalNotificationService();
+  final NotificationApiService _notificationApiService =
+      NotificationApiService();
 
   final StreamController<Map<String, dynamic>> _messageStreamController =
       StreamController<Map<String, dynamic>>.broadcast();
@@ -38,9 +44,11 @@ class FirebaseMessagingService implements NotificationService {
       // Request notification permissions
       await requestPermission();
 
-      // Get FCM token
+      // Get FCM token (but don't register yet - wait for login)
       final token = await getToken();
-      log('FCM Token: $token');
+      if (token != null) {
+        log('FCM Token: $token');
+      }
 
       // Setup message handlers
       _setupMessageHandlers();
@@ -48,10 +56,14 @@ class FirebaseMessagingService implements NotificationService {
       // Handle background messages
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-      // Handle token refresh
-      _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      // Handle token refresh - only register if user is logged in
+      _firebaseMessaging.onTokenRefresh.listen((newToken) async {
         log('FCM Token refreshed: $newToken');
-        // TODO: Send updated token to backend
+        // Check if user has access token before registering
+        final accessToken = await TokenStorage.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          _registerFcmToken(newToken);
+        }
         _messageStreamController.add({
           'type': 'token_refresh',
           'token': newToken,
@@ -62,6 +74,21 @@ class FirebaseMessagingService implements NotificationService {
     } catch (e) {
       log('Error initializing Firebase Messaging Service: $e');
       rethrow;
+    }
+  }
+
+  /// Register FCM token after successful login
+  /// Call this method after user authentication is complete
+  Future<void> registerFcmTokenAfterLogin() async {
+    try {
+      final token = await getToken();
+      if (token != null) {
+        await _registerFcmToken(token);
+      } else {
+        log('No FCM token available to register');
+      }
+    } catch (e) {
+      log('Error registering FCM token after login: $e');
     }
   }
 
@@ -327,6 +354,41 @@ class FirebaseMessagingService implements NotificationService {
       log('FCM token deleted');
     } catch (e) {
       log('Error deleting FCM token: $e');
+    }
+  }
+
+  /// Register FCM token with backend
+  Future<void> _registerFcmToken(String fcmToken) async {
+    try {
+      log('Registering FCM token with backend...');
+
+      // Get device information
+      final deviceInfo = await DeviceInfoService.getAllDeviceInfo();
+
+      // Create registration request
+      final request = FcmRegisterRequest(
+        deviceId: deviceInfo['deviceId']!,
+        fcmToken: fcmToken,
+        platform: deviceInfo['platform']!,
+        appVersion: deviceInfo['appVersion']!,
+        osVersion: deviceInfo['osVersion']!,
+      );
+
+      // Register with backend
+      final response = await _notificationApiService.registerFcmToken(request);
+
+      if (response.success) {
+        log('FCM token registered successfully with backend');
+        log('Device ID: ${deviceInfo['deviceId']}');
+        log('Platform: ${deviceInfo['platform']}');
+        log('App Version: ${deviceInfo['appVersion']}');
+        log('OS Version: ${deviceInfo['osVersion']}');
+      } else {
+        log('FCM token registration failed: ${response.message}');
+      }
+    } catch (e) {
+      log('Error registering FCM token with backend: $e');
+      // Don't rethrow - this is a background operation that shouldn't crash the app
     }
   }
 

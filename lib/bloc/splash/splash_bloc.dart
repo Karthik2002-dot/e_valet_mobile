@@ -58,11 +58,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
       // Initialize WebSocket connection if user is authenticated
       if (webSocketBloc != null && userId != null) {
+        // Add delay on splash to ensure network is ready (especially on first launch)
         await WebSocketHelper.connectAfterLogin(
           webSocketBloc: webSocketBloc!,
           outletId: outletId,
           operatorId: isOperator ? userId : null,
           driverId: roles.any((r) => r.contains('driver')) ? userId : null,
+          initialDelay: const Duration(milliseconds: 1500), // Longer delay for splash
         );
       }
     } catch (e) {

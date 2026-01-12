@@ -1,13 +1,23 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/oauth/login_api_service.dart';
+import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/oauth/phone_password_login_request.dart';
+import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
+import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginInitial()) {
+  final FirebaseMessagingService? firebaseMessagingService;
+  final WebSocketBloc? webSocketBloc;
+
+  LoginBloc({
+    this.firebaseMessagingService,
+    this.webSocketBloc,
+  }) : super(const LoginInitial()) {
     on<LoginIdChanged>(_onLoginIdChanged);
     on<PinChanged>(_onPinChanged);
     on<LoginSubmitted>(_onLoginSubmitted);
@@ -57,6 +67,43 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final profile = await LoginApiService.verifyPhonePasswordLogin(request);
 
       if (profile.roles.isNotEmpty) {
+        // Register FCM token after successful login
+        try {
+          await firebaseMessagingService?.registerFcmTokenAfterLogin();
+          log('FCM token registration initiated after login');
+        } catch (e) {
+          log('Failed to register FCM token after login: $e');
+          // Don't fail the login if FCM registration fails
+        }
+
+        // Connect WebSocket after successful login
+        try {
+          if (webSocketBloc != null) {
+            final roles = profile.roles.map((r) => r.toLowerCase()).toList();
+            final userId = profile.user?.id;
+            final isOperator = roles.any((r) => r.contains('operator'));
+            final isDriver = roles.any((r) => r.contains('driver'));
+
+            String? outletId;
+            if (isOperator) {
+              outletId = '2'; // Default outlet ID for operators
+            }
+
+            await WebSocketHelper.connectAfterLogin(
+              webSocketBloc: webSocketBloc!,
+              outletId: outletId,
+              operatorId: isOperator ? userId : null,
+              driverId: isDriver ? userId : null,
+              initialDelay:
+                  const Duration(milliseconds: 500), // Shorter delay for login
+            );
+            log('WebSocket connection initiated after login');
+          }
+        } catch (e) {
+          log('Failed to connect WebSocket after login: $e');
+          // Don't fail the login if WebSocket connection fails
+        }
+
         emit(LoginSuccess(profile));
       } else {
         emit(
