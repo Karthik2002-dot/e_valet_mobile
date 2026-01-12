@@ -38,9 +38,10 @@ class WebSocketService {
     Map<String, dynamic>? auth,
     bool autoConnect = true,
     int reconnectionAttempts = 5,
-    int reconnectionDelay = 1000,
-    int reconnectionDelayMax = 5000,
+    int reconnectionDelay = 2000,
+    int reconnectionDelayMax = 10000,
     bool randomizationFactor = true,
+    int timeout = 20000,
   }) async {
     try {
       // Disconnect existing socket if any
@@ -49,6 +50,8 @@ class WebSocketService {
         await disconnect();
       }
 
+      print('Connecting to WebSocket: $url');
+
       // Build socket options
       final optionBuilder = IO.OptionBuilder()
           .setTransports(['websocket'])
@@ -56,7 +59,9 @@ class WebSocketService {
           .setReconnectionAttempts(reconnectionAttempts)
           .setReconnectionDelay(reconnectionDelay)
           .setReconnectionDelayMax(reconnectionDelayMax)
-          .enableForceNew();
+          .setTimeout(timeout)
+          .enableForceNew()
+          .enableReconnection();
 
       // Add query parameters if provided
       if (query != null && query.isNotEmpty) {
@@ -94,6 +99,7 @@ class WebSocketService {
 
       // Connect if autoConnect is true
       if (autoConnect) {
+        print('Auto-connecting socket...');
         _socket!.connect();
       }
     } catch (e) {
@@ -105,10 +111,12 @@ class WebSocketService {
   /// Setup default socket event listeners
   void _setupDefaultListeners() {
     _socket?.onConnect((_) {
+      print('WebSocket connected successfully');
       _connectionController.add(true);
     });
 
     _socket?.onDisconnect((data) {
+      print('WebSocket disconnected: $data');
       _connectionController.add(false);
     });
 
@@ -130,13 +138,27 @@ class WebSocketService {
       print('WebSocket reconnecting (attempt: $attempt)');
     });
 
+    _socket?.onReconnectAttempt((attempt) {
+      print('WebSocket reconnection attempt: $attempt');
+    });
+
     _socket?.onReconnectError((error) {
       print('WebSocket reconnection error: $error');
     });
 
     _socket?.onReconnectFailed((_) {
-      print('WebSocket reconnection failed');
+      print('WebSocket reconnection failed - giving up');
       _connectionController.add(false);
+    });
+
+    _socket?.onPing((_) {
+      // Uncomment for debugging
+      // print('WebSocket ping');
+    });
+
+    _socket?.onPong((_) {
+      // Uncomment for debugging
+      // print('WebSocket pong');
     });
   }
 

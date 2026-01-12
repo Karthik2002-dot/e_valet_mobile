@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,23 +37,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
-        BlocProvider<WebSocketBloc>(
-          create: (context) => WebSocketBloc(),
-          lazy: false,
-        ),
-        BlocProvider<SplashBloc>(
-          create: (context) => SplashBloc(
-            webSocketBloc: context.read<WebSocketBloc>(),
-          ),
+        // Provide FirebaseMessagingService to the entire app
+        Provider<FirebaseMessagingService>.value(
+          value: firebaseMessagingService,
         ),
       ],
-      child: MaterialApp(
-        title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
-        navigatorKey: FirebaseMessagingService.navigatorKey,
-        home: const SplashScreen(),
-        debugShowCheckedModeBanner: false,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<WebSocketBloc>(
+            create: (context) => WebSocketBloc(),
+            lazy: false,
+          ),
+          BlocProvider<SplashBloc>(
+            create: (context) => SplashBloc(
+              webSocketBloc: context.read<WebSocketBloc>(),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
+          navigatorKey: FirebaseMessagingService.navigatorKey,
+          home: const SplashScreen(),
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }
