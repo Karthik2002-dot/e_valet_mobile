@@ -46,7 +46,10 @@ class DriverStatus {
   }
 
   bool get isOnline =>
-      status.toUpperCase() == 'ONLINE' || status.toUpperCase() == 'ON_BREAK';
+      status.toUpperCase() == 'ONLINE' ||
+      status.toUpperCase() == 'ON_BREAK' ||
+      status.toUpperCase() == 'BREAK';
   bool get isOffline => status.toUpperCase() == 'OFFLINE';
-  bool get isOnBreak => status.toUpperCase() == 'ON_BREAK';
+  bool get isOnBreak =>
+      status.toUpperCase() == 'ON_BREAK' || status.toUpperCase() == 'BREAK';
 }

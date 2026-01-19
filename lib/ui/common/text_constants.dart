@@ -140,6 +140,7 @@ class TextConstants {
   // Break Messages
   static const String takingBreak = 'Taking a Break';
   static const String relaxAndRestart = 'Relax and Restart!';
+  static const String endBreak = 'End Break';
 
   // Manual Tag Entry
   static const String enterTagNumberTitle = 'Enter the Tag Number to Proceed';
