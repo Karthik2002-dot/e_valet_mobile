@@ -83,6 +83,12 @@ class _SplashScreenState extends State<SplashScreen>
       },
       child: BlocBuilder<SplashBloc, SplashState>(
         builder: (context, state) {
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
+          final splashAsset = isLandscape
+              ? 'assets/jsons/horizontal_splash.json'
+              : 'assets/jsons/splash.json';
+
           return Scaffold(
             backgroundColor: AppColors.white,
             body: state is SplashError
@@ -106,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen>
                   )
                 : SizedBox.expand(
                     child: Lottie.asset(
-                      'assets/jsons/splash.json',
+                      splashAsset,
                       controller: _animationController,
                       onLoaded: (composition) {
                         _animationController
