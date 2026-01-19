@@ -26,22 +26,38 @@ class CameraPreviewWidget extends StatelessWidget {
         aspectRatio = size.height / size.width;
       }
 
-      return SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: AspectRatio(
-          aspectRatio: aspectRatio,
-          child: CameraPreview(cameraController!),
+      // Reduce camera height to leave space for parking location input at bottom
+      final cameraHeight = size.height * 0.7; // Use 70% of screen height
+
+      return Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        height: cameraHeight,
+        child: SizedBox(
+          width: double.infinity,
+          height: cameraHeight,
+          child: AspectRatio(
+            aspectRatio: aspectRatio,
+            child: CameraPreview(cameraController!),
+          ),
         ),
       );
     } else {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: AppColors.black,
-        child: const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.primary,
+      final cameraHeight = MediaQuery.of(context).size.height * 0.7;
+      return Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        height: cameraHeight,
+        child: Container(
+          width: double.infinity,
+          height: cameraHeight,
+          color: AppColors.black,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+            ),
           ),
         ),
       );

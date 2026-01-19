@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/api/driver/re-park_api.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
 
 class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
@@ -21,7 +22,7 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     try {
       if (event.isReparking) {
         // Create repark photo request model
-        final reparkRequest = ReparkPhotoRequest(imagePath: event.imagePath);
+        final reparkRequest = ReparkPhotoRequest(imagePath: event.imagePath!);
 
         // Upload re-parked car photo to repark API
         await ReparkApiService.uploadReparkPhoto(
@@ -29,9 +30,20 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
           request: reparkRequest,
         );
       } else {
-        // Upload parking photo directly to park API
-        await ImageApiService.uploadParkingPhoto(
+        // Create park request model with GPS data
+        // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
+        // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
+        final parkRequest = ParkRequest(
           imagePath: event.imagePath,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          accuracy: event.accuracy,
+          parkingLocation: event.parkingLocation,
+        );
+
+        // Upload parking data to park API
+        await ImageApiService.uploadParkingPhoto(
+          request: parkRequest,
           sessionId: event.sessionId,
         );
       }

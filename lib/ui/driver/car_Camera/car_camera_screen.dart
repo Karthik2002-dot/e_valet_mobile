@@ -212,9 +212,39 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                         .add(const ToggleFlashRequested()),
                   ),
 
-                  // Bottom Overlay (Photo button and text)
+                  // Capture Button Overlay (positioned over camera)
+                  Positioned(
+                    bottom: MediaQuery.of(context).size.height *
+                        0.25, // Position above the input container
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Builder(
+                        builder: (builderContext) => GestureDetector(
+                          onTap: () {
+                            _capturePhoto(builderContext);
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.18,
+                            height: MediaQuery.of(context).size.width * 0.18,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primary,
+                              border: Border.all(
+                                color: AppColors.white,
+                                width: 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Bottom Overlay (Input field only)
                   CameraBottomOverlay(
                     onCapture: _capturePhoto,
+                    onSubmit: _handleSubmitWithParkingLocation,
                   ),
                 ],
               ),
@@ -272,6 +302,64 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       if (mounted) {
         SnackBars.showErrorSnackBar(
           blocContext,
+          '${TextConstants.errorCapturingPhoto}: $e',
+        );
+      }
+    }
+  }
+
+  Future<void> _handleSubmitWithParkingLocation(
+    BuildContext context,
+    String parkingLocation,
+  ) async {
+    final state = context.read<CarCameraBloc>().state;
+    if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
+      SnackBars.showErrorSnackBar(
+        context,
+        TextConstants.cameraNotReady,
+      );
+      return;
+    }
+
+    try {
+      final cameraController = state is CarCameraInitialized
+          ? state.cameraController
+          : (state as CarCameraFlashToggled).cameraController;
+      final isFlashOn = state is CarCameraInitialized
+          ? state.isFlashOn
+          : (state as CarCameraFlashToggled).isFlashOn;
+
+      // Set flash mode for the photo capture
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.always : FlashMode.off,
+      );
+
+      // Take the picture
+      final image = await cameraController.takePicture();
+
+      // Restore flash mode for preview
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.torch : FlashMode.off,
+      );
+
+      // Navigate directly to preview screen with parking location
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PreviewCarScreen(
+              imagePath: image.path,
+              sessionId: widget.sessionId,
+              isReparking: widget.isReparking,
+              parkingLocation: parkingLocation,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          context,
           '${TextConstants.errorCapturingPhoto}: $e',
         );
       }
