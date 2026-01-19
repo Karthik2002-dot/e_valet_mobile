@@ -214,11 +214,15 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       child: BlocListener<PreviewCarBloc, PreviewCarState>(
         listener: (context, state) {
           if (state is PreviewCarSuccess) {
-            // Navigate to success screen with the captured image
+            // Navigate to success screen
+            // If parking was done via location input, show car.png with golden background
+            final isLocationBased = widget.parkingLocation != null &&
+                widget.parkingLocation!.isNotEmpty;
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => CarSuccessScreen(
-                  imagePath: widget.imagePath,
+                  imagePath: isLocationBased ? null : widget.imagePath,
+                  isLocationBasedParking: isLocationBased,
                 ),
               ),
             );

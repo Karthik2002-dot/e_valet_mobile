@@ -32,50 +32,46 @@ class ConfirmArrivalBloc
     emit(const ConfirmArrivalLoading());
 
     try {
-      // Get stored location or fetch new one
-      var locationData = await TokenStorage.getCurrentLocation();
-
-      if (locationData == null) {
-        // Request permission if needed
-        LocationPermission permission = await LocationService.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await LocationService.requestPermission();
-        }
-
-        if (permission != LocationPermission.denied &&
-            permission != LocationPermission.deniedForever) {
-          final position = await LocationService.getCurrentLocation();
-          final latitude = position.latitude;
-          final longitude = position.longitude;
-          final accuracy = position.accuracy;
-          final location =
-              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-
-          locationData = {
-            'latitude': latitude,
-            'longitude': longitude,
-            'location': location,
-            'accuracy': accuracy,
-          };
-
-          // Save for future use
-          await TokenStorage.saveCurrentLocation(
-            latitude: latitude,
-            longitude: longitude,
-            location: location,
-          );
-        } else {
-          throw ApiException(
-            TextConstants.locationPermissionRequiredArrival,
-            code: 'location_permission_denied',
-          );
-        }
+      // Always fetch fresh location with accuracy for arrived API
+      // Request permission if needed
+      LocationPermission permission = await LocationService.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await LocationService.requestPermission();
       }
 
-      final latitude = locationData['latitude'] as double;
-      final longitude = locationData['longitude'] as double;
-      final accuracy = locationData['accuracy'] as double;
-      final location = locationData['location'] as String;
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw ApiException(
+          TextConstants.locationPermissionRequiredArrival,
+          code: 'location_permission_denied',
+        );
+      }
+
+      // Get current location coordinates with accuracy
+      final coordinates = await LocationService.getCurrentCoordinates();
+      final latitude = coordinates['latitude']!;
+      final longitude = coordinates['longitude']!;
+      final accuracy = coordinates['accuracy']!;
+
+      // Validate location is not 0,0
+      if (latitude == 0.0 && longitude == 0.0) {
+        throw ApiException(
+          'Invalid location. Please ensure GPS is enabled and try again.',
+          code: 'invalid_location',
+        );
+      }
+
+      // Save location for future use
+      final location =
+          '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+      await TokenStorage.saveCurrentLocation(
+        latitude: latitude,
+        longitude: longitude,
+        location: location,
+      );
+
+      print('[Confirm Arrival] Session ID: ${event.sessionId}');
+      print('[Confirm Arrival] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       final response = await ArrivedApiService.confirmArrival(
         sessionId: event.sessionId,
@@ -117,54 +113,46 @@ class ConfirmArrivalBloc
     emit(const ConfirmArrivalLoading());
 
     try {
-      // Get stored current location (used for accept, arrived, handover)
-      var locationData = await TokenStorage.getCurrentLocation();
-
-      if (locationData == null) {
-        // Fallback: Try arrival location for backward compatibility
-        locationData = await TokenStorage.getArrivalLocation();
-
-        if (locationData == null) {
-          // Last resort: Get current location
-          // Request permission if needed
-          LocationPermission permission =
-              await LocationService.checkPermission();
-          if (permission == LocationPermission.denied) {
-            permission = await LocationService.requestPermission();
-          }
-
-          if (permission != LocationPermission.denied &&
-              permission != LocationPermission.deniedForever) {
-            final position = await LocationService.getCurrentLocation();
-            final latitude = position.latitude;
-            final longitude = position.longitude;
-            final location =
-                '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-
-            locationData = {
-              'latitude': latitude,
-              'longitude': longitude,
-              'location': location,
-            };
-
-            // Save for future use
-            await TokenStorage.saveCurrentLocation(
-              latitude: latitude,
-              longitude: longitude,
-              location: location,
-            );
-          } else {
-            throw ApiException(
-              TextConstants.locationPermissionRequiredHandover,
-              code: 'location_permission_denied',
-            );
-          }
-        }
+      // Always fetch fresh location with accuracy for handover API
+      // Request permission if needed
+      LocationPermission permission = await LocationService.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await LocationService.requestPermission();
       }
 
-      final latitude = locationData['latitude'] as double;
-      final longitude = locationData['longitude'] as double;
-      final accuracy = locationData['accuracy'] as double;
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw ApiException(
+          TextConstants.locationPermissionRequiredHandover,
+          code: 'location_permission_denied',
+        );
+      }
+
+      // Get current location coordinates with accuracy
+      final coordinates = await LocationService.getCurrentCoordinates();
+      final latitude = coordinates['latitude']!;
+      final longitude = coordinates['longitude']!;
+      final accuracy = coordinates['accuracy']!;
+
+      // Validate location is not 0,0
+      if (latitude == 0.0 && longitude == 0.0) {
+        throw ApiException(
+          'Invalid location. Please ensure GPS is enabled and try again.',
+          code: 'invalid_location',
+        );
+      }
+
+      // Save location for future use
+      final location =
+          '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+      await TokenStorage.saveCurrentLocation(
+        latitude: latitude,
+        longitude: longitude,
+        location: location,
+      );
+
+      print('[Confirm Handover] Session ID: ${event.sessionId}');
+      print('[Confirm Handover] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       // Call handover API
       final response = await HandoverApiService.confirmHandover(

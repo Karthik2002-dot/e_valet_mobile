@@ -7,11 +7,13 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
 class CarSuccessScreen extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
+  final bool isLocationBasedParking;
 
   const CarSuccessScreen({
     super.key,
-    required this.imagePath,
+    this.imagePath,
+    this.isLocationBasedParking = false,
   });
 
   @override
@@ -19,8 +21,13 @@ class CarSuccessScreen extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Determine background color and image to show
+    final backgroundColor = isLocationBasedParking
+        ? AppColors.headerYellow
+        : AppColors.primary;
+
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -38,30 +45,48 @@ class CarSuccessScreen extends StatelessWidget {
               ),
             ),
 
-            // Captured car image with rounded corners
+            // Car image - show car.png for location-based parking, otherwise show captured image
             Expanded(
               child: Padding(
                 padding: EdgeInsets.all(screenWidth * 0.03),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(screenWidth * 0.04),
-                  child: Image.file(
-                    File(imagePath),
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Fallback to static logo if image loading fails
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(screenWidth * 0.04),
-                        child: Image.asset(
+                  child: isLocationBasedParking
+                      ? // Show car.png image with full display (no cropping)
+                          Image.asset(
                           'assets/images/car.png',
                           width: double.infinity,
                           height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    },
-                  ),
+                          fit: BoxFit.contain,
+                        )
+                      : // Show captured image for normal photo flow
+                          (imagePath != null
+                              ? Image.file(
+                                  File(imagePath!),
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Fallback to static logo if image loading fails
+                                    return ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.04),
+                                      child: Image.asset(
+                                        'assets/images/car.png',
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : // Fallback if no image path provided
+                                  Image.asset(
+                                  'assets/images/car.png',
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.contain,
+                                )),
                 ),
               ),
             ),

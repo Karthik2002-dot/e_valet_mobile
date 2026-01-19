@@ -235,7 +235,8 @@ class TokenStorage {
 
   static Future<String?> getSessionId() async {
     try {
-      return _box.get(_sessionIdKey) as String?;
+      final sessionId = _box.get(_sessionIdKey) as String?;
+      return sessionId;
     } catch (e) {
       print('[TokenStorage] Error retrieving session ID: $e');
       return null;

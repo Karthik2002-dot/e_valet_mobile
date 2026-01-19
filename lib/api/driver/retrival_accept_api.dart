@@ -38,6 +38,9 @@ class RetrievalAcceptApiService {
         'accuracy': accuracy,
       };
 
+      print('[ACCEPT API] Request URL: /sessions/$sessionId/accept');
+      print('[ACCEPT API] Request Body: $requestBody');
+
       final response = await base.post(
         '/sessions/$sessionId/accept',
         data: requestBody,

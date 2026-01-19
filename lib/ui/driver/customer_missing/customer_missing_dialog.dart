@@ -108,7 +108,10 @@ class CustomerMissingDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  onProceed();
+                  // Wait for dialog to fully close before proceeding
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    onProceed();
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
