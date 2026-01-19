@@ -5,6 +5,7 @@ class RetrievalRequest {
   final String sessionId;
   final int cardNumber;
   final String requestType;
+  final bool isManualRequest;
   final String waitingTime;
   final String requestedAt;
   final Vehicle vehicle;
@@ -18,6 +19,7 @@ class RetrievalRequest {
     required this.requestedAt,
     required this.vehicle,
     required this.parkedBy,
+    required this.isManualRequest,
   });
 
   factory RetrievalRequest.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class RetrievalRequest {
       requestedAt: json['requestedAt'] ?? '',
       vehicle: Vehicle.fromJson(json['vehicle'] ?? {}),
       parkedBy: ParkedBy.fromJson(json['parkedBy'] ?? {}),
+      isManualRequest: json['isManualRequest'] ?? false,
     );
   }
 
@@ -41,6 +44,7 @@ class RetrievalRequest {
       'requestedAt': requestedAt,
       'vehicle': vehicle.toJson(),
       'parkedBy': parkedBy.toJson(),
+      'isManualRequest': isManualRequest,
     };
   }
 }

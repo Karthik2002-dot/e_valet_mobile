@@ -141,11 +141,11 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                   widget.request.vehicle.photo,
                   width: MediaQuery.of(context).size.width * 0.1,
                   height: MediaQuery.of(context).size.width * 0.1,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: MediaQuery.of(context).size.width * 0.08,
-                      height: MediaQuery.of(context).size.width * 0.08,
+                      width: MediaQuery.of(context).size.width * 0.1,
+                      height: MediaQuery.of(context).size.width * 0.1,
                       color: AppColors.grey.withOpacity(0.3),
                       child: Icon(
                         Icons.directions_car,
@@ -164,7 +164,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Row 1: Card number and Status
+                    // Row 1: Card number, Status, and Parking Location
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -196,6 +196,31 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                         ),
                       ],
                     ),
+                    // Parking Location
+                    if (widget.request.vehicle.parkingLocation != null &&
+                        widget.request.vehicle.parkingLocation.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.004),
+                        child: Row(
+                          children: [
+                            Icon(Icons.local_parking,
+                                size: MediaQuery.of(context).size.width * 0.018,
+                                color: AppColors.primary),
+                            SizedBox(width: 4),
+                            Flexible(
+                              child: TextComponent(
+                                labelText:
+                                    widget.request.vehicle.parkingLocation,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.014,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                     // Row 2: Time and Requested at
                     Row(
@@ -251,7 +276,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                           color: AppColors.grey,
                         ),
                         TextComponent(
-                          labelText: widget.request.parkedBy.phone!,
+                          labelText: widget.request.parkedBy.phone ?? '-',
                           fontSize: MediaQuery.of(context).size.width * 0.015,
                           color: AppColors.grey,
                           fontWeight: FontWeight.w500,

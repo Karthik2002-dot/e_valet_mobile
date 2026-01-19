@@ -10,10 +10,15 @@ class ManualRetrievalRequest {
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'cardNumber': cardNumber,
-      'customerPhone': customerPhone ?? '',
-      'notes': notes ?? '',
     };
+    if (customerPhone != null && customerPhone!.isNotEmpty) {
+      data['customerPhone'] = customerPhone;
+    }
+    if (notes != null && notes!.isNotEmpty) {
+      data['notes'] = notes;
+    }
+    return data;
   }
 }
