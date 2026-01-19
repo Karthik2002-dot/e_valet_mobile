@@ -2,13 +2,13 @@ class ClockInRequest {
   final int outletId;
   final double latitude;
   final double longitude;
-  final String address;
+  final double accuracy;
 
   ClockInRequest({
     required this.outletId,
     required this.latitude,
     required this.longitude,
-    required this.address,
+    required this.accuracy,
   });
 
   Map<String, dynamic> toJson() {
@@ -16,7 +16,7 @@ class ClockInRequest {
       'outletId': outletId,
       'latitude': latitude,
       'longitude': longitude,
-      'address': address,
+      'accuracy': accuracy,
     };
   }
 }

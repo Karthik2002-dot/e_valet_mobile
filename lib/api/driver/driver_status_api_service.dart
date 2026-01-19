@@ -35,7 +35,8 @@ class DriverStatusApiService {
       final response = await base.get('/drivers/me/status');
 
       final data = response.data as Map<String, dynamic>;
-      return DriverStatus.fromJson(data);
+      final driverStatus = DriverStatus.fromJson(data);
+      return driverStatus;
     } on ApiException {
       rethrow;
     } catch (e) {
@@ -68,7 +69,8 @@ class DriverStatusApiService {
       );
 
       final data = response.data as Map<String, dynamic>;
-      return ClockInResponse.fromJson(data);
+      final clockInResponse = ClockInResponse.fromJson(data);
+      return clockInResponse;
     } on ApiException {
       rethrow;
     } catch (e) {
@@ -101,7 +103,8 @@ class DriverStatusApiService {
       );
 
       final data = response.data as Map<String, dynamic>;
-      return ClockOutResponse.fromJson(data);
+      final clockOutResponse = ClockOutResponse.fromJson(data);
+      return clockOutResponse;
     } on ApiException {
       rethrow;
     } catch (e) {

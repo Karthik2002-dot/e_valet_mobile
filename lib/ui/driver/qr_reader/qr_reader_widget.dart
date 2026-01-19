@@ -88,7 +88,10 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
   @override
   void deactivate() {
     // Widget is being deactivated (navigating away)
-    controller?.stop();
+    // Schedule camera stop for after current frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller?.stop();
+    });
     super.deactivate();
   }
 
@@ -216,10 +219,16 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
       });
     } else if (state == AppLifecycleState.paused) {
       // Stop controller when app goes to background
-      controller?.stop();
+      // Schedule for next frame to avoid setState during lifecycle changes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller?.stop();
+      });
     } else if (state == AppLifecycleState.inactive) {
       // Stop controller when app becomes inactive
-      controller?.stop();
+      // Schedule for next frame to avoid setState during lifecycle changes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller?.stop();
+      });
     }
   }
 
@@ -244,10 +253,20 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
     try {
       if (state.cameraShouldBeActive) {
         // Camera should be active according to BLoC state
-        await controller!.start();
+        // Schedule for next frame to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (mounted && controller != null) {
+            await controller!.start();
+          }
+        });
       } else {
         // Camera should be stopped according to BLoC state
-        await controller!.stop();
+        // Schedule for next frame to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (mounted && controller != null) {
+            await controller!.stop();
+          }
+        });
       }
     } catch (e) {
       // If camera operation fails, try to recover based on current state

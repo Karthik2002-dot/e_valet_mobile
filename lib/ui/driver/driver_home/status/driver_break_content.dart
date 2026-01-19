@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class DriverBreakContent extends StatelessWidget {
@@ -9,6 +10,7 @@ class DriverBreakContent extends StatelessWidget {
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
+  final VoidCallback? onBreakEnd;
 
   const DriverBreakContent({
     super.key,
@@ -16,6 +18,7 @@ class DriverBreakContent extends StatelessWidget {
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    this.onBreakEnd,
   });
 
   @override
@@ -70,6 +73,26 @@ class DriverBreakContent extends StatelessWidget {
           ),
         ),
         SizedBox(height: screenHeight * 0.05),
+        // End break button
+        if (onBreakEnd != null)
+          ElevatedButtonComponent(
+            labelText: TextConstants.endBreak,
+            onPressed: onBreakEnd!,
+            elevatedButtonBackgroundColor: AppColors.primary,
+            fontColor: AppColors.white,
+            fontSize: isDesktop
+                ? screenWidth * 0.014
+                : isTablet
+                    ? screenWidth * 0.024
+                    : screenWidth * 0.04,
+            fontWeight: FontWeight.w600,
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.08,
+              vertical: screenHeight * 0.015,
+            ),
+            radius: 12.0,
+          ),
+        SizedBox(height: screenHeight * 0.02),
       ],
     );
   }

@@ -1,19 +1,19 @@
 class ClockOutRequest {
   final double latitude;
   final double longitude;
-  final String address;
+  final double accuracy;
 
   ClockOutRequest({
     required this.latitude,
     required this.longitude,
-    required this.address,
+    required this.accuracy,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'latitude': latitude,
       'longitude': longitude,
-      'address': address,
+      'accuracy': accuracy,
     };
   }
 }
