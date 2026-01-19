@@ -87,8 +87,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
 
       _retrievalAssignedSubscription = retrievalAssignedStream.listen(
         (data) {
-          // When a retrieval is assigned, fetch the latest assigned sessions
-          add(const _PollAssignedSessions());
+          // WebSocket now drives updates directly — no HTTP polling
+          _emitSessionsFromSocketPayload(data);
         },
         onError: (error) {
           print('Error listening to retrieval assigned updates: $error');
@@ -111,14 +111,14 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     StartAssignedSessionsPolling event,
     Emitter<AssignedSessionsBackgroundState> emit,
   ) {
-    // Polling is no longer used - WebSocket handles real-time updates
+    // Polling removed: WebSocket pushes updates, and manual refresh is available
   }
 
   void _onStopPolling(
     StopAssignedSessionsPolling event,
     Emitter<AssignedSessionsBackgroundState> emit,
   ) {
-    // Polling is no longer used - nothing to stop
+    // Polling removed: nothing to stop
   }
 
   void _onRefreshAssignedSessions(
@@ -153,6 +153,40 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     } catch (e) {
       print('Failed to fetch assigned sessions: $e');
     }
+  }
+
+  /// Emit sessions from WebSocket payload without hitting the REST API
+  void _emitSessionsFromSocketPayload(dynamic data) {
+    try {
+      final sessions = _extractSessions(data);
+      if (sessions != null) {
+        emit(AssignedSessionsBackgroundData(sessions));
+      }
+    } catch (e) {
+      print('Failed to parse WebSocket assigned sessions payload: $e');
+    }
+  }
+
+  /// Best-effort extractor for assigned sessions from socket payloads
+  List<dynamic>? _extractSessions(dynamic data) {
+    if (data == null) return null;
+
+    // If server sends { sessions: [...] }
+    if (data is Map<String, dynamic> && data['sessions'] is List) {
+      return List<dynamic>.from(data['sessions'] as List);
+    }
+
+    // If server sends a single session object
+    if (data is Map<String, dynamic>) {
+      return [data];
+    }
+
+    // If server sends a list directly
+    if (data is List) {
+      return List<dynamic>.from(data);
+    }
+
+    return null;
   }
 
   @override
