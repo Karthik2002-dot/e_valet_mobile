@@ -15,7 +15,7 @@ class RetrievalAcceptApiService {
     required String sessionId,
     required double latitude,
     required double longitude,
-    required String location,
+    required double accuracy,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
@@ -35,7 +35,7 @@ class RetrievalAcceptApiService {
       final requestBody = {
         'latitude': latitude,
         'longitude': longitude,
-        'location': location,
+        'accuracy': accuracy,
       };
 
       final response = await base.post(

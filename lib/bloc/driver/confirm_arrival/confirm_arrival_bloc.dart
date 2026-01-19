@@ -47,6 +47,7 @@ class ConfirmArrivalBloc
           final position = await LocationService.getCurrentLocation();
           final latitude = position.latitude;
           final longitude = position.longitude;
+          final accuracy = position.accuracy;
           final location =
               '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
 
@@ -54,6 +55,7 @@ class ConfirmArrivalBloc
             'latitude': latitude,
             'longitude': longitude,
             'location': location,
+            'accuracy': accuracy,
           };
 
           // Save for future use
@@ -72,13 +74,14 @@ class ConfirmArrivalBloc
 
       final latitude = locationData['latitude'] as double;
       final longitude = locationData['longitude'] as double;
+      final accuracy = locationData['accuracy'] as double;
       final location = locationData['location'] as String;
 
       final response = await ArrivedApiService.confirmArrival(
         sessionId: event.sessionId,
         latitude: latitude,
         longitude: longitude,
-        location: location,
+        accuracy: accuracy,
       );
 
       // Store location for handover API (keeping for backward compatibility)
@@ -161,14 +164,14 @@ class ConfirmArrivalBloc
 
       final latitude = locationData['latitude'] as double;
       final longitude = locationData['longitude'] as double;
-      final location = locationData['location'] as String;
+      final accuracy = locationData['accuracy'] as double;
 
       // Call handover API
       final response = await HandoverApiService.confirmHandover(
         sessionId: event.sessionId,
         latitude: latitude,
         longitude: longitude,
-        location: location,
+        accuracy: accuracy,
       );
 
       emit(ConfirmHandoverSuccess(message: response.message));

@@ -65,7 +65,7 @@ class RetrivalRequestBloc
           locationData = {
             'latitude': latitude,
             'longitude': longitude,
-            'location': location,
+            'accuracy': position.accuracy,
           };
 
           // Save for future use
@@ -83,7 +83,7 @@ class RetrivalRequestBloc
         sessionId: event.sessionId,
         latitude: locationData['latitude'] as double,
         longitude: locationData['longitude'] as double,
-        location: locationData['location'] as String,
+        accuracy: locationData['accuracy'] as double,
       );
       emit(RetrivalRequestAccepted(response.message));
     } catch (e) {

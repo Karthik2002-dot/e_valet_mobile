@@ -77,14 +77,14 @@ class ConfirmHandoverBloc
 
       final latitude = locationData['latitude'] as double;
       final longitude = locationData['longitude'] as double;
-      final location = locationData['location'] as String;
+      final accuracy = locationData['accuracy'] as double;
 
       // Call handover API
       final response = await HandoverApiService.confirmHandover(
         sessionId: event.sessionId,
         latitude: latitude,
         longitude: longitude,
-        location: location,
+        accuracy: accuracy,
       );
 
       emit(ConfirmHandoverSuccess(message: response.message));

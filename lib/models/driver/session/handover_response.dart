@@ -2,14 +2,14 @@ class HandoverResponse {
   final String sessionId;
   final Map<String, dynamic> status;
   final int cardNumber;
-  final String handedOverAt;
+  final String completedAt;
   final String message;
 
   HandoverResponse({
     required this.sessionId,
     required this.status,
     required this.cardNumber,
-    required this.handedOverAt,
+    required this.completedAt,
     required this.message,
   });
 
@@ -29,7 +29,7 @@ class HandoverResponse {
       sessionId: (json['sessionId'] ?? '').toString(),
       status: statusMap,
       cardNumber: json['cardNumber'] as int? ?? 0,
-      handedOverAt: (json['handedOverAt'] ?? '').toString(),
+      completedAt: (json['completedAt'] ?? '').toString(),
       message: (json['message'] ?? '').toString(),
     );
   }

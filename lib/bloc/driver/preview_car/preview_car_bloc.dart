@@ -21,12 +21,20 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
 
     try {
       if (event.isReparking) {
-        // Create repark photo request model
-        final reparkRequest = ReparkPhotoRequest(imagePath: event.imagePath!);
+        // Create repark request model with GPS data
+        // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
+        // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
+        final reparkRequest = ReparkPhotoRequest(
+          imagePath: event.imagePath,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          accuracy: event.accuracy,
+          parkingLocation: event.parkingLocation,
+        );
 
-        // Upload re-parked car photo to repark API
+        // Upload re-parked car data to repark API
         await ReparkApiService.uploadReparkPhoto(
-          sessionId: event.sessionId!,
+          sessionId: event.sessionId,
           request: reparkRequest,
         );
       } else {

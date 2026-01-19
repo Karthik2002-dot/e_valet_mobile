@@ -13,10 +13,25 @@ class ReparkApiService {
 
   /// Upload re-parked car photo to the session
   /// POST /api/v1/sessions/{id}/repark
+  ///
+  /// Supports two scenarios:
+  /// 1. With photo: photo + longitude + latitude + accuracy (no parkingLocation)
+  /// 2. Without photo: parkingLocation + longitude + latitude + accuracy (no photo)
   static Future<ReparkPhotoResponse> uploadReparkPhoto({
-    required String sessionId,
+    String? sessionId, // Optional: if not provided, use from TokenStorage
     required ReparkPhotoRequest request,
   }) async {
+    // Get session ID from parameter or Hive storage
+    final actualSessionId = sessionId ?? await TokenStorage.getSessionId();
+
+    if (actualSessionId == null || actualSessionId.isEmpty) {
+      print('❌ No session ID found!');
+      throw ApiException(
+        'No active session. Please check in first.',
+        code: 'no_session',
+      );
+    }
+
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       print('❌ No access token found');
@@ -32,18 +47,34 @@ class ReparkApiService {
     );
 
     try {
-      // Create multipart form data
-      final formData = FormData.fromMap({
-        'photo': await MultipartFile.fromFile(
-          request.imagePath,
+      // Build form data based on whether photo is provided
+      final Map<String, dynamic> formDataMap = {
+        'latitude': request.latitude,
+        'longitude': request.longitude,
+      };
+
+      // Add accuracy if provided
+      if (request.accuracy != null) {
+        formDataMap['accuracy'] = request.accuracy;
+      }
+
+      // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
+      if (request.hasPhoto) {
+        formDataMap['photo'] = await MultipartFile.fromFile(
+          request.imagePath!,
           filename: request.filename,
-        ),
-        if (request.hasDescription) 'description': request.description,
-      });
+        );
+      }
+      // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
+      else if (request.hasParkingLocation) {
+        formDataMap['parkingLocation'] = request.parkingLocation;
+      }
+
+      final formData = FormData.fromMap(formDataMap);
 
       // Make the API call
       final response = await base.post(
-        '/sessions/$sessionId/repark',
+        '/sessions/$actualSessionId/repark',
         data: formData,
       );
 
