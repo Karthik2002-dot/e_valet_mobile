@@ -20,16 +20,17 @@ class OperatorDashboardLoaded extends OperatorDashboardState {
   final OperatorDashboardKpisResponse kpis;
   final OperatorAvailableDriversResponse availableDrivers;
   final RetrievalRequestsResponse retrievalRequests;
-  // final DigitalKeyRackResponse digitalKeyRack;
+  final DigitalKeyRackResponse digitalKeyRack;
 
   const OperatorDashboardLoaded({
     required this.kpis,
     required this.availableDrivers,
     required this.retrievalRequests,
-    // required this.digitalKeyRack,
+    required this.digitalKeyRack,
   });
 
-  List<Object> get props => [kpis, availableDrivers, retrievalRequests];
+  List<Object> get props =>
+      [kpis, availableDrivers, retrievalRequests, digitalKeyRack];
 }
 
 class OperatorDashboardError extends OperatorDashboardState {

@@ -108,21 +108,21 @@ class OperatorDashboardBloc
         OperatorRetrievalRequestsApiService.getRetrievalRequests(
           outletId: event.outletId,
         ),
-        // OperatorDigitalKeyRackApiService.getDigitalKeyRack(
-        //   outletId: event.outletId,
-        // ),
+        OperatorDigitalKeyRackApiService.getDigitalKeyRack(
+          outletId: event.outletId,
+        ),
       ]);
 
       final kpis = results[0] as dynamic;
       final availableDrivers = results[1] as dynamic;
       final retrievalRequests = results[2] as dynamic;
-      // final digitalKeyRack = results[3] as dynamic;
+      final digitalKeyRack = results[3] as dynamic;
 
       emit(OperatorDashboardLoaded(
         kpis: kpis,
         availableDrivers: availableDrivers,
         retrievalRequests: retrievalRequests,
-        // digitalKeyRack: digitalKeyRack,
+        digitalKeyRack: digitalKeyRack,
       ));
     } catch (e) {
       emit(OperatorDashboardError(e.toString()));
@@ -188,7 +188,7 @@ class OperatorDashboardBloc
         kpis: kpis,
         availableDrivers: availableDrivers,
         retrievalRequests: retrievalRequests,
-        // digitalKeyRack: currentState.digitalKeyRack,
+        digitalKeyRack: currentState.digitalKeyRack,
       ));
     } catch (e) {
       // Silently fail - don't show error for background updates
