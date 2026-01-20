@@ -22,9 +22,8 @@ class CarSuccessScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Determine background color and image to show
-    final backgroundColor = isLocationBasedParking
-        ? AppColors.headerYellow
-        : AppColors.primary;
+    final backgroundColor =
+        isLocationBasedParking ? AppColors.headerYellow : AppColors.primary;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -53,40 +52,40 @@ class CarSuccessScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(screenWidth * 0.04),
                   child: isLocationBasedParking
                       ? // Show car.png image with full display (no cropping)
-                          Image.asset(
+                      Image.asset(
                           'assets/images/car.png',
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.contain,
                         )
                       : // Show captured image for normal photo flow
-                          (imagePath != null
-                              ? Image.file(
-                                  File(imagePath!),
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    // Fallback to static logo if image loading fails
-                                    return ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                          screenWidth * 0.04),
-                                      child: Image.asset(
-                                        'assets/images/car.png',
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  },
-                                )
-                              : // Fallback if no image path provided
-                                  Image.asset(
-                                  'assets/images/car.png',
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.contain,
-                                )),
+                      (imagePath != null
+                          ? Image.file(
+                              File(imagePath!),
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback to static logo if image loading fails
+                                return ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.circular(screenWidth * 0.04),
+                                  child: Image.asset(
+                                    'assets/images/car.png',
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              },
+                            )
+                          : // Fallback if no image path provided
+                          Image.asset(
+                              'assets/images/car.png',
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.contain,
+                            )),
                 ),
               ),
             ),

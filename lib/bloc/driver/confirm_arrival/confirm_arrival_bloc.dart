@@ -71,7 +71,8 @@ class ConfirmArrivalBloc
       );
 
       print('[Confirm Arrival] Session ID: ${event.sessionId}');
-      print('[Confirm Arrival] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
+      print(
+          '[Confirm Arrival] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       final response = await ArrivedApiService.confirmArrival(
         sessionId: event.sessionId,
@@ -152,7 +153,8 @@ class ConfirmArrivalBloc
       );
 
       print('[Confirm Handover] Session ID: ${event.sessionId}');
-      print('[Confirm Handover] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
+      print(
+          '[Confirm Handover] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       // Call handover API
       final response = await HandoverApiService.confirmHandover(

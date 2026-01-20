@@ -64,7 +64,8 @@ class RetrivalRequestBloc
 
       // Validate location is not 0,0
       if (latitude == 0.0 && longitude == 0.0) {
-        throw Exception('Invalid location. Please ensure GPS is enabled and try again.');
+        throw Exception(
+            'Invalid location. Please ensure GPS is enabled and try again.');
       }
 
       // Save location for future use
@@ -77,7 +78,8 @@ class RetrivalRequestBloc
       );
 
       print('[Accept Request] Session ID: ${event.sessionId}');
-      print('[Accept Request] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
+      print(
+          '[Accept Request] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       final response = await RetrievalAcceptApiService.acceptSession(
         sessionId: event.sessionId,

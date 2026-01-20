@@ -204,7 +204,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                   // Header text: ~0.04, Spacing: 0.008, Input field: 0.06, Spacing: 0.01, Button: 0.035
                   // Total: ~0.183 or 18.3%, using 19% for better alignment
                   final estimatedInputHeight = screenHeight * 0.19;
-                  
+
                   return Stack(
                     children: [
                       // Camera Preview Widget (positioned at bottom)
@@ -212,7 +212,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        top: estimatedInputHeight, // Start right after input container
+                        top:
+                            estimatedInputHeight, // Start right after input container
                         child: CameraPreviewWidget(
                           isCameraInitialized: isCameraInitialized,
                           cameraController: cameraController,
@@ -230,7 +231,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
                       // Capture Button Overlay (positioned over camera)
                       Positioned(
-                        bottom: MediaQuery.of(context).size.width * 0.1, // Position at bottom with some margin
+                        bottom: MediaQuery.of(context).size.width *
+                            0.1, // Position at bottom with some margin
                         left: 0,
                         right: 0,
                         child: Center(
@@ -241,7 +243,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                               },
                               child: Container(
                                 width: MediaQuery.of(context).size.width * 0.18,
-                                height: MediaQuery.of(context).size.width * 0.18,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.18,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: AppColors.primary,
