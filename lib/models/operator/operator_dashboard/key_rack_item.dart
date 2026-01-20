@@ -4,7 +4,6 @@ class KeyRackItem {
   final String photoUrl;
   final String parkedAt;
   final String duration;
-  final String parkedBy;
 
   KeyRackItem({
     required this.cardNumber,
@@ -12,7 +11,6 @@ class KeyRackItem {
     required this.photoUrl,
     required this.parkedAt,
     required this.duration,
-    required this.parkedBy,
   });
 
   factory KeyRackItem.fromJson(Map<String, dynamic> json) {
@@ -22,7 +20,6 @@ class KeyRackItem {
       photoUrl: json['photoUrl'] ?? '',
       parkedAt: json['parkedAt'] ?? '',
       duration: json['duration'] ?? '',
-      parkedBy: json['parkedBy'] ?? '',
     );
   }
 
@@ -33,7 +30,6 @@ class KeyRackItem {
       'photoUrl': photoUrl,
       'parkedAt': parkedAt,
       'duration': duration,
-      'parkedBy': parkedBy,
     };
   }
 }
