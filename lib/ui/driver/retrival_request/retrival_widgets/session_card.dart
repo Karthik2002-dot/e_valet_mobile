@@ -31,46 +31,71 @@ class SessionCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(18)),
-                child: Stack(
-                  children: [
-                    Image(
-                      image: session.photoUrl != null
-                          ? NetworkImage(session.photoUrl!)
-                          : const AssetImage('assets/images/car.png')
-                              as ImageProvider,
-                      width: double.infinity,
-                      height: screenWidth * 0.35,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/images/car.png',
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.black,
+                    width: 2,
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(18),
+                  ),
+                  color: AppColors.white,
+                ),
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(18)),
+                  child: session.photoUrl != null
+                      ? Image.network(
+                          session.photoUrl!,
                           width: double.infinity,
                           height: screenWidth * 0.35,
                           fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                    if (session.hasPhotos)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: AppColors.white,
-                            size: 16,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: double.infinity,
+                              height: screenWidth * 0.35,
+                              color: AppColors.white,
+                              child: Center(
+                                child: ColorFiltered(
+                                  colorFilter: const ColorFilter.matrix([
+                                    -1, 0, 0, 0, 255, // Red channel inverted
+                                    0, -1, 0, 0, 255, // Green channel inverted
+                                    0, 0, -1, 0, 255, // Blue channel inverted
+                                    0, 0, 0, 1, 0, // Alpha channel unchanged
+                                  ]),
+                                  child: Image.asset(
+                                    'assets/images/cars.png',
+                                    fit: BoxFit.contain,
+                                    width: screenWidth * 0.3,
+                                    height: screenWidth * 0.3,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: double.infinity,
+                          height: screenWidth * 0.35,
+                          color: AppColors.white,
+                          child: Center(
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.matrix([
+                                -1, 0, 0, 0, 255, // Red channel inverted
+                                0, -1, 0, 0, 255, // Green channel inverted
+                                0, 0, -1, 0, 255, // Blue channel inverted
+                                0, 0, 0, 1, 0, // Alpha channel unchanged
+                              ]),
+                              child: Image.asset(
+                                'assets/images/cars.png',
+                                fit: BoxFit.contain,
+                                width: screenWidth * 0.3,
+                                height: screenWidth * 0.3,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                  ],
                 ),
               ),
               Padding(

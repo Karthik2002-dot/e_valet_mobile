@@ -5,11 +5,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class CameraBottomOverlay extends StatefulWidget {
   final Function(BuildContext) onCapture;
   final Function(BuildContext, String)? onSubmit;
+  final bool positionAtTop;
 
   const CameraBottomOverlay({
     super.key,
     required this.onCapture,
     this.onSubmit,
+    this.positionAtTop = false,
   });
 
   @override
@@ -38,20 +40,17 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardOpen = keyboardHeight > 0;
 
-    // Camera takes 70% of screen
-    final cameraHeight = screenHeight * 0.7;
-
-    // Calculate bottom position dynamically based on keyboard
-    final bottomPosition =
-        isKeyboardOpen ? keyboardHeight + screenHeight * 0.01 : 0.0;
-
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      bottom: bottomPosition,
+      top: widget.positionAtTop
+          ? (isKeyboardOpen ? keyboardHeight + screenHeight * 0.01 : 0.0)
+          : (isKeyboardOpen ? null : screenHeight * 0.7),
+      bottom: widget.positionAtTop
+          ? null
+          : (isKeyboardOpen ? keyboardHeight + screenHeight * 0.01 : 0.0),
       left: 0,
       right: 0,
-      top: isKeyboardOpen ? null : cameraHeight,
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,

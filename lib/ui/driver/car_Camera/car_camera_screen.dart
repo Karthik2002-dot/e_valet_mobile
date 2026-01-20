@@ -196,57 +196,75 @@ class _CarCameraScreenState extends State<CarCameraScreen>
             return Scaffold(
               backgroundColor: AppColors.black,
               appBar: const CustomAppBar(),
-              body: Stack(
-                children: [
-                  // Camera Preview Widget
-                  CameraPreviewWidget(
-                    isCameraInitialized: isCameraInitialized,
-                    cameraController: cameraController,
-                  ),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate approximate input container height based on its content
+                  final screenHeight = MediaQuery.of(context).size.height;
+                  // Container padding (vertical): 0.015 * 2 = 0.03
+                  // Header text: ~0.04, Spacing: 0.008, Input field: 0.06, Spacing: 0.01, Button: 0.035
+                  // Total: ~0.183 or 18.3%, using 19% for better alignment
+                  final estimatedInputHeight = screenHeight * 0.19;
+                  
+                  return Stack(
+                    children: [
+                      // Camera Preview Widget (positioned at bottom)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        top: estimatedInputHeight, // Start right after input container
+                        child: CameraPreviewWidget(
+                          isCameraInitialized: isCameraInitialized,
+                          cameraController: cameraController,
+                        ),
+                      ),
 
-                  // Top Overlay (Flash button, Instructions)
-                  CameraTopOverlay(
-                    isFlashOn: isFlashOn,
-                    onFlashToggle: () => context
-                        .read<CarCameraBloc>()
-                        .add(const ToggleFlashRequested()),
-                  ),
+                      // Top Overlay (Flash button, Instructions) - positioned over camera
+                      CameraTopOverlay(
+                        isFlashOn: isFlashOn,
+                        onFlashToggle: () => context
+                            .read<CarCameraBloc>()
+                            .add(const ToggleFlashRequested()),
+                        topOffset: estimatedInputHeight, // Start at camera area
+                      ),
 
-                  // Capture Button Overlay (positioned over camera)
-                  Positioned(
-                    bottom: MediaQuery.of(context).size.height *
-                        0.25, // Position above the input container
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Builder(
-                        builder: (builderContext) => GestureDetector(
-                          onTap: () {
-                            _capturePhoto(builderContext);
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.18,
-                            height: MediaQuery.of(context).size.width * 0.18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.primary,
-                              border: Border.all(
-                                color: AppColors.white,
-                                width: 4,
+                      // Capture Button Overlay (positioned over camera)
+                      Positioned(
+                        bottom: MediaQuery.of(context).size.width * 0.1, // Position at bottom with some margin
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Builder(
+                            builder: (builderContext) => GestureDetector(
+                              onTap: () {
+                                _capturePhoto(builderContext);
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.18,
+                                height: MediaQuery.of(context).size.width * 0.18,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primary,
+                                  border: Border.all(
+                                    color: AppColors.white,
+                                    width: 4,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
 
-                  // Bottom Overlay (Input field only)
-                  CameraBottomOverlay(
-                    onCapture: _capturePhoto,
-                    onSubmit: _handleSubmitWithParkingLocation,
-                  ),
-                ],
+                      // Top Overlay (Input field only)
+                      CameraBottomOverlay(
+                        onCapture: _capturePhoto,
+                        onSubmit: _handleSubmitWithParkingLocation,
+                        positionAtTop: true,
+                      ),
+                    ],
+                  );
+                },
               ),
             );
           },
