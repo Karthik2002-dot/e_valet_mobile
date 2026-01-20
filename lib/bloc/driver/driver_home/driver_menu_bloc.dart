@@ -50,7 +50,7 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
       driverName: driverName,
       isOnBreak: false,
       isOnline:
-          false, // Start with offline, let DriverStatusBloc determine actual status
+          true, // Start with online, let DriverStatusBloc determine actual status
     ));
   }
 

@@ -196,27 +196,78 @@ class _CarCameraScreenState extends State<CarCameraScreen>
             return Scaffold(
               backgroundColor: AppColors.black,
               appBar: const CustomAppBar(),
-              body: Stack(
-                children: [
-                  // Camera Preview Widget
-                  CameraPreviewWidget(
-                    isCameraInitialized: isCameraInitialized,
-                    cameraController: cameraController,
-                  ),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate approximate input container height based on its content
+                  final screenHeight = MediaQuery.of(context).size.height;
+                  // Container padding (vertical): 0.015 * 2 = 0.03
+                  // Header text: ~0.04, Spacing: 0.008, Input field: 0.06, Spacing: 0.01, Button: 0.035
+                  // Total: ~0.183 or 18.3%, using 19% for better alignment
+                  final estimatedInputHeight = screenHeight * 0.19;
 
-                  // Top Overlay (Flash button, Instructions)
-                  CameraTopOverlay(
-                    isFlashOn: isFlashOn,
-                    onFlashToggle: () => context
-                        .read<CarCameraBloc>()
-                        .add(const ToggleFlashRequested()),
-                  ),
+                  return Stack(
+                    children: [
+                      // Camera Preview Widget (positioned at bottom)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        top:
+                            estimatedInputHeight, // Start right after input container
+                        child: CameraPreviewWidget(
+                          isCameraInitialized: isCameraInitialized,
+                          cameraController: cameraController,
+                        ),
+                      ),
 
-                  // Bottom Overlay (Photo button and text)
-                  CameraBottomOverlay(
-                    onCapture: _capturePhoto,
-                  ),
-                ],
+                      // Top Overlay (Flash button, Instructions) - positioned over camera
+                      CameraTopOverlay(
+                        isFlashOn: isFlashOn,
+                        onFlashToggle: () => context
+                            .read<CarCameraBloc>()
+                            .add(const ToggleFlashRequested()),
+                        topOffset: estimatedInputHeight, // Start at camera area
+                      ),
+
+                      // Capture Button Overlay (positioned over camera)
+                      Positioned(
+                        bottom: MediaQuery.of(context).size.width *
+                            0.1, // Position at bottom with some margin
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Builder(
+                            builder: (builderContext) => GestureDetector(
+                              onTap: () {
+                                _capturePhoto(builderContext);
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.18,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.18,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primary,
+                                  border: Border.all(
+                                    color: AppColors.white,
+                                    width: 4,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Top Overlay (Input field only)
+                      CameraBottomOverlay(
+                        onCapture: _capturePhoto,
+                        onSubmit: _handleSubmitWithParkingLocation,
+                        positionAtTop: true,
+                      ),
+                    ],
+                  );
+                },
               ),
             );
           },
@@ -272,6 +323,64 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       if (mounted) {
         SnackBars.showErrorSnackBar(
           blocContext,
+          '${TextConstants.errorCapturingPhoto}: $e',
+        );
+      }
+    }
+  }
+
+  Future<void> _handleSubmitWithParkingLocation(
+    BuildContext context,
+    String parkingLocation,
+  ) async {
+    final state = context.read<CarCameraBloc>().state;
+    if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
+      SnackBars.showErrorSnackBar(
+        context,
+        TextConstants.cameraNotReady,
+      );
+      return;
+    }
+
+    try {
+      final cameraController = state is CarCameraInitialized
+          ? state.cameraController
+          : (state as CarCameraFlashToggled).cameraController;
+      final isFlashOn = state is CarCameraInitialized
+          ? state.isFlashOn
+          : (state as CarCameraFlashToggled).isFlashOn;
+
+      // Set flash mode for the photo capture
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.always : FlashMode.off,
+      );
+
+      // Take the picture
+      final image = await cameraController.takePicture();
+
+      // Restore flash mode for preview
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.torch : FlashMode.off,
+      );
+
+      // Navigate directly to preview screen with parking location
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PreviewCarScreen(
+              imagePath: image.path,
+              sessionId: widget.sessionId,
+              isReparking: widget.isReparking,
+              parkingLocation: parkingLocation,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          context,
           '${TextConstants.errorCapturingPhoto}: $e',
         );
       }

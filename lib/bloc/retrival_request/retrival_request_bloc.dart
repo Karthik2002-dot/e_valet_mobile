@@ -44,46 +44,48 @@ class RetrivalRequestBloc
   ) async {
     emit(const RetrivalRequestLoading());
     try {
-      // Get stored location or fetch new one
-      var locationData = await TokenStorage.getCurrentLocation();
-
-      if (locationData == null) {
-        // Request permission if needed
-        LocationPermission permission = await LocationService.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await LocationService.requestPermission();
-        }
-
-        if (permission != LocationPermission.denied &&
-            permission != LocationPermission.deniedForever) {
-          final position = await LocationService.getCurrentLocation();
-          final latitude = position.latitude;
-          final longitude = position.longitude;
-          final location =
-              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-
-          locationData = {
-            'latitude': latitude,
-            'longitude': longitude,
-            'location': location,
-          };
-
-          // Save for future use
-          await TokenStorage.saveCurrentLocation(
-            latitude: latitude,
-            longitude: longitude,
-            location: location,
-          );
-        } else {
-          throw Exception('Location permission is required to accept session');
-        }
+      // Always fetch fresh location with accuracy for accept API
+      // Request permission if needed
+      LocationPermission permission = await LocationService.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await LocationService.requestPermission();
       }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw Exception('Location permission is required to accept session');
+      }
+
+      // Get current location coordinates with accuracy
+      final coordinates = await LocationService.getCurrentCoordinates();
+      final latitude = coordinates['latitude']!;
+      final longitude = coordinates['longitude']!;
+      final accuracy = coordinates['accuracy']!;
+
+      // Validate location is not 0,0
+      if (latitude == 0.0 && longitude == 0.0) {
+        throw Exception(
+            'Invalid location. Please ensure GPS is enabled and try again.');
+      }
+
+      // Save location for future use
+      final location =
+          '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+      await TokenStorage.saveCurrentLocation(
+        latitude: latitude,
+        longitude: longitude,
+        location: location,
+      );
+
+      print('[Accept Request] Session ID: ${event.sessionId}');
+      print(
+          '[Accept Request] Latitude: $latitude, Longitude: $longitude, Accuracy: $accuracy');
 
       final response = await RetrievalAcceptApiService.acceptSession(
         sessionId: event.sessionId,
-        latitude: locationData['latitude'] as double,
-        longitude: locationData['longitude'] as double,
-        location: locationData['location'] as String,
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: accuracy,
       );
       emit(RetrivalRequestAccepted(response.message));
     } catch (e) {

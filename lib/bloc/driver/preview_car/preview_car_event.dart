@@ -8,18 +8,37 @@ abstract class PreviewCarEvent extends Equatable {
 }
 
 class SubmitPhotoRequested extends PreviewCarEvent {
-  final String imagePath;
+  final String? imagePath;
   final String? sessionId;
   final bool isReparking;
+  final double latitude;
+  final double longitude;
+  final double? accuracy;
+  final String? parkingLocation;
 
-  const SubmitPhotoRequested(
-    this.imagePath, {
+  const SubmitPhotoRequested({
+    this.imagePath,
     this.sessionId,
     this.isReparking = false,
-  });
+    required this.latitude,
+    required this.longitude,
+    this.accuracy,
+    this.parkingLocation,
+  }) : assert(
+          imagePath != null || parkingLocation != null,
+          'Either imagePath or parkingLocation must be provided',
+        );
 
   @override
-  List<Object?> get props => [imagePath, sessionId, isReparking];
+  List<Object?> get props => [
+        imagePath,
+        sessionId,
+        isReparking,
+        latitude,
+        longitude,
+        accuracy,
+        parkingLocation,
+      ];
 }
 
 class ResetSubmission extends PreviewCarEvent {

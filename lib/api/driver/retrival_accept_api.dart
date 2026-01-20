@@ -2,6 +2,7 @@ import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/image_API.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/accept_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
@@ -14,11 +15,8 @@ class RetrievalAcceptApiService {
     required String sessionId,
     required double latitude,
     required double longitude,
-    required String location,
+    required double accuracy,
   }) async {
-    // Check if this matches the session ID stored in TokenStorage
-    final storedSessionId = await TokenStorage.getSessionId();
-
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       print('❌ No access token found');
@@ -37,8 +35,11 @@ class RetrievalAcceptApiService {
       final requestBody = {
         'latitude': latitude,
         'longitude': longitude,
-        'location': location,
+        'accuracy': accuracy,
       };
+
+      print('[ACCEPT API] Request URL: /sessions/$sessionId/accept');
+      print('[ACCEPT API] Request Body: $requestBody');
 
       final response = await base.post(
         '/sessions/$sessionId/accept',
@@ -51,8 +52,16 @@ class RetrievalAcceptApiService {
       final pendingPhotoPath = await TokenStorage.getPendingPhotoPath();
       if (pendingPhotoPath != null && pendingPhotoPath.isNotEmpty) {
         try {
-          await ImageApiService.uploadParkingPhoto(
+          // Create park request with photo and GPS data from accept call
+          final parkRequest = ParkRequest(
             imagePath: pendingPhotoPath,
+            latitude: latitude,
+            longitude: longitude,
+            // accuracy is optional, so we don't include it here
+          );
+
+          await ImageApiService.uploadParkingPhoto(
+            request: parkRequest,
             sessionId: sessionId,
           );
           await TokenStorage.clearPendingPhotoPath();
