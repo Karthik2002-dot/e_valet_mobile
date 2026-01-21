@@ -16,8 +16,13 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retriev
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
+  final void Function(int)? onNavigateToTab;
 
-  const DashboardContent({super.key, this.onRefreshReady});
+  const DashboardContent({
+    super.key,
+    this.onRefreshReady,
+    this.onNavigateToTab,
+  });
 
   @override
   State<DashboardContent> createState() => _DashboardContentState();
@@ -174,7 +179,17 @@ class _DashboardContentState extends State<DashboardContent> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          DashboardKpiGrid(kpis: state.kpis),
+                          DashboardKpiGrid(
+                            kpis: state.kpis,
+                            onAvailableValetsTap: () {
+                              // change index to whatever your Valets screen index is
+                              widget.onNavigateToTab?.call(2);
+                            },
+                            onTotalVehiclesParkedTap: () {
+                              // change index to whatever your Parking screen index is
+                              widget.onNavigateToTab?.call(1);
+                            },
+                          ),
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.03,
                           ),
