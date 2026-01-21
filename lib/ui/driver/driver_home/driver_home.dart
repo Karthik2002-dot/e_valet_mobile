@@ -271,7 +271,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   if (state is AssignedSessionsBackgroundData) {
                     if (state.hasSessions) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted && ModalRoute.of(blocContext)?.isCurrent == true) {
+                        if (mounted &&
+                            ModalRoute.of(blocContext)?.isCurrent == true) {
                           _presentAssignedSessionSheet(blocContext);
                         }
                       });

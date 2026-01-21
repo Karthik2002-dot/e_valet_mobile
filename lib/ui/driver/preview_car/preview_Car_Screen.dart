@@ -47,7 +47,6 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     super.dispose();
   }
 
-
   Future<void> _handleSubmit(BuildContext context) async {
     try {
       // Get current GPS location
