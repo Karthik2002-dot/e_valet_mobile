@@ -6,11 +6,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class CameraTopOverlay extends StatelessWidget {
   final bool isFlashOn;
   final VoidCallback onFlashToggle;
+  final double topOffset;
 
   const CameraTopOverlay({
     super.key,
     required this.isFlashOn,
     required this.onFlashToggle,
+    this.topOffset = 0.0,
   });
 
   @override
@@ -19,7 +21,7 @@ class CameraTopOverlay extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Positioned(
-      top: 0,
+      top: topOffset,
       left: 0,
       right: 0,
       child: Container(

@@ -71,6 +71,19 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         ? (state as DriverStatusLoaded).status
         : null;
 
+    // Check if user is already in desired state - if so, just emit current state
+    if (previousState != null) {
+      final isCurrentlyOnline = previousState.isOnline;
+      final wantsToGoOnline = event.status.toUpperCase() == 'ONLINE';
+
+      if ((isCurrentlyOnline && wantsToGoOnline) ||
+          (!isCurrentlyOnline && !wantsToGoOnline)) {
+        // Already in desired state, just emit current state
+        emit(DriverStatusLoaded(previousState));
+        return;
+      }
+    }
+
     // Emit loading state to disable toggle during API call
     emit(const DriverStatusLoading());
 
@@ -80,15 +93,18 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
 
       double latitude;
       double longitude;
+      double accuracy;
 
       if (locationData != null) {
         latitude = locationData['latitude'] as double;
         longitude = locationData['longitude'] as double;
+        accuracy = locationData['accuracy'] as double? ?? 0.0;
       } else {
         // Fallback: Get current location if stored location not available
         final coordinates = await LocationService.getCurrentCoordinates();
         latitude = coordinates['latitude']!;
         longitude = coordinates['longitude']!;
+        accuracy = coordinates['accuracy']!;
 
         // Save for future use
         final location =
@@ -100,18 +116,13 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         );
       }
 
-      final address = LocationService.getAddressFromCoordinates(
-        latitude,
-        longitude,
-      );
-
       if (event.status.toUpperCase() == 'ONLINE') {
         // Clock in - go online
         final clockInRequest = ClockInRequest(
           outletId: 2,
           latitude: latitude,
           longitude: longitude,
-          address: address,
+          accuracy: accuracy,
         );
 
         final clockInResponse =
@@ -132,7 +143,7 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         final clockOutRequest = ClockOutRequest(
           latitude: latitude,
           longitude: longitude,
-          address: address,
+          accuracy: accuracy,
         );
 
         final clockOutResponse =
@@ -206,15 +217,18 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
 
       double latitude;
       double longitude;
+      double accuracy;
 
       if (locationData != null) {
         latitude = locationData['latitude'] as double;
         longitude = locationData['longitude'] as double;
+        accuracy = locationData['accuracy'] as double? ?? 0.0;
       } else {
         // Fallback: Get current location if stored location not available
         final coordinates = await LocationService.getCurrentCoordinates();
         latitude = coordinates['latitude']!;
         longitude = coordinates['longitude']!;
+        accuracy = coordinates['accuracy']!;
 
         // Save for future use
         final location =
@@ -226,17 +240,12 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         );
       }
 
-      final address = LocationService.getAddressFromCoordinates(
-        latitude,
-        longitude,
-      );
-
       if (event.isOnBreak) {
         // Start break
         final breakStartRequest = BreakStartRequest(
           latitude: latitude,
           longitude: longitude,
-          address: address,
+          accuracy: accuracy,
         );
 
         final breakStartResponse =
@@ -257,7 +266,7 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         final breakEndRequest = BreakEndRequest(
           latitude: latitude,
           longitude: longitude,
-          address: address,
+          accuracy: accuracy,
         );
 
         final breakEndResponse =

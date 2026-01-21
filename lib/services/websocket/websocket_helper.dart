@@ -65,7 +65,8 @@ class WebSocketHelper {
       // Set up timeout timer
       timeoutTimer = Timer(const Duration(seconds: 15), () {
         if (!connectionCompleter.isCompleted) {
-          print('WebSocket connection timeout after 15 seconds - continuing anyway');
+          print(
+              'WebSocket connection timeout after 15 seconds - continuing anyway');
           connectionCompleter.complete();
           connectionSubscription.cancel();
         }

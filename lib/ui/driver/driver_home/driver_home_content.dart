@@ -11,12 +11,14 @@ class DriverHomeContent extends StatelessWidget {
   final String driverName;
   final bool isOnBreak;
   final bool isOnline;
+  final VoidCallback? onBreakEnd;
 
   const DriverHomeContent({
     super.key,
     required this.driverName,
     required this.isOnBreak,
     required this.isOnline,
+    this.onBreakEnd,
   });
 
   @override
@@ -73,6 +75,7 @@ class DriverHomeContent extends StatelessWidget {
                             screenHeight: screenHeight,
                             isTablet: isTablet,
                             isDesktop: isDesktop,
+                            onBreakEnd: onBreakEnd,
                           )
                         : isOnline
                             ? DriverOnlineContent(

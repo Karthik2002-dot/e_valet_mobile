@@ -113,12 +113,13 @@ class LocationService {
     }
   }
 
-  /// Get current location coordinates (latitude and longitude)
+  /// Get current location coordinates (latitude, longitude, and accuracy)
   static Future<Map<String, double>> getCurrentCoordinates() async {
     final position = await getCurrentLocation();
     return {
       'latitude': position.latitude,
       'longitude': position.longitude,
+      'accuracy': position.accuracy,
     };
   }
 

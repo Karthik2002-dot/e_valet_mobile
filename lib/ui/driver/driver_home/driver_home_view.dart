@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.d
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_content.dart';
 
@@ -40,6 +41,11 @@ class DriverHomeView extends StatelessWidget {
               driverName: driverName,
               isOnBreak: isOnBreak,
               isOnline: isOnline,
+              onBreakEnd: () {
+                context
+                    .read<DriverStatusBloc>()
+                    .add(const DriverBreakToggled(false));
+              },
             );
           },
         );

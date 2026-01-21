@@ -11,7 +11,7 @@ enum DevicePlatform {
 
 class DeviceInfoService {
   static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
-  
+
   /// Get the platform name in uppercase format (ANDROID, IOS, WEB)
   static Future<String> getPlatform() async {
     try {

@@ -49,7 +49,8 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
     emit(DriverHomeLoaded(
       driverName: driverName,
       isOnBreak: false,
-      isOnline: true,
+      isOnline:
+          true, // Start with online, let DriverStatusBloc determine actual status
     ));
   }
 

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:niloufer_valet_mobile/api/core/api_config.dart';
 import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ImageApiService {
@@ -11,8 +12,12 @@ class ImageApiService {
 
   /// Upload parking photo to the session
   /// POST /api/v1/sessions/{id}/park
+  ///
+  /// Supports two scenarios:
+  /// 1. With photo: photo + longitude + latitude + accuracy (no parkingLocation)
+  /// 2. Without photo: parkingLocation + longitude + latitude + accuracy (no photo)
   static Future<Map<String, dynamic>> uploadParkingPhoto({
-    required String imagePath,
+    required ParkRequest request,
     String? sessionId, // Optional: if not provided, use from TokenStorage
   }) async {
     // Get session ID from parameter or Hive storage
@@ -43,14 +48,30 @@ class ImageApiService {
     );
 
     try {
-      // Create multipart form data
-      final formData = FormData.fromMap({
-        'photo': await MultipartFile.fromFile(
-          imagePath,
-          filename: imagePath.split('/').last,
-        ),
-        // description is optional, so we don't send it
-      });
+      // Build form data based on whether photo is provided
+      final Map<String, dynamic> formDataMap = {
+        'latitude': request.latitude,
+        'longitude': request.longitude,
+      };
+
+      // Add accuracy if provided
+      if (request.accuracy != null) {
+        formDataMap['accuracy'] = request.accuracy;
+      }
+
+      // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
+      if (request.hasPhoto) {
+        formDataMap['photo'] = await MultipartFile.fromFile(
+          request.imagePath!,
+          filename: request.filename,
+        );
+      }
+      // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
+      else if (request.hasParkingLocation) {
+        formDataMap['parkingLocation'] = request.parkingLocation;
+      }
+
+      final formData = FormData.fromMap(formDataMap);
 
       // Make the API call
       final response = await base.post(

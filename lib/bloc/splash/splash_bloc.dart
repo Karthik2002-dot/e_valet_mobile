@@ -64,7 +64,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           outletId: outletId,
           operatorId: isOperator ? userId : null,
           driverId: roles.any((r) => r.contains('driver')) ? userId : null,
-          initialDelay: const Duration(milliseconds: 1500), // Longer delay for splash
+          initialDelay:
+              const Duration(milliseconds: 1500), // Longer delay for splash
         );
       }
     } catch (e) {

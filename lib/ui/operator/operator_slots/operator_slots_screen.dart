@@ -287,39 +287,6 @@ class OperatorSlotsScreen extends StatelessWidget {
                                     Row(
                                       children: [
                                         Icon(
-                                          Icons.person_outline,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.01,
-                                          color: AppColors.grey,
-                                        ),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.003,
-                                        ),
-                                        Expanded(
-                                          child: TextComponent(
-                                            labelText: item.parkedBy,
-                                            fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.009,
-                                            color: AppColors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.003,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(
                                           Icons.access_time,
                                           size: MediaQuery.of(context)
                                                   .size

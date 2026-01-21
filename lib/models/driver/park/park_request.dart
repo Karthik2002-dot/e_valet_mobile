@@ -1,15 +1,12 @@
-/// Model for re-park request
-/// Supports two scenarios:
-/// 1. With photo: photo + longitude + latitude + accuracy (no parkingLocation)
-/// 2. Without photo: parkingLocation + longitude + latitude + accuracy (no photo)
-class ReparkPhotoRequest {
+/// Model for park request
+class ParkRequest {
   final String? imagePath;
   final double latitude;
   final double longitude;
   final double? accuracy;
   final String? parkingLocation;
 
-  const ReparkPhotoRequest({
+  const ParkRequest({
     this.imagePath,
     required this.latitude,
     required this.longitude,
@@ -32,6 +29,6 @@ class ReparkPhotoRequest {
 
   @override
   String toString() {
-    return 'ReparkPhotoRequest(imagePath: $imagePath, latitude: $latitude, longitude: $longitude, accuracy: $accuracy, parkingLocation: $parkingLocation)';
+    return 'ParkRequest(imagePath: $imagePath, latitude: $latitude, longitude: $longitude, accuracy: $accuracy, parkingLocation: $parkingLocation)';
   }
 }

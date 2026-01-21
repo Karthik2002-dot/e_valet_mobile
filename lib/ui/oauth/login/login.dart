@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context,
       listen: false,
     );
-    
+
     // Get WebSocketBloc from context
     final webSocketBloc = context.read<WebSocketBloc>();
 
