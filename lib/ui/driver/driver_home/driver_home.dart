@@ -62,76 +62,71 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
 
-  void _presentAssignedSessionSheet() {
-    // Reset dismiss state
+  void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
-
-    // Cancel any existing timer
     _dismissTimer?.cancel();
-
-    // Set timer to allow dismissal after 60 seconds
     _dismissTimer = Timer(const Duration(seconds: 60), () {
       if (mounted) {
         _dismissNotifier.value = true;
       }
     });
 
+    final assignedSessionsBloc = context.read<AssignedSessionsBackgroundBloc>();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
-      isDismissible: _dismissNotifier.value, // Controlled by ValueNotifier
-      enableDrag: false, // Disable drag to dismiss
-      builder: (BuildContext modalContext) => ValueListenableBuilder<bool>(
-        valueListenable: _dismissNotifier,
-        builder: (context, canDismiss, _) {
-          return Stack(
-            children: [
-              // Invisible barrier that captures taps when dismissible
-              if (canDismiss)
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(modalContext).pop();
-                      _cleanupTimer();
-                    },
-                    child: Container(
-                      color: Colors.black
-                          .withOpacity(0.001), // Nearly invisible but tappable
+      isDismissible: _dismissNotifier.value,
+      enableDrag: false,
+      builder: (BuildContext modalContext) => BlocProvider.value(
+        value: assignedSessionsBloc,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _dismissNotifier,
+          builder: (context, canDismiss, _) {
+            return Stack(
+              children: [
+                if (canDismiss)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(modalContext).pop();
+                        _cleanupTimer();
+                      },
+                      child: Container(
+                        color: Colors.black.withOpacity(0.001),
+                      ),
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FractionallySizedBox(
+                    heightFactor: 0.6,
+                    child: Stack(
+                      children: [
+                        const AssignedSessionSheetLoader(),
+                        if (canDismiss)
+                          Positioned.fill(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(modalContext).pop();
+                                _cleanupTimer();
+                              },
+                              child: Container(
+                                color: Colors.transparent,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              // The actual bottom sheet content
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: FractionallySizedBox(
-                  heightFactor: 0.6,
-                  child: Stack(
-                    children: [
-                      const AssignedSessionSheetLoader(),
-                      // Invisible overlay that captures taps when dismissible
-                      if (canDismiss)
-                        Positioned.fill(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(modalContext).pop();
-                              _cleanupTimer();
-                            },
-                            child: Container(
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     ).then((_) {
-      // Cleanup when sheet is closed
       _cleanupTimer();
     });
   }
@@ -272,14 +267,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             listeners: [
               BlocListener<AssignedSessionsBackgroundBloc,
                   AssignedSessionsBackgroundState>(
-                listener: (context, state) {
+                listener: (blocContext, state) {
                   if (state is AssignedSessionsBackgroundData) {
                     if (state.hasSessions) {
-                      // Show bottom sheet when new assigned sessions data arrives
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
-                            ModalRoute.of(context)?.isCurrent == true) {
-                          _presentAssignedSessionSheet();
+                            ModalRoute.of(blocContext)?.isCurrent == true) {
+                          _presentAssignedSessionSheet(blocContext);
                         }
                       });
                     }
