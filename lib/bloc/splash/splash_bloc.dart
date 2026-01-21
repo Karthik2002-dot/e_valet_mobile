@@ -53,7 +53,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));
       if (isOperator) {
-        outletId = '2';
+        outletId = '1';
       }
 
       // Initialize WebSocket connection if user is authenticated

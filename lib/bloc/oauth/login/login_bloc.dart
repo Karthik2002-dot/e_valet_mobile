@@ -86,7 +86,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
             String? outletId;
             if (isOperator) {
-              outletId = '2'; // Default outlet ID for operators
+              outletId = '1';
             }
 
             await WebSocketHelper.connectAfterLogin(

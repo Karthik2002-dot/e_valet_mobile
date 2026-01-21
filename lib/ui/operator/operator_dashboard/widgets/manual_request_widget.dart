@@ -47,8 +47,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
     context.read<OperatorDashboardBloc>().add(
           CreateManualRetrievalRequest(
             cardNumber: cardNumber,
-            outletId:
-                '2', // TODO: Replace with actual outletId from session/profile
+            outletId: '1',
           ),
         );
   }

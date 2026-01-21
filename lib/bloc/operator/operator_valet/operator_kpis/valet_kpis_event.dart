@@ -6,6 +6,6 @@ class FetchValetKpis extends ValetKpisEvent {
   final String outletId;
 
   const FetchValetKpis({
-    this.outletId = '2',
+    this.outletId = '1',
   });
 }

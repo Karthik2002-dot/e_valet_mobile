@@ -26,7 +26,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   int _selectedIndex = 0;
   VoidCallback? _dashboardRefresh;
   late OperatorDashboardBloc _dashboardBloc;
-  final String _outletId = '2';
+  final String _outletId = '1';
 
   @override
   void initState() {

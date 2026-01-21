@@ -25,7 +25,7 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent> {
   late OperatorDashboardBloc _dashboardBloc;
-  final String _outletId = '2';
+  final String _outletId = '1';
 
   @override
   void initState() {

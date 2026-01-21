@@ -61,7 +61,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
 
       // Get outletId from DriverStatusBloc
       final statusState = context.read<DriverStatusBloc>().state;
-      int outletId = 2; // Default fallback
+      int outletId = 1; // Default fallback
 
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;
