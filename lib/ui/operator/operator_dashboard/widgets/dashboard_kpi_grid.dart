@@ -5,20 +5,26 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class DashboardKpiGrid extends StatelessWidget {
   final OperatorDashboardKpisResponse kpis;
+  final VoidCallback? onTotalVehiclesParkedTap;
+  final VoidCallback? onAvailableValetsTap;
 
   const DashboardKpiGrid({
     super.key,
     required this.kpis,
+    this.onTotalVehiclesParkedTap,
+    this.onAvailableValetsTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 4 - 9,
+            width: width / 4 - 9,
             child: KpiCard(
               title: TextConstants.availableTags,
               value:
@@ -27,16 +33,19 @@ class DashboardKpiGrid extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 4 - 9,
-            child: KpiCard(
-              title: TextConstants.availableValets,
-              value:
-                  '${kpis.availableValets.available}/${kpis.availableValets.total}',
+            width: width / 4 - 9,
+            child: GestureDetector(
+              onTap: onAvailableValetsTap,
+              child: KpiCard(
+                title: TextConstants.availableValets,
+                value:
+                    '${kpis.availableValets.available}/${kpis.availableValets.total}',
+              ),
             ),
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 4 - 9,
+            width: width / 4 - 9,
             child: KpiCard(
               title: TextConstants.vehiclesInTransit,
               value: kpis.vehiclesInTransit.toString(),
@@ -44,10 +53,13 @@ class DashboardKpiGrid extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 4 - 9,
-            child: KpiCard(
-              title: TextConstants.totalVehiclesParked,
-              value: kpis.totalVehiclesParked.toString(),
+            width: width / 4 - 9,
+            child: GestureDetector(
+              onTap: onTotalVehiclesParkedTap,
+              child: KpiCard(
+                title: TextConstants.totalVehiclesParked,
+                value: kpis.totalVehiclesParked.toString(),
+              ),
             ),
           ),
         ],

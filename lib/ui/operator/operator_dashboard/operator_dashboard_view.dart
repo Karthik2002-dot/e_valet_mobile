@@ -65,6 +65,11 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         onRefreshReady: (refresh) {
           _dashboardRefresh = refresh;
         },
+        onNavigateToTab: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
       0,
     );
