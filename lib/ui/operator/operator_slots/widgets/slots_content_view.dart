@@ -33,7 +33,7 @@ class _SlotsContentViewState extends State<SlotsContentView> {
 
   List<KeyRackItem> _getFilteredAndSortedItems() {
     final items = widget.digitalKeyRack.keyRack;
-    
+
     if (_searchQuery.isEmpty) {
       return items;
     }
@@ -175,9 +175,9 @@ class _SlotsContentViewState extends State<SlotsContentView> {
             itemCount: filteredItems.length,
             itemBuilder: (context, index) {
               final item = filteredItems[index];
-              final isMatch = _searchQuery.isNotEmpty && 
-                              item.cardNumber.toString().contains(_searchQuery);
-              
+              final isMatch = _searchQuery.isNotEmpty &&
+                  item.cardNumber.toString().contains(_searchQuery);
+
               return ParkedCarCard(
                 item: item,
                 onManualRequest: widget.onManualRequest,

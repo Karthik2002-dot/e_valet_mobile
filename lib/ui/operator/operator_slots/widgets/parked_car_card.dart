@@ -28,13 +28,13 @@ class ParkedCarCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: isHighlighted 
-              ? AppColors.primary.withOpacity(0.05) 
+          color: isHighlighted
+              ? AppColors.primary.withOpacity(0.05)
               : AppColors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isHighlighted 
-                ? AppColors.primary 
+            color: isHighlighted
+                ? AppColors.primary
                 : AppColors.grey.withOpacity(0.2),
             width: isHighlighted ? 2 : 1,
           ),

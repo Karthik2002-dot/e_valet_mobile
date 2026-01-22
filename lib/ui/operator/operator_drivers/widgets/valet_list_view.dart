@@ -73,7 +73,7 @@ class ValetListView extends StatelessWidget {
         if (state is ValetListLoaded) {
           // First, filter by status based on selected KPI card
           List filteredValets = state.response.valets;
-          
+
           // Apply status filter
           switch (statusFilter) {
             case ValetFilter.available:
@@ -95,7 +95,7 @@ class ValetListView extends StatelessWidget {
               // Show all valets
               break;
           }
-          
+
           // Then filter by searchQuery (name, phone, or userId)
           final query = searchQuery.trim().toLowerCase();
           if (query.isNotEmpty) {
