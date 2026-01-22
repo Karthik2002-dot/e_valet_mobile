@@ -53,10 +53,10 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
               (route) => false,
             );
           } else if (state is TagSubmissionError) {
-            // TODO: Handle error (e.g., show error dialog)
+            // Show custom error message for invalid or already used QR/tag
             SnackBars.showErrorSnackBar(
               context,
-              state.message,
+              TextConstants.tagSubmissionError,
             );
           }
         },

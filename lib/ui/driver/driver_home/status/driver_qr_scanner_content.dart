@@ -110,13 +110,9 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     ),
                   ),
                 );
-              } else if (submissionState is TagSubmissionError) {
-                // Show error message
-                SnackBars.showErrorSnackBar(
-                  context,
-                  submissionState.message,
-                );
               }
+              // Error handling is done in the parent widget (DriverOnlineContent)
+              // to avoid duplicate error messages
             },
           ),
         ],
