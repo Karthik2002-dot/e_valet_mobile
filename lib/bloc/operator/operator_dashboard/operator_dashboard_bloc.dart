@@ -20,6 +20,7 @@ class OperatorDashboardBloc
   final String outletId;
   StreamSubscription<dynamic>? _sessionStatusSubscription;
   StreamSubscription<dynamic>? _statsUpdateSubscription;
+  StreamSubscription<dynamic>? _driverStatusChangedSubscription;
 
   OperatorDashboardBloc({
     this.webSocketBloc,
@@ -84,6 +85,27 @@ class OperatorDashboardBloc
         },
         onError: (error) {
           print('Error listening to stats updates: $error');
+        },
+      );
+
+      // Listen to driver:status_changed event
+      final driverStatusChangedStream =
+          webSocketBloc!.service.getEventStream('driver:status_changed');
+
+      _driverStatusChangedSubscription = driverStatusChangedStream.listen(
+        (data) {
+          // Silently refresh only available drivers when driver status changes
+          add(
+            RefreshDashboardKpisSilently(
+              outletId: outletId,
+              refreshKpis: false,
+              refreshDrivers: true,
+              refreshRequests: false,
+            ),
+          );
+        },
+        onError: (error) {
+          print('Error listening to driver status updates: $error');
         },
       );
     } catch (e) {
@@ -254,7 +276,16 @@ class OperatorDashboardBloc
         refreshRequests: true,
       ));
     } catch (e) {
-      emit(ManualRequestError(e.toString()));
+      // Show a business-friendly error message for card not found
+      String errorMessage = e.toString();
+      final cardNotFoundRegExp =
+          RegExp(r'Card #[0-9]+ not found in outlet [0-9]+');
+      final match = cardNotFoundRegExp.firstMatch(errorMessage);
+      if (match != null) {
+        errorMessage =
+            'No parked vehicle found for this card number. Please enter a valid card number.';
+      }
+      emit(ManualRequestError(errorMessage));
 
       // Restore the previous dashboard state after error too
       if (previousState != null) {
@@ -268,6 +299,7 @@ class OperatorDashboardBloc
     // Cancel WebSocket subscriptions
     await _sessionStatusSubscription?.cancel();
     await _statsUpdateSubscription?.cancel();
+    await _driverStatusChangedSubscription?.cancel();
     return super.close();
   }
 }
