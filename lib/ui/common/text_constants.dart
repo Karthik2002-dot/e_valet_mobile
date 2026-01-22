@@ -230,6 +230,8 @@ class TextConstants {
   static const String validationEnterTagNumber = 'Please enter the tag number';
   static const String validationEnterValidNumber =
       'Please enter a valid number';
+  static const String tagSubmissionError =
+      'The QR code you scanned or the tag number you entered is invalid or already used. Please kindly check the QR code or tag number.';
 
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
