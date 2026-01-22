@@ -19,6 +19,8 @@ class TextFieldComponent extends StatefulWidget {
   final int? maxLines;
   final bool enabled;
   final EdgeInsets? contentPadding;
+  final VoidCallback? onSubmitEditing;
+  final TextInputAction? textInputAction;
 
   const TextFieldComponent({
     super.key,
@@ -38,6 +40,8 @@ class TextFieldComponent extends StatefulWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.contentPadding,
+    this.onSubmitEditing,
+    this.textInputAction,
   });
 
   @override
@@ -74,6 +78,10 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
           focusNode: widget.focusNode,
           maxLines: widget.maxLines,
           enabled: widget.enabled,
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onSubmitEditing != null
+              ? (_) => widget.onSubmitEditing!()
+              : null,
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.black,

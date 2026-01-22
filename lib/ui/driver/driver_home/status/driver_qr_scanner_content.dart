@@ -180,6 +180,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                       hintText: TextConstants.tagNumberHint,
                       controller: _tagNumberController,
                       keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      onSubmitEditing: _handleManualSubmit,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return TextConstants.validationEnterTagNumber;
