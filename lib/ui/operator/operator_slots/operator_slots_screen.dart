@@ -14,7 +14,7 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/slots_c
 
 class OperatorSlotsScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
-  
+
   const OperatorSlotsScreen({
     super.key,
     this.onRefreshReady,
@@ -32,7 +32,7 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Provide the refresh method to the parent
     if (widget.onRefreshReady != null) {
       Future.microtask(() {
@@ -97,32 +97,39 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
               }
 
               if (state is OperatorDashboardLoaded) {
-                return SingleChildScrollView(
-                  padding: EdgeInsets.all(
-                    MediaQuery.of(context).size.width * 0.02,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextComponent(
-                        labelText: TextConstants.parkedCarTitle,
-                        color: AppColors.black,
-                        fontSize: MediaQuery.of(context).size.width * 0.02,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      const SizedBox(height: 8),
-                      TextComponent(
-                        labelText: TextConstants.parkedCarDescription,
-                        color: AppColors.grey,
-                        fontSize: MediaQuery.of(context).size.width * 0.013,
-                      ),
-                      const SizedBox(height: 24),
-                      SlotsContentView(
-                        digitalKeyRack: state.digitalKeyRack,
-                        onManualRequest: _handleManualRequest,
-                      ),
-                    ],
+                return GestureDetector(
+                  onTap: () {
+                    // Dismiss keyboard when tapping outside
+                    FocusScope.of(context).unfocus();
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(
+                      MediaQuery.of(context).size.width * 0.02,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextComponent(
+                          labelText: TextConstants.parkedCarTitle,
+                          color: AppColors.black,
+                          fontSize: MediaQuery.of(context).size.width * 0.02,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        const SizedBox(height: 8),
+                        TextComponent(
+                          labelText: TextConstants.parkedCarDescription,
+                          color: AppColors.grey,
+                          fontSize: MediaQuery.of(context).size.width * 0.013,
+                        ),
+                        const SizedBox(height: 24),
+                        SlotsContentView(
+                          digitalKeyRack: state.digitalKeyRack,
+                          onManualRequest: _handleManualRequest,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }

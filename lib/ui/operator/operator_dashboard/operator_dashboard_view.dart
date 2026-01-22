@@ -58,7 +58,8 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _refreshDashboard() {
-    print('_refreshDashboard called, selectedIndex: $_selectedIndex'); // Debug log
+    print(
+        '_refreshDashboard called, selectedIndex: $_selectedIndex'); // Debug log
     // Call specific refresh callback based on selected tab
     switch (_selectedIndex) {
       case 0:
@@ -68,12 +69,14 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         break;
       case 1:
         // Slots/Parked Car screen
-        print('Calling slots refresh, callback is: ${_slotsRefresh != null ? "set" : "null"}'); // Debug log
+        print(
+            'Calling slots refresh, callback is: ${_slotsRefresh != null ? "set" : "null"}'); // Debug log
         _slotsRefresh?.call();
         break;
       case 2:
         // Drivers/Valets screen
-        print('Calling drivers refresh, callback is: ${_driversRefresh != null ? "set" : "null"}'); // Debug log
+        print(
+            'Calling drivers refresh, callback is: ${_driversRefresh != null ? "set" : "null"}'); // Debug log
         _driversRefresh?.call();
         break;
       default:
@@ -154,6 +157,11 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
               IconButton(
                 icon: const Icon(Icons.menu, color: AppColors.white),
                 onPressed: () {
+                  final currentScope = FocusScope.of(context);
+                  if (!currentScope.hasPrimaryFocus &&
+                      currentScope.focusedChild != null) {
+                    currentScope.unfocus();
+                  }
                   _scaffoldKey.currentState?.openEndDrawer();
                 },
               ),
