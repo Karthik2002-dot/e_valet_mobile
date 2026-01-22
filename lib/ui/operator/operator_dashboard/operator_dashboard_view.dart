@@ -26,6 +26,8 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   int _selectedIndex = 0;
   int _refreshKey = 0;
   VoidCallback? _dashboardRefresh;
+  VoidCallback? _slotsRefresh;
+  VoidCallback? _driversRefresh;
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = '1';
 
@@ -56,14 +58,30 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _refreshDashboard() {
-    // For dashboard tab (index 0), call the dashboard refresh callback
-    if (_selectedIndex == 0) {
-      _dashboardRefresh?.call();
-    } else {
-      // For other tabs, increment refresh key to recreate the widget
-      setState(() {
-        _refreshKey++;
-      });
+    print('_refreshDashboard called, selectedIndex: $_selectedIndex'); // Debug log
+    // Call specific refresh callback based on selected tab
+    switch (_selectedIndex) {
+      case 0:
+        // Dashboard
+        print('Calling dashboard refresh'); // Debug log
+        _dashboardRefresh?.call();
+        break;
+      case 1:
+        // Slots/Parked Car screen
+        print('Calling slots refresh, callback is: ${_slotsRefresh != null ? "set" : "null"}'); // Debug log
+        _slotsRefresh?.call();
+        break;
+      case 2:
+        // Drivers/Valets screen
+        print('Calling drivers refresh, callback is: ${_driversRefresh != null ? "set" : "null"}'); // Debug log
+        _driversRefresh?.call();
+        break;
+      default:
+        // For other tabs (Car Logs), increment refresh key to recreate the widget
+        print('Incrementing refresh key for tab $_selectedIndex'); // Debug log
+        setState(() {
+          _refreshKey++;
+        });
     }
   }
 
@@ -72,6 +90,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       _selectedIndex,
       DashboardContent(
         onRefreshReady: (refresh) {
+          print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;
         },
         onNavigateToTab: (int index) {
@@ -81,6 +100,14 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         },
       ),
       _refreshKey,
+      onSlotsRefreshReady: (refresh) {
+        print('Slots refresh callback registered'); // Debug log
+        _slotsRefresh = refresh;
+      },
+      onDriversRefreshReady: (refresh) {
+        print('Drivers refresh callback registered'); // Debug log
+        _driversRefresh = refresh;
+      },
     );
   }
 

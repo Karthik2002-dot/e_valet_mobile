@@ -27,8 +27,8 @@ class ValetKpiCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primary.withOpacity(0.1) 
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.001)
               : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -46,42 +46,43 @@ class ValetKpiCard extends StatelessWidget {
               : null,
         ),
         child: isLoading
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SkeletonLoader(
-                  height: MediaQuery.of(context).size.height * 0.015,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  borderRadius: 4,
-                ),
-                const SizedBox(height: 8),
-                SkeletonLoader(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                  width: MediaQuery.of(context).size.width * 0.08,
-                  borderRadius: 4,
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextComponent(
-                  labelText: label,
-                  color: isSelected ? AppColors.primary : AppColors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.013,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-                const SizedBox(height: 8),
-                TextComponent(
-                  labelText: value,
-                  color: isSelected ? AppColors.primary : AppColors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.025,
-                  fontWeight: FontWeight.bold,
-                ),
-              ],
-            ),
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SkeletonLoader(
+                    height: MediaQuery.of(context).size.height * 0.015,
+                    width: MediaQuery.of(context).size.width * 0.12,
+                    borderRadius: 4,
+                  ),
+                  const SizedBox(height: 8),
+                  SkeletonLoader(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                    width: MediaQuery.of(context).size.width * 0.08,
+                    borderRadius: 4,
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextComponent(
+                    labelText: label,
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.width * 0.013,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                  const SizedBox(height: 8),
+                  TextComponent(
+                    labelText: value,
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.width * 0.025,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
       ),
     );
   }

@@ -13,7 +13,12 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/slots_content_view.dart';
 
 class OperatorSlotsScreen extends StatefulWidget {
-  const OperatorSlotsScreen({super.key});
+  final Function(VoidCallback)? onRefreshReady;
+  
+  const OperatorSlotsScreen({
+    super.key,
+    this.onRefreshReady,
+  });
 
   @override
   State<OperatorSlotsScreen> createState() => _OperatorSlotsScreenState();
@@ -23,6 +28,26 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
   final _apiService = OperatorManualRetrievalApiService();
   final String _outletId = '1';
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Provide the refresh method to the parent
+    if (widget.onRefreshReady != null) {
+      Future.microtask(() {
+        widget.onRefreshReady?.call(refresh);
+      });
+    }
+  }
+
+  void refresh() {
+    print('OperatorSlotsScreen: refresh() called'); // Debug log
+    // Refresh the dashboard data which includes the slots
+    context.read<OperatorDashboardBloc>().add(
+          FetchDashboardKpis(outletId: _outletId),
+        );
+  }
 
   Future<void> _handleManualRequest(int cardNumber, String sessionId) async {
     if (_isProcessing) return;

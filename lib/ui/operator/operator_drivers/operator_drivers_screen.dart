@@ -12,11 +12,11 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_list_view.dart';
 
 class OperatorDriversScreen extends StatefulWidget {
-  final VoidCallback? onRefresh;
+  final Function(VoidCallback)? onRefreshReady;
 
   const OperatorDriversScreen({
     super.key,
-    this.onRefresh,
+    this.onRefreshReady,
   });
 
   @override
@@ -45,11 +45,26 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
         _searchQuery = _searchController.text.trim();
       });
     });
+    
+    // Provide the refresh method to the parent immediately
+    if (widget.onRefreshReady != null) {
+      // Call immediately instead of using addPostFrameCallback
+      Future.microtask(() {
+        widget.onRefreshReady?.call(refresh);
+      });
+    }
   }
 
   void refresh() {
+    print('OperatorDriversScreen: refresh() called'); // Debug log
     _valetKpisBloc.add(FetchValetKpis(outletId: _outletId));
     _valetListBloc.add(FetchValetList(outletId: _outletId));
+    // Reset filter to show all when refreshing
+    if (mounted) {
+      setState(() {
+        _selectedFilter = ValetFilter.all;
+      });
+    }
   }
 
   @override
