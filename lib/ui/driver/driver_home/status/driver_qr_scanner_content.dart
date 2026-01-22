@@ -7,7 +7,6 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
-import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
@@ -44,7 +43,19 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     super.dispose();
   }
 
-  void _handleManualSubmit() {
+  void _handleSubmit(BuildContext submitContext) {
+    // First check if QR code was scanned
+    // Use the provided context which has access to QrBloc
+    final qrState = submitContext.read<QrBloc>().state;
+    if (qrState.qrData != null) {
+      // Submit QR code data
+      submitContext.read<TagSubmissionBloc>().add(
+            QrCodeSubmitted(qrState.qrData!),
+          );
+      return;
+    }
+
+    // Otherwise, handle manual entry
     if (_formKey.currentState?.validate() ?? false) {
       final tagNumber = _tagNumberController.text.trim();
 
@@ -53,21 +64,21 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
       if (cardNumber == null) {
         // Show error if tag number is not a valid number
         SnackBars.showErrorSnackBar(
-          context,
+          submitContext,
           TextConstants.validationEnterValidTagNumber,
         );
         return;
       }
 
       // Get outletId from DriverStatusBloc
-      final statusState = context.read<DriverStatusBloc>().state;
+      final statusState = submitContext.read<DriverStatusBloc>().state;
       int outletId = 1; // Default fallback
 
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;
       }
 
-      context.read<TagSubmissionBloc>().add(
+      submitContext.read<TagSubmissionBloc>().add(
             TagNumberSubmitted(
               outletId: outletId,
               cardNumber: cardNumber,
@@ -105,17 +116,6 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                   context,
                   submissionState.message,
                 );
-              }
-            },
-          ),
-          // Listener for QR state to auto-submit when QR data is detected
-          BlocListener<QrBloc, QrState>(
-            listener: (context, qrState) {
-              // Auto-submit when QR data is available
-              if (qrState.qrData != null) {
-                context.read<TagSubmissionBloc>().add(
-                      QrCodeSubmitted(qrState.qrData!),
-                    );
               }
             },
           ),
@@ -175,24 +175,29 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         color: AppColors.black,
                       ),
                     ),
-                    TextFieldComponent(
-                      labelText: TextConstants.emptyText,
-                      hintText: TextConstants.tagNumberHint,
-                      controller: _tagNumberController,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      onSubmitEditing: _handleManualSubmit,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return TextConstants.validationEnterTagNumber;
-                        }
-                        final cardNumber = int.tryParse(value.trim());
-                        if (cardNumber == null) {
-                          return TextConstants.validationEnterValidNumber;
-                        }
-                        return null;
+                    Builder(
+                      builder: (textFieldContext) {
+                        return TextFieldComponent(
+                          labelText: TextConstants.emptyText,
+                          hintText: TextConstants.tagNumberHint,
+                          controller: _tagNumberController,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          onSubmitEditing: () =>
+                              _handleSubmit(textFieldContext),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return TextConstants.validationEnterTagNumber;
+                            }
+                            final cardNumber = int.tryParse(value.trim());
+                            if (cardNumber == null) {
+                              return TextConstants.validationEnterValidNumber;
+                            }
+                            return null;
+                          },
+                          borderRadius: widget.screenWidth * 0.03,
+                        );
                       },
-                      borderRadius: widget.screenWidth * 0.03,
                     ),
                   ],
                 ),
@@ -219,7 +224,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                             ? widget.screenHeight * 0.07
                             : widget.screenHeight * 0.062,
                     child: ElevatedButton(
-                      onPressed: isLoading ? null : _handleManualSubmit,
+                      onPressed:
+                          isLoading ? null : () => _handleSubmit(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         disabledBackgroundColor: AppColors.greyLight,

@@ -56,18 +56,15 @@ class SlotsContentView extends StatelessWidget {
                         labelText: '$availableSlots',
                         color: AppColors.success,
                         fontWeight: FontWeight.bold,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.03,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
                       ),
                       SizedBox(
-                        height:
-                            MediaQuery.of(context).size.height * 0.008,
+                        height: MediaQuery.of(context).size.height * 0.008,
                       ),
                       TextComponent(
                         labelText: TextConstants.available,
                         color: AppColors.grey,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.016,
+                        fontSize: MediaQuery.of(context).size.width * 0.016,
                       ),
                     ],
                   ),
@@ -92,18 +89,15 @@ class SlotsContentView extends StatelessWidget {
                         labelText: '$occupiedSlots',
                         color: AppColors.error,
                         fontWeight: FontWeight.bold,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.03,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
                       ),
                       SizedBox(
-                        height:
-                            MediaQuery.of(context).size.height * 0.008,
+                        height: MediaQuery.of(context).size.height * 0.008,
                       ),
                       TextComponent(
                         labelText: TextConstants.occupied,
                         color: AppColors.grey,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.016,
+                        fontSize: MediaQuery.of(context).size.width * 0.016,
                       ),
                     ],
                   ),
@@ -128,18 +122,15 @@ class SlotsContentView extends StatelessWidget {
                         labelText: '$totalSlots',
                         color: AppColors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.03,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
                       ),
                       SizedBox(
-                        height:
-                            MediaQuery.of(context).size.height * 0.008,
+                        height: MediaQuery.of(context).size.height * 0.008,
                       ),
                       TextComponent(
                         labelText: 'Total Slots',
                         color: AppColors.grey,
-                        fontSize:
-                            MediaQuery.of(context).size.width * 0.016,
+                        fontSize: MediaQuery.of(context).size.width * 0.016,
                       ),
                     ],
                   ),
@@ -164,10 +155,8 @@ class SlotsContentView extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 5,
-                crossAxisSpacing:
-                    MediaQuery.of(context).size.width * 0.015,
-                mainAxisSpacing:
-                    MediaQuery.of(context).size.height * 0.015,
+                crossAxisSpacing: MediaQuery.of(context).size.width * 0.015,
+                mainAxisSpacing: MediaQuery.of(context).size.height * 0.015,
                 childAspectRatio: 0.85,
               ),
               itemCount: digitalKeyRack.keyRack.length,
@@ -201,21 +190,16 @@ class SlotsContentView extends StatelessWidget {
                         ),
                         child: Image.network(
                           item.photoUrl,
-                          height:
-                              MediaQuery.of(context).size.height * 0.1,
+                          height: MediaQuery.of(context).size.height * 0.1,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              height:
-                                  MediaQuery.of(context).size.height *
-                                      0.1,
+                              height: MediaQuery.of(context).size.height * 0.1,
                               color: AppColors.grey.withOpacity(0.2),
                               child: Icon(
                                 Icons.directions_car,
-                                size:
-                                    MediaQuery.of(context).size.width *
-                                        0.03,
+                                size: MediaQuery.of(context).size.width * 0.03,
                                 color: AppColors.grey,
                               ),
                             );
@@ -231,41 +215,33 @@ class SlotsContentView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 TextComponent(
                                   labelText: 'Card #${item.cardNumber}',
                                   fontWeight: FontWeight.bold,
-                                  fontSize: MediaQuery.of(context)
-                                          .size
-                                          .width *
-                                      0.012,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.012,
                                   color: AppColors.black,
                                 ),
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: MediaQuery.of(context)
-                                            .size
-                                            .width *
-                                        0.006,
-                                    vertical: MediaQuery.of(context)
-                                            .size
-                                            .height *
-                                        0.002,
+                                    horizontal:
+                                        MediaQuery.of(context).size.width *
+                                            0.006,
+                                    vertical:
+                                        MediaQuery.of(context).size.height *
+                                            0.002,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary
-                                        .withOpacity(0.15),
-                                    borderRadius:
-                                        BorderRadius.circular(6),
+                                    color: AppColors.primary.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: TextComponent(
                                     labelText: item.duration,
-                                    fontSize: MediaQuery.of(context)
-                                            .size
-                                            .width *
-                                        0.008,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.008,
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -274,32 +250,26 @@ class SlotsContentView extends StatelessWidget {
                             ),
                             SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height *
-                                      0.005,
+                                  MediaQuery.of(context).size.height * 0.005,
                             ),
                             Row(
                               children: [
                                 Icon(
                                   Icons.access_time,
-                                  size: MediaQuery.of(context)
-                                          .size
-                                          .width *
-                                      0.01,
+                                  size:
+                                      MediaQuery.of(context).size.width * 0.01,
                                   color: AppColors.grey,
                                 ),
                                 SizedBox(
-                                  width: MediaQuery.of(context)
-                                          .size
-                                          .width *
-                                      0.003,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.003,
                                 ),
                                 Expanded(
                                   child: TextComponent(
                                     labelText: item.parkedAt,
-                                    fontSize: MediaQuery.of(context)
-                                            .size
-                                            .width *
-                                        0.008,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.008,
                                     color: AppColors.grey,
                                   ),
                                 ),

@@ -75,12 +75,14 @@ class ValetListView extends StatelessWidget {
             filteredValets = state.response.valets;
           } else if (RegExp(r'^\d+$').hasMatch(query)) {
             // If query is all digits, match userId exactly
-            filteredValets = state.response.valets.where((valet) => valet.userId.toLowerCase() == query).toList();
+            filteredValets = state.response.valets
+                .where((valet) => valet.userId.toLowerCase() == query)
+                .toList();
           } else {
             filteredValets = state.response.valets.where((valet) {
               return valet.name.toLowerCase().contains(query) ||
-                     valet.phone.toLowerCase().contains(query) ||
-                     valet.userId.toLowerCase().contains(query);
+                  valet.phone.toLowerCase().contains(query) ||
+                  valet.userId.toLowerCase().contains(query);
             }).toList();
           }
 

@@ -3,7 +3,7 @@ class TextConstants {
 
   static const dashboard = 'Dashboard';
   static const slots = 'Slots';
-  static const parkedCar='Parked Car';
+  static const parkedCar = 'Parked Car';
   static const valets = 'Valets';
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
