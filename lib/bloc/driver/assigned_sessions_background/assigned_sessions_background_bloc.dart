@@ -12,6 +12,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
   final WebSocketBloc? webSocketBloc;
   StreamSubscription<dynamic>? _retrievalAssignedSubscription;
   StreamSubscription<bool>? _webSocketConnectionSubscription;
+  StreamSubscription<dynamic>? _retrievalCancelledSubscription;
 
   AssignedSessionsBackgroundBloc({this.webSocketBloc})
       : super(const AssignedSessionsBackgroundInitial()) {
@@ -64,15 +65,46 @@ class AssignedSessionsBackgroundBloc extends Bloc<
       if (isConnected) {
         // WebSocket connected - setup the event listener
         _setupRetrievalAssignedListener();
+        _setupRetrievalCancelledListener();
       } else {
         // WebSocket disconnected - cleanup the listener
         _cleanupRetrievalAssignedListener();
+        _cleanupRetrievalCancelledListener();
       }
     });
 
     // If already connected, setup listener immediately
     if (webSocketBloc!.isConnected) {
       _setupRetrievalAssignedListener();
+      _setupRetrievalCancelledListener();
+    }
+  }
+
+  void _setupRetrievalCancelledListener() {
+    _cleanupRetrievalCancelledListener();
+
+    try {
+      final retrievalCancelledStream =
+          webSocketBloc!.service.getEventStream('retrieval:cancelled');
+
+      _retrievalCancelledSubscription = retrievalCancelledStream.listen(
+        (data) {
+          // Emit a state to indicate cancellation
+          emit(const AssignedSessionsCancelled());
+        },
+        onError: (error) {
+          print('Error listening to retrieval cancelled updates: $error');
+        },
+      );
+    } catch (e) {
+      print('Error setting up retrieval:cancelled listener: $e');
+    }
+  }
+
+  void _cleanupRetrievalCancelledListener() {
+    if (_retrievalCancelledSubscription != null) {
+      _retrievalCancelledSubscription?.cancel();
+      _retrievalCancelledSubscription = null;
     }
   }
 
@@ -193,6 +225,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
   Future<void> close() {
     // Cancel WebSocket subscriptions
     _retrievalAssignedSubscription?.cancel();
+    _retrievalCancelledSubscription?.cancel();
     _webSocketConnectionSubscription?.cancel();
     return super.close();
   }
