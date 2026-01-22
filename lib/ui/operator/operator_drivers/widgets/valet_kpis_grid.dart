@@ -18,10 +18,10 @@ class ValetKpisGrid extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 5,
+      crossAxisCount: 4,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 2,
+      childAspectRatio: 3,
       children: [
         ValetKpiCard(
           value: kpis != null ? '${kpis!.totalValets}' : '0',
@@ -41,11 +41,6 @@ class ValetKpisGrid extends StatelessWidget {
         ValetKpiCard(
           value: kpis != null ? '${kpis!.onBreakValets}' : '0',
           label: TextConstants.onBreakValets,
-          isLoading: isLoading,
-        ),
-        ValetKpiCard(
-          value: kpis != null ? '${kpis!.offlineValets}' : '0',
-          label: TextConstants.offlineValets,
           isLoading: isLoading,
         ),
       ],

@@ -28,6 +28,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
   late ValetListBloc _valetListBloc;
   final String _outletId = '1';
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -36,6 +37,11 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
     _valetKpisBloc.add(FetchValetKpis(outletId: _outletId));
     _valetListBloc = ValetListBloc();
     _valetListBloc.add(FetchValetList(outletId: _outletId));
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.trim();
+      });
+    });
   }
 
   void refresh() {
@@ -116,67 +122,52 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: AppColors.grey.withOpacity(0.3)),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: TextConstants.searchByNameOrPhone,
-                          hintStyle: TextStyle(
-                            color: AppColors.grey,
-                            fontSize: MediaQuery.of(context).size.width * 0.013,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: AppColors.grey,
-                            size: 20,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.013,
-                        ),
-                      ),
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: TextConstants.searchByNameOrPhone,
+                    hintStyle: TextStyle(
+                      color: AppColors.grey,
+                      fontSize: MediaQuery.of(context).size.width * 0.013,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: AppColors.grey,
+                      size: 20,
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear,
+                                color: AppColors.grey, size: 20),
+                            onPressed: () {
+                              _searchController.clear();
+                              FocusScope.of(context).unfocus();
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: AppColors.grey.withOpacity(0.3)),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.filter_list,
-                        color: AppColors.grey,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        // TODO: Implement filter functionality
-                      },
-                    ),
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.013,
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 24),
-              ValetListView(outletId: _outletId),
+              ValetListView(
+                outletId: _outletId,
+                searchQuery: _searchQuery,
+              ),
             ],
           ),
         ),

@@ -40,7 +40,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/slots.png',
-                title: TextConstants.slots,
+                title: TextConstants.parkedCar,
                 isSelected: selectedIndex == 1,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -56,15 +56,15 @@ class OperatorDrawer extends StatelessWidget {
                   onItemSelected?.call(2);
                 },
               ),
-              OperatorDrawerItem(
-                asset: 'assets/images/cars.png',
-                title: TextConstants.carLogs,
-                isSelected: selectedIndex == 3,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onItemSelected?.call(3);
-                },
-              ),
+              // OperatorDrawerItem(
+              //   asset: 'assets/images/cars.png',
+              //   title: TextConstants.carLogs,
+              //   isSelected: selectedIndex == 3,
+              //   onTap: () {
+              //     Navigator.of(context).pop();
+              //     onItemSelected?.call(3);
+              //   },
+              // ),
               Spacer(),
               Divider(
                 color: AppColors.black,
@@ -72,15 +72,15 @@ class OperatorDrawer extends StatelessWidget {
                 indent: 16,
                 endIndent: 16,
               ),
-              OperatorDrawerItem(
-                asset: 'assets/images/profile.png',
-                title: TextConstants.profile,
-                isSelected: selectedIndex == 4,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onItemSelected?.call(4);
-                },
-              ),
+              // OperatorDrawerItem(
+              //   asset: 'assets/images/profile.png',
+              //   title: TextConstants.profile,
+              //   isSelected: selectedIndex == 4,
+              //   onTap: () {
+              //     Navigator.of(context).pop();
+              //     onItemSelected?.call(4);
+              //   },
+              // ),
               OperatorDrawerItem(
                 asset: 'assets/images/logout.png',
                 title: TextConstants.logout,
