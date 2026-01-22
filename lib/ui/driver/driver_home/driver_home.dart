@@ -13,7 +13,9 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
@@ -61,6 +63,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
+
+  // Track if we've already shown the session incomplete dialog
+  bool _hasShownSessionDialog = false;
 
   void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
@@ -231,6 +236,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _assignedBloc = null; // Clear bloc reference
     _cleanupTimer();
     _dismissNotifier.dispose();
+    _hasShownSessionDialog = false; // Reset flag
     super.dispose();
   }
 
@@ -329,6 +335,37 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       case DriverMenuActionType.logout:
                         // This case is now handled by DriverMenuLogoutSuccess/Failure
                         break;
+                    }
+                  } else if (state is DriverHomeLoaded) {
+                    // Check if there's a CHECKED_IN session and show dialog
+                    // Only show once per screen load
+                    if (!_hasShownSessionDialog &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasCheckedInSession) {
+                      _hasShownSessionDialog = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final checkedInSession =
+                              state.pendingSessions!.checkedInSession;
+                          if (checkedInSession != null) {
+                            SessionIncompleteDialog.show(
+                              context,
+                              onContinue: () {
+                                // Navigate to camera screen with back navigation prevented
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => CarCameraScreen(
+                                      sessionId: checkedInSession.sessionId,
+                                      preventBackNavigation: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                        }
+                      });
                     }
                   }
                 },

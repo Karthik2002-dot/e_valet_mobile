@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/api/oauth/logout_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
@@ -46,12 +47,25 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
     final driverName =
         firstName.isNotEmpty ? firstName : TextConstants.driverFallbackName;
 
-    emit(DriverHomeLoaded(
-      driverName: driverName,
-      isOnBreak: false,
-      isOnline:
-          true, // Start with online, let DriverStatusBloc determine actual status
-    ));
+    // Fetch pending sessions
+    try {
+      final pendingSessions =
+          await SessionsPendingApiService.getPendingSessions();
+      emit(DriverHomeLoaded(
+        driverName: driverName,
+        isOnBreak: false,
+        isOnline: false,
+        pendingSessions: pendingSessions,
+      ));
+    } catch (e) {
+      // If API call fails, still emit loaded state without pending sessions
+      // This allows the screen to load even if the API fails
+      emit(DriverHomeLoaded(
+        driverName: driverName,
+        isOnBreak: false,
+        isOnline: false,
+      ));
+    }
   }
 
   void _onOnBreakToggled(

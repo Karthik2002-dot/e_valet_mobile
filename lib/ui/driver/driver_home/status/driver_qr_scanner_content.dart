@@ -93,7 +93,10 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CarCameraScreen(sessionId: null),
+                    builder: (context) => CarCameraScreen(
+                      sessionId: null,
+                      preventBackNavigation: true,
+                    ),
                   ),
                 );
               } else if (submissionState is TagSubmissionError) {
