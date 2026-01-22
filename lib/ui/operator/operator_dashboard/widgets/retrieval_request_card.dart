@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/retrieval_request_utils.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/assignment_confirmation_dialog.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 class RetrievalRequestCard extends StatefulWidget {
   final RetrievalRequest request;
@@ -29,6 +30,17 @@ class RetrievalRequestCard extends StatefulWidget {
 }
 
 class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
+  void _callPhoneNumber(String phoneNumber) async {
+    try {
+      final called = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+      if (called == null || !called) {
+        SnackBars.showErrorSnackBar(context, 'Could not launch phone dialer');
+      }
+    } catch (e) {
+      SnackBars.showErrorSnackBar(context, 'Could not launch phone dialer');
+    }
+  }
+
   bool _isDraggingOver = false;
 
   void _showAssignmentDialog(AvailableDriver driver) {
@@ -270,16 +282,21 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                           fontWeight: FontWeight.w600,
                         ),
                         Spacer(),
-                        Icon(
-                          Icons.phone_outlined,
-                          size: MediaQuery.of(context).size.width * 0.016,
-                          color: AppColors.grey,
-                        ),
-                        TextComponent(
-                          labelText: widget.request.parkedBy.phone ?? '-',
-                          fontSize: MediaQuery.of(context).size.width * 0.015,
-                          color: AppColors.grey,
-                          fontWeight: FontWeight.w500,
+                        GestureDetector(
+                          onTap: () {
+                            final phone = widget.request.parkedBy.phone;
+                            if (phone != null && phone.isNotEmpty) {
+                              _callPhoneNumber(phone);
+                            } else {
+                              SnackBars.showErrorSnackBar(
+                                  context, 'No phone number available');
+                            }
+                          },
+                          child: Icon(
+                            Icons.phone_outlined,
+                            size: MediaQuery.of(context).size.width * 0.016,
+                            color: AppColors.grey,
+                          ),
                         ),
                       ],
                     ),
