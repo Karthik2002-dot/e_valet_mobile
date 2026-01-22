@@ -20,6 +20,7 @@ class OperatorDashboardBloc
   final String outletId;
   StreamSubscription<dynamic>? _sessionStatusSubscription;
   StreamSubscription<dynamic>? _statsUpdateSubscription;
+  StreamSubscription<dynamic>? _driverStatusChangedSubscription;
 
   OperatorDashboardBloc({
     this.webSocketBloc,
@@ -84,6 +85,27 @@ class OperatorDashboardBloc
         },
         onError: (error) {
           print('Error listening to stats updates: $error');
+        },
+      );
+
+      // Listen to driver:status_changed event
+      final driverStatusChangedStream =
+          webSocketBloc!.service.getEventStream('driver:status_changed');
+
+      _driverStatusChangedSubscription = driverStatusChangedStream.listen(
+        (data) {
+          // Silently refresh only available drivers when driver status changes
+          add(
+            RefreshDashboardKpisSilently(
+              outletId: outletId,
+              refreshKpis: false,
+              refreshDrivers: true,
+              refreshRequests: false,
+            ),
+          );
+        },
+        onError: (error) {
+          print('Error listening to driver status updates: $error');
         },
       );
     } catch (e) {
@@ -268,6 +290,7 @@ class OperatorDashboardBloc
     // Cancel WebSocket subscriptions
     await _sessionStatusSubscription?.cancel();
     await _statsUpdateSubscription?.cancel();
+    await _driverStatusChangedSubscription?.cancel();
     return super.close();
   }
 }
