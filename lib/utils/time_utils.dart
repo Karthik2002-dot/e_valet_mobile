@@ -29,4 +29,39 @@ class TimeUtils {
       return utcDateTimeStr;
     }
   }
+
+  /// Format DateTime to readable date format (e.g., "22 Jan, 2026")
+  static String formatToReadableDate(DateTime dateTime) {
+    final day = dateTime.day;
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    final month = months[dateTime.month - 1];
+    final year = dateTime.year;
+    return '$day $month, $year';
+  }
+
+  /// Format UTC string to IST with full date and time (e.g., "22 Jan, 2026 at 4:30 PM")
+  static String formatUtcToIstFullDateTime(String utcDateTimeStr) {
+    if (utcDateTimeStr.isEmpty) return 'N/A';
+    try {
+      final istDateTime = parseUtcToIst(utcDateTimeStr);
+      final date = formatToReadableDate(istDateTime);
+      final time = formatTo12Hour(istDateTime);
+      return '$date at $time';
+    } catch (e) {
+      return utcDateTimeStr;
+    }
+  }
 }
