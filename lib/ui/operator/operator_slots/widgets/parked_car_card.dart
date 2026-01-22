@@ -8,12 +8,14 @@ class ParkedCarCard extends StatelessWidget {
   final KeyRackItem item;
   final VoidCallback? onTap;
   final Function(int cardNumber, String sessionId)? onManualRequest;
+  final bool isHighlighted;
 
   const ParkedCarCard({
     super.key,
     required this.item,
     this.onTap,
     this.onManualRequest,
+    this.isHighlighted = false,
   });
 
   @override
@@ -26,17 +28,23 @@ class ParkedCarCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: isHighlighted
+              ? AppColors.primary.withOpacity(0.05)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.grey.withOpacity(0.2),
-            width: 1,
+            color: isHighlighted
+                ? AppColors.primary
+                : AppColors.grey.withOpacity(0.2),
+            width: isHighlighted ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.08),
-              spreadRadius: 0,
-              blurRadius: 12,
+              color: isHighlighted
+                  ? AppColors.primary.withOpacity(0.2)
+                  : AppColors.black.withOpacity(0.08),
+              spreadRadius: isHighlighted ? 2 : 0,
+              blurRadius: isHighlighted ? 16 : 12,
               offset: const Offset(0, 4),
             ),
           ],

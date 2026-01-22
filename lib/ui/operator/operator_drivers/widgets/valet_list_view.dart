@@ -7,15 +7,18 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_card.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_drivers_screen.dart';
 
 class ValetListView extends StatelessWidget {
   final String outletId;
   final String searchQuery;
+  final ValetFilter statusFilter;
 
   const ValetListView({
     super.key,
     required this.outletId,
     this.searchQuery = '',
+    this.statusFilter = ValetFilter.all,
   });
 
   @override
@@ -68,22 +71,46 @@ class ValetListView extends StatelessWidget {
         }
 
         if (state is ValetListLoaded) {
-          // Filter valets by searchQuery (name, phone, or userId)
+          // First, filter by status based on selected KPI card
+          List filteredValets = state.response.valets;
+
+          // Apply status filter
+          switch (statusFilter) {
+            case ValetFilter.available:
+              filteredValets = filteredValets
+                  .where((valet) => valet.status.toLowerCase() == 'available')
+                  .toList();
+              break;
+            case ValetFilter.onDuty:
+              filteredValets = filteredValets
+                  .where((valet) => valet.status.toLowerCase() == 'on_duty')
+                  .toList();
+              break;
+            case ValetFilter.onBreak:
+              filteredValets = filteredValets
+                  .where((valet) => valet.status.toLowerCase() == 'on_break')
+                  .toList();
+              break;
+            case ValetFilter.all:
+              // Show all valets
+              break;
+          }
+
+          // Then filter by searchQuery (name, phone, or userId)
           final query = searchQuery.trim().toLowerCase();
-          List filteredValets;
-          if (query.isEmpty) {
-            filteredValets = state.response.valets;
-          } else if (RegExp(r'^\d+$').hasMatch(query)) {
-            // If query is all digits, match userId exactly
-            filteredValets = state.response.valets
-                .where((valet) => valet.userId.toLowerCase() == query)
-                .toList();
-          } else {
-            filteredValets = state.response.valets.where((valet) {
-              return valet.name.toLowerCase().contains(query) ||
-                  valet.phone.toLowerCase().contains(query) ||
-                  valet.userId.toLowerCase().contains(query);
-            }).toList();
+          if (query.isNotEmpty) {
+            if (RegExp(r'^\d+$').hasMatch(query)) {
+              // If query is all digits, match userId exactly
+              filteredValets = filteredValets
+                  .where((valet) => valet.userId.toLowerCase() == query)
+                  .toList();
+            } else {
+              filteredValets = filteredValets.where((valet) {
+                return valet.name.toLowerCase().contains(query) ||
+                    valet.phone.toLowerCase().contains(query) ||
+                    valet.userId.toLowerCase().contains(query);
+              }).toList();
+            }
           }
 
           if (filteredValets.isEmpty) {
