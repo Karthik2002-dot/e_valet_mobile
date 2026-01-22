@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
@@ -11,6 +13,8 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_ev
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
+import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
@@ -66,6 +70,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
+
+  // Track if permissions have been requested
+  bool _hasRequestedPermissions = false;
 
   void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
@@ -148,8 +155,49 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _routeObserver.setOnRouteChanged(_onRouteChanged);
 
+    // Request permissions when driver home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestPermissions();
+    });
+
     // Start periodic WebSocket health check
     _startWebSocketHealthCheck();
+  }
+
+  Future<void> _requestPermissions() async {
+    // Only request once per screen load
+    if (_hasRequestedPermissions) return;
+    _hasRequestedPermissions = true;
+
+    // Request Location Permission
+    LocationPermission locationPermission =
+        await LocationService.checkPermission();
+    if (locationPermission == LocationPermission.denied) {
+      locationPermission = await LocationService.requestPermission();
+    }
+
+    if (locationPermission != LocationPermission.denied &&
+        locationPermission != LocationPermission.deniedForever) {
+      // Get current location and store it
+      try {
+        final position = await LocationService.getCurrentLocation();
+        final latitude = position.latitude;
+        final longitude = position.longitude;
+        final location =
+            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
+        await TokenStorage.saveCurrentLocation(
+          latitude: latitude,
+          longitude: longitude,
+          location: location,
+        );
+      } catch (e) {
+        // Continue even if location fetch fails
+      }
+    }
+
+    // Request Camera Permission
+    await Permission.camera.request();
   }
 
   void _onRouteChanged() {
@@ -237,6 +285,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
+    _hasRequestedPermissions = false; // Reset permission flag
     super.dispose();
   }
 
