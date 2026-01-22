@@ -1,27 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/slots_content_view.dart';
 
-class OperatorSlotsScreen extends StatelessWidget {
+class OperatorSlotsScreen extends StatefulWidget {
   const OperatorSlotsScreen({super.key});
+
+  @override
+  State<OperatorSlotsScreen> createState() => _OperatorSlotsScreenState();
+}
+
+class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
+  final _apiService = OperatorManualRetrievalApiService();
+  final String _outletId = '1';
+  bool _isProcessing = false;
+
+  Future<void> _handleManualRequest(int cardNumber, String sessionId) async {
+    if (_isProcessing) return;
+
+    setState(() => _isProcessing = true);
+
+    try {
+      final request = ManualRetrievalRequest(cardNumber: cardNumber);
+      final response = await _apiService.createManualRetrievalRequest(
+        outletId: _outletId,
+        request: request,
+      );
+
+      if (mounted) {
+        SnackBars.showSuccessSnackBar(
+          context,
+          response.message,
+        );
+        // Refresh the data to update UI
+        context.read<OperatorDashboardBloc>().add(
+              FetchDashboardKpis(outletId: _outletId),
+            );
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          context,
+          'Failed to create manual retrieval request: ${e.toString()}',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
-        builder: (context, state) {
-          if (state is OperatorDashboardLoading) {
-            return _buildLoadingState(context);
-          }
+      child: Stack(
+        children: [
+          BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
+            builder: (context, state) {
+              if (state is OperatorDashboardLoading) {
+                return _buildLoadingState(context);
+              }
 
-          if (state is OperatorDashboardLoaded) {
-            return SingleChildScrollView(
+              if (state is OperatorDashboardLoaded) {
+                return SingleChildScrollView(
               padding: EdgeInsets.all(
                 MediaQuery.of(context).size.width * 0.02,
               ),
@@ -44,6 +95,7 @@ class OperatorSlotsScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   SlotsContentView(
                     digitalKeyRack: state.digitalKeyRack,
+                    onManualRequest: _handleManualRequest,
                   ),
                 ],
               ),
@@ -77,8 +129,38 @@ class OperatorSlotsScreen extends StatelessWidget {
             );
           }
 
-          return _buildLoadingState(context);
-        },
+              return _buildLoadingState(context);
+            },
+          ),
+          // Loading overlay when processing manual request
+          if (_isProcessing)
+            Container(
+              color: AppColors.black.withOpacity(0.5),
+              child: Center(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextComponent(
+                          labelText: 'Creating manual retrieval request...',
+                          fontSize: 14,
+                          color: AppColors.black,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
