@@ -7,11 +7,13 @@ import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 class ParkedCarCard extends StatelessWidget {
   final KeyRackItem item;
   final VoidCallback? onTap;
+  final Function(int cardNumber, String sessionId)? onManualRequest;
 
   const ParkedCarCard({
     super.key,
     required this.item,
     this.onTap,
+    this.onManualRequest,
   });
 
   @override
@@ -201,6 +203,37 @@ class ParkedCarCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                        // Manual Request Button
+                        if (onManualRequest != null) ...[
+                          SizedBox(height: screenHeight * 0.008),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () => onManualRequest!(
+                                item.cardNumber,
+                                item.sessionId,
+                              ),
+                              label: TextComponent(
+                                labelText: 'Manual Request',
+                                fontSize: screenWidth * 0.015,
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.white,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.008,
+                                  horizontal: screenWidth * 0.008,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 2,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

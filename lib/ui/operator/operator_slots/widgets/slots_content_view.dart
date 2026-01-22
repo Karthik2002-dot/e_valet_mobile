@@ -7,10 +7,12 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/parked_
 
 class SlotsContentView extends StatelessWidget {
   final DigitalKeyRackResponse digitalKeyRack;
+  final Function(int cardNumber, String sessionId)? onManualRequest;
 
   const SlotsContentView({
     super.key,
     required this.digitalKeyRack,
+    this.onManualRequest,
   });
 
   @override
@@ -38,12 +40,15 @@ class SlotsContentView extends StatelessWidget {
               crossAxisCount: 5,
               crossAxisSpacing: MediaQuery.of(context).size.width * 0.02,
               mainAxisSpacing: MediaQuery.of(context).size.height * 0.02,
-              childAspectRatio: 0.8,
+              childAspectRatio: 0.7,
             ),
             itemCount: digitalKeyRack.keyRack.length,
             itemBuilder: (context, index) {
               final item = digitalKeyRack.keyRack[index];
-              return ParkedCarCard(item: item);
+              return ParkedCarCard(
+                item: item,
+                onManualRequest: onManualRequest,
+              );
             },
           ),
         ] else ...[
