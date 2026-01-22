@@ -263,6 +263,9 @@ class TextConstants {
   static const String occupied = 'Occupied';
   static const String availableValue = '12';
   static const String occupiedValue = '8';
+  static const String parkedCarTitle = 'Parked Car';
+  static const String parkedCarDescription = 'Manage and monitor parked cars';
+  static const String noCarsParked = 'No Cars Parked';
 
   // QR Reader
   static const String cameraErrorReinitializing =

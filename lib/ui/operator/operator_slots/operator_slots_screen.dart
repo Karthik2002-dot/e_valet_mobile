@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/slots_content_view.dart';
@@ -20,8 +21,32 @@ class OperatorSlotsScreen extends StatelessWidget {
           }
 
           if (state is OperatorDashboardLoaded) {
-            return SlotsContentView(
-              digitalKeyRack: state.digitalKeyRack,
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(
+                MediaQuery.of(context).size.width * 0.02,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextComponent(
+                    labelText: TextConstants.parkedCarTitle,
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.width * 0.02,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  const SizedBox(height: 8),
+                  TextComponent(
+                    labelText: TextConstants.parkedCarDescription,
+                    color: AppColors.grey,
+                    fontSize: MediaQuery.of(context).size.width * 0.013,
+                  ),
+                  const SizedBox(height: 24),
+                  SlotsContentView(
+                    digitalKeyRack: state.digitalKeyRack,
+                  ),
+                ],
+              ),
             );
           }
 
