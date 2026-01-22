@@ -276,7 +276,16 @@ class OperatorDashboardBloc
         refreshRequests: true,
       ));
     } catch (e) {
-      emit(ManualRequestError(e.toString()));
+      // Show a business-friendly error message for card not found
+      String errorMessage = e.toString();
+      final cardNotFoundRegExp =
+          RegExp(r'Card #[0-9]+ not found in outlet [0-9]+');
+      final match = cardNotFoundRegExp.firstMatch(errorMessage);
+      if (match != null) {
+        errorMessage =
+            'No parked vehicle found for this card number. Please enter a valid card number.';
+      }
+      emit(ManualRequestError(errorMessage));
 
       // Restore the previous dashboard state after error too
       if (previousState != null) {
