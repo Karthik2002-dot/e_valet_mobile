@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
 import 'package:niloufer_valet_mobile/models/oauth/logout_response.dart';
 
 abstract class DriverMenuState extends Equatable {
@@ -49,22 +50,26 @@ class DriverHomeLoaded extends DriverMenuState {
   final String driverName;
   final bool isOnBreak;
   final bool isOnline;
+  final PendingSessionsResponse? pendingSessions;
 
   const DriverHomeLoaded({
     required this.driverName,
     required this.isOnBreak,
     required this.isOnline,
+    this.pendingSessions,
   });
 
   DriverHomeLoaded copyWith({
     String? driverName,
     bool? isOnBreak,
     bool? isOnline,
+    PendingSessionsResponse? pendingSessions,
   }) {
     return DriverHomeLoaded(
       driverName: driverName ?? this.driverName,
       isOnBreak: isOnBreak ?? this.isOnBreak,
       isOnline: isOnline ?? this.isOnline,
+      pendingSessions: pendingSessions ?? this.pendingSessions,
     );
   }
 
@@ -73,5 +78,6 @@ class DriverHomeLoaded extends DriverMenuState {
         driverName,
         isOnBreak,
         isOnline,
+        pendingSessions,
       ];
 }

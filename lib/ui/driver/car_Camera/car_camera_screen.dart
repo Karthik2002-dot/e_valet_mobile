@@ -17,11 +17,13 @@ import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/cam
 class CarCameraScreen extends StatefulWidget {
   final String? sessionId;
   final bool isReparking;
+  final bool preventBackNavigation;
 
   const CarCameraScreen({
     super.key,
     this.sessionId,
     this.isReparking = false,
+    this.preventBackNavigation = false,
   });
 
   @override
@@ -138,7 +140,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     // final screenWidth = MediaQuery.of(context).size.width;
     // final orientation = MediaQuery.of(context).orientation;
 
-    return BlocProvider<CarCameraBloc>.value(
+    Widget cameraContent = BlocProvider<CarCameraBloc>.value(
       value: _cameraBloc,
       child: BlocListener<CarCameraBloc, CarCameraState>(
         listener: (context, state) {
@@ -274,6 +276,16 @@ class _CarCameraScreenState extends State<CarCameraScreen>
         ),
       ),
     );
+
+    // Wrap with PopScope to prevent back navigation if needed
+    if (widget.preventBackNavigation) {
+      return PopScope(
+        canPop: false, // Prevent back button from navigating back
+        child: cameraContent,
+      );
+    }
+
+    return cameraContent;
   }
 
   Future<void> _capturePhoto(BuildContext blocContext) async {
