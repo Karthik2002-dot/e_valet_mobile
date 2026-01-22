@@ -139,6 +139,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     hintText: TextConstants.tagNumberHint,
                     controller: _tagNumberController,
                     keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    onSubmitEditing: _handleSubmit,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return TextConstants.validationEnterTagNumber;
