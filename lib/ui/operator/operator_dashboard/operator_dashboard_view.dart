@@ -24,6 +24,7 @@ class OperatorDashboardView extends StatefulWidget {
 class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
+  int _refreshKey = 0;
   VoidCallback? _dashboardRefresh;
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = '1';
@@ -55,7 +56,15 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _refreshDashboard() {
-    _dashboardRefresh?.call();
+    // For dashboard tab (index 0), call the dashboard refresh callback
+    if (_selectedIndex == 0) {
+      _dashboardRefresh?.call();
+    } else {
+      // For other tabs, increment refresh key to recreate the widget
+      setState(() {
+        _refreshKey++;
+      });
+    }
   }
 
   Widget _getBodyWidget() {
@@ -71,7 +80,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
           });
         },
       ),
-      0,
+      _refreshKey,
     );
   }
 

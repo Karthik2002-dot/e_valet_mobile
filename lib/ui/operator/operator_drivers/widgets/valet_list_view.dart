@@ -10,10 +10,12 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet
 
 class ValetListView extends StatelessWidget {
   final String outletId;
+  final String searchQuery;
 
   const ValetListView({
     super.key,
     required this.outletId,
+    this.searchQuery = '',
   });
 
   @override
@@ -66,7 +68,23 @@ class ValetListView extends StatelessWidget {
         }
 
         if (state is ValetListLoaded) {
-          if (state.response.valets.isEmpty) {
+          // Filter valets by searchQuery (name, phone, or userId)
+          final query = searchQuery.trim().toLowerCase();
+          List filteredValets;
+          if (query.isEmpty) {
+            filteredValets = state.response.valets;
+          } else if (RegExp(r'^\d+$').hasMatch(query)) {
+            // If query is all digits, match userId exactly
+            filteredValets = state.response.valets.where((valet) => valet.userId.toLowerCase() == query).toList();
+          } else {
+            filteredValets = state.response.valets.where((valet) {
+              return valet.name.toLowerCase().contains(query) ||
+                     valet.phone.toLowerCase().contains(query) ||
+                     valet.userId.toLowerCase().contains(query);
+            }).toList();
+          }
+
+          if (filteredValets.isEmpty) {
             return Center(
               child: TextComponent(
                 labelText: TextConstants.noValetsFound,
@@ -84,10 +102,10 @@ class ValetListView extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.8,
             ),
-            itemCount: state.response.valets.length,
+            itemCount: filteredValets.length,
             itemBuilder: (context, index) {
               return ValetCard(
-                valet: state.response.valets[index],
+                valet: filteredValets[index],
               );
             },
           );

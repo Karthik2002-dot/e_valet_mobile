@@ -3,14 +3,12 @@ class ValetKpisResponse {
   final int availableValets;
   final int onDutyValets;
   final int onBreakValets;
-  final int offlineValets;
 
   ValetKpisResponse({
     required this.totalValets,
     required this.availableValets,
     required this.onDutyValets,
     required this.onBreakValets,
-    required this.offlineValets,
   });
 
   factory ValetKpisResponse.fromJson(Map<String, dynamic> json) {
@@ -19,7 +17,6 @@ class ValetKpisResponse {
       availableValets: json['availableValets'] as int,
       onDutyValets: json['onDutyValets'] as int,
       onBreakValets: json['onBreakValets'] as int,
-      offlineValets: json['offlineValets'] as int,
     );
   }
 
@@ -29,7 +26,6 @@ class ValetKpisResponse {
       'availableValets': availableValets,
       'onDutyValets': onDutyValets,
       'onBreakValets': onBreakValets,
-      'offlineValets': offlineValets,
     };
   }
 }
