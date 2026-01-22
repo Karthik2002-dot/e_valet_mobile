@@ -7,23 +7,45 @@ class ValetKpiCard extends StatelessWidget {
   final String value;
   final String label;
   final bool isLoading;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   const ValetKpiCard({
     super.key,
     required this.value,
     required this.label,
     this.isLoading = false,
+    this.isSelected = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: isLoading
+    return InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? AppColors.primary.withOpacity(0.1) 
+              : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: isLoading
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -47,18 +69,20 @@ class ValetKpiCard extends StatelessWidget {
               children: [
                 TextComponent(
                   labelText: label,
-                  color: AppColors.black,
+                  color: isSelected ? AppColors.primary : AppColors.black,
                   fontSize: MediaQuery.of(context).size.width * 0.013,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
                 const SizedBox(height: 8),
                 TextComponent(
                   labelText: value,
-                  color: AppColors.black,
+                  color: isSelected ? AppColors.primary : AppColors.black,
                   fontSize: MediaQuery.of(context).size.width * 0.025,
                   fontWeight: FontWeight.bold,
                 ),
               ],
             ),
+      ),
     );
   }
 }

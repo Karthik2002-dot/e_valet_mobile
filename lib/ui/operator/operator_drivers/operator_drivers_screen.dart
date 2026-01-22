@@ -23,12 +23,15 @@ class OperatorDriversScreen extends StatefulWidget {
   State<OperatorDriversScreen> createState() => _OperatorDriversScreenState();
 }
 
+enum ValetFilter { all, available, onDuty, onBreak }
+
 class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
   late ValetKpisBloc _valetKpisBloc;
   late ValetListBloc _valetListBloc;
   final String _outletId = '1';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  ValetFilter _selectedFilter = ValetFilter.all;
 
   @override
   void initState() {
@@ -118,6 +121,12 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                   return ValetKpisGrid(
                     kpis: isLoaded ? state.kpis : null,
                     isLoading: isLoading,
+                    selectedFilter: _selectedFilter,
+                    onFilterChanged: (filter) {
+                      setState(() {
+                        _selectedFilter = filter;
+                      });
+                    },
                   );
                 },
               ),
@@ -167,6 +176,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
               ValetListView(
                 outletId: _outletId,
                 searchQuery: _searchQuery,
+                statusFilter: _selectedFilter,
               ),
             ],
           ),
