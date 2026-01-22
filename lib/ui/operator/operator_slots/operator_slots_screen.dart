@@ -73,61 +73,63 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
 
               if (state is OperatorDashboardLoaded) {
                 return SingleChildScrollView(
-              padding: EdgeInsets.all(
-                MediaQuery.of(context).size.width * 0.02,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextComponent(
-                    labelText: TextConstants.parkedCarTitle,
-                    color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.02,
-                    fontWeight: FontWeight.bold,
+                  padding: EdgeInsets.all(
+                    MediaQuery.of(context).size.width * 0.02,
                   ),
-                  const SizedBox(height: 8),
-                  TextComponent(
-                    labelText: TextConstants.parkedCarDescription,
-                    color: AppColors.grey,
-                    fontSize: MediaQuery.of(context).size.width * 0.013,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextComponent(
+                        labelText: TextConstants.parkedCarTitle,
+                        color: AppColors.black,
+                        fontSize: MediaQuery.of(context).size.width * 0.02,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      const SizedBox(height: 8),
+                      TextComponent(
+                        labelText: TextConstants.parkedCarDescription,
+                        color: AppColors.grey,
+                        fontSize: MediaQuery.of(context).size.width * 0.013,
+                      ),
+                      const SizedBox(height: 24),
+                      SlotsContentView(
+                        digitalKeyRack: state.digitalKeyRack,
+                        onManualRequest: _handleManualRequest,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  SlotsContentView(
-                    digitalKeyRack: state.digitalKeyRack,
-                    onManualRequest: _handleManualRequest,
-                  ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          if (state is OperatorDashboardError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: MediaQuery.of(context).size.width * 0.08,
-                    color: AppColors.error,
+              if (state is OperatorDashboardError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: MediaQuery.of(context).size.width * 0.08,
+                        color: AppColors.error,
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.02),
+                      TextComponent(
+                        labelText: 'Failed to load slots data',
+                        fontSize: MediaQuery.of(context).size.width * 0.02,
+                        color: AppColors.error,
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      TextComponent(
+                        labelText: state.message,
+                        fontSize: MediaQuery.of(context).size.width * 0.016,
+                        color: AppColors.grey,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                  TextComponent(
-                    labelText: 'Failed to load slots data',
-                    fontSize: MediaQuery.of(context).size.width * 0.02,
-                    color: AppColors.error,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                  TextComponent(
-                    labelText: state.message,
-                    fontSize: MediaQuery.of(context).size.width * 0.016,
-                    color: AppColors.grey,
-                  ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
               return _buildLoadingState(context);
             },
