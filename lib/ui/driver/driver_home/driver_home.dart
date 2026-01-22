@@ -332,6 +332,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         }
                       });
                     }
+                  } else if (state is AssignedSessionsCancelled) {
+                    // Close the bottom sheet if open
+                    if (Navigator.of(blocContext).canPop()) {
+                      Navigator.of(blocContext).pop();
+                    }
+                    _cleanupTimer(); // Ensure timer is cleaned up
                   }
                 },
               ),

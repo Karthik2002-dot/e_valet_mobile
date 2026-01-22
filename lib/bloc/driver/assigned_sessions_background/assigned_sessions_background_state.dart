@@ -9,6 +9,10 @@ class AssignedSessionsBackgroundInitial
   const AssignedSessionsBackgroundInitial();
 }
 
+class AssignedSessionsCancelled extends AssignedSessionsBackgroundState {
+  const AssignedSessionsCancelled();
+}
+
 class AssignedSessionsBackgroundData extends AssignedSessionsBackgroundState {
   final List<dynamic> sessions;
 

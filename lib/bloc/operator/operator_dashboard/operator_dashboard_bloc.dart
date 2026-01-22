@@ -98,7 +98,7 @@ class OperatorDashboardBloc
           add(
             RefreshDashboardKpisSilently(
               outletId: outletId,
-              refreshKpis: false,
+              refreshKpis: true,
               refreshDrivers: true,
               refreshRequests: false,
             ),
