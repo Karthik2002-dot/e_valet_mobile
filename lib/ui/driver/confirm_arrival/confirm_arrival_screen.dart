@@ -18,10 +18,14 @@ import 'package:niloufer_valet_mobile/ui/driver/customer_missing/customer_missin
 
 class ConfirmArrivalScreen extends StatefulWidget {
   final AssignedSession session;
+  final bool preventBackNavigation;
+  final bool showHandoverOnLoad;
 
   const ConfirmArrivalScreen({
     super.key,
     required this.session,
+    this.preventBackNavigation = false,
+    this.showHandoverOnLoad = false,
   });
 
   @override
@@ -32,6 +36,12 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   bool _showHandoverButtons = false;
   final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
       GlobalKey<HandoverButtonsSectionState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _showHandoverButtons = widget.showHandoverOnLoad;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +79,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
             final screenHeight = MediaQuery.of(context).size.height;
             final isLoading = state is ConfirmArrivalLoading;
 
-            return Scaffold(
+            final scaffoldContent = Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
               appBar: const CustomAppBar(),
               body: Column(
@@ -156,6 +166,16 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                 ],
               ),
             );
+
+            // Wrap with PopScope to prevent back navigation if needed
+            if (widget.preventBackNavigation) {
+              return PopScope(
+                canPop: false, // Prevent back button from navigating back
+                child: scaffoldContent,
+              );
+            }
+
+            return scaffoldContent;
           },
         ),
       ),
