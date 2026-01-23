@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
@@ -119,7 +120,7 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
       if (event.status.toUpperCase() == 'ONLINE') {
         // Clock in - go online
         final clockInRequest = ClockInRequest(
-          outletId: 1,
+          outletId: int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1,
           latitude: latitude,
           longitude: longitude,
           accuracy: accuracy,
