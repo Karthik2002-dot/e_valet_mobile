@@ -187,7 +187,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       // Call clock-in API
       final clockInRequest = ClockInRequest(
-        outletId: 1,
+        outletId: int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1,
         latitude: latitude,
         longitude: longitude,
         accuracy: accuracy,
