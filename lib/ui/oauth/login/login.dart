@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
@@ -44,6 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (_) => const DriverHomeScreen(),
         ),
       );
+      // Dispatch event to refresh driver status after navigation
+      context.read<DriverStatusBloc>().add(const DriverStatusStarted());
     }
   }
 

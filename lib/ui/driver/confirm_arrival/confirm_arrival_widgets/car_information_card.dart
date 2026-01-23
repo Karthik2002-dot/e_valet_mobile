@@ -71,7 +71,7 @@ class CarInformationCard extends StatelessWidget {
                                 'assets/images/cars.png',
                                 fit: BoxFit.contain,
                                 width: screenWidth * 0.4,
-                                height: screenWidth * 0.4,
+                                height: screenHeight * 0.4,
                               ),
                             ),
                           ),
@@ -94,7 +94,7 @@ class CarInformationCard extends StatelessWidget {
                             'assets/images/cars.png',
                             fit: BoxFit.contain,
                             width: screenWidth * 0.4,
-                            height: screenWidth * 0.4,
+                            height: screenHeight * 0.4,
                           ),
                         ),
                       ),
@@ -140,6 +140,35 @@ class CarInformationCard extends StatelessWidget {
                   thickness: 1,
                   height: 1,
                 ),
+                if (session.parkingLocation != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 20,
+                        color: AppColors.secondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextComponent(
+                          labelText: session.parkingLocation.toString(),
+                          fontSize: screenWidth * 0.04,
+                          color: AppColors.black,
+                          maxLines: 2,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    color: AppColors.greyLight,
+                    thickness: 1,
+                    height: 1,
+                  ),
+                ],
 
                 SizedBox(height: screenHeight * 0.02),
 

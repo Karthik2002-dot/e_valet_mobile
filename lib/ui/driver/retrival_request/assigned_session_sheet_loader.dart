@@ -57,6 +57,15 @@ class _AssignedSessionSheetLoaderState
               TokenStorage.saveAssignedSessionData(sessionJson).catchError((e) {
                 // ignore or log
               });
+              // Save parkingLocation if present
+              final parkingLocation = sessionJson['parkingLocation'];
+              if (parkingLocation != null &&
+                  parkingLocation.toString().trim().isNotEmpty) {
+                TokenStorage.saveParkingLocation(parkingLocation.toString())
+                    .catchError((e) {
+                  // ignore or log
+                });
+              }
             }
           }
 

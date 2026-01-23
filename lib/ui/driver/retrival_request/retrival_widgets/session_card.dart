@@ -133,6 +133,36 @@ class SessionCard extends StatelessWidget {
                       thickness: 1,
                       height: 1,
                     ),
+                    // Show location if available
+                    if (session.parkingLocation != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            size: 20,
+                            color: AppColors.secondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextComponent(
+                              labelText: session.parkingLocation!,
+                              fontSize: screenWidth * 0.04,
+                              color: AppColors.black,
+                              maxLines: 2,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Divider(
+                        color: AppColors.greyLight,
+                        thickness: 1,
+                        height: 1,
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

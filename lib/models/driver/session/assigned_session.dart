@@ -10,6 +10,7 @@ class AssignedSession {
   final String customerPhone;
   final AssignedSessionParkedBy? parkedBy;
   final List<AssignedSessionPhoto> photos;
+  final String parkingLocation;
 
   AssignedSession({
     required this.id,
@@ -20,6 +21,7 @@ class AssignedSession {
     required this.customerPhone,
     required this.parkedBy,
     required this.photos,
+    required this.parkingLocation,
   });
 
   factory AssignedSession.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class AssignedSession {
       outletName: (json['outletName'] ?? '').toString(),
       assignedAt: (json['assignedAt'] ?? '').toString(),
       customerPhone: (json['customerPhone'] ?? '').toString(),
+      parkingLocation: (json['parkingLocation'] ?? '').toString(),
       parkedBy: json['parkedBy'] != null
           ? AssignedSessionParkedBy.fromJson(
               Map<String, dynamic>.from(json['parkedBy'] as Map),
