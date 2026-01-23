@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
@@ -72,7 +73,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
       // Get outletId from DriverStatusBloc
       final statusState = submitContext.read<DriverStatusBloc>().state;
-      int outletId = 1; // Default fallback
+      int outletId =
+          int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1; // Default fallback
 
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;

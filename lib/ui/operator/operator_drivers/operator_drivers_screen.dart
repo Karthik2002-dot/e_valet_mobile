@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -28,7 +29,7 @@ enum ValetFilter { all, available, onDuty, onBreak }
 class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
   late ValetKpisBloc _valetKpisBloc;
   late ValetListBloc _valetListBloc;
-  final String _outletId = '1';
+  final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   ValetFilter _selectedFilter = ValetFilter.all;

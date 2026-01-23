@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/api/oauth/login_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
@@ -90,7 +91,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           if (webSocketBloc != null) {
             String? outletId;
             if (isOperator) {
-              outletId = '1';
+              outletId = dotenv.env['OUTLET_ID'] ?? '1';
             }
 
             await WebSocketHelper.connectAfterLogin(
