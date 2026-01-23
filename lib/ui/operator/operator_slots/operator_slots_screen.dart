@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
@@ -26,12 +27,22 @@ class OperatorSlotsScreen extends StatefulWidget {
 
 class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
   final _apiService = OperatorManualRetrievalApiService();
-  final String _outletId = '1';
+  final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Fetch the latest data when the screen is first loaded
+    // This ensures we get fresh data when navigating from KPI cards or switching tabs
+    Future.microtask(() {
+      if (mounted) {
+        context.read<OperatorDashboardBloc>().add(
+              FetchDashboardKpis(outletId: _outletId),
+            );
+      }
+    });
 
     // Provide the refresh method to the parent
     if (widget.onRefreshReady != null) {
