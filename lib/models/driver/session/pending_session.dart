@@ -122,8 +122,8 @@ class PendingSession {
   }
 
   bool get isCheckedIn => status == 'CHECKED_IN';
-  
+
   bool get isAccepted => status == 'ACCEPT' || status == 'ACCEPTED';
-  
+
   bool get isArrived => status == 'ARRIVED';
 }

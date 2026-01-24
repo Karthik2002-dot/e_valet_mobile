@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
@@ -130,7 +129,10 @@ class _AssignedSessionSheetLoaderState
         final session = AssignedSession.fromJson(sessionData);
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ConfirmArrivalScreen(session: session),
+            builder: (context) => ConfirmArrivalScreen(
+              session: session,
+              preventBackNavigation: true,
+            ),
           ),
         );
       } catch (e) {
