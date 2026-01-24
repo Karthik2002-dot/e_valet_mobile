@@ -49,8 +49,7 @@ class PendingSessionsResponse {
   }
 
   /// Check if there's any session with ACCEPT status
-  bool get hasAcceptedSession =>
-      sessions.any((session) => session.isAccepted);
+  bool get hasAcceptedSession => sessions.any((session) => session.isAccepted);
 
   /// Get the first ACCEPT session if any
   PendingSession? get acceptedSession {
@@ -62,8 +61,7 @@ class PendingSessionsResponse {
   }
 
   /// Check if there's any session with ARRIVED status
-  bool get hasArrivedSession =>
-      sessions.any((session) => session.isArrived);
+  bool get hasArrivedSession => sessions.any((session) => session.isArrived);
 
   /// Get the first ARRIVED session if any
   PendingSession? get arrivedSession {

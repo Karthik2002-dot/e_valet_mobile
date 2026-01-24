@@ -72,12 +72,20 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
-  
+
   // Track if we've already navigated for accepted/arrived sessions
   bool _hasNavigatedForStatus = false;
 
   // Track if permissions have been requested
   bool _hasRequestedPermissions = false;
+
+  void _refreshPendingSessions() {
+    try {
+      context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+    } catch (e) {
+      // Ignore refresh errors when context is not ready
+    }
+  }
 
   void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
@@ -243,6 +251,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     if (state == AppLifecycleState.resumed) {
       // App came back to foreground - check WebSocket
       _checkWebSocketOnResume();
+      _hasNavigatedForStatus = false;
+      _refreshPendingSessions();
     }
   }
 
@@ -428,7 +438,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         }
                       });
                     }
-                    
+
                     // Check for ARRIVED status first (higher priority)
                     // If status is ARRIVED, navigate to handover screen
                     if (!_hasNavigatedForStatus &&
@@ -442,8 +452,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                               state.pendingSessions!.arrivedSession;
                           if (arrivedSession != null) {
                             // Convert PendingSession to AssignedSession
-                            final assignedSession = SessionConverter
-                                .pendingToAssigned(arrivedSession);
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    arrivedSession);
                             // Navigate to arrived screen with handover UI directly
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -471,8 +482,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                               state.pendingSessions!.acceptedSession;
                           if (acceptedSession != null) {
                             // Convert PendingSession to AssignedSession
-                            final assignedSession = SessionConverter
-                                .pendingToAssigned(acceptedSession);
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    acceptedSession);
                             // Navigate to arrived screen with back navigation prevented
                             Navigator.of(context).push(
                               MaterialPageRoute(
