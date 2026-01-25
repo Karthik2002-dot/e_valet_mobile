@@ -110,9 +110,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         }
 
         // Automatically clock in (go online) for drivers after successful login
+        // Await so clock-in completes before navigate; driver home then shows ONLINE
         if (isDriver) {
-          // Run clock-in in background without blocking login
-          _clockInAfterLogin();
+          await _clockInAfterLogin();
         }
 
         emit(LoginSuccess(profile));
@@ -141,8 +141,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(const LoginInitial());
   }
 
-  /// Automatically clock in (go online) for drivers after successful login
-  /// This runs in the background and doesn't block the login flow
+  /// Automatically clock in (go online) for drivers after successful login.
+  /// Awaited before LoginSuccess so driver home status fetch returns ONLINE.
   Future<void> _clockInAfterLogin() async {
     try {
       log('Starting automatic clock-in after login...');

@@ -427,20 +427,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               ),
               BlocListener<DriverStatusBloc, DriverStatusState>(
                 listener: (context, state) {
-                  if (state is DriverStatusClockInSuccess) {
-                    // Show success snackbar with message from API
-                    SnackBars.showSuccessSnackBar(context, state.message);
-                  } else if (state is DriverStatusClockOutSuccess) {
-                    // Show success snackbar with message from API
-                    SnackBars.showSuccessSnackBar(context, state.message);
-                  } else if (state is DriverBreakStartSuccess) {
-                    // Show success snackbar with message from API
+                  if (state is DriverBreakStartSuccess) {
                     SnackBars.showSuccessSnackBar(context, state.message);
                   } else if (state is DriverBreakEndSuccess) {
-                    // Show success snackbar with message from API
                     SnackBars.showSuccessSnackBar(context, state.message);
                   } else if (state is DriverStatusError) {
-                    // Show error snackbar
                     SnackBars.showErrorSnackBar(context, state.message);
                   }
                 },
