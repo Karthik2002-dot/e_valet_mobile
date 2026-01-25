@@ -34,32 +34,6 @@ class DriverStatusError extends DriverStatusState {
   List<Object?> get props => [message];
 }
 
-class DriverStatusClockInSuccess extends DriverStatusState {
-  final DriverStatus status;
-  final String message;
-
-  const DriverStatusClockInSuccess({
-    required this.status,
-    required this.message,
-  });
-
-  @override
-  List<Object?> get props => [status, message];
-}
-
-class DriverStatusClockOutSuccess extends DriverStatusState {
-  final DriverStatus status;
-  final String message;
-
-  const DriverStatusClockOutSuccess({
-    required this.status,
-    required this.message,
-  });
-
-  @override
-  List<Object?> get props => [status, message];
-}
-
 class DriverBreakStartSuccess extends DriverStatusState {
   final DriverStatus status;
   final String message;
