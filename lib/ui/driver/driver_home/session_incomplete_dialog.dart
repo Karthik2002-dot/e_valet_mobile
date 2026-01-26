@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class SessionIncompleteDialog extends StatelessWidget {
   final VoidCallback onContinue;
+  final String? cardNumber;
 
-  const SessionIncompleteDialog({
-    super.key,
-    required this.onContinue,
-  });
+  const SessionIncompleteDialog(
+      {super.key, required this.onContinue, required this.cardNumber});
 
   static Future<void> show(
     BuildContext context, {
     required VoidCallback onContinue,
+    required String cardNumber,
   }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => SessionIncompleteDialog(
         onContinue: onContinue,
+        cardNumber: cardNumber,
       ),
     );
   }
@@ -35,7 +37,9 @@ class SessionIncompleteDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
-          padding: EdgeInsets.all(screenWidth * 0.06),
+          padding: EdgeInsets.all(
+            screenWidth * 0.06,
+          ),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
@@ -58,19 +62,33 @@ class SessionIncompleteDialog extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: screenHeight * 0.03),
+              SizedBox(
+                height: screenHeight * 0.03,
+              ),
 
               // Message Text
               TextComponent(
-                labelText:
-                    'Your session has been not completed please click on continue to proceed',
+                labelText: TextConstants.sessionContinue,
                 fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
                 textAlign: TextAlign.center,
               ),
+              SizedBox(
+                height: screenHeight * 0.03,
+              ),
 
-              SizedBox(height: screenHeight * 0.03),
+              TextComponent(
+                labelText: '${TextConstants.cardNumberLabel}: $cardNumber',
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+                textAlign: TextAlign.center,
+              ),
+
+              SizedBox(
+                height: screenHeight * 0.03,
+              ),
 
               // Continue Button
               SizedBox(
@@ -92,7 +110,7 @@ class SessionIncompleteDialog extends StatelessWidget {
                     ),
                   ),
                   child: TextComponent(
-                    labelText: 'Continue',
+                    labelText: TextConstants.continueLabel,
                     fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,

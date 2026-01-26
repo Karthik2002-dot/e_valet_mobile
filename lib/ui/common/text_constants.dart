@@ -327,4 +327,8 @@ class TextConstants {
   static const String assignedToLabel = 'Assigned To ';
   static const String recommendedBy = 'Recommended - Parked this vehicle';
   static const String recommendedFor = 'Recommended for';
+
+  static const String sessionContinue =
+      'Your session has been not completed please click on continue to proceed';
+  static const String continueLabel = 'Continue';
 }
