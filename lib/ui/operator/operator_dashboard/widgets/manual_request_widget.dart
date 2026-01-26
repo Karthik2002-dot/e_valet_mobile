@@ -63,8 +63,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
           // Trigger soft refresh to update the UI
           widget.onRequestCreated();
         } else if (state is ManualRequestError) {
-          SnackBars.showErrorSnackBar(context,
-              '${TextConstants.failedToCreateRequest}: ${state.message}');
+          SnackBars.showErrorSnackBar(
+              context, TextConstants.failedToCreateRequest);
         }
       },
       child: BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
