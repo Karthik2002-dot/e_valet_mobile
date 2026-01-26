@@ -20,6 +20,7 @@ class CustomerMissingService {
         builder: (context) => CarCameraScreen(
           sessionId: sessionId,
           isReparking: true,
+          preventBackNavigation: true,
         ),
       ),
     );
