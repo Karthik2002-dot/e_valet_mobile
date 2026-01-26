@@ -422,6 +422,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           if (checkedInSession != null) {
                             SessionIncompleteDialog.show(
                               context,
+                              cardNumber:
+                                  checkedInSession.cardNumber.toString(),
                               onContinue: () {
                                 // Navigate to camera screen with back navigation prevented
                                 Navigator.of(context).push(
