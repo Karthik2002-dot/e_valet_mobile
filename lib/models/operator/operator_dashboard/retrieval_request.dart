@@ -10,6 +10,7 @@ class RetrievalRequest {
   final String requestedAt;
   final Vehicle vehicle;
   final ParkedBy parkedBy;
+  final String status;
 
   RetrievalRequest({
     required this.sessionId,
@@ -20,6 +21,7 @@ class RetrievalRequest {
     required this.vehicle,
     required this.parkedBy,
     required this.isManualRequest,
+    required this.status,
   });
 
   factory RetrievalRequest.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class RetrievalRequest {
       vehicle: Vehicle.fromJson(json['vehicle'] ?? {}),
       parkedBy: ParkedBy.fromJson(json['parkedBy'] ?? {}),
       isManualRequest: json['isManualRequest'] ?? false,
+      status: json['status'] ?? '',
     );
   }
 
@@ -45,6 +48,7 @@ class RetrievalRequest {
       'vehicle': vehicle.toJson(),
       'parkedBy': parkedBy.toJson(),
       'isManualRequest': isManualRequest,
+      'status': status,
     };
   }
 }

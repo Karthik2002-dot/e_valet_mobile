@@ -43,6 +43,19 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
 
   bool _isDraggingOver = false;
 
+  bool get _isAssignable =>
+      RetrievalRequestUtils.isAssignable(widget.request.status);
+
+  Color _statusColor() => RetrievalRequestUtils.getStatusColor(
+        status: widget.request.status,
+        waitingTime: widget.request.waitingTime,
+      );
+
+  String _statusLabel() => RetrievalRequestUtils.getStatusLabel(
+        status: widget.request.status,
+        waitingTime: widget.request.waitingTime,
+      );
+
   void _showAssignmentDialog(AvailableDriver driver) {
     final dashboardBloc = context.read<OperatorDashboardBloc>();
 
@@ -87,17 +100,26 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
   Widget build(BuildContext context) {
     return DragTarget<AvailableDriver>(
       onWillAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          return false;
+        }
         // Only accept if driver status is 'free'
         return details.data.status.toLowerCase() == 'free';
       },
       onAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          setState(() {
+            _isDraggingOver = false;
+          });
+          return;
+        }
         setState(() {
           _isDraggingOver = false;
         });
         _showAssignmentDialog(details.data);
       },
       onMove: (details) {
-        if (!_isDraggingOver) {
+        if (_isAssignable && !_isDraggingOver) {
           setState(() {
             _isDraggingOver = true;
           });
@@ -126,10 +148,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
               12,
             ),
             border: Border.all(
-              color: _isDraggingOver
-                  ? AppColors.primary
-                  : RetrievalRequestUtils.getPriorityColor(
-                      widget.request.waitingTime),
+              color: _isDraggingOver ? AppColors.primary : _statusColor(),
               width: _isDraggingOver ? 3 : 2,
             ),
             boxShadow: [
@@ -194,13 +213,11 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                                 MediaQuery.of(context).size.height * 0.005,
                           ),
                           decoration: BoxDecoration(
-                            color: RetrievalRequestUtils.getPriorityColor(
-                                widget.request.waitingTime),
+                            color: _statusColor(),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: TextComponent(
-                            labelText: RetrievalRequestUtils.getPriorityLabel(
-                                widget.request.waitingTime),
+                            labelText: _statusLabel(),
                             fontSize: MediaQuery.of(context).size.width * 0.014,
                             color: AppColors.white,
                             fontWeight: FontWeight.w600,
@@ -219,7 +236,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                             Icon(Icons.local_parking,
                                 size: MediaQuery.of(context).size.width * 0.018,
                                 color: AppColors.primary),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Flexible(
                               child: TextComponent(
                                 labelText:
@@ -281,7 +298,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                           color: AppColors.black,
                           fontWeight: FontWeight.w600,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         GestureDetector(
                           onTap: () {
                             final phone = widget.request.parkedBy.phone;
