@@ -21,6 +21,7 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
       emit(const DriverMenuInitial());
     });
     on<DriverHomeStarted>(_onDriverHomeStarted);
+    on<DriverPendingSessionsRefresh>(_onPendingSessionsRefresh);
     on<DriverOnBreakToggled>(_onOnBreakToggled);
     on<DriverOnlineStatusToggled>(_onOnlineStatusToggled);
   }
@@ -122,6 +123,26 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
         isOnBreak: false,
         isOnline: true,
       ));
+    }
+  }
+
+  Future<void> _onPendingSessionsRefresh(
+    DriverPendingSessionsRefresh event,
+    Emitter<DriverMenuState> emit,
+  ) async {
+    if (state is! DriverHomeLoaded) {
+      add(const DriverHomeStarted());
+      return;
+    }
+
+    final currentState = state as DriverHomeLoaded;
+    try {
+      final pendingSessions =
+          await SessionsPendingApiService.getPendingSessions();
+      emit(currentState.copyWith(pendingSessions: pendingSessions));
+    } catch (e) {
+      // Keep existing state if refresh fails
+      emit(currentState);
     }
   }
 

@@ -47,4 +47,28 @@ class PendingSessionsResponse {
       return null;
     }
   }
+
+  /// Check if there's any session with ACCEPT status
+  bool get hasAcceptedSession => sessions.any((session) => session.isAccepted);
+
+  /// Get the first ACCEPT session if any
+  PendingSession? get acceptedSession {
+    try {
+      return sessions.firstWhere((session) => session.isAccepted);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Check if there's any session with ARRIVED status
+  bool get hasArrivedSession => sessions.any((session) => session.isArrived);
+
+  /// Get the first ARRIVED session if any
+  PendingSession? get arrivedSession {
+    try {
+      return sessions.firstWhere((session) => session.isArrived);
+    } catch (_) {
+      return null;
+    }
+  }
 }

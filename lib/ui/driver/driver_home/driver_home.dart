@@ -18,11 +18,13 @@ import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 
 class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   static final DriverHomeRouteObserver _instance =
@@ -71,8 +73,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
 
+  // Track if we've already navigated for accepted/arrived sessions
+  bool _hasNavigatedForStatus = false;
+
   // Track if permissions have been requested
   bool _hasRequestedPermissions = false;
+
+  void _refreshPendingSessions() {
+    try {
+      context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+    } catch (e) {
+      // Ignore refresh errors when context is not ready
+    }
+  }
 
   void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
@@ -238,6 +251,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     if (state == AppLifecycleState.resumed) {
       // App came back to foreground - check WebSocket
       _checkWebSocketOnResume();
+      _hasNavigatedForStatus = false;
+      _refreshPendingSessions();
     }
   }
 
@@ -285,6 +300,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
+    _hasNavigatedForStatus = false; // Reset navigation flag
     _hasRequestedPermissions = false; // Reset permission flag
     super.dispose();
   }
@@ -417,6 +433,66 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                                   ),
                                 );
                               },
+                            );
+                          }
+                        }
+                      });
+                    }
+
+                    // Check for ARRIVED status first (higher priority)
+                    // If status is ARRIVED, navigate to handover screen
+                    if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasArrivedSession) {
+                      _hasNavigatedForStatus = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final arrivedSession =
+                              state.pendingSessions!.arrivedSession;
+                          if (arrivedSession != null) {
+                            // Convert PendingSession to AssignedSession
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    arrivedSession);
+                            // Navigate to arrived screen with handover UI directly
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ConfirmArrivalScreen(
+                                  session: assignedSession,
+                                  preventBackNavigation: true,
+                                  showHandoverOnLoad: true,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for ACCEPT status
+                    // If status is ACCEPT, navigate to arrived screen
+                    else if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasAcceptedSession) {
+                      _hasNavigatedForStatus = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final acceptedSession =
+                              state.pendingSessions!.acceptedSession;
+                          if (acceptedSession != null) {
+                            // Convert PendingSession to AssignedSession
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    acceptedSession);
+                            // Navigate to arrived screen with back navigation prevented
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ConfirmArrivalScreen(
+                                  session: assignedSession,
+                                  preventBackNavigation: true,
+                                ),
+                              ),
                             );
                           }
                         }
