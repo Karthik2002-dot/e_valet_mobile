@@ -317,6 +317,43 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                         ),
                       ],
                     ),
+                    if (widget.request.assignedTo.name.isNotEmpty) ...[
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // Row 3: Requested by name and Phone number
+                      Row(
+                        children: [
+                          TextComponent(
+                            labelText: TextConstants.assignedToLabel,
+                            fontSize: MediaQuery.of(context).size.width * 0.014,
+                            color: AppColors.grey,
+                          ),
+                          TextComponent(
+                            labelText: widget.request.parkedBy.name,
+                            fontSize: MediaQuery.of(context).size.width * 0.016,
+                            color: AppColors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              final phone = widget.request.parkedBy.phone;
+                              if (phone != null && phone.isNotEmpty) {
+                                _callPhoneNumber(phone);
+                              } else {
+                                SnackBars.showErrorSnackBar(
+                                    context, 'No phone number available');
+                              }
+                            },
+                            child: Icon(
+                              Icons.phone_outlined,
+                              size: MediaQuery.of(context).size.width * 0.016,
+                              color: AppColors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]
                   ],
                 ),
               ),
