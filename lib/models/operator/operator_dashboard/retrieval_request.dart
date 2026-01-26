@@ -1,3 +1,4 @@
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assigned_to.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/parked_by.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/vehicle.dart';
 
@@ -10,6 +11,8 @@ class RetrievalRequest {
   final String requestedAt;
   final Vehicle vehicle;
   final ParkedBy parkedBy;
+  final String status;
+  final AssignedTo assignedTo;
 
   RetrievalRequest({
     required this.sessionId,
@@ -20,6 +23,8 @@ class RetrievalRequest {
     required this.vehicle,
     required this.parkedBy,
     required this.isManualRequest,
+    required this.status,
+    required this.assignedTo,
   });
 
   factory RetrievalRequest.fromJson(Map<String, dynamic> json) {
@@ -32,6 +37,8 @@ class RetrievalRequest {
       vehicle: Vehicle.fromJson(json['vehicle'] ?? {}),
       parkedBy: ParkedBy.fromJson(json['parkedBy'] ?? {}),
       isManualRequest: json['isManualRequest'] ?? false,
+      status: json['status'] ?? '',
+      assignedTo: AssignedTo.fromJson(json['assignedTo'] ?? {}),
     );
   }
 
@@ -45,6 +52,8 @@ class RetrievalRequest {
       'vehicle': vehicle.toJson(),
       'parkedBy': parkedBy.toJson(),
       'isManualRequest': isManualRequest,
+      'status': status,
+      'assignedTo': assignedTo.toJson(),
     };
   }
 }
