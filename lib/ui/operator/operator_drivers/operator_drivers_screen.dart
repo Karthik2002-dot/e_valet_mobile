@@ -14,10 +14,12 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet
 
 class OperatorDriversScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
+  final Function(int)? onNavigateToTab;
 
   const OperatorDriversScreen({
     super.key,
     this.onRefreshReady,
+    this.onNavigateToTab,
   });
 
   @override
@@ -95,17 +97,37 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextComponent(
-                  labelText: TextConstants.valetDashboardTitle,
-                  color: AppColors.black,
-                  fontSize: MediaQuery.of(context).size.width * 0.02,
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 8),
-                TextComponent(
-                  labelText: TextConstants.valetDashboardDescription,
-                  color: AppColors.grey,
-                  fontSize: MediaQuery.of(context).size.width * 0.013,
+                // Back icon button to navigate to dashboard
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      color: AppColors.black,
+                      onPressed: () {
+                        // Navigate back to dashboard (index 0)
+                        widget.onNavigateToTab?.call(0);
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextComponent(
+                          labelText: TextConstants.valetDashboardTitle,
+                          color: AppColors.black,
+                          fontSize: MediaQuery.of(context).size.width * 0.02,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        const SizedBox(height: 8),
+                        TextComponent(
+                          labelText: TextConstants.valetDashboardDescription,
+                          color: AppColors.grey,
+                          fontSize: MediaQuery.of(context).size.width * 0.013,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 BlocBuilder<ValetKpisBloc, ValetKpisState>(

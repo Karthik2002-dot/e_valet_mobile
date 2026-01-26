@@ -10,6 +10,7 @@ class OperatorScreenRouter {
     int refreshKey, {
     Function(VoidCallback)? onSlotsRefreshReady,
     Function(VoidCallback)? onDriversRefreshReady,
+    Function(int)? onNavigateToTab,
   }) {
     switch (selectedIndex) {
       case 0:
@@ -18,11 +19,13 @@ class OperatorScreenRouter {
         return OperatorSlotsScreen(
           key: ValueKey(refreshKey),
           onRefreshReady: onSlotsRefreshReady,
+          onNavigateToTab: onNavigateToTab,
         );
       case 2:
         return OperatorDriversScreen(
           key: ValueKey(refreshKey),
           onRefreshReady: onDriversRefreshReady,
+          onNavigateToTab: onNavigateToTab,
         );
       case 3:
         return OperatorCarLogsScreen(key: ValueKey(refreshKey));
