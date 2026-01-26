@@ -175,7 +175,8 @@ class LocalNotificationService {
       // Create longer vibration pattern: [delay, vibrate, pause, vibrate, pause, vibrate, pause, vibrate, pause]
       // Pattern: 0ms delay, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause
       // Total vibration: ~8 seconds (2000 + 500 + 2000 + 500 + 2000 + 500 + 2000 + 500)
-      final vibrationPattern = Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
+      final vibrationPattern =
+          Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
 
       // Android notification details
       // No sound parameter = uses default system notification sound (enabled by default)
@@ -236,7 +237,8 @@ class LocalNotificationService {
       // Create longer vibration pattern: [delay, vibrate, pause, vibrate, pause, vibrate, pause, vibrate, pause]
       // Pattern: 0ms delay, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause
       // Total vibration: ~8 seconds (2000 + 500 + 2000 + 500 + 2000 + 500 + 2000 + 500)
-      final vibrationPattern = Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
+      final vibrationPattern =
+          Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
 
       final androidDetails = AndroidNotificationDetails(
         'high_priority_channel',

@@ -64,7 +64,8 @@ class _AssignedSessionSheetLoaderState
               });
               // Save parkingLocation if present - check both typed session and raw JSON
               String? parkingLocation;
-              if (typedSession != null && typedSession.parkingLocation.isNotEmpty) {
+              if (typedSession != null &&
+                  typedSession.parkingLocation.isNotEmpty) {
                 // Use parkingLocation from typed session if available
                 parkingLocation = typedSession.parkingLocation;
               } else if (sessionJson is Map<String, dynamic>) {
@@ -74,9 +75,10 @@ class _AssignedSessionSheetLoaderState
                   parkingLocation = rawLocation.toString();
                 }
               }
-              
+
               // Save parkingLocation if we found it
-              if (parkingLocation != null && parkingLocation.trim().isNotEmpty) {
+              if (parkingLocation != null &&
+                  parkingLocation.trim().isNotEmpty) {
                 TokenStorage.saveParkingLocation(parkingLocation)
                     .catchError((e) {
                   // ignore or log
