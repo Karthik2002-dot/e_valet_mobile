@@ -329,7 +329,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                             color: AppColors.grey,
                           ),
                           TextComponent(
-                            labelText: widget.request.parkedBy.name,
+                            labelText: widget.request.assignedTo.name,
                             fontSize: MediaQuery.of(context).size.width * 0.016,
                             color: AppColors.black,
                             fontWeight: FontWeight.w600,
@@ -337,7 +337,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                           const Spacer(),
                           GestureDetector(
                             onTap: () {
-                              final phone = widget.request.parkedBy.phone;
+                              final phone = widget.request.assignedTo.phone;
                               if (phone != null && phone.isNotEmpty) {
                                 _callPhoneNumber(phone);
                               } else {

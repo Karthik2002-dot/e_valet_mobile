@@ -47,3 +47,17 @@ class CreateManualRetrievalRequest extends OperatorDashboardEvent {
     required this.outletId,
   });
 }
+
+class NewParkingEvent extends OperatorDashboardEvent {
+  final String outletId;
+  final bool refreshKpis;
+  final bool refreshDrivers;
+  final bool refreshRequests;
+
+  NewParkingEvent({
+    String? outletId,
+    this.refreshKpis = true,
+    this.refreshDrivers = true,
+    this.refreshRequests = true,
+  }) : outletId = outletId ?? (dotenv.env['OUTLET_ID'] ?? '1');
+}
