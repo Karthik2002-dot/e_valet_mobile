@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:niloufer_valet_mobile/api/notification/notification_api_service.dart';
 import 'package:niloufer_valet_mobile/models/notification/fcm_register_request.dart';
 import 'package:niloufer_valet_mobile/services/device/device_info_service.dart';
@@ -190,6 +191,8 @@ class FirebaseMessagingService implements NotificationService {
           title: notification.title ?? 'New Notification',
           body: notification.body ?? '',
           payload: message.data,
+          importance: Importance.high,
+          priority: Priority.high,
         );
       }
 
