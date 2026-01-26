@@ -21,7 +21,7 @@ class TextConstants {
   static const pleaseEnterValidCardNumber = 'Please enter a valid card number';
   static const manualRequest = 'MANUAL REQUEST';
   static const processingText = 'PROCESSING...';
-  static const failedToCreateRequest = 'Failed to create request';
+  static const failedToCreateRequest = 'Failed to create manual request...';
 
   // Assign Driver
   static const failedToAssignDriver = 'Failed to assign driver';
