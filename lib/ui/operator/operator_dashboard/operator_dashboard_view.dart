@@ -112,6 +112,11 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         print('Drivers refresh callback registered'); // Debug log
         _driversRefresh = refresh;
       },
+      onNavigateToTab: (int index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
     );
   }
 
