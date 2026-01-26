@@ -41,11 +41,16 @@ class _AssignedSessionSheetLoaderState
               sessionId = rawSession.id;
               sessionJson = rawSession.toJson();
             } else if (rawSession is Map<String, dynamic>) {
-              // Defensive: map from backend
+              // Defensive: map from backend - try to parse to typed session
               sessionId = rawSession['id']?.toString();
               sessionJson = rawSession;
-              // Optionally:
-              // typedSession = AssignedSession.fromJson(rawSession);
+              // Try to parse the session to get typed object with all fields
+              try {
+                typedSession = AssignedSession.fromJson(rawSession);
+              } catch (e) {
+                // If parsing fails, keep sessionJson as raw map
+                // This ensures we still have the data even if model parsing fails
+              }
             }
 
             if (sessionId != null) {
@@ -57,11 +62,24 @@ class _AssignedSessionSheetLoaderState
               TokenStorage.saveAssignedSessionData(sessionJson).catchError((e) {
                 // ignore or log
               });
-              // Save parkingLocation if present
-              final parkingLocation = sessionJson['parkingLocation'];
+              // Save parkingLocation if present - check both typed session and raw JSON
+              String? parkingLocation;
+              if (typedSession != null &&
+                  typedSession.parkingLocation.isNotEmpty) {
+                // Use parkingLocation from typed session if available
+                parkingLocation = typedSession.parkingLocation;
+              } else if (sessionJson is Map<String, dynamic>) {
+                // Fallback to raw JSON if typed session doesn't have it
+                final rawLocation = sessionJson['parkingLocation'];
+                if (rawLocation != null) {
+                  parkingLocation = rawLocation.toString();
+                }
+              }
+
+              // Save parkingLocation if we found it
               if (parkingLocation != null &&
-                  parkingLocation.toString().trim().isNotEmpty) {
-                TokenStorage.saveParkingLocation(parkingLocation.toString())
+                  parkingLocation.trim().isNotEmpty) {
+                TokenStorage.saveParkingLocation(parkingLocation)
                     .catchError((e) {
                   // ignore or log
                 });

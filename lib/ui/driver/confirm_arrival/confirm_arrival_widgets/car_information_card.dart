@@ -208,41 +208,6 @@ class CarInformationCard extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                SizedBox(height: screenHeight * 0.02),
-
-                // Locate Car Button
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.015,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.greyLight,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: screenWidth * 0.05,
-                        color: AppColors.secondary,
-                      ),
-                      SizedBox(width: screenWidth * 0.02),
-                      TextComponent(
-                        labelText: TextConstants.locateCarUsingPhoto,
-                        fontSize: screenWidth * 0.035,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
