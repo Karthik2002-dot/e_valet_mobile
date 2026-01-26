@@ -64,6 +64,7 @@ class AssignedSession {
       'customerPhone': customerPhone,
       'parkedBy': parkedBy?.toJson(),
       'photos': photos.map((photo) => photo.toJson()).toList(),
+      'parkingLocation': parkingLocation,
     };
   }
 }
