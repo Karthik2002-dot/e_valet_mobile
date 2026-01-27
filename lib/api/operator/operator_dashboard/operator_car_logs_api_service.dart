@@ -11,9 +11,6 @@ class OperatorCarLogsApiService {
 
   static Future<CarLogsResponse> getCarLogs({
     required String outletId,
-    required int page,
-    required int pageSize,
-    required String search,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
 
@@ -34,14 +31,21 @@ class OperatorCarLogsApiService {
         '/operators/car-logs',
         queryParameters: {
           'outletId': int.tryParse(outletId) ?? 1,
-          'page': page,
-          'pageSize': pageSize,
-          'search': search,
         },
       );
 
       if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
+        final data = response.data;
+        if (data is! Map<String, dynamic>) {
+          final message = data is String
+              ? data
+              : 'Invalid response format from server.';
+          throw ApiException(
+            message,
+            code: 'car_logs_error',
+            statusCode: response.statusCode,
+          );
+        }
         final carLogs = CarLogsResponse.fromJson(data);
         return carLogs;
       } else {

@@ -16,9 +16,6 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
     try {
       final carLogs = await OperatorCarLogsApiService.getCarLogs(
         outletId: event.outletId,
-        page: event.page,
-        pageSize: event.pageSize,
-        search: event.search,
       );
       emit(CarLogsLoaded(carLogsResponse: carLogs));
     } catch (e) {
