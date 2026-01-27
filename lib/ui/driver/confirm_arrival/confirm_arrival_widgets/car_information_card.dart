@@ -140,7 +140,8 @@ class CarInformationCard extends StatelessWidget {
                   thickness: 1,
                   height: 1,
                 ),
-                if (session.parkingLocation != null) ...[
+                if (session.parkingLocation != null &&
+                    session.parkingLocation!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
