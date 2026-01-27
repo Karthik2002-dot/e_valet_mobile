@@ -134,7 +134,8 @@ class SessionCard extends StatelessWidget {
                       height: 1,
                     ),
                     // Show location if available
-                    if (session.parkingLocation != null) ...[
+                    if (session.parkingLocation != null &&
+                        session.parkingLocation!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
