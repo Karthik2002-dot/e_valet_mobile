@@ -1,3 +1,31 @@
+class ParkedBy {
+  final String userId;
+  final String name;
+  final String phone;
+
+  ParkedBy({
+    required this.userId,
+    required this.name,
+    required this.phone,
+  });
+
+  factory ParkedBy.fromJson(Map<String, dynamic> json) {
+    return ParkedBy(
+      userId: (json['userId'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      phone: (json['phone'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'name': name,
+      'phone': phone,
+    };
+  }
+}
+
 class PendingSession {
   final String sessionId;
   final int cardNumber;
@@ -9,6 +37,8 @@ class PendingSession {
   final String? customerPhone;
   final String? parkingLocation;
   final String? taskType;
+  final ParkedBy? parkedBy;
+  final List<dynamic> photos;
 
   PendingSession({
     required this.sessionId,
@@ -21,6 +51,8 @@ class PendingSession {
     this.customerPhone,
     this.parkingLocation,
     this.taskType,
+    this.parkedBy,
+    this.photos = const [],
   });
 
   static const Set<String> _knownStatuses = {
@@ -92,6 +124,18 @@ class PendingSession {
     // Handle status - can be a string or an object with nested fields
     final statusString = _extractStatus(json['status']);
 
+    // Handle parkedBy - can be null or an object
+    ParkedBy? parkedBy;
+    if (json['parkedBy'] != null && json['parkedBy'] is Map) {
+      parkedBy = ParkedBy.fromJson(json['parkedBy'] as Map<String, dynamic>);
+    }
+
+    // Handle photos - can be null or a list
+    List<dynamic> photos = [];
+    if (json['photos'] != null && json['photos'] is List) {
+      photos = json['photos'] as List;
+    }
+
     return PendingSession(
       sessionId: (json['sessionId'] ?? '').toString(),
       cardNumber: json['cardNumber'] as int? ?? 0,
@@ -103,6 +147,8 @@ class PendingSession {
       customerPhone: json['customerPhone']?.toString(),
       parkingLocation: json['parkingLocation']?.toString(),
       taskType: json['taskType']?.toString(),
+      parkedBy: parkedBy,
+      photos: photos,
     );
   }
 
@@ -118,6 +164,8 @@ class PendingSession {
       if (customerPhone != null) 'customerPhone': customerPhone,
       if (parkingLocation != null) 'parkingLocation': parkingLocation,
       if (taskType != null) 'taskType': taskType,
+      if (parkedBy != null) 'parkedBy': parkedBy!.toJson(),
+      'photos': photos,
     };
   }
 
