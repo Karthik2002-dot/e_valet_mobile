@@ -341,12 +341,32 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                 listener: (blocContext, state) {
                   if (state is AssignedSessionsBackgroundData) {
                     if (state.hasSessions) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted &&
-                            ModalRoute.of(blocContext)?.isCurrent == true) {
-                          _presentAssignedSessionSheet(blocContext);
+                      // Check if there are pending sessions that require navigation
+                      // If so, don't show the bottom sheet - navigation will happen instead
+                      final driverMenuState =
+                          blocContext.read<DriverMenuBloc>().state;
+                      bool shouldShowBottomSheet = true;
+
+                      if (driverMenuState is DriverHomeLoaded) {
+                        final pendingSessions = driverMenuState.pendingSessions;
+                        if (pendingSessions != null) {
+                          // If there's a pending session that requires navigation, don't show bottom sheet
+                          if (pendingSessions.hasArrivedSession ||
+                              pendingSessions.hasAcceptedSession ||
+                              pendingSessions.hasCheckedInSession) {
+                            shouldShowBottomSheet = false;
+                          }
                         }
-                      });
+                      }
+
+                      if (shouldShowBottomSheet) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted &&
+                              ModalRoute.of(blocContext)?.isCurrent == true) {
+                            _presentAssignedSessionSheet(blocContext);
+                          }
+                        });
+                      }
                     }
                   } else if (state is AssignedSessionsCancelled) {
                     // Close the bottom sheet if open
@@ -410,43 +430,18 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   } else if (state is DriverHomeLoaded) {
                     // Check if there's a CHECKED_IN session and show dialog
                     // Only show once per screen load
-                    if (!_hasShownSessionDialog &&
-                        state.pendingSessions != null &&
-                        state.pendingSessions!.hasCheckedInSession) {
-                      _hasShownSessionDialog = true;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted &&
-                            ModalRoute.of(context)?.isCurrent == true) {
-                          final checkedInSession =
-                              state.pendingSessions!.checkedInSession;
-                          if (checkedInSession != null) {
-                            SessionIncompleteDialog.show(
-                              context,
-                              cardNumber:
-                                  checkedInSession.cardNumber.toString(),
-                              onContinue: () {
-                                // Navigate to camera screen with back navigation prevented
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => CarCameraScreen(
-                                      sessionId: checkedInSession.sessionId,
-                                      preventBackNavigation: true,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                        }
-                      });
-                    }
 
-                    // Check for ARRIVED status first (higher priority)
-                    // If status is ARRIVED, navigate to handover screen
+                    // Priority order: ARRIVED > ACCEPTED > CHECKED_IN
+                    // Check for ARRIVED status first (highest priority)
                     if (!_hasNavigatedForStatus &&
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasArrivedSession) {
                       _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
                             ModalRoute.of(context)?.isCurrent == true) {
@@ -477,6 +472,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasAcceptedSession) {
                       _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
                             ModalRoute.of(context)?.isCurrent == true) {
@@ -495,6 +495,37 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                                   preventBackNavigation: true,
                                 ),
                               ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for CHECKED_IN session and show dialog
+                    else if (!_hasShownSessionDialog &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasCheckedInSession) {
+                      _hasShownSessionDialog = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final checkedInSession =
+                              state.pendingSessions!.checkedInSession;
+                          if (checkedInSession != null) {
+                            SessionIncompleteDialog.show(
+                              context,
+                              cardNumber:
+                                  checkedInSession.cardNumber.toString(),
+                              onContinue: () {
+                                // Navigate to camera screen with back navigation prevented
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => CarCameraScreen(
+                                      sessionId: checkedInSession.sessionId,
+                                      preventBackNavigation: true,
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           }
                         }
