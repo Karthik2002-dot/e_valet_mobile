@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_r
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
@@ -301,7 +302,7 @@ class OperatorDashboardBloc
       ));
     } catch (e) {
       // Show a business-friendly error message for card not found
-      String errorMessage = e.toString();
+      String errorMessage = e is ApiException ? e.message : e.toString();
       final cardNotFoundRegExp =
           RegExp(r'Card #[0-9]+ not found in outlet [0-9]+');
       final match = cardNotFoundRegExp.firstMatch(errorMessage);
