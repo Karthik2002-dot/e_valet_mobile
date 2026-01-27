@@ -3,12 +3,16 @@ import 'pending_session.dart';
 class PendingSessionsResponse {
   final List<PendingSession> sessions;
   final int count;
+  final int parkingTasksCount;
+  final int retrievalTasksCount;
   final bool hasPendingTasks;
   final String message;
 
   PendingSessionsResponse({
     required this.sessions,
     required this.count,
+    required this.parkingTasksCount,
+    required this.retrievalTasksCount,
     required this.hasPendingTasks,
     required this.message,
   });
@@ -21,6 +25,8 @@ class PendingSessionsResponse {
           .map((sessionJson) => PendingSession.fromJson(sessionJson))
           .toList(),
       count: json['count'] as int? ?? 0,
+      parkingTasksCount: json['parkingTasksCount'] as int? ?? 0,
+      retrievalTasksCount: json['retrievalTasksCount'] as int? ?? 0,
       hasPendingTasks: json['hasPendingTasks'] as bool? ?? false,
       message: (json['message'] ?? '').toString(),
     );
@@ -30,6 +36,8 @@ class PendingSessionsResponse {
     return {
       'sessions': sessions.map((session) => session.toJson()).toList(),
       'count': count,
+      'parkingTasksCount': parkingTasksCount,
+      'retrievalTasksCount': retrievalTasksCount,
       'hasPendingTasks': hasPendingTasks,
       'message': message,
     };
