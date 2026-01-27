@@ -10,6 +10,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_state.dart
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:intl/intl.dart';
 
+enum SortDirection { none, ascending, descending }
+
 class OperatorCarLogsScreen extends StatefulWidget {
   const OperatorCarLogsScreen({super.key});
 
@@ -21,15 +23,16 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   late CarLogsBloc _carLogsBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
+  // Sorting state
+  String _sortColumn = '';
+  SortDirection _sortDirection = SortDirection.none;
+
   @override
   void initState() {
     super.initState();
     _carLogsBloc = CarLogsBloc();
     _carLogsBloc.add(FetchCarLogs(
       outletId: _outletId,
-      page: 0,
-      pageSize: 10,
-      search: '',
     ));
   }
 
@@ -81,15 +84,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                         ),
                       )
                     else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: state.carLogsResponse.logs.length,
-                        itemBuilder: (context, index) {
-                          final log = state.carLogsResponse.logs[index];
-                          return _buildCarLogCard(log);
-                        },
-                      ),
+                      _buildCarLogsTable(state.carLogsResponse.logs),
                   ],
                 ),
               );
@@ -113,9 +108,6 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                       onPressed: () {
                         _carLogsBloc.add(FetchCarLogs(
                           outletId: _outletId,
-                          page: 0,
-                          pageSize: 10,
-                          search: '',
                         ));
                       },
                       child: const Text('Retry'),
@@ -133,127 +125,235 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     );
   }
 
-  Widget _buildCarLogCard(CarLog log) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+  List<CarLog> _sortLogs(List<CarLog> logs) {
+    if (_sortColumn.isEmpty || _sortDirection == SortDirection.none) {
+      return logs;
+    }
+
+    final sortedLogs = List<CarLog>.from(logs);
+
+    sortedLogs.sort((a, b) {
+      dynamic aValue;
+      dynamic bValue;
+
+      switch (_sortColumn) {
+        case 'Tag Number':
+          aValue = a.tagNumber;
+          bValue = b.tagNumber;
+          break;
+        case 'Car Status':
+          aValue = a.displayStatus;
+          bValue = b.displayStatus;
+          break;
+        case 'Duration':
+          aValue = a.duration;
+          bValue = b.duration;
+          break;
+        case 'Park Location':
+          aValue = a.parkingLocation;
+          bValue = b.parkingLocation;
+          break;
+        case 'Parked At':
+          aValue = DateTime.tryParse(a.parkedAt) ?? DateTime.now();
+          bValue = DateTime.tryParse(b.parkedAt) ?? DateTime.now();
+          break;
+        case 'Parked By':
+          aValue = a.parkedBy.name;
+          bValue = b.parkedBy.name;
+          break;
+        default:
+          return 0;
+      }
+
+      int comparison = 0;
+      if (aValue is String && bValue is String) {
+        comparison = aValue.toLowerCase().compareTo(bValue.toLowerCase());
+      } else if (aValue is int && bValue is int) {
+        comparison = aValue.compareTo(bValue);
+      } else if (aValue is DateTime && bValue is DateTime) {
+        comparison = aValue.compareTo(bValue);
+      }
+
+      return _sortDirection == SortDirection.ascending ? comparison : -comparison;
+    });
+
+    return sortedLogs;
+  }
+
+  void _onHeaderTap(String columnName) {
+    setState(() {
+      if (_sortColumn == columnName) {
+        // Cycle through sort directions: none -> ascending -> descending -> none
+        switch (_sortDirection) {
+          case SortDirection.none:
+            _sortDirection = SortDirection.ascending;
+            break;
+          case SortDirection.ascending:
+            _sortDirection = SortDirection.descending;
+            break;
+          case SortDirection.descending:
+            _sortDirection = SortDirection.none;
+            _sortColumn = '';
+            break;
+        }
+      } else {
+        _sortColumn = columnName;
+        _sortDirection = SortDirection.ascending;
+      }
+    });
+  }
+
+  Widget _buildCarLogsTable(List<CarLog> logs) {
+    // Sort the logs based on current sorting state
+    final sortedLogs = _sortLogs(logs);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: availableWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                _buildTableHeaderRow(availableWidth),
+                // Data rows
+                ...sortedLogs.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final log = entry.value;
+                  return _buildTableDataRow(log, index, availableWidth);
+                }).toList(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTableHeaderRow(double availableWidth) {
+    return Container(
+      width: availableWidth,
+      decoration: BoxDecoration(
+        color: AppColors.grey.withOpacity(0.1),
+        border: Border(
+          bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        children: [
+          Expanded(flex: 12, child: _buildSortableHeaderCell('Tag Number')),
+          Expanded(flex: 16, child: _buildSortableHeaderCell('Car Status')),
+          Expanded(flex: 16, child: _buildSortableHeaderCell('Duration')),
+          Expanded(flex: 20, child: _buildSortableHeaderCell('Park Location')),
+          Expanded(flex: 20, child: _buildSortableHeaderCell('Parked At')),
+          Expanded(flex: 16, child: _buildSortableHeaderCell('Parked By')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTableDataRow(CarLog log, int index, double availableWidth) {
+    return Container(
+      width: availableWidth,
+      decoration: BoxDecoration(
+        color: index % 2 == 0 
+            ? Colors.white 
+            : AppColors.grey.withOpacity(0.05),
+        border: Border(
+          bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 12, child: _buildDataCell('${log.tagNumber}')),
+          Expanded(flex: 16, child: _buildDataCell(log.displayStatus)),
+          Expanded(flex: 16, child: _buildDataCell(log.duration)),
+          Expanded(flex: 20, child: _buildDataCell(log.parkingLocation)),
+          Expanded(flex: 20, child: _buildDataCell(log.parkedBy.name)),
+          Expanded(flex: 16, child: _buildDataCell(_formatDateTime(log.parkedAt))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSortableHeaderCell(String text) {
+    final isActive = _sortColumn == text;
+    final sortIcon = _getSortIcon(text);
+
+    return InkWell(
+      onTap: () => _onHeaderTap(text),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            right: BorderSide(color: AppColors.grey.withOpacity(0.3)),
+          ),
+        ),
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextComponent(
-                  labelText: 'Tag #${log.tagNumber}',
-                  color: AppColors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextComponent(
-                    labelText: log.duration,
-                    color: AppColors.success,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            Expanded(
+              child: TextComponent(
+                labelText: text,
+                color: isActive ? AppColors.primary : AppColors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                textAlign: TextAlign.left,
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildInfoRow('Session ID', log.sessionId),
-            const SizedBox(height: 8),
-            _buildInfoRow('Parking Location', log.parkingLocation),
-            const SizedBox(height: 8),
-            _buildInfoRow('Parked At', _formatDateTime(log.parkedAt)),
-            const SizedBox(height: 8),
-            _buildInfoRow('Handovered At', _formatDateTime(log.handoveredAt)),
-            const SizedBox(height: 12),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextComponent(
-                        labelText: 'Parked By',
-                        color: AppColors.grey,
-                        fontSize: 12,
-                      ),
-                      const SizedBox(height: 4),
-                      TextComponent(
-                        labelText: log.parkedBy.name,
-                        color: AppColors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      TextComponent(
-                        labelText: log.parkedBy.phone,
-                        color: AppColors.grey,
-                        fontSize: 12,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextComponent(
-                        labelText: 'Handovered By',
-                        color: AppColors.grey,
-                        fontSize: 12,
-                      ),
-                      const SizedBox(height: 4),
-                      TextComponent(
-                        labelText: log.handoveredBy.name,
-                        color: AppColors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            if (sortIcon != null) ...[
+              const SizedBox(width: 4),
+              Icon(
+                sortIcon,
+                size: 16,
+                color: AppColors.primary,
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: TextComponent(
-            labelText: '$label:',
-            color: AppColors.grey,
-            fontSize: 12,
-          ),
+
+  IconData? _getSortIcon(String columnName) {
+    if (_sortColumn != columnName) return null;
+
+    switch (_sortDirection) {
+      case SortDirection.ascending:
+        return Icons.arrow_upward;
+      case SortDirection.descending:
+        return Icons.arrow_downward;
+      case SortDirection.none:
+        return null;
+    }
+  }
+
+  Widget _buildDataCell(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(color: AppColors.grey.withOpacity(0.3)),
         ),
-        Expanded(
-          child: TextComponent(
-            labelText: value,
-            color: AppColors.black,
-            fontSize: 14,
-          ),
-        ),
-      ],
+      ),
+      child: TextComponent(
+        labelText: text,
+        color: AppColors.black,
+        fontSize: 13,
+        fontWeight: FontWeight.normal,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        softWrap: true,
+        textAlign: TextAlign.left,
+      ),
     );
   }
 

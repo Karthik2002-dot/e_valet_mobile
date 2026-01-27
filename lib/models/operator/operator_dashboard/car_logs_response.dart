@@ -19,9 +19,9 @@ class CarLogsResponse {
               ?.map((log) => CarLog.fromJson(log as Map<String, dynamic>))
               .toList() ??
           [],
-      total: json['total'] as int? ?? 0,
-      page: json['page'] as int? ?? 0,
-      pageSize: json['pageSize'] as int? ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? 0,
     );
   }
 

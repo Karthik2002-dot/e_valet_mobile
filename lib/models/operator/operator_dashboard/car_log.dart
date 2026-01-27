@@ -4,7 +4,7 @@ class CarLog {
   final String duration;
   final String parkedAt;
   final String handoveredAt;
-  final Map<String, dynamic> displayStatus;
+  final String displayStatus;
   final ParkedBy parkedBy;
   final HandoveredBy handoveredBy;
   final String parkingLocation;
@@ -24,11 +24,11 @@ class CarLog {
   factory CarLog.fromJson(Map<String, dynamic> json) {
     return CarLog(
       sessionId: json['sessionId'] as String? ?? '',
-      tagNumber: json['tagNumber'] as int? ?? 0,
+      tagNumber: (json['tagNumber'] as num?)?.toInt() ?? 0,
       duration: json['duration'] as String? ?? '',
       parkedAt: json['parkedAt'] as String? ?? '',
       handoveredAt: json['handoveredAt'] as String? ?? '',
-      displayStatus: json['displayStatus'] as Map<String, dynamic>? ?? {},
+      displayStatus: json['displayStatus'] as String? ?? '',
       parkedBy: ParkedBy.fromJson(json['parkedBy'] as Map<String, dynamic>? ?? {}),
       handoveredBy: HandoveredBy.fromJson(json['handoveredBy'] as Map<String, dynamic>? ?? {}),
       parkingLocation: json['parkingLocation'] as String? ?? '',
