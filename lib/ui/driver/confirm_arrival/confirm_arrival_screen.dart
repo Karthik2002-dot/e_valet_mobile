@@ -131,16 +131,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                             onCustomerMissing: () {
                               CustomerMissingDialog.show(
                                 context,
-                                onProceed: () async {
-                                  await CustomerMissingService
-                                      .handleCustomerMissing(
-                                    context: context,
-                                    sessionId: widget.session.id,
-                                    onSuccess: () {
-                                      // Any additional success handling can be added here
-                                    },
-                                  );
-                                },
+                                sessionId: widget.session.id,
                                 onCancel: () {
                                   // Reset the customer missing button after cancel
                                   _handoverButtonsKey.currentState
