@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
@@ -31,6 +32,8 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
   final _apiService = OperatorManualRetrievalApiService();
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   bool _isProcessing = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -60,6 +63,19 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
     context.read<OperatorDashboardBloc>().add(
           FetchDashboardKpis(outletId: _outletId),
         );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+    });
   }
 
   Future<void> _handleManualRequest(int cardNumber, String sessionId) async {
@@ -124,43 +140,130 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Back icon button to navigate to dashboard
-                        Row(
+                        // Header with back button, title, search, and description
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back),
-                              color: AppColors.black,
-                              onPressed: () {
-                                // Navigate back to dashboard (index 0)
-                                widget.onNavigateToTab?.call(0);
-                              },
-                            ),
-                            const SizedBox(width: 10),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
                               children: [
+                                IconButton(
+                                  icon: const Icon(Icons.arrow_back),
+                                  color: AppColors.black,
+                                  onPressed: () {
+                                    // Navigate back to dashboard (index 0)
+                                    widget.onNavigateToTab?.call(0);
+                                  },
+                                ),
                                 TextComponent(
-                                  labelText: TextConstants.parkedCarTitle,
+                                  labelText:
+                                      '${TextConstants.parkedCarTitle} (${state.digitalKeyRack.keyRack.length})',
                                   color: AppColors.black,
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.02,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(height: 8),
-                                TextComponent(
-                                  labelText: TextConstants.parkedCarDescription,
-                                  color: AppColors.grey,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.013,
+                                const Spacer(),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.25,
+                                  child: TextField(
+                                    controller: _searchController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _searchQuery = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: 'Search by card number...',
+                                      hintStyle: TextStyle(
+                                        color: AppColors.grey,
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.012,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: AppColors.primary,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.015,
+                                      ),
+                                      suffixIcon: _searchQuery.isNotEmpty
+                                          ? IconButton(
+                                              icon: Icon(
+                                                Icons.clear,
+                                                color: AppColors.grey,
+                                                size: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.015,
+                                              ),
+                                              onPressed: _clearSearch,
+                                            )
+                                          : null,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal:
+                                            MediaQuery.of(context).size.width *
+                                                0.01,
+                                        vertical:
+                                            MediaQuery.of(context).size.height *
+                                                0.01,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color:
+                                              AppColors.grey.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color:
+                                              AppColors.grey.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: AppColors.primary,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.012,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
                                 ),
                               ],
-                            )
+                            ),
+                            const SizedBox(height: 1),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left:
+                                      48), // Align with title text start (IconButton width + padding)
+                              child: TextComponent(
+                                labelText: TextConstants.parkedCarDescription,
+                                color: AppColors.grey,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.013,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
                         SlotsContentView(
                           digitalKeyRack: state.digitalKeyRack,
+                          searchQuery: _searchQuery,
                           onManualRequest: _handleManualRequest,
                         ),
                       ],

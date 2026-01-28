@@ -28,7 +28,10 @@ class OperatorScreenRouter {
           onNavigateToTab: onNavigateToTab,
         );
       case 3:
-        return OperatorCarLogsScreen(key: ValueKey(refreshKey));
+        return OperatorCarLogsScreen(
+          key: ValueKey(refreshKey),
+          onNavigateToTab: onNavigateToTab,
+        );
       default:
         return dashboardContent;
     }
