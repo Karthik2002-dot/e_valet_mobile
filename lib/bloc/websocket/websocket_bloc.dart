@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_service.dart';
 import 'websocket_event.dart';
 import 'websocket_state.dart';
@@ -11,7 +12,16 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   final WebSocketService _webSocketService = WebSocketService();
   final Set<String> _joinedRooms = {};
   StreamSubscription<bool>? _connectionSubscription;
+  StreamSubscription<Map<String, dynamic>>? _authErrorSubscription;
   final Map<String, StreamSubscription<dynamic>> _eventSubscriptions = {};
+  
+  // Store connection details for reconnection
+  String? _lastUrl;
+  Map<String, dynamic>? _lastQuery;
+  Map<String, dynamic>? _lastAuth;
+  
+  // Track if we're currently refreshing token to avoid multiple refresh attempts
+  bool _isRefreshingToken = false;
 
   WebSocketBloc() : super(const WebSocketInitial()) {
     on<ConnectWebSocket>(_onConnectWebSocket);
@@ -23,6 +33,18 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     on<EmitEvent>(_onEmitEvent);
     on<_WebSocketConnectionEstablished>(_onConnectionEstablished);
     on<_WebSocketConnectionLost>(_onConnectionLost);
+    on<_WebSocketRefreshTokenAndReconnect>(_onRefreshTokenAndReconnect);
+    
+    // Setup auth error listener
+    _setupAuthErrorListener();
+  }
+  
+  /// Setup listener for authentication errors
+  void _setupAuthErrorListener() {
+    _authErrorSubscription = _webSocketService.authErrorStream.listen((error) {
+      print('Auth error detected in WebSocket, triggering token refresh');
+      add(const _WebSocketRefreshTokenAndReconnect());
+    });
   }
 
   /// Get WebSocket service instance for direct access if needed
@@ -42,6 +64,11 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     try {
       emit(const WebSocketConnecting());
 
+      // Store connection details for potential reconnection
+      _lastUrl = event.url;
+      _lastQuery = event.query;
+      _lastAuth = event.auth;
+
       // Connect to WebSocket
       await _webSocketService.connect(
         url: event.url,
@@ -55,7 +82,6 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       _connectionSubscription =
           _webSocketService.connectionStream.listen((isConnected) {
         if (isConnected) {
-          final socketId = _webSocketService.socket?.id ?? 'unknown';
           add(const _WebSocketConnectionEstablished());
         } else {
           add(const _WebSocketConnectionLost());
@@ -67,6 +93,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
       if (_webSocketService.isConnected) {
         final socketId = _webSocketService.socket?.id ?? 'unknown';
+        print('WebSocket connected with ID: $socketId');
         emit(WebSocketConnected(socketId: socketId));
       }
     } catch (e) {
@@ -122,7 +149,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
       // Use emitWithAck to get server confirmation
       try {
-        final response = await _webSocketService.emitWithAck(
+        await _webSocketService.emitWithAck(
           'subscribe:${event.roomType}',
           payload,
           const Duration(seconds: 5),
@@ -258,10 +285,104 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     emit(const WebSocketDisconnected(reason: 'Connection lost'));
   }
 
+  /// Refresh token and reconnect to WebSocket
+  Future<void> _onRefreshTokenAndReconnect(
+    _WebSocketRefreshTokenAndReconnect event,
+    Emitter<WebSocketState> emit,
+  ) async {
+    // Prevent multiple simultaneous refresh attempts
+    if (_isRefreshingToken) {
+      print('Token refresh already in progress, skipping');
+      return;
+    }
+
+    _isRefreshingToken = true;
+
+    try {
+      print('Refreshing access token for WebSocket reconnection...');
+
+      // Refresh the token
+      await RefreshApiService.refreshToken();
+
+      // Get the new access token
+      final newAccessToken = await TokenStorage.getAccessToken();
+      if (newAccessToken == null || newAccessToken.isEmpty) {
+        throw Exception('Failed to get new access token after refresh');
+      }
+
+      print('Token refreshed successfully, reconnecting WebSocket...');
+
+      // Disconnect the old connection
+      await _webSocketService.disconnect();
+
+      // Small delay before reconnecting
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Update query with new token
+      final updatedQuery = Map<String, dynamic>.from(_lastQuery ?? {});
+      updatedQuery['token'] = newAccessToken;
+
+      // Reconnect with new token
+      await _webSocketService.connect(
+        url: _lastUrl!,
+        auth: _lastAuth,
+        query: updatedQuery,
+        autoConnect: true,
+      );
+
+      // Update stored query for future reconnections
+      _lastQuery = updatedQuery;
+
+      print('WebSocket reconnected with new token');
+
+      // Re-join all previously joined rooms
+      if (_joinedRooms.isNotEmpty) {
+        print('Re-joining ${_joinedRooms.length} rooms after reconnection');
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        for (final roomName in _joinedRooms.toList()) {
+          // Parse room name to extract type and id
+          final parts = roomName.split(':');
+          if (parts.length == 2) {
+            final roomType = parts[0];
+            final roomId = parts[1];
+            
+            final payload = <String, dynamic>{};
+            payload['${roomType}Id'] = roomId;
+            
+            try {
+              await _webSocketService.emitWithAck(
+                'subscribe:$roomType',
+                payload,
+                const Duration(seconds: 5),
+              );
+              print('Re-joined room: $roomName');
+            } catch (e) {
+              print('Failed to re-join room $roomName: $e');
+            }
+          }
+        }
+      }
+
+      if (_webSocketService.isConnected) {
+        final socketId = _webSocketService.socket?.id ?? 'unknown';
+        emit(WebSocketConnected(
+            socketId: socketId, joinedRooms: _joinedRooms.toList()));
+      }
+    } catch (e) {
+      print('Error refreshing token and reconnecting: $e');
+      emit(WebSocketError(
+          message: 'Token refresh failed', error: e.toString()));
+    } finally {
+      _isRefreshingToken = false;
+    }
+  }
+
   @override
   Future<void> close() async {
     // Cancel all subscriptions
     await _connectionSubscription?.cancel();
+    await _authErrorSubscription?.cancel();
     for (var subscription in _eventSubscriptions.values) {
       await subscription.cancel();
     }
@@ -278,4 +399,8 @@ class _WebSocketConnectionEstablished extends WebSocketEvent {
 
 class _WebSocketConnectionLost extends WebSocketEvent {
   const _WebSocketConnectionLost();
+}
+
+class _WebSocketRefreshTokenAndReconnect extends WebSocketEvent {
+  const _WebSocketRefreshTokenAndReconnect();
 }
