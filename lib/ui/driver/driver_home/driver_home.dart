@@ -127,6 +127,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   alignment: Alignment.bottomCenter,
                   child: FractionallySizedBox(
                     heightFactor: 0.6,
+                    alignment: Alignment.bottomCenter,
                     child: Stack(
                       children: [
                         const AssignedSessionSheetLoader(),
@@ -431,7 +432,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     // Check if there's a CHECKED_IN session and show dialog
                     // Only show once per screen load
 
-                    // Priority order: ARRIVED > ACCEPTED > CHECKED_IN
+                    // Priority order: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN
                     // Check for ARRIVED status first (highest priority)
                     if (!_hasNavigatedForStatus &&
                         state.pendingSessions != null &&
@@ -492,6 +493,37 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                               MaterialPageRoute(
                                 builder: (_) => ConfirmArrivalScreen(
                                   session: assignedSession,
+                                  preventBackNavigation: true,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for REPARKING status
+                    // If status is REPARKING, navigate to camera screen for reparking
+                    else if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasReparkingSession) {
+                      _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final reparkingSession =
+                              state.pendingSessions!.reparkingSession;
+                          if (reparkingSession != null) {
+                            // Navigate directly to camera screen for reparking
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => CarCameraScreen(
+                                  sessionId: reparkingSession.sessionId,
+                                  isReparking: true,
                                   preventBackNavigation: true,
                                 ),
                               ),

@@ -79,4 +79,17 @@ class PendingSessionsResponse {
       return null;
     }
   }
+
+  /// Check if there's any session with REPARKING status
+  bool get hasReparkingSession =>
+      sessions.any((session) => session.isReparking);
+
+  /// Get the first REPARKING session if any
+  PendingSession? get reparkingSession {
+    try {
+      return sessions.firstWhere((session) => session.isReparking);
+    } catch (_) {
+      return null;
+    }
+  }
 }

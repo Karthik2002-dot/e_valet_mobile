@@ -60,6 +60,7 @@ class PendingSession {
     'ACCEPTED',
     'ARRIVED',
     'CHECKED_IN',
+    'REPARKING',
   };
 
   static String _normalizeStatusString(dynamic value) {
@@ -174,4 +175,6 @@ class PendingSession {
   bool get isAccepted => status == 'ACCEPT' || status == 'ACCEPTED';
 
   bool get isArrived => status == 'ARRIVED';
+
+  bool get isReparking => status == 'REPARKING';
 }

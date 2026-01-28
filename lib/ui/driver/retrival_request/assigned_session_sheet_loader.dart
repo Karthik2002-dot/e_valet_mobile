@@ -86,55 +86,61 @@ class _AssignedSessionSheetLoaderState
             }
           }
 
-          return BlocProvider(
-            create: (context) => RetrivalRequestBloc(),
-            child: Builder(
-              builder: (blocContext) {
-                return BlocListener<RetrivalRequestBloc, RetrivalRequestState>(
-                  listener: (context, state) {
-                    if (state is RetrivalRequestAccepted) {
-                      SnackBars.showSuccessSnackBar(context, state.message);
-                      Navigator.of(context).pop();
-                      _navigateToConfirmArrival(context);
-                    } else if (state is RetrivalRequestError) {
-                      SnackBars.showErrorSnackBar(context, state.message);
-                    }
-                  },
-                  child: RetrievalRequestSheet(
-                    // If you make this parameter `AssignedSession?` in the sheet:
-                    session: typedSession,
-                    message: typedSession == null
-                        ? 'No active retrieval requests'
-                        : null,
-                    isLoading: false,
-                    onAccept: sessionId != null
-                        ? () {
-                            TokenStorage.getSessionIdFromGetApi()
-                                .then((storedSessionId) {
-                              if (storedSessionId != null &&
-                                  storedSessionId.isNotEmpty) {
-                                if (blocContext.mounted) {
-                                  blocContext.read<RetrivalRequestBloc>().add(
-                                        AcceptRetrivalRequest(storedSessionId),
-                                      );
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: BlocProvider(
+              create: (context) => RetrivalRequestBloc(),
+              child: Builder(
+                builder: (blocContext) {
+                  return BlocListener<RetrivalRequestBloc, RetrivalRequestState>(
+                    listener: (context, state) {
+                      if (state is RetrivalRequestAccepted) {
+                        SnackBars.showSuccessSnackBar(context, state.message);
+                        Navigator.of(context).pop();
+                        _navigateToConfirmArrival(context);
+                      } else if (state is RetrivalRequestError) {
+                        SnackBars.showErrorSnackBar(context, state.message);
+                      }
+                    },
+                    child: RetrievalRequestSheet(
+                      // If you make this parameter `AssignedSession?` in the sheet:
+                      session: typedSession,
+                      message: typedSession == null
+                          ? 'No active retrieval requests'
+                          : null,
+                      isLoading: false,
+                      onAccept: sessionId != null
+                          ? () {
+                              TokenStorage.getSessionIdFromGetApi()
+                                  .then((storedSessionId) {
+                                if (storedSessionId != null &&
+                                    storedSessionId.isNotEmpty) {
+                                  if (blocContext.mounted) {
+                                    blocContext.read<RetrivalRequestBloc>().add(
+                                          AcceptRetrivalRequest(storedSessionId),
+                                        );
+                                  }
+                                } else {
+                                  // log if needed
                                 }
-                              } else {
-                                // log if needed
-                              }
-                            });
-                          }
-                        : null,
-                  ),
-                );
-              },
+                              });
+                            }
+                          : null,
+                    ),
+                  );
+                },
+              ),
             ),
           );
         }
 
         // Default / loading state
-        return const RetrievalRequestSheet(
-          message: 'Loading...',
-          isLoading: true,
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: const RetrievalRequestSheet(
+            message: 'Loading...',
+            isLoading: true,
+          ),
         );
       },
     );
