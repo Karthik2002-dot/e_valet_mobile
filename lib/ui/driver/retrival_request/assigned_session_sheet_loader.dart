@@ -92,7 +92,8 @@ class _AssignedSessionSheetLoaderState
               create: (context) => RetrivalRequestBloc(),
               child: Builder(
                 builder: (blocContext) {
-                  return BlocListener<RetrivalRequestBloc, RetrivalRequestState>(
+                  return BlocListener<RetrivalRequestBloc,
+                      RetrivalRequestState>(
                     listener: (context, state) {
                       if (state is RetrivalRequestAccepted) {
                         SnackBars.showSuccessSnackBar(context, state.message);
@@ -117,7 +118,8 @@ class _AssignedSessionSheetLoaderState
                                     storedSessionId.isNotEmpty) {
                                   if (blocContext.mounted) {
                                     blocContext.read<RetrivalRequestBloc>().add(
-                                          AcceptRetrivalRequest(storedSessionId),
+                                          AcceptRetrivalRequest(
+                                              storedSessionId),
                                         );
                                   }
                                 } else {

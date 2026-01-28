@@ -129,7 +129,8 @@ class CustomerMissingDialog extends StatelessWidget {
                       ),
                     );
                   });
-                  SnackBars.showSuccessSnackBar(context, state.response.message);
+                  SnackBars.showSuccessSnackBar(
+                      context, state.response.message);
                 } else if (state is InitiateReparkError) {
                   SnackBars.showErrorSnackBar(context, state.message);
                 }
@@ -196,8 +197,8 @@ class CustomerMissingDialog extends StatelessWidget {
                             height: screenWidth * 0.05,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(AppColors.black),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.black),
                             ),
                           )
                         : Row(
