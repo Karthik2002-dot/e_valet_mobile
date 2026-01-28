@@ -249,6 +249,20 @@ class TextConstants {
   static const String totalTripsValue = '456';
   static const String totalDistanceValue = '2340 km';
 
+  // Car Logs Table Headers
+  static const String carLogsTagNumber = 'Tag Number';
+  static const String carLogsCarStatus = 'Car Status';
+  static const String carLogsDuration = 'Duration';
+  static const String carLogsParkLocation = 'Park Location';
+  static const String carLogsParkedBy = 'Parked By';
+  static const String carLogsParkedAt = 'Parked At';
+
+  // Car Logs Search and Messages
+  static const String carLogsSearchHint =
+      'Search by tag, status, or parked by...';
+  static const String carLogsNoDataMessage = 'No car logs available';
+  static const String carLogsErrorMessage = 'Error loading car logs';
+
   // Drivers Screen (Operator)
   static const String driversTitle = 'Drivers';
   static const String driversDescription = 'Manage and monitor all drivers';

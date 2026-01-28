@@ -9,9 +9,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart'
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_state.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
-import 'package:niloufer_valet_mobile/utils/time_utils.dart';
-
-enum SortDirection { none, ascending, descending }
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/car_logs_table_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/table_header_row_widget.dart';
 
 class OperatorCarLogsScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
@@ -213,8 +212,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                   // For now, keep client-side search since API doesn't support search parameters
                                 },
                                 decoration: InputDecoration(
-                                  hintText:
-                                      'Search by tag, status, or parked by...',
+                                  hintText: TextConstants.carLogsSearchHint,
                                   hintStyle: TextStyle(
                                     color: AppColors.grey,
                                     fontSize:
@@ -294,7 +292,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                       Expanded(
                         child: Center(
                           child: TextComponent(
-                            labelText: 'No car logs available',
+                            labelText: TextConstants.carLogsNoDataMessage,
                             color: AppColors.grey,
                           ),
                         ),
@@ -309,9 +307,15 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                       child: CircularProgressIndicator(),
                                     )
                                   : SingleChildScrollView(
-                                      child: _buildCarLogsTable(
-                                          _getFilteredLogs(
-                                              state.carLogsResponse.logs)),
+                                      child: CarLogsTableWidget(
+                                        logs: _getFilteredLogs(
+                                            state.carLogsResponse.logs),
+                                        sortColumn: _sortColumn,
+                                        sortDirection: _sortDirection,
+                                        onHeaderTap: _onHeaderTap,
+                                        getSortIcon: _getSortIcon,
+                                        sortLogs: _sortLogs,
+                                      ),
                                     ),
                             ),
                             _buildPaginationControls(
@@ -329,7 +333,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextComponent(
-                      labelText: 'Error loading car logs',
+                      labelText: TextConstants.carLogsErrorMessage,
                       color: AppColors.error,
                     ),
                     const SizedBox(height: 8),
@@ -442,124 +446,6 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     });
   }
 
-  Widget _buildCarLogsTable(List<CarLog> logs) {
-    // Sort the logs based on current sorting state
-    final sortedLogs = _sortLogs(logs);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
-
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: availableWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header row
-                _buildTableHeaderRow(availableWidth),
-                // Data rows
-                ...sortedLogs.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final log = entry.value;
-                  return _buildTableDataRow(log, index, availableWidth);
-                }).toList(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTableHeaderRow(double availableWidth) {
-    return Container(
-      width: availableWidth,
-      decoration: BoxDecoration(
-        color: AppColors.grey.withOpacity(0.1),
-        border: Border(
-          bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(flex: 12, child: _buildSortableHeaderCell('Tag Number')),
-          Expanded(flex: 16, child: _buildSortableHeaderCell('Car Status')),
-          Expanded(flex: 16, child: _buildSortableHeaderCell('Duration')),
-          Expanded(flex: 20, child: _buildSortableHeaderCell('Park Location')),
-          Expanded(flex: 20, child: _buildSortableHeaderCell('Parked By')),
-          Expanded(flex: 16, child: _buildSortableHeaderCell('Parked At')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTableDataRow(CarLog log, int index, double availableWidth) {
-    return Container(
-      width: availableWidth,
-      decoration: BoxDecoration(
-        color: index % 2 == 0 ? Colors.white : AppColors.grey.withOpacity(0.05),
-        border: Border(
-          bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(flex: 12, child: _buildDataCell('${log.tagNumber}')),
-          Expanded(flex: 16, child: _buildDataCell(log.displayStatus)),
-          Expanded(flex: 16, child: _buildDataCell(log.duration)),
-          Expanded(flex: 20, child: _buildDataCell(log.parkingLocation)),
-          Expanded(flex: 20, child: _buildDataCell(log.parkedBy.name)),
-          Expanded(
-              flex: 16, child: _buildDataCell(_formatDateTime(log.parkedAt))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSortableHeaderCell(String text) {
-    final isActive = _sortColumn == text;
-    final sortIcon = _getSortIcon(text);
-
-    return InkWell(
-      onTap: () => _onHeaderTap(text),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(color: AppColors.grey.withOpacity(0.3)),
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextComponent(
-                labelText: text,
-                color: isActive ? AppColors.primary : AppColors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                softWrap: true,
-                textAlign: TextAlign.left,
-              ),
-            ),
-            if (sortIcon != null) ...[
-              const SizedBox(width: 4),
-              Icon(
-                sortIcon,
-                size: 16,
-                color: AppColors.primary,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   IconData? _getSortIcon(String columnName) {
     if (_sortColumn != columnName) return null;
 
@@ -571,31 +457,6 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
       case SortDirection.none:
         return null;
     }
-  }
-
-  Widget _buildDataCell(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(
-          right: BorderSide(color: AppColors.grey.withOpacity(0.3)),
-        ),
-      ),
-      child: TextComponent(
-        labelText: text,
-        color: AppColors.black,
-        fontSize: 13,
-        fontWeight: FontWeight.normal,
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-        softWrap: true,
-        textAlign: TextAlign.left,
-      ),
-    );
-  }
-
-  String _formatDateTime(String dateTimeString) {
-    return TimeUtils.formatUtcToIstFullDateTime(dateTimeString);
   }
 
   Widget _buildPaginationControls(List<CarLog> logs) {
