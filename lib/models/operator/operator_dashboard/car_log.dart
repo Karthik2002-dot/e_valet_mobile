@@ -29,8 +29,10 @@ class CarLog {
       parkedAt: json['parkedAt'] as String? ?? '',
       handoveredAt: json['handoveredAt'] as String? ?? '',
       displayStatus: json['displayStatus'] as String? ?? '',
-      parkedBy: ParkedBy.fromJson(json['parkedBy'] as Map<String, dynamic>? ?? {}),
-      handoveredBy: HandoveredBy.fromJson(json['handoveredBy'] as Map<String, dynamic>? ?? {}),
+      parkedBy:
+          ParkedBy.fromJson(json['parkedBy'] as Map<String, dynamic>? ?? {}),
+      handoveredBy: HandoveredBy.fromJson(
+          json['handoveredBy'] as Map<String, dynamic>? ?? {}),
       parkingLocation: json['parkingLocation'] as String? ?? '',
     );
   }
