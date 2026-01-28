@@ -263,6 +263,9 @@ class TextConstants {
   static const String carLogsNoDataMessage = 'No car logs available';
   static const String carLogsErrorMessage = 'Error loading car logs';
 
+  // Car Logs Pagination
+  static const String paginationShowLabel = 'Show:';
+
   // Drivers Screen (Operator)
   static const String driversTitle = 'Drivers';
   static const String driversDescription = 'Manage and monitor all drivers';

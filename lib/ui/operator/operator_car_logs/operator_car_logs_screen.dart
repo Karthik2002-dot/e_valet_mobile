@@ -11,6 +11,8 @@ import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_state.dart
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/car_logs_table_widget.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/table_header_row_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/page_button_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/page_size_dropdown_widget.dart';
 
 class OperatorCarLogsScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
@@ -473,7 +475,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Page size dropdown
-            _buildPageSizeDropdown(),
+            PageSizeDropdownWidget(
+              itemsPerPage: _itemsPerPage,
+              pageSizeOptions: _pageSizeOptions,
+              onPageSizeChanged: _changePageSize,
+            ),
 
             const Spacer(),
 
@@ -497,7 +503,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Page size dropdown
-          _buildPageSizeDropdown(),
+          PageSizeDropdownWidget(
+            itemsPerPage: _itemsPerPage,
+            pageSizeOptions: _pageSizeOptions,
+            onPageSizeChanged: _changePageSize,
+          ),
 
           const Spacer(),
 
@@ -573,110 +583,68 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     if (totalPages <= maxVisiblePages) {
       // Show all pages if total is small
       for (int i = 1; i <= totalPages; i++) {
-        widgets.add(_buildPageButton(i));
+        widgets.add(PageButtonWidget(
+          page: i,
+          currentPage: _currentPage,
+          onPressed: () => _goToPage(i),
+        ));
       }
     } else {
       // Show pages with ellipsis for large totals
       if (_currentPage <= 3) {
         // Current page is near the beginning
         for (int i = 1; i <= 4; i++) {
-          widgets.add(_buildPageButton(i));
+          widgets.add(PageButtonWidget(
+            page: i,
+            currentPage: _currentPage,
+            onPressed: () => _goToPage(i),
+          ));
         }
         widgets.add(const Text('...', style: TextStyle(fontSize: 14)));
-        widgets.add(_buildPageButton(totalPages));
+        widgets.add(PageButtonWidget(
+          page: totalPages,
+          currentPage: _currentPage,
+          onPressed: () => _goToPage(totalPages),
+        ));
       } else if (_currentPage >= totalPages - 2) {
         // Current page is near the end
-        widgets.add(_buildPageButton(1));
+        widgets.add(PageButtonWidget(
+          page: 1,
+          currentPage: _currentPage,
+          onPressed: () => _goToPage(1),
+        ));
         widgets.add(const Text('...', style: TextStyle(fontSize: 14)));
         for (int i = totalPages - 3; i <= totalPages; i++) {
-          widgets.add(_buildPageButton(i));
+          widgets.add(PageButtonWidget(
+            page: i,
+            currentPage: _currentPage,
+            onPressed: () => _goToPage(i),
+          ));
         }
       } else {
         // Current page is in the middle
-        widgets.add(_buildPageButton(1));
+        widgets.add(PageButtonWidget(
+          page: 1,
+          currentPage: _currentPage,
+          onPressed: () => _goToPage(1),
+        ));
         widgets.add(const Text('...', style: TextStyle(fontSize: 14)));
         for (int i = _currentPage - 1; i <= _currentPage + 1; i++) {
-          widgets.add(_buildPageButton(i));
+          widgets.add(PageButtonWidget(
+            page: i,
+            currentPage: _currentPage,
+            onPressed: () => _goToPage(i),
+          ));
         }
         widgets.add(const Text('...', style: TextStyle(fontSize: 14)));
-        widgets.add(_buildPageButton(totalPages));
+        widgets.add(PageButtonWidget(
+          page: totalPages,
+          currentPage: _currentPage,
+          onPressed: () => _goToPage(totalPages),
+        ));
       }
     }
 
     return widgets;
-  }
-
-  Widget _buildPageButton(int page) {
-    final isSelected = page == _currentPage;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: TextButton(
-        onPressed: () => _goToPage(page),
-        style: TextButton.styleFrom(
-          backgroundColor: isSelected ? AppColors.primary : Colors.transparent,
-          foregroundColor: isSelected ? Colors.white : AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          minimumSize: const Size(44, 44),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: Text(
-          page.toString(),
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPageSizeDropdown() {
-    return Row(
-      children: [
-        Text(
-          'Show:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: AppColors.grey,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.grey.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: DropdownButton<int>(
-            value: _itemsPerPage,
-            onChanged: (int? newValue) {
-              if (newValue != null) {
-                _changePageSize(newValue);
-              }
-            },
-            items: _pageSizeOptions.map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text(
-                  value.toString(),
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-              );
-            }).toList(),
-            underline: const SizedBox.shrink(),
-            icon: Icon(
-              Icons.arrow_drop_down,
-              size: 20,
-              color: AppColors.grey,
-            ),
-            isDense: true,
-          ),
-        ),
-      ],
-    );
   }
 }
