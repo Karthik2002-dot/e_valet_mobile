@@ -8,38 +8,45 @@ class TableDataRowWidget extends StatelessWidget {
   final CarLog log;
   final int index;
   final double availableWidth;
+  final VoidCallback? onTap;
 
   const TableDataRowWidget({
     super.key,
     required this.log,
     required this.index,
     required this.availableWidth,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: availableWidth,
-      decoration: BoxDecoration(
-        color: index % 2 == 0 ? Colors.white : AppColors.grey.withOpacity(0.05),
-        border: Border(
-          bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(flex: 12, child: DataCellWidget(text: '${log.tagNumber}')),
-          Expanded(flex: 16, child: DataCellWidget(text: log.displayStatus)),
-          Expanded(flex: 16, child: DataCellWidget(text: log.duration)),
-          Expanded(flex: 20, child: DataCellWidget(text: log.parkingLocation)),
-          Expanded(flex: 20, child: DataCellWidget(text: log.parkedBy.name)),
-          Expanded(
-            flex: 16,
-            child: DataCellWidget(
-                text: TimeUtils.formatUtcToIstFullDateTime(log.parkedAt)),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: availableWidth,
+        decoration: BoxDecoration(
+          color:
+              index % 2 == 0 ? Colors.white : AppColors.grey.withOpacity(0.05),
+          border: Border(
+            bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
           ),
-        ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 12, child: DataCellWidget(text: '${log.tagNumber}')),
+            Expanded(flex: 16, child: DataCellWidget(text: log.displayStatus)),
+            Expanded(flex: 16, child: DataCellWidget(text: log.duration)),
+            Expanded(
+                flex: 20, child: DataCellWidget(text: log.parkingLocation)),
+            Expanded(flex: 20, child: DataCellWidget(text: log.parkedBy.name)),
+            Expanded(
+              flex: 16,
+              child: DataCellWidget(
+                  text: TimeUtils.formatUtcToIstFullDateTime(log.parkedAt)),
+            ),
+          ],
+        ),
       ),
     );
   }

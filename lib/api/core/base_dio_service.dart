@@ -63,6 +63,22 @@ class BaseDioService {
     );
   }
 
+  Future<Response<dynamic>> patch(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    bool retryOn401 = true,
+  }) async {
+    return _executePatchWithRetry(
+      path: path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      retryOn401: retryOn401,
+    );
+  }
+
   Future<Response<dynamic>> _executeGetWithRetry({
     required String path,
     Map<String, dynamic>? queryParameters,
@@ -172,6 +188,50 @@ class BaseDioService {
             final updatedOptions = await _updateOptionsWithNewToken(options);
             // Retry the request with updated headers
             return _executePutWithRetry(
+              path: path,
+              data: data,
+              queryParameters: queryParameters,
+              options: updatedOptions,
+              retryOn401: false, // Prevent infinite retry
+              isRetry: true,
+            );
+          } catch (refreshError) {
+            // If refresh fails, throw session expired error instead of unauthorized
+            throw ApiException(
+              'Your session has expired. Please login again.',
+              code: 'session_expired',
+              statusCode: 401,
+            );
+          }
+        }
+      }
+      throw apiException;
+    }
+  }
+
+  Future<Response<dynamic>> _executePatchWithRetry({
+    required String path,
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    required bool retryOn401,
+    bool isRetry = false,
+  }) async {
+    try {
+      return await dio.patch(path,
+          data: data, queryParameters: queryParameters, options: options);
+    } on DioException catch (e) {
+      final apiException = _mapDioError(e);
+      // If 401 and retry is enabled and not already retrying, try to refresh token
+      if (apiException.statusCode == 401 && retryOn401 && !isRetry) {
+        final hasToken = await _hasAccessToken();
+        if (hasToken) {
+          try {
+            await RefreshApiService.refreshToken();
+            // Update headers with new token
+            final updatedOptions = await _updateOptionsWithNewToken(options);
+            // Retry the request with updated headers
+            return _executePatchWithRetry(
               path: path,
               data: data,
               queryParameters: queryParameters,

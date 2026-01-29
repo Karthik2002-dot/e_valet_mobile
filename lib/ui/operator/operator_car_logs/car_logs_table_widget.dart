@@ -10,6 +10,7 @@ class CarLogsTableWidget extends StatelessWidget {
   final Function(String) onHeaderTap;
   final IconData? Function(String) getSortIcon;
   final List<CarLog> Function(List<CarLog>) sortLogs;
+  final Function(CarLog)? onRowTap;
 
   const CarLogsTableWidget({
     super.key,
@@ -19,6 +20,7 @@ class CarLogsTableWidget extends StatelessWidget {
     required this.onHeaderTap,
     required this.getSortIcon,
     required this.sortLogs,
+    this.onRowTap,
   });
 
   @override
@@ -53,6 +55,7 @@ class CarLogsTableWidget extends StatelessWidget {
                     log: log,
                     index: index,
                     availableWidth: availableWidth,
+                    onTap: onRowTap != null ? () => onRowTap!(log) : null,
                   );
                 }).toList(),
               ],

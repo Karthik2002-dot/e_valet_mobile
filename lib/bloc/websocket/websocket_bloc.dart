@@ -14,12 +14,12 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   StreamSubscription<bool>? _connectionSubscription;
   StreamSubscription<Map<String, dynamic>>? _authErrorSubscription;
   final Map<String, StreamSubscription<dynamic>> _eventSubscriptions = {};
-  
+
   // Store connection details for reconnection
   String? _lastUrl;
   Map<String, dynamic>? _lastQuery;
   Map<String, dynamic>? _lastAuth;
-  
+
   // Track if we're currently refreshing token to avoid multiple refresh attempts
   bool _isRefreshingToken = false;
 
@@ -34,11 +34,11 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     on<_WebSocketConnectionEstablished>(_onConnectionEstablished);
     on<_WebSocketConnectionLost>(_onConnectionLost);
     on<_WebSocketRefreshTokenAndReconnect>(_onRefreshTokenAndReconnect);
-    
+
     // Setup auth error listener
     _setupAuthErrorListener();
   }
-  
+
   /// Setup listener for authentication errors
   void _setupAuthErrorListener() {
     _authErrorSubscription = _webSocketService.authErrorStream.listen((error) {
@@ -339,17 +339,17 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       if (_joinedRooms.isNotEmpty) {
         print('Re-joining ${_joinedRooms.length} rooms after reconnection');
         await Future.delayed(const Duration(milliseconds: 500));
-        
+
         for (final roomName in _joinedRooms.toList()) {
           // Parse room name to extract type and id
           final parts = roomName.split(':');
           if (parts.length == 2) {
             final roomType = parts[0];
             final roomId = parts[1];
-            
+
             final payload = <String, dynamic>{};
             payload['${roomType}Id'] = roomId;
-            
+
             try {
               await _webSocketService.emitWithAck(
                 'subscribe:$roomType',
@@ -371,8 +371,8 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       }
     } catch (e) {
       print('Error refreshing token and reconnecting: $e');
-      emit(WebSocketError(
-          message: 'Token refresh failed', error: e.toString()));
+      emit(
+          WebSocketError(message: 'Token refresh failed', error: e.toString()));
     } finally {
       _isRefreshingToken = false;
     }

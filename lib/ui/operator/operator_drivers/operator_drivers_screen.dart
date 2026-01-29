@@ -97,35 +97,38 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back icon button to navigate to dashboard
-                Row(
+                // Header with back button, title, and description
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      color: AppColors.black,
-                      onPressed: () {
-                        // Navigate back to dashboard (index 0)
-                        widget.onNavigateToTab?.call(0);
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          color: AppColors.black,
+                          onPressed: () {
+                            // Navigate back to dashboard (index 0)
+                            widget.onNavigateToTab?.call(0);
+                          },
+                        ),
                         TextComponent(
                           labelText: TextConstants.valetDashboardTitle,
                           color: AppColors.black,
                           fontSize: MediaQuery.of(context).size.width * 0.02,
                           fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 8),
-                        TextComponent(
-                          labelText: TextConstants.valetDashboardDescription,
-                          color: AppColors.grey,
-                          fontSize: MediaQuery.of(context).size.width * 0.013,
-                        ),
                       ],
+                    ),
+                    const SizedBox(height: 0),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 48), // Align with title text start
+                      child: TextComponent(
+                        labelText: TextConstants.valetDashboardDescription,
+                        color: AppColors.grey,
+                        fontSize: MediaQuery.of(context).size.width * 0.013,
+                      ),
                     ),
                   ],
                 ),

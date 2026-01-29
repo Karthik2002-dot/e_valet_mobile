@@ -130,7 +130,7 @@ class WebSocketService {
     _socket?.onConnectError((error) {
       print('WebSocket connection error: $error');
       _connectionController.add(false);
-      
+
       // Check if error is authentication-related
       _checkAndHandleAuthError(error);
     });
@@ -142,7 +142,7 @@ class WebSocketService {
 
     _socket?.onError((error) {
       print('WebSocket error: $error');
-      
+
       // Check if error is authentication-related
       _checkAndHandleAuthError(error);
     });
