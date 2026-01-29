@@ -31,27 +31,12 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
     UpdateCarLogStatus event,
     Emitter<CarLogsState> emit,
   ) async {
-    print('=== BLOC: _onUpdateCarLogStatus called ===');
-    print('Current state: $state');
-
     try {
-      print('=== BLOC DEBUG: Processing update ===');
-      print('Event sessionId: ${event.sessionId}');
-      print('Event newStatus: ${event.newStatus}');
-      print('===================================');
-
       final response =
           await OperatorUpdateSessionApiService.updateSessionStatus(
         sessionId: event.sessionId,
         newStatus: event.newStatus,
       );
-
-      // Log the successful update
-      print('Session status updated successfully: ${response.message}');
-      print('Response details:');
-      print('- Old Status: ${response.oldStatus}');
-      print('- New Status: ${response.newStatus}');
-      print('- Updated At: ${response.updatedAt}');
 
       // After successful update, refresh the car logs
       if (state is CarLogsLoaded) {

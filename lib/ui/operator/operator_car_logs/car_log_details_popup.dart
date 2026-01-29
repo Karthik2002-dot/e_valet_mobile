@@ -6,7 +6,8 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_event.dart';
-import 'package:niloufer_valet_mobile/utils/time_utils.dart';
+import 'widgets/simple_detail_row.dart';
+import 'widgets/status_detail_row.dart';
 
 class CarLogDetailsPopup extends StatefulWidget {
   final CarLog carLog;
@@ -178,17 +179,26 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSimpleDetailRow(
-                        'Tag Number', widget.carLog.tagNumber.toString()),
+                    SimpleDetailRow(
+                        label: 'Tag Number',
+                        value: widget.carLog.tagNumber.toString()),
                     const SizedBox(height: 16),
-                    _buildSimpleDetailRow(
-                        'Parked By',
-                        widget.carLog.parkedBy.phone != null &&
-                                widget.carLog.parkedBy.phone!.isNotEmpty
+                    SimpleDetailRow(
+                        label: 'Parked By',
+                        value: widget.carLog.parkedBy.phone.isNotEmpty
                             ? '${widget.carLog.parkedBy.name} (${widget.carLog.parkedBy.phone})'
                             : widget.carLog.parkedBy.name),
                     const SizedBox(height: 16),
-                    _buildStatusDetailRow('Car Status', _selectedStatus),
+                    StatusDetailRow(
+                      label: 'Car Status',
+                      selectedStatus: _selectedStatus,
+                      statusOptions: _statusOptions,
+                      onStatusChanged: (value) {
+                        setState(() {
+                          _selectedStatus = value;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -246,94 +256,6 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSimpleDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        TextComponent(
-          labelText: label,
-          color: AppColors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        TextComponent(
-          labelText: value,
-          color: AppColors.black,
-          fontSize: 16,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        TextComponent(
-          labelText: label,
-          color: AppColors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        Container(
-          width: 200,
-          margin: const EdgeInsets.only(left: 16),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.grey.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: DropdownButtonFormField<String>(
-            value: _selectedStatus,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              border: InputBorder.none,
-            ),
-            items: _statusOptions.map((status) {
-              return DropdownMenuItem(
-                value: status,
-                child: Text(status, style: const TextStyle(fontSize: 14)),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedStatus = value ?? '';
-              });
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextComponent(
-          labelText: label,
-          color: AppColors.black,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.grey.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.grey.withOpacity(0.3)),
-          ),
-          child: TextComponent(
-            labelText: value,
-            color: AppColors.black,
-            fontSize: 14,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -9,10 +9,8 @@ class OperatorUpdateSessionApiService {
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static Future<UpdateSessionStatusResponse> updateSessionStatus({
-    required String sessionId,
-    required String newStatus,
-  }) async {
+  static Future<UpdateSessionStatusResponse> updateSessionStatus(
+      {required String sessionId, required String newStatus}) async {
     final accessToken = await TokenStorage.getAccessToken();
 
     if (accessToken == null || accessToken.isEmpty) {
@@ -28,14 +26,6 @@ class OperatorUpdateSessionApiService {
     );
 
     try {
-      // Debug: Print request details
-      print('=== API REQUEST DEBUG ===');
-      print('URL: $_baseUrl/operators/update-session');
-      print('Method: PATCH');
-      print(
-          'Request Body: {"sessionId": "$sessionId", "newStatus": "$newStatus"}');
-      print('========================');
-
       final response = await base.patch(
         '/operators/update-session',
         data: {
