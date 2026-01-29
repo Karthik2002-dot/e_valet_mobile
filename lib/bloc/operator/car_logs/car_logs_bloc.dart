@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_car_logs_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_update_session_api_service.dart';
 import 'car_logs_event.dart';
@@ -32,8 +33,7 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
     Emitter<CarLogsState> emit,
   ) async {
     try {
-      final response =
-          await OperatorUpdateSessionApiService.updateSessionStatus(
+      await OperatorUpdateSessionApiService.updateSessionStatus(
         sessionId: event.sessionId,
         newStatus: event.newStatus,
       );
@@ -42,9 +42,7 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
       if (state is CarLogsLoaded) {
         final currentState = state as CarLogsLoaded;
         add(FetchCarLogs(
-          outletId: currentState.carLogsResponse.logs.isNotEmpty
-              ? '1' // You might want to store outletId in state
-              : '1',
+          outletId: dotenv.env['OUTLET_ID']!,
           page: currentState.carLogsResponse.page,
           pageSize: currentState.carLogsResponse.pageSize,
         ));

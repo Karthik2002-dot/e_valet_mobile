@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_event.dart';
 import 'widgets/simple_detail_row.dart';
@@ -110,7 +111,8 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
     } catch (e) {
       // Show error if needed
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update status: $e')),
+        SnackBar(
+            content: Text(TextConstants.failedToUpdateStatus(e.toString()))),
       );
     } finally {
       setState(() {
@@ -158,7 +160,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
               child: Row(
                 children: [
                   TextComponent(
-                    labelText: 'Car Log Details',
+                    labelText: TextConstants.carLogDetailsTitle,
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -180,17 +182,17 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SimpleDetailRow(
-                        label: 'Tag Number',
+                        label: TextConstants.tagNumberLabel,
                         value: widget.carLog.tagNumber.toString()),
                     const SizedBox(height: 16),
                     SimpleDetailRow(
-                        label: 'Parked By',
+                        label: TextConstants.parkedByLabel,
                         value: widget.carLog.parkedBy.phone.isNotEmpty
                             ? '${widget.carLog.parkedBy.name} (${widget.carLog.parkedBy.phone})'
                             : widget.carLog.parkedBy.name),
                     const SizedBox(height: 16),
                     StatusDetailRow(
-                      label: 'Car Status',
+                      label: TextConstants.carStatusLabel,
                       selectedStatus: _selectedStatus,
                       statusOptions: _statusOptions,
                       onStatusChanged: (value) {
@@ -218,7 +220,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                   TextButton(
                     onPressed: () => widget.onClose(),
                     child: TextComponent(
-                      labelText: 'Cancel',
+                      labelText: TextConstants.cancelButton,
                       color: AppColors.grey,
                       fontWeight: FontWeight.w600,
                     ),
@@ -245,7 +247,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                             ),
                           )
                         : TextComponent(
-                            labelText: 'Submit',
+                            labelText: TextConstants.submitButton,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),

@@ -348,4 +348,11 @@ class TextConstants {
   static const String sessionContinue =
       'Your session has been not completed please click on continue to proceed';
   static const String continueLabel = 'Continue';
+
+  // Car Log Details Popup
+  static const String carLogDetailsTitle = 'Car Log Details';
+  static const String carStatusLabel = 'Car Status';
+  static const String cancelButton = 'Cancel';
+  static String failedToUpdateStatus(String error) =>
+      'Failed to update status: $error';
 }
