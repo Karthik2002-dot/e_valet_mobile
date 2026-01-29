@@ -13,3 +13,13 @@ class FetchCarLogs extends CarLogsEvent {
     this.pageSize = 10,
   });
 }
+
+class UpdateCarLogStatus extends CarLogsEvent {
+  final String sessionId;
+  final String newStatus;
+
+  const UpdateCarLogStatus({
+    required this.sessionId,
+    required this.newStatus,
+  });
+}
