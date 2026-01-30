@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
@@ -54,6 +55,9 @@ class MyApp extends StatelessWidget {
             create: (context) => SplashBloc(
               webSocketBloc: context.read<WebSocketBloc>(),
             ),
+          ),
+          BlocProvider<DriverStatusBloc>(
+            create: (context) => DriverStatusBloc(),
           ),
         ],
         child: MaterialApp(

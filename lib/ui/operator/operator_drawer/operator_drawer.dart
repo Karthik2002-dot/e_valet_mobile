@@ -40,7 +40,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/slots.png',
-                title: TextConstants.slots,
+                title: TextConstants.parkedCar,
                 isSelected: selectedIndex == 1,
                 onTap: () {
                   Navigator.of(context).pop();

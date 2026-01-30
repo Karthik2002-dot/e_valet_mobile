@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
@@ -53,7 +54,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));
       if (isOperator) {
-        outletId = '2';
+        outletId = dotenv.env['OUTLET_ID'] ?? '1';
       }
 
       // Initialize WebSocket connection if user is authenticated

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 
@@ -64,6 +65,7 @@ class LocalNotificationService {
 
     try {
       // High priority channel for urgent notifications
+      // Using default system sound (no custom sound specified) with playSound: true
       const highPriorityChannel = AndroidNotificationChannel(
         'high_priority_channel',
         'High Priority Notifications',
@@ -71,6 +73,7 @@ class LocalNotificationService {
         importance: Importance.high,
         playSound: true,
         enableVibration: true,
+        // No sound parameter = uses default system notification sound
       );
 
       // Default channel
@@ -80,6 +83,8 @@ class LocalNotificationService {
         description: 'This channel is used for default notifications',
         importance: Importance.defaultImportance,
         playSound: true,
+        enableVibration: true,
+        // No sound parameter = uses default system notification sound
       );
 
       // Retrieval request channel
@@ -90,6 +95,7 @@ class LocalNotificationService {
         importance: Importance.high,
         playSound: true,
         enableVibration: true,
+        // No sound parameter = uses default system notification sound
       );
 
       // Driver updates channel
@@ -99,6 +105,8 @@ class LocalNotificationService {
         description: 'Notifications for driver assignments and updates',
         importance: Importance.defaultImportance,
         playSound: true,
+        enableVibration: true,
+        // No sound parameter = uses default system notification sound
       );
 
       // System alerts channel
@@ -109,6 +117,7 @@ class LocalNotificationService {
         importance: Importance.high,
         playSound: true,
         enableVibration: true,
+        // No sound parameter = uses default system notification sound
       );
 
       // Register all channels
@@ -163,13 +172,24 @@ class LocalNotificationService {
       final effectiveChannelDescription =
           channelDescription ?? _getChannelDescription(payload?['type']);
 
+      // Create longer vibration pattern: [delay, vibrate, pause, vibrate, pause, vibrate, pause, vibrate, pause]
+      // Pattern: 0ms delay, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause
+      // Total vibration: ~8 seconds (2000 + 500 + 2000 + 500 + 2000 + 500 + 2000 + 500)
+      final vibrationPattern =
+          Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
+
       // Android notification details
+      // No sound parameter = uses default system notification sound (enabled by default)
       final androidDetails = AndroidNotificationDetails(
         effectiveChannelId,
         effectiveChannelName,
         channelDescription: effectiveChannelDescription,
         importance: importance,
         priority: priority,
+        playSound: true,
+        enableVibration: true,
+        vibrationPattern: vibrationPattern,
+        // No sound parameter = uses default system notification sound
         icon: '@mipmap/ic_launcher',
         styleInformation: BigTextStyleInformation(
           body,
@@ -214,6 +234,12 @@ class LocalNotificationService {
     Map<String, dynamic>? payload,
   }) async {
     try {
+      // Create longer vibration pattern: [delay, vibrate, pause, vibrate, pause, vibrate, pause, vibrate, pause]
+      // Pattern: 0ms delay, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause, 2000ms vibrate, 500ms pause
+      // Total vibration: ~8 seconds (2000 + 500 + 2000 + 500 + 2000 + 500 + 2000 + 500)
+      final vibrationPattern =
+          Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
+
       final androidDetails = AndroidNotificationDetails(
         'high_priority_channel',
         'High Priority Notifications',
@@ -221,6 +247,10 @@ class LocalNotificationService {
             'This channel is used for high priority notifications',
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        vibrationPattern: vibrationPattern,
+        // No sound parameter = uses default system notification sound
         icon: '@mipmap/ic_launcher',
         actions: actions,
         styleInformation: BigTextStyleInformation(

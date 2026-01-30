@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
@@ -47,8 +48,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
     context.read<OperatorDashboardBloc>().add(
           CreateManualRetrievalRequest(
             cardNumber: cardNumber,
-            outletId:
-                '2', // TODO: Replace with actual outletId from session/profile
+            outletId: dotenv.env['OUTLET_ID'] ?? '1',
           ),
         );
   }
@@ -63,8 +63,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
           // Trigger soft refresh to update the UI
           widget.onRequestCreated();
         } else if (state is ManualRequestError) {
-          SnackBars.showErrorSnackBar(context,
-              '${TextConstants.failedToCreateRequest}: ${state.message}');
+          SnackBars.showErrorSnackBar(context, state.message);
         }
       },
       child: BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(

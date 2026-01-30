@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -19,6 +18,10 @@ class WebSocketService {
   final StreamController<bool> _connectionController =
       StreamController<bool>.broadcast();
 
+  /// Authentication error stream
+  final StreamController<Map<String, dynamic>> _authErrorController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
   /// Custom event stream controller for dynamic event handling
   final Map<String, StreamController<dynamic>> _eventControllers = {};
 
@@ -30,6 +33,10 @@ class WebSocketService {
 
   /// Stream to listen to connection status changes
   Stream<bool> get connectionStream => _connectionController.stream;
+
+  /// Stream to listen to authentication errors
+  Stream<Map<String, dynamic>> get authErrorStream =>
+      _authErrorController.stream;
 
   /// Initialize and connect to WebSocket server
   Future<void> connect({
@@ -123,6 +130,9 @@ class WebSocketService {
     _socket?.onConnectError((error) {
       print('WebSocket connection error: $error');
       _connectionController.add(false);
+
+      // Check if error is authentication-related
+      _checkAndHandleAuthError(error);
     });
 
     _socket?.onConnectTimeout((_) {
@@ -132,6 +142,9 @@ class WebSocketService {
 
     _socket?.onError((error) {
       print('WebSocket error: $error');
+
+      // Check if error is authentication-related
+      _checkAndHandleAuthError(error);
     });
 
     _socket?.onReconnect((attempt) {
@@ -160,6 +173,48 @@ class WebSocketService {
       // Uncomment for debugging
       // print('WebSocket pong');
     });
+
+    // Listen to custom 'exception' event from server (NestJS gateway exception filter)
+    _socket?.on('exception', (data) {
+      print('WebSocket exception from server: $data');
+      _checkAndHandleAuthError(data);
+    });
+  }
+
+  /// Check if error is authentication-related and emit to auth error stream
+  void _checkAndHandleAuthError(dynamic error) {
+    try {
+      String errorMessage = '';
+      int? statusCode;
+
+      if (error is Map) {
+        errorMessage = error['message']?.toString() ?? '';
+        statusCode = error['statusCode'] as int?;
+      } else if (error is String) {
+        errorMessage = error;
+      }
+
+      // Check for authentication error indicators
+      final isAuthError = statusCode == 401 ||
+          statusCode == 403 ||
+          errorMessage.toLowerCase().contains('unauthorized') ||
+          errorMessage.toLowerCase().contains('authentication') ||
+          errorMessage.toLowerCase().contains('token') ||
+          errorMessage.toLowerCase().contains('forbidden');
+
+      if (isAuthError) {
+        print('Authentication error detected in WebSocket: $errorMessage');
+        if (!_authErrorController.isClosed) {
+          _authErrorController.add({
+            'error': errorMessage,
+            'statusCode': statusCode,
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+        }
+      }
+    } catch (e) {
+      print('Error checking auth error: $e');
+    }
   }
 
   /// Emit an event to the server
@@ -300,6 +355,9 @@ class WebSocketService {
     await disconnect();
     if (!_connectionController.isClosed) {
       await _connectionController.close();
+    }
+    if (!_authErrorController.isClosed) {
+      await _authErrorController.close();
     }
   }
 

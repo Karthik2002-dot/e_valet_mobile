@@ -32,6 +32,21 @@ class _DashboardThreeColumnLayoutState
   final ScrollController _retrievalRequestsScrollController =
       ScrollController();
 
+  int _statusOrder(String status) {
+    switch (status.toUpperCase()) {
+      case 'RETRIEVAL_REQUESTED':
+        return 0;
+      case 'ASSIGNED':
+        return 1;
+      case 'ACCEPTED':
+        return 2;
+      case 'ARRIVED':
+        return 3;
+      default:
+        return 4;
+    }
+  }
+
   @override
   void dispose() {
     _retrievalRequestsScrollController.dispose();
@@ -137,13 +152,19 @@ class _DashboardThreeColumnLayoutState
                               // Stop auto-scrolling when drag leaves
                             },
                             builder: (context, candidateData, rejectedData) {
+                              final sortedRequests = [
+                                ...widget.retrievalRequests.requests
+                              ];
+                              sortedRequests.sort(
+                                (a, b) => _statusOrder(a.status)
+                                    .compareTo(_statusOrder(b.status)),
+                              );
+
                               return ListView.builder(
                                 controller: _retrievalRequestsScrollController,
-                                itemCount:
-                                    widget.retrievalRequests.requests.length,
+                                itemCount: sortedRequests.length,
                                 itemBuilder: (context, index) {
-                                  final request =
-                                      widget.retrievalRequests.requests[index];
+                                  final request = sortedRequests[index];
                                   return RetrievalRequestCard(
                                     request: request,
                                     availableDrivers:

@@ -12,7 +12,6 @@ import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
-import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
@@ -35,51 +34,17 @@ class PreviewCarScreen extends StatefulWidget {
 }
 
 class _PreviewCarScreenState extends State<PreviewCarScreen> {
-  Timer? _pollingTimer;
   String? _currentParkingLocation;
 
   @override
   void initState() {
     super.initState();
     _currentParkingLocation = widget.parkingLocation;
-    _startPolling();
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
     super.dispose();
-  }
-
-  void _startPolling() {
-    // Cancel existing timer if any
-    _pollingTimer?.cancel();
-
-    // Start polling every 2 seconds
-    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      _pollAssignedSessions();
-    });
-  }
-
-  Future<void> _pollAssignedSessions() async {
-    try {
-      final assignedSessions =
-          await AssignedSessionsApiService.fetchAssignedSessions();
-
-      // Only reflect/show data when we successfully get it
-      _handleAssignedSessionsUpdate(assignedSessions);
-
-      // Restart the timer when we get data
-      _startPolling();
-    } catch (e) {
-      // Even on error, restart the timer to continue polling
-      _startPolling();
-    }
-  }
-
-  void _handleAssignedSessionsUpdate(List<dynamic> assignedSessions) {
-    // Here you can update UI or perform actions only when data is received
-    // For example: show a snackbar, update state, navigate, etc.
   }
 
   Future<void> _handleSubmit(BuildContext context) async {

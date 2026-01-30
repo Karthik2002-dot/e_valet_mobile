@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/retrieval_request_utils.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/assignment_confirmation_dialog.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 class RetrievalRequestCard extends StatefulWidget {
   final RetrievalRequest request;
@@ -29,7 +30,31 @@ class RetrievalRequestCard extends StatefulWidget {
 }
 
 class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
+  void _callPhoneNumber(String phoneNumber) async {
+    try {
+      final called = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+      if (called == null || !called) {
+        SnackBars.showErrorSnackBar(context, 'Could not launch phone dialer');
+      }
+    } catch (e) {
+      SnackBars.showErrorSnackBar(context, 'Could not launch phone dialer');
+    }
+  }
+
   bool _isDraggingOver = false;
+
+  bool get _isAssignable =>
+      RetrievalRequestUtils.isAssignable(widget.request.status);
+
+  Color _statusColor() => RetrievalRequestUtils.getStatusColor(
+        status: widget.request.status,
+        waitingTime: widget.request.waitingTime,
+      );
+
+  String _statusLabel() => RetrievalRequestUtils.getStatusLabel(
+        status: widget.request.status,
+        waitingTime: widget.request.waitingTime,
+      );
 
   void _showAssignmentDialog(AvailableDriver driver) {
     final dashboardBloc = context.read<OperatorDashboardBloc>();
@@ -75,17 +100,26 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
   Widget build(BuildContext context) {
     return DragTarget<AvailableDriver>(
       onWillAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          return false;
+        }
         // Only accept if driver status is 'free'
         return details.data.status.toLowerCase() == 'free';
       },
       onAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          setState(() {
+            _isDraggingOver = false;
+          });
+          return;
+        }
         setState(() {
           _isDraggingOver = false;
         });
         _showAssignmentDialog(details.data);
       },
       onMove: (details) {
-        if (!_isDraggingOver) {
+        if (_isAssignable && !_isDraggingOver) {
           setState(() {
             _isDraggingOver = true;
           });
@@ -114,10 +148,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
               12,
             ),
             border: Border.all(
-              color: _isDraggingOver
-                  ? AppColors.primary
-                  : RetrievalRequestUtils.getPriorityColor(
-                      widget.request.waitingTime),
+              color: _isDraggingOver ? AppColors.primary : _statusColor(),
               width: _isDraggingOver ? 3 : 2,
             ),
             boxShadow: [
@@ -182,13 +213,11 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                                 MediaQuery.of(context).size.height * 0.005,
                           ),
                           decoration: BoxDecoration(
-                            color: RetrievalRequestUtils.getPriorityColor(
-                                widget.request.waitingTime),
+                            color: _statusColor(),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: TextComponent(
-                            labelText: RetrievalRequestUtils.getPriorityLabel(
-                                widget.request.waitingTime),
+                            labelText: _statusLabel(),
                             fontSize: MediaQuery.of(context).size.width * 0.014,
                             color: AppColors.white,
                             fontWeight: FontWeight.w600,
@@ -207,7 +236,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                             Icon(Icons.local_parking,
                                 size: MediaQuery.of(context).size.width * 0.018,
                                 color: AppColors.primary),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Flexible(
                               child: TextComponent(
                                 labelText:
@@ -269,20 +298,62 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                           color: AppColors.black,
                           fontWeight: FontWeight.w600,
                         ),
-                        Spacer(),
-                        Icon(
-                          Icons.phone_outlined,
-                          size: MediaQuery.of(context).size.width * 0.016,
-                          color: AppColors.grey,
-                        ),
-                        TextComponent(
-                          labelText: widget.request.parkedBy.phone ?? '-',
-                          fontSize: MediaQuery.of(context).size.width * 0.015,
-                          color: AppColors.grey,
-                          fontWeight: FontWeight.w500,
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () {
+                            final phone = widget.request.parkedBy.phone;
+                            if (phone != null && phone.isNotEmpty) {
+                              _callPhoneNumber(phone);
+                            } else {
+                              SnackBars.showErrorSnackBar(
+                                  context, 'No phone number available');
+                            }
+                          },
+                          child: Icon(
+                            Icons.phone_outlined,
+                            size: MediaQuery.of(context).size.width * 0.016,
+                            color: AppColors.grey,
+                          ),
                         ),
                       ],
                     ),
+                    if (widget.request.assignedTo.name.isNotEmpty) ...[
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // Row 3: Requested by name and Phone number
+                      Row(
+                        children: [
+                          TextComponent(
+                            labelText: TextConstants.assignedToLabel,
+                            fontSize: MediaQuery.of(context).size.width * 0.014,
+                            color: AppColors.grey,
+                          ),
+                          TextComponent(
+                            labelText: widget.request.assignedTo.name,
+                            fontSize: MediaQuery.of(context).size.width * 0.016,
+                            color: AppColors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              final phone = widget.request.assignedTo.phone;
+                              if (phone != null && phone.isNotEmpty) {
+                                _callPhoneNumber(phone);
+                              } else {
+                                SnackBars.showErrorSnackBar(
+                                    context, 'No phone number available');
+                              }
+                            },
+                            child: Icon(
+                              Icons.phone_outlined,
+                              size: MediaQuery.of(context).size.width * 0.016,
+                              color: AppColors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]
                   ],
                 ),
               ),

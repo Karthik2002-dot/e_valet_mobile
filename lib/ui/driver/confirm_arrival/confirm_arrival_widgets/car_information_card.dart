@@ -71,7 +71,7 @@ class CarInformationCard extends StatelessWidget {
                                 'assets/images/cars.png',
                                 fit: BoxFit.contain,
                                 width: screenWidth * 0.4,
-                                height: screenWidth * 0.4,
+                                height: screenHeight * 0.4,
                               ),
                             ),
                           ),
@@ -94,7 +94,7 @@ class CarInformationCard extends StatelessWidget {
                             'assets/images/cars.png',
                             fit: BoxFit.contain,
                             width: screenWidth * 0.4,
-                            height: screenWidth * 0.4,
+                            height: screenHeight * 0.4,
                           ),
                         ),
                       ),
@@ -140,6 +140,36 @@ class CarInformationCard extends StatelessWidget {
                   thickness: 1,
                   height: 1,
                 ),
+                if (session.parkingLocation != null &&
+                    session.parkingLocation!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 20,
+                        color: AppColors.secondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextComponent(
+                          labelText: session.parkingLocation.toString(),
+                          fontSize: screenWidth * 0.04,
+                          color: AppColors.black,
+                          maxLines: 2,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    color: AppColors.greyLight,
+                    thickness: 1,
+                    height: 1,
+                  ),
+                ],
 
                 SizedBox(height: screenHeight * 0.02),
 
@@ -178,41 +208,6 @@ class CarInformationCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-
-                SizedBox(height: screenHeight * 0.02),
-
-                // Locate Car Button
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.015,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.greyLight,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: screenWidth * 0.05,
-                        color: AppColors.secondary,
-                      ),
-                      SizedBox(width: screenWidth * 0.02),
-                      TextComponent(
-                        labelText: TextConstants.locateCarUsingPhoto,
-                        fontSize: screenWidth * 0.035,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),

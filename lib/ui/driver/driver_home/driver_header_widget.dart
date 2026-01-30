@@ -4,7 +4,6 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bl
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_break_toggle_widget.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_online_toggle_widget.dart';
 
 class DriverHeaderWidget extends StatelessWidget {
   final bool isOnline;
@@ -48,29 +47,17 @@ class DriverHeaderWidget extends StatelessWidget {
 
           return Stack(
             children: [
-              // On Break toggle positioned at very top-left, just below logo
+              // On Break toggle positioned at very top-right, just below logo
               if (isCurrentlyOnline)
                 Positioned(
                   top: 4, // Minimal offset from top (4 pixels)
-                  left: padding * 1.5, // Extra gap from left edge
+                  right: padding, // Gap from right edge
                   child: DriverBreakToggleWidget(
                     screenWidth: screenWidth,
                     isTablet: isTablet,
                     isDesktop: isDesktop,
                   ),
                 ),
-
-              // Online toggle positioned at very top-right corner
-              Positioned(
-                top: 4, // Minimal offset from top (4 pixels)
-                right: padding,
-                child: DriverOnlineToggleWidget(
-                  isOnline: isOnline,
-                  screenWidth: screenWidth,
-                  isTablet: isTablet,
-                  isDesktop: isDesktop,
-                ),
-              ),
             ],
           );
         },

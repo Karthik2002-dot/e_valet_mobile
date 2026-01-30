@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 abstract class OperatorDashboardEvent {
   const OperatorDashboardEvent();
 }
@@ -5,9 +7,9 @@ abstract class OperatorDashboardEvent {
 class FetchDashboardKpis extends OperatorDashboardEvent {
   final String outletId;
 
-  const FetchDashboardKpis({
-    this.outletId = '2',
-  });
+  FetchDashboardKpis({
+    String? outletId,
+  }) : outletId = outletId ?? (dotenv.env['OUTLET_ID'] ?? '1');
 }
 
 /// Event for silently refreshing KPIs without showing loader
@@ -18,12 +20,12 @@ class RefreshDashboardKpisSilently extends OperatorDashboardEvent {
   final bool refreshDrivers;
   final bool refreshRequests;
 
-  const RefreshDashboardKpisSilently({
-    this.outletId = '2',
+  RefreshDashboardKpisSilently({
+    String? outletId,
     this.refreshKpis = true,
     this.refreshDrivers = true,
     this.refreshRequests = true,
-  });
+  }) : outletId = outletId ?? (dotenv.env['OUTLET_ID'] ?? '1');
 }
 
 class AssignDriverToRetrieval extends OperatorDashboardEvent {
@@ -44,4 +46,18 @@ class CreateManualRetrievalRequest extends OperatorDashboardEvent {
     required this.cardNumber,
     required this.outletId,
   });
+}
+
+class NewParkingEvent extends OperatorDashboardEvent {
+  final String outletId;
+  final bool refreshKpis;
+  final bool refreshDrivers;
+  final bool refreshRequests;
+
+  NewParkingEvent({
+    String? outletId,
+    this.refreshKpis = true,
+    this.refreshDrivers = true,
+    this.refreshRequests = true,
+  }) : outletId = outletId ?? (dotenv.env['OUTLET_ID'] ?? '1');
 }

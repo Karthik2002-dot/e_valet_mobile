@@ -3,6 +3,7 @@ class TextConstants {
 
   static const dashboard = 'Dashboard';
   static const slots = 'Slots';
+  static const parkedCar = 'Parked Car';
   static const valets = 'Valets';
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
@@ -20,7 +21,7 @@ class TextConstants {
   static const pleaseEnterValidCardNumber = 'Please enter a valid card number';
   static const manualRequest = 'MANUAL REQUEST';
   static const processingText = 'PROCESSING...';
-  static const failedToCreateRequest = 'Failed to create request';
+  static const failedToCreateRequest = 'Failed to create manual request...';
 
   // Assign Driver
   static const failedToAssignDriver = 'Failed to assign driver';
@@ -229,6 +230,8 @@ class TextConstants {
   static const String validationEnterTagNumber = 'Please enter the tag number';
   static const String validationEnterValidNumber =
       'Please enter a valid number';
+  static const String tagSubmissionError =
+      'The QR code you scanned or the tag number you entered is invalid or already used. Please kindly check the QR code or tag number.';
 
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
@@ -246,6 +249,23 @@ class TextConstants {
   static const String totalTripsValue = '456';
   static const String totalDistanceValue = '2340 km';
 
+  // Car Logs Table Headers
+  static const String carLogsTagNumber = 'Tag Number';
+  static const String carLogsCarStatus = 'Car Status';
+  static const String carLogsDuration = 'Duration';
+  static const String carLogsParkLocation = 'Park Location';
+  static const String carLogsParkedBy = 'Parked By';
+  static const String carLogsParkedAt = 'Parked At';
+
+  // Car Logs Search and Messages
+  static const String carLogsSearchHint =
+      'Search by tag, status, or parked by...';
+  static const String carLogsNoDataMessage = 'No car logs available';
+  static const String carLogsErrorMessage = 'Error loading car logs';
+
+  // Car Logs Pagination
+  static const String paginationShowLabel = 'Show:';
+
   // Drivers Screen (Operator)
   static const String driversTitle = 'Drivers';
   static const String driversDescription = 'Manage and monitor all drivers';
@@ -262,6 +282,9 @@ class TextConstants {
   static const String occupied = 'Occupied';
   static const String availableValue = '12';
   static const String occupiedValue = '8';
+  static const String parkedCarTitle = 'Parked Car';
+  static const String parkedCarDescription = 'Manage and monitor parked cars';
+  static const String noCarsParked = 'No Cars Parked';
 
   // QR Reader
   static const String cameraErrorReinitializing =
@@ -318,6 +341,18 @@ class TextConstants {
   static const String cancelText = 'Cancel';
   static const String confirm = 'Confirm';
   static const String parkedByLabel = 'Parked By ';
+  static const String assignedToLabel = 'Assigned To ';
   static const String recommendedBy = 'Recommended - Parked this vehicle';
   static const String recommendedFor = 'Recommended for';
+
+  static const String sessionContinue =
+      'Your session has been not completed please click on continue to proceed';
+  static const String continueLabel = 'Continue';
+
+  // Car Log Details Popup
+  static const String carLogDetailsTitle = 'Car Log Details';
+  static const String carStatusLabel = 'Car Status';
+  static const String cancelButton = 'Cancel';
+  static String failedToUpdateStatus(String error) =>
+      'Failed to update status: $error';
 }

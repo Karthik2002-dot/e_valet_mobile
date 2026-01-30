@@ -1,6 +1,35 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 class TokenStorage {
+  static const String _parkingLocationKey = 'parking_location';
+
+  // Parking Location management
+  static Future<void> saveParkingLocation(String location) async {
+    try {
+      await _box.put(_parkingLocationKey, location);
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving parking location: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getParkingLocation() async {
+    try {
+      return _box.get(_parkingLocationKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving parking location: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearParkingLocation() async {
+    try {
+      await _box.delete(_parkingLocationKey);
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing parking location: $e');
+    }
+  }
+
   static const String _boxName = 'authBox';
 
   // Public getter so other classes can reuse the same box name

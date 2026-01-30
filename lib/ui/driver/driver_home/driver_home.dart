@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
@@ -11,12 +13,18 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_ev
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
+import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 
 class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   static final DriverHomeRouteObserver _instance =
@@ -62,76 +70,89 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
 
-  void _presentAssignedSessionSheet() {
-    // Reset dismiss state
+  // Track if we've already shown the session incomplete dialog
+  bool _hasShownSessionDialog = false;
+
+  // Track if we've already navigated for accepted/arrived sessions
+  bool _hasNavigatedForStatus = false;
+
+  // Track if permissions have been requested
+  bool _hasRequestedPermissions = false;
+
+  void _refreshPendingSessions() {
+    try {
+      context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+    } catch (e) {
+      // Ignore refresh errors when context is not ready
+    }
+  }
+
+  void _presentAssignedSessionSheet(BuildContext context) {
     _dismissNotifier.value = false;
-
-    // Cancel any existing timer
     _dismissTimer?.cancel();
-
-    // Set timer to allow dismissal after 60 seconds
     _dismissTimer = Timer(const Duration(seconds: 60), () {
       if (mounted) {
         _dismissNotifier.value = true;
       }
     });
 
+    final assignedSessionsBloc = context.read<AssignedSessionsBackgroundBloc>();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
-      isDismissible: _dismissNotifier.value, // Controlled by ValueNotifier
-      enableDrag: false, // Disable drag to dismiss
-      builder: (BuildContext modalContext) => ValueListenableBuilder<bool>(
-        valueListenable: _dismissNotifier,
-        builder: (context, canDismiss, _) {
-          return Stack(
-            children: [
-              // Invisible barrier that captures taps when dismissible
-              if (canDismiss)
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(modalContext).pop();
-                      _cleanupTimer();
-                    },
-                    child: Container(
-                      color: Colors.black
-                          .withOpacity(0.001), // Nearly invisible but tappable
+      isDismissible: _dismissNotifier.value,
+      enableDrag: false,
+      builder: (BuildContext modalContext) => BlocProvider.value(
+        value: assignedSessionsBloc,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _dismissNotifier,
+          builder: (context, canDismiss, _) {
+            return Stack(
+              children: [
+                if (canDismiss)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(modalContext).pop();
+                        _cleanupTimer();
+                      },
+                      child: Container(
+                        color: Colors.black.withOpacity(0.001),
+                      ),
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FractionallySizedBox(
+                    heightFactor: 0.6,
+                    alignment: Alignment.bottomCenter,
+                    child: Stack(
+                      children: [
+                        const AssignedSessionSheetLoader(),
+                        if (canDismiss)
+                          Positioned.fill(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(modalContext).pop();
+                                _cleanupTimer();
+                              },
+                              child: Container(
+                                color: Colors.transparent,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              // The actual bottom sheet content
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: FractionallySizedBox(
-                  heightFactor: 0.6,
-                  child: Stack(
-                    children: [
-                      const AssignedSessionSheetLoader(),
-                      // Invisible overlay that captures taps when dismissible
-                      if (canDismiss)
-                        Positioned.fill(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(modalContext).pop();
-                              _cleanupTimer();
-                            },
-                            child: Container(
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     ).then((_) {
-      // Cleanup when sheet is closed
       _cleanupTimer();
     });
   }
@@ -148,8 +169,49 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _routeObserver.setOnRouteChanged(_onRouteChanged);
 
+    // Request permissions when driver home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestPermissions();
+    });
+
     // Start periodic WebSocket health check
     _startWebSocketHealthCheck();
+  }
+
+  Future<void> _requestPermissions() async {
+    // Only request once per screen load
+    if (_hasRequestedPermissions) return;
+    _hasRequestedPermissions = true;
+
+    // Request Location Permission
+    LocationPermission locationPermission =
+        await LocationService.checkPermission();
+    if (locationPermission == LocationPermission.denied) {
+      locationPermission = await LocationService.requestPermission();
+    }
+
+    if (locationPermission != LocationPermission.denied &&
+        locationPermission != LocationPermission.deniedForever) {
+      // Get current location and store it
+      try {
+        final position = await LocationService.getCurrentLocation();
+        final latitude = position.latitude;
+        final longitude = position.longitude;
+        final location =
+            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+
+        await TokenStorage.saveCurrentLocation(
+          latitude: latitude,
+          longitude: longitude,
+          location: location,
+        );
+      } catch (e) {
+        // Continue even if location fetch fails
+      }
+    }
+
+    // Request Camera Permission
+    await Permission.camera.request();
   }
 
   void _onRouteChanged() {
@@ -190,6 +252,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     if (state == AppLifecycleState.resumed) {
       // App came back to foreground - check WebSocket
       _checkWebSocketOnResume();
+      _hasNavigatedForStatus = false;
+      _refreshPendingSessions();
     }
   }
 
@@ -236,6 +300,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _assignedBloc = null; // Clear bloc reference
     _cleanupTimer();
     _dismissNotifier.dispose();
+    _hasShownSessionDialog = false; // Reset flag
+    _hasNavigatedForStatus = false; // Reset navigation flag
+    _hasRequestedPermissions = false; // Reset permission flag
     super.dispose();
   }
 
@@ -272,17 +339,42 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             listeners: [
               BlocListener<AssignedSessionsBackgroundBloc,
                   AssignedSessionsBackgroundState>(
-                listener: (context, state) {
+                listener: (blocContext, state) {
                   if (state is AssignedSessionsBackgroundData) {
                     if (state.hasSessions) {
-                      // Show bottom sheet when new assigned sessions data arrives
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted &&
-                            ModalRoute.of(context)?.isCurrent == true) {
-                          _presentAssignedSessionSheet();
+                      // Check if there are pending sessions that require navigation
+                      // If so, don't show the bottom sheet - navigation will happen instead
+                      final driverMenuState =
+                          blocContext.read<DriverMenuBloc>().state;
+                      bool shouldShowBottomSheet = true;
+
+                      if (driverMenuState is DriverHomeLoaded) {
+                        final pendingSessions = driverMenuState.pendingSessions;
+                        if (pendingSessions != null) {
+                          // If there's a pending session that requires navigation, don't show bottom sheet
+                          if (pendingSessions.hasArrivedSession ||
+                              pendingSessions.hasAcceptedSession ||
+                              pendingSessions.hasCheckedInSession) {
+                            shouldShowBottomSheet = false;
+                          }
                         }
-                      });
+                      }
+
+                      if (shouldShowBottomSheet) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted &&
+                              ModalRoute.of(blocContext)?.isCurrent == true) {
+                            _presentAssignedSessionSheet(blocContext);
+                          }
+                        });
+                      }
                     }
+                  } else if (state is AssignedSessionsCancelled) {
+                    // Close the bottom sheet if open
+                    if (Navigator.of(blocContext).canPop()) {
+                      Navigator.of(blocContext).pop();
+                    }
+                    _cleanupTimer(); // Ensure timer is cleaned up
                   }
                 },
               ),
@@ -336,25 +428,151 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         // This case is now handled by DriverMenuLogoutSuccess/Failure
                         break;
                     }
+                  } else if (state is DriverHomeLoaded) {
+                    // Check if there's a CHECKED_IN session and show dialog
+                    // Only show once per screen load
+
+                    // Priority order: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN
+                    // Check for ARRIVED status first (highest priority)
+                    if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasArrivedSession) {
+                      _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final arrivedSession =
+                              state.pendingSessions!.arrivedSession;
+                          if (arrivedSession != null) {
+                            // Convert PendingSession to AssignedSession
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    arrivedSession);
+                            // Navigate to arrived screen with handover UI directly
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ConfirmArrivalScreen(
+                                  session: assignedSession,
+                                  preventBackNavigation: true,
+                                  showHandoverOnLoad: true,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for ACCEPT status
+                    // If status is ACCEPT, navigate to arrived screen
+                    else if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasAcceptedSession) {
+                      _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final acceptedSession =
+                              state.pendingSessions!.acceptedSession;
+                          if (acceptedSession != null) {
+                            // Convert PendingSession to AssignedSession
+                            final assignedSession =
+                                SessionConverter.pendingToAssigned(
+                                    acceptedSession);
+                            // Navigate to arrived screen with back navigation prevented
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ConfirmArrivalScreen(
+                                  session: assignedSession,
+                                  preventBackNavigation: true,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for REPARKING status
+                    // If status is REPARKING, navigate to camera screen for reparking
+                    else if (!_hasNavigatedForStatus &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasReparkingSession) {
+                      _hasNavigatedForStatus = true;
+                      // Close bottom sheet if open before navigating
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                        _cleanupTimer();
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final reparkingSession =
+                              state.pendingSessions!.reparkingSession;
+                          if (reparkingSession != null) {
+                            // Navigate directly to camera screen for reparking
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => CarCameraScreen(
+                                  sessionId: reparkingSession.sessionId,
+                                  isReparking: true,
+                                  preventBackNavigation: true,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    }
+                    // Check for CHECKED_IN session and show dialog
+                    else if (!_hasShownSessionDialog &&
+                        state.pendingSessions != null &&
+                        state.pendingSessions!.hasCheckedInSession) {
+                      _hasShownSessionDialog = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted &&
+                            ModalRoute.of(context)?.isCurrent == true) {
+                          final checkedInSession =
+                              state.pendingSessions!.checkedInSession;
+                          if (checkedInSession != null) {
+                            SessionIncompleteDialog.show(
+                              context,
+                              cardNumber:
+                                  checkedInSession.cardNumber.toString(),
+                              onContinue: () {
+                                // Navigate to camera screen with back navigation prevented
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => CarCameraScreen(
+                                      sessionId: checkedInSession.sessionId,
+                                      preventBackNavigation: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                        }
+                      });
+                    }
                   }
                 },
               ),
               BlocListener<DriverStatusBloc, DriverStatusState>(
                 listener: (context, state) {
-                  if (state is DriverStatusClockInSuccess) {
-                    // Show success snackbar with message from API
-                    SnackBars.showSuccessSnackBar(context, state.message);
-                  } else if (state is DriverStatusClockOutSuccess) {
-                    // Show success snackbar with message from API
-                    SnackBars.showSuccessSnackBar(context, state.message);
-                  } else if (state is DriverBreakStartSuccess) {
-                    // Show success snackbar with message from API
+                  if (state is DriverBreakStartSuccess) {
                     SnackBars.showSuccessSnackBar(context, state.message);
                   } else if (state is DriverBreakEndSuccess) {
-                    // Show success snackbar with message from API
                     SnackBars.showSuccessSnackBar(context, state.message);
                   } else if (state is DriverStatusError) {
-                    // Show error snackbar
                     SnackBars.showErrorSnackBar(context, state.message);
                   }
                 },

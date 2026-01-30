@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
@@ -16,8 +17,13 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retriev
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
+  final void Function(int)? onNavigateToTab;
 
-  const DashboardContent({super.key, this.onRefreshReady});
+  const DashboardContent({
+    super.key,
+    this.onRefreshReady,
+    this.onNavigateToTab,
+  });
 
   @override
   State<DashboardContent> createState() => _DashboardContentState();
@@ -25,7 +31,7 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent> {
   late OperatorDashboardBloc _dashboardBloc;
-  final String _outletId = '2';
+  final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
   @override
   void initState() {
@@ -174,7 +180,17 @@ class _DashboardContentState extends State<DashboardContent> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          DashboardKpiGrid(kpis: state.kpis),
+                          DashboardKpiGrid(
+                            kpis: state.kpis,
+                            onAvailableValetsTap: () {
+                              // change index to whatever your Valets screen index is
+                              widget.onNavigateToTab?.call(2);
+                            },
+                            onTotalVehiclesParkedTap: () {
+                              // change index to whatever your Parking screen index is
+                              widget.onNavigateToTab?.call(1);
+                            },
+                          ),
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.03,
                           ),

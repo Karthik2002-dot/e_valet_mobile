@@ -23,6 +23,10 @@ class DriverHomeStarted extends DriverMenuEvent {
   const DriverHomeStarted();
 }
 
+class DriverPendingSessionsRefresh extends DriverMenuEvent {
+  const DriverPendingSessionsRefresh();
+}
+
 class DriverOnBreakToggled extends DriverMenuEvent {
   final bool isOnBreak;
 

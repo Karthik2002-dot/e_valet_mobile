@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -61,7 +62,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
 
       // Get outletId from DriverStatusBloc
       final statusState = context.read<DriverStatusBloc>().state;
-      int outletId = 2; // Default fallback
+      int outletId =
+          int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1; // Default fallback
 
       if (statusState is DriverStatusLoaded) {
         outletId = statusState.status.outletId;
@@ -88,7 +90,10 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CarCameraScreen(sessionId: null),
+              builder: (context) => CarCameraScreen(
+                sessionId: null,
+                preventBackNavigation: true,
+              ),
             ),
           );
         }
@@ -136,6 +141,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     hintText: TextConstants.tagNumberHint,
                     controller: _tagNumberController,
                     keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    onSubmitEditing: _handleSubmit,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return TextConstants.validationEnterTagNumber;

@@ -8,9 +8,12 @@ import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_r
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_dashboard_kpis_response.dart';
 import 'operator_dashboard_event.dart';
 import 'operator_dashboard_state.dart';
 
@@ -20,6 +23,8 @@ class OperatorDashboardBloc
   final String outletId;
   StreamSubscription<dynamic>? _sessionStatusSubscription;
   StreamSubscription<dynamic>? _statsUpdateSubscription;
+  StreamSubscription<dynamic>? _driverStatusChangedSubscription;
+  StreamSubscription<dynamic>? _newParkingSubscription;
 
   OperatorDashboardBloc({
     this.webSocketBloc,
@@ -29,6 +34,7 @@ class OperatorDashboardBloc
     on<RefreshDashboardKpisSilently>(_onRefreshDashboardKpisSilently);
     on<AssignDriverToRetrieval>(_onAssignDriverToRetrieval);
     on<CreateManualRetrievalRequest>(_onCreateManualRetrievalRequest);
+    on<NewParkingEvent>(_onNewParkingEvent);
 
     // Setup WebSocket listeners if WebSocketBloc is provided
     _setupWebSocketListeners();
@@ -84,6 +90,47 @@ class OperatorDashboardBloc
         },
         onError: (error) {
           print('Error listening to stats updates: $error');
+        },
+      );
+
+      // Listen to driver:status_changed event
+      final driverStatusChangedStream =
+          webSocketBloc!.service.getEventStream('driver:status_changed');
+
+      _driverStatusChangedSubscription = driverStatusChangedStream.listen(
+        (data) {
+          // Silently refresh only available drivers when driver status changes
+          add(
+            RefreshDashboardKpisSilently(
+              outletId: outletId,
+              refreshKpis: true,
+              refreshDrivers: true,
+              refreshRequests: false,
+            ),
+          );
+        },
+        onError: (error) {
+          print('Error listening to driver status updates: $error');
+        },
+      );
+
+      // Listen to session:new_parking event
+      final newParkingStream =
+          webSocketBloc!.service.getEventStream('session:new_parking');
+
+      _newParkingSubscription = newParkingStream.listen(
+        (data) {
+          add(
+            RefreshDashboardKpisSilently(
+              outletId: outletId,
+              refreshKpis: true,
+              refreshDrivers: true,
+              refreshRequests: false,
+            ),
+          );
+        },
+        onError: (error) {
+          print('Error listening to new parking updates: $error');
         },
       );
     } catch (e) {
@@ -254,7 +301,16 @@ class OperatorDashboardBloc
         refreshRequests: true,
       ));
     } catch (e) {
-      emit(ManualRequestError(e.toString()));
+      // Show a business-friendly error message for card not found
+      String errorMessage = e is ApiException ? e.message : e.toString();
+      final cardNotFoundRegExp =
+          RegExp(r'Card #[0-9]+ not found in outlet [0-9]+');
+      final match = cardNotFoundRegExp.firstMatch(errorMessage);
+      if (match != null) {
+        errorMessage =
+            'No parked vehicle found for this card number. Please enter a valid card number.';
+      }
+      emit(ManualRequestError(errorMessage));
 
       // Restore the previous dashboard state after error too
       if (previousState != null) {
@@ -263,11 +319,54 @@ class OperatorDashboardBloc
     }
   }
 
+  Future<void> _onNewParkingEvent(
+    NewParkingEvent event,
+    Emitter<OperatorDashboardState> emit,
+  ) async {
+    if (state is! OperatorDashboardLoaded) {
+      return;
+    }
+
+    final currentState = state as OperatorDashboardLoaded;
+
+    try {
+      final results = await Future.wait([
+        OperatorDashboardApiService.getDashboardKpis(
+          outletId: event.outletId,
+        ),
+        OperatorAvailableDriversApiService.getAvailableDrivers(
+          outletId: event.outletId,
+        ),
+      ]);
+
+      final kpis =
+          results[0] as OperatorDashboardKpisResponse; // cast to correct type
+      final availableDrivers = results[1]
+          as OperatorAvailableDriversResponse; // cast to correct type
+
+      emit(
+        OperatorDashboardLoaded(
+          kpis: kpis,
+          availableDrivers: availableDrivers,
+          retrievalRequests: currentState.retrievalRequests,
+          digitalKeyRack: currentState.digitalKeyRack,
+        ),
+      );
+    } catch (e) {
+      developer.log(
+        'New parking refresh (kpis + drivers) failed: $e',
+        name: 'OperatorDashboardBloc',
+      );
+    }
+  }
+
   @override
   Future<void> close() async {
     // Cancel WebSocket subscriptions
     await _sessionStatusSubscription?.cancel();
     await _statsUpdateSubscription?.cancel();
+    await _driverStatusChangedSubscription?.cancel();
+    await _newParkingSubscription?.cancel();
     return super.close();
   }
 }

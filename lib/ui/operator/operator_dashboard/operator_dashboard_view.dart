@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
@@ -24,9 +25,12 @@ class OperatorDashboardView extends StatefulWidget {
 class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
+  int _refreshKey = 0;
   VoidCallback? _dashboardRefresh;
+  VoidCallback? _slotsRefresh;
+  VoidCallback? _driversRefresh;
   late OperatorDashboardBloc _dashboardBloc;
-  final String _outletId = '2';
+  final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
   @override
   void initState() {
@@ -55,7 +59,34 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _refreshDashboard() {
-    _dashboardRefresh?.call();
+    print(
+        '_refreshDashboard called, selectedIndex: $_selectedIndex'); // Debug log
+    // Call specific refresh callback based on selected tab
+    switch (_selectedIndex) {
+      case 0:
+        // Dashboard
+        print('Calling dashboard refresh'); // Debug log
+        _dashboardRefresh?.call();
+        break;
+      case 1:
+        // Slots/Parked Car screen
+        print(
+            'Calling slots refresh, callback is: ${_slotsRefresh != null ? "set" : "null"}'); // Debug log
+        _slotsRefresh?.call();
+        break;
+      case 2:
+        // Drivers/Valets screen
+        print(
+            'Calling drivers refresh, callback is: ${_driversRefresh != null ? "set" : "null"}'); // Debug log
+        _driversRefresh?.call();
+        break;
+      default:
+        // For other tabs (Car Logs), increment refresh key to recreate the widget
+        print('Incrementing refresh key for tab $_selectedIndex'); // Debug log
+        setState(() {
+          _refreshKey++;
+        });
+    }
   }
 
   Widget _getBodyWidget() {
@@ -63,10 +94,29 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       _selectedIndex,
       DashboardContent(
         onRefreshReady: (refresh) {
+          print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;
         },
+        onNavigateToTab: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
-      0,
+      _refreshKey,
+      onSlotsRefreshReady: (refresh) {
+        print('Slots refresh callback registered'); // Debug log
+        _slotsRefresh = refresh;
+      },
+      onDriversRefreshReady: (refresh) {
+        print('Drivers refresh callback registered'); // Debug log
+        _driversRefresh = refresh;
+      },
+      onNavigateToTab: (int index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
     );
   }
 
@@ -113,6 +163,11 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
               IconButton(
                 icon: const Icon(Icons.menu, color: AppColors.white),
                 onPressed: () {
+                  final currentScope = FocusScope.of(context);
+                  if (!currentScope.hasPrimaryFocus &&
+                      currentScope.focusedChild != null) {
+                    currentScope.unfocus();
+                  }
                   _scaffoldKey.currentState?.openEndDrawer();
                 },
               ),
