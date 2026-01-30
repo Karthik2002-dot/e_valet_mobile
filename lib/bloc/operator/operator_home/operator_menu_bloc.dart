@@ -21,6 +21,8 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
   ) async {
     // Try to clock out first (will fail gracefully if not clocked in or not applicable)
     await _tryClockOutForOperator();
+    await TokenStorage.clearAll();
+      await SessionManager.clearSessionFlags();
 
     try {
       final response = await LogoutApiService.logout();
@@ -29,15 +31,13 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
       print(
           '🔵 OPERATOR LOGOUT ERROR: Logout API failed with ApiException: ${e.message}');
       // Ensure local logout even if API fails
-      await TokenStorage.clearAll();
-      await SessionManager.clearSessionFlags();
+      
       emit(OperatorMenuLogoutFailure(e.message));
     } catch (e) {
       print(
           '🔵 OPERATOR LOGOUT ERROR: Logout API failed with unknown error: $e');
       // Ensure local logout even if API fails
-      await TokenStorage.clearAll();
-      await SessionManager.clearSessionFlags();
+      
       emit(OperatorMenuLogoutFailure('Logout failed: ${e.toString()}'));
     }
   }
