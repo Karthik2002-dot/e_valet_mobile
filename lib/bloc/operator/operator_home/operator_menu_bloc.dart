@@ -28,10 +28,16 @@ class OperatorMenuBloc extends Bloc<OperatorMenuEvent, OperatorMenuState> {
     } on ApiException catch (e) {
       print(
           '🔵 OPERATOR LOGOUT ERROR: Logout API failed with ApiException: ${e.message}');
+      // Ensure local logout even if API fails
+      await TokenStorage.clearAll();
+      await SessionManager.clearSessionFlags();
       emit(OperatorMenuLogoutFailure(e.message));
     } catch (e) {
       print(
           '🔵 OPERATOR LOGOUT ERROR: Logout API failed with unknown error: $e');
+      // Ensure local logout even if API fails
+      await TokenStorage.clearAll();
+      await SessionManager.clearSessionFlags();
       emit(OperatorMenuLogoutFailure('Logout failed: ${e.toString()}'));
     }
   }
