@@ -85,6 +85,7 @@ class DriverStatusApiService {
   static Future<ClockOutResponse> clockOut(ClockOutRequest request) async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
+      print('🔴 CLOCK-OUT API ERROR: Access token not found');
       throw ApiException(
         'Access token not found. Please login again.',
         code: 'no_token',
@@ -104,10 +105,14 @@ class DriverStatusApiService {
 
       final data = response.data as Map<String, dynamic>;
       final clockOutResponse = ClockOutResponse.fromJson(data);
+
       return clockOutResponse;
-    } on ApiException {
+    } on ApiException catch (e) {
+      print(
+          '🔴 CLOCK-OUT API ERROR: ApiException: ${e.message} (code: ${e.code})');
       rethrow;
     } catch (e) {
+      print('🔴 CLOCK-OUT API ERROR: Unknown error: $e');
       throw ApiException(
         'Failed to clock out. Please try again.',
         code: 'unknown_error',

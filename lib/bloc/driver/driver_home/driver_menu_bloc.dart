@@ -39,8 +39,11 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
       final response = await LogoutApiService.logout();
       emit(DriverMenuLogoutSuccess(response));
     } on ApiException catch (e) {
+      print(
+          '🔵 DRIVER LOGOUT ERROR: Logout API failed with ApiException: ${e.message}');
       emit(DriverMenuLogoutFailure(e.message));
     } catch (e) {
+      print('🔵 DRIVER LOGOUT ERROR: Logout API failed with unknown error: $e');
       emit(DriverMenuLogoutFailure(
         TextConstants.genericError,
       ));
@@ -92,6 +95,7 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
       await DriverStatusApiService.clockOut(clockOutRequest);
       log('Automatic clock-out successful before logout');
     } catch (e) {
+      print('🟡 DRIVER CLOCK-OUT ERROR: Clock-out failed: $e');
       log('Failed to clock out automatically before logout: $e');
       // Don't fail the logout if clock-out fails - this is a background operation
     }
