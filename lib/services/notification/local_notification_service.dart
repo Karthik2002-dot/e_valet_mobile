@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
+import 'text_to_speech_service.dart';
 
 class LocalNotificationService {
   static final LocalNotificationService _instance =
@@ -417,11 +418,22 @@ class LocalNotificationService {
 
     if (response.payload != null) {
       try {
-        final payload = jsonDecode(response.payload!);
+        final payload = jsonDecode(response.payload!) as Map<String, dynamic>?;
         log('Notification payload: $payload');
 
-        // Handle notification tap based on payload
-        // This will be processed by the FirebaseMessagingService
+        // Speak notification body aloud when user taps (loud, hearable TTS)
+        if (payload != null) {
+          final body = payload['body'] as String?;
+          final title = payload['title'] as String?;
+          final textToSpeak = body?.trim().isNotEmpty == true
+              ? body!
+              : title?.trim().isNotEmpty == true
+                  ? title!
+                  : null;
+          if (textToSpeak != null) {
+            TextToSpeechService().speak(textToSpeak);
+          }
+        }
       } catch (e) {
         log('Error parsing notification payload: $e');
       }
