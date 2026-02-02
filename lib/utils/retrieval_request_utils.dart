@@ -39,7 +39,7 @@ class RetrievalRequestUtils {
     return normalized == 'RETRIEVAL_REQUESTED';
   }
 
-  /// Status-based color for the request card / status pill
+  /// Status-based color for the request card / status pill (no High/Medium/Low).
   static Color getStatusColor({
     required String status,
     required String waitingTime,
@@ -52,12 +52,13 @@ class RetrievalRequestUtils {
       case 'ARRIVED':
         return Colors.green;
       case 'RETRIEVAL_REQUESTED':
+        return AppColors.primary;
       default:
-        return getPriorityColor(waitingTime);
+        return AppColors.primary;
     }
   }
 
-  /// Status label to show in UI
+  /// Status label to show in UI (actual status from API, no High/Medium/Low).
   static String getStatusLabel({
     required String status,
     required String waitingTime,
@@ -70,8 +71,14 @@ class RetrievalRequestUtils {
       case 'ARRIVED':
         return 'Arrived';
       case 'RETRIEVAL_REQUESTED':
+        return 'Retrieval Requested';
       default:
-        return getPriorityLabel(waitingTime);
+        return status
+            .split('_')
+            .map((e) => e.isEmpty
+                ? e
+                : e[0].toUpperCase() + e.substring(1).toLowerCase())
+            .join(' ');
     }
   }
 }

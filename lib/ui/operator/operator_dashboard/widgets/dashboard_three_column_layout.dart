@@ -32,14 +32,14 @@ class DashboardThreeColumnLayout extends StatelessWidget {
           retrievalRequests: retrievalRequests,
           isLoading: isLoading,
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+        const SizedBox(height: 12),
         // --- Retrieval Requests (two columns) ---
         TextComponent(
           labelText: TextConstants.retrievalRequests,
           color: AppColors.black,
-          fontSize: MediaQuery.of(context).size.width * 0.018,
+          fontSize: MediaQuery.of(context).size.height * 0.015,
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+        const SizedBox(height: 12),
         Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

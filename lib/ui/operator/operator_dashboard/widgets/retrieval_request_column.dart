@@ -7,7 +7,8 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/retrieval_request_card.dart';
 
-/// One column of retrieval request cards (left or right half of the list).
+/// One column of retrieval request cards.
+/// Left column: only RETRIEVAL_REQUESTED. Right column: all other statuses (Assigned, Accepted, Arrived, etc.).
 /// Handles loading skeleton, empty state, and drag-target scroll.
 class RetrievalRequestColumn extends StatefulWidget {
   final RetrievalRequestsResponse retrievalRequests;
@@ -59,19 +60,27 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
       return _buildSkeleton(context);
     }
 
-    final sortedRequests = [
-      ...widget.retrievalRequests.requests
-    ]..sort((a, b) =>
-        _statusOrder(a.status).compareTo(_statusOrder(b.status)));
+    final allRequests = widget.retrievalRequests.requests;
 
-    if (sortedRequests.isEmpty) {
+    if (allRequests.isEmpty) {
       return _buildEmpty(context);
     }
 
-    final mid = (sortedRequests.length / 2).ceil();
+    // Left column: only RETRIEVAL_REQUESTED. Right column: all other statuses.
+    final retrievalRequested = allRequests
+        .where((r) =>
+            r.status.toUpperCase() == 'RETRIEVAL_REQUESTED')
+        .toList();
+    final otherStatuses = allRequests
+        .where((r) =>
+            r.status.toUpperCase() != 'RETRIEVAL_REQUESTED')
+        .toList()
+      ..sort((a, b) =>
+          _statusOrder(a.status).compareTo(_statusOrder(b.status)));
+
     final columnRequests = widget.isLeftColumn
-        ? sortedRequests.sublist(0, mid)
-        : sortedRequests.sublist(mid);
+        ? retrievalRequested
+        : otherStatuses;
 
     if (columnRequests.isEmpty) {
       return Center(

@@ -28,13 +28,11 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
         TextComponent(
           labelText: TextConstants.availableValets,
           color: AppColors.black,
-          fontSize: MediaQuery.of(context).size.width * 0.018,
+          fontSize: MediaQuery.of(context).size.height * 0.015,
         ),
+        const SizedBox(height: 12),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.015,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.06,
+          height: MediaQuery.of(context).size.height * 0.05,
           child: isLoading ? _buildSkeleton(context) : _buildContent(context),
         ),
       ],
@@ -86,9 +84,10 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                       borderRadius: 4,
                     ),
                     SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.005),
+                      height: MediaQuery.of(context).size.height * 0.005,
+                    ),
                     SkeletonLoader(
-                      height: MediaQuery.of(context).size.height * 0.012,
+                      height: MediaQuery.of(context).size.height * 0.008,
                       width: MediaQuery.of(context).size.width * 0.06,
                       borderRadius: 4,
                     ),
@@ -148,11 +147,13 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
             right: MediaQuery.of(context).size.width * 0.015,
           ),
           child: IntrinsicWidth(
-            child: AvailableDriversCard(
-              driver: driver,
-              isRecommended: isRecommended,
-              recommendedCardNumber: recommendedCardNumber,
-              compact: true,
+            child: Center(
+              child: AvailableDriversCard(
+                driver: driver,
+                isRecommended: isRecommended,
+                recommendedCardNumber: recommendedCardNumber,
+                compact: true,
+              ),
             ),
           ),
         );

@@ -15,7 +15,7 @@ class KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -34,17 +34,17 @@ class KpiCard extends StatelessWidget {
             labelText: title,
             textAlign: TextAlign.center,
             color: AppColors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.012,
-            fontWeight: FontWeight.w500,
+            fontSize: MediaQuery.of(context).size.height * 0.012,
+            fontWeight: FontWeight.w400,
           ),
           const SizedBox(
-            height: 12,
+            height: 8,
           ),
           TextComponent(
             labelText: value,
             textAlign: TextAlign.center,
             color: AppColors.black,
-            fontSize: MediaQuery.of(context).size.width * 0.015,
+            fontSize: MediaQuery.of(context).size.height * 0.015,
             fontWeight: FontWeight.bold,
           ),
         ],
