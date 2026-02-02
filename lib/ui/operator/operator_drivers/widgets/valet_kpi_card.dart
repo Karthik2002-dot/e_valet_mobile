@@ -70,11 +70,11 @@ class ValetKpiCard extends StatelessWidget {
                   TextComponent(
                     labelText: label,
                     color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.013,
+                    fontSize: MediaQuery.of(context).size.width * 0.02,
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   TextComponent(
                     labelText: value,
                     color: AppColors.black,
