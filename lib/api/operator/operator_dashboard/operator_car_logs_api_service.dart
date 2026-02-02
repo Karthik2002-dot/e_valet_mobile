@@ -68,6 +68,7 @@ class OperatorCarLogsApiService {
     required String outletId,
     int page = 1,
     int pageSize = 10,
+    String? search,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
 
@@ -84,13 +85,17 @@ class OperatorCarLogsApiService {
     );
 
     try {
+      final queryParams = <String, dynamic>{
+        'outletId': int.tryParse(outletId) ?? 1,
+        'page': page,
+        'pageSize': pageSize,
+      };
+      if (search != null && search.trim().isNotEmpty) {
+        queryParams['search'] = search.trim();
+      }
       final response = await base.get(
         '/operators/car-logs',
-        queryParameters: {
-          'outletId': int.tryParse(outletId) ?? 1,
-          'page': page,
-          'pageSize': pageSize,
-        },
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {

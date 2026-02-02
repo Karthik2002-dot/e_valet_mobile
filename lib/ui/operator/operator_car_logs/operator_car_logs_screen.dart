@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,6 +56,10 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   CarLog? _selectedCarLog;
   bool _showPopup = false;
 
+  // Debounce for search
+  Timer? _searchDebounce;
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 400);
+
   @override
   void initState() {
     super.initState();
@@ -71,14 +76,17 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   void refresh() {
-    print('OperatorCarLogsScreen: refresh() called'); // Debug log
     _carLogsBloc.add(FetchCarLogs(
       outletId: _outletId,
+      page: _currentPage,
+      pageSize: _itemsPerPage,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     ));
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _carLogsBloc.close();
     super.dispose();
@@ -102,24 +110,12 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
       outletId: _outletId,
       page: _currentPage,
       pageSize: _itemsPerPage,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     ));
   }
 
   int _getTotalPages() {
     return (_totalItems / _itemsPerPage).ceil();
-  }
-
-  List<CarLog> _getFilteredLogs(List<CarLog> logs) {
-    if (_searchQuery.isEmpty) {
-      return logs;
-    }
-
-    final query = _searchQuery.toLowerCase();
-    return logs.where((log) {
-      return log.tagNumber.toString().toLowerCase().contains(query) ||
-          log.displayStatus.toLowerCase().contains(query) ||
-          log.parkedBy.name.toLowerCase().contains(query);
-    }).toList();
   }
 
   void _goToPage(int page) {
@@ -316,10 +312,20 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                   controller: _searchController,
                                   keyboardType: TextInputType.text,
                                   onChanged: (value) {
-                                    setState(() {
-                                      _searchQuery = value.trim();
-                                      _currentPage = 1;
-                                    });
+                                    final query = value.trim();
+                                    setState(() => _searchQuery = query);
+                                    _searchDebounce?.cancel();
+                                    _searchDebounce = Timer(
+                                      _searchDebounceDuration,
+                                      () {
+                                        if (!mounted) return;
+                                        setState(() {
+                                          _currentPage = 1;
+                                          _isTableLoading = true;
+                                        });
+                                        _fetchCarLogs();
+                                      },
+                                    );
                                   },
                                   decoration: InputDecoration(
                                     hintText: TextConstants.carLogsSearchHint,
@@ -409,7 +415,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                           )
                                         : SingleChildScrollView(
                                             child: CarLogsTableWidget(
-                                              logs: _getFilteredLogs(
+                                              logs: _sortLogs(
                                                   state.carLogsResponse.logs),
                                               sortColumn: _sortColumn,
                                               sortDirection: _sortDirection,
@@ -458,6 +464,9 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                 outletId: _outletId,
                                 page: _currentPage,
                                 pageSize: _itemsPerPage,
+                                search: _searchQuery.isEmpty
+                                    ? null
+                                    : _searchQuery,
                               ));
                             },
                             child: const Text('Retry'),
@@ -577,30 +586,23 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   Widget _buildPaginationControls(List<CarLog> logs) {
-    final filteredLogs = _getFilteredLogs(logs);
-    final displayTotal =
-        _searchQuery.isEmpty ? _totalItems : filteredLogs.length;
     final totalPages = _getTotalPages();
 
-    // Hide pagination when searching (search works on current page only)
-    if (_searchQuery.isNotEmpty || totalPages <= 1) {
+    // Simplified bar when only one page (total from API reflects search)
+    if (totalPages <= 1) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Page size dropdown
             PageSizeDropdownWidget(
               itemsPerPage: _itemsPerPage,
               pageSizeOptions: _pageSizeOptions,
               onPageSizeChanged: _changePageSize,
             ),
-
             const Spacer(),
-
-            // Page info
             Text(
-              '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > displayTotal ? displayTotal : _currentPage * _itemsPerPage} of $displayTotal',
+              '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,

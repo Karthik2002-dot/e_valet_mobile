@@ -8,6 +8,8 @@ import 'car_logs_event.dart';
 import 'car_logs_state.dart';
 
 class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
+  String? _lastSearch;
+
   CarLogsBloc() : super(const CarLogsInitial()) {
     on<FetchCarLogs>(_onFetchCarLogs);
     on<UpdateCarLogStatus>(_onUpdateCarLogStatus);
@@ -17,6 +19,7 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
     FetchCarLogs event,
     Emitter<CarLogsState> emit,
   ) async {
+    _lastSearch = event.search;
     emit(const CarLogsLoading());
     try {
       final results = await Future.wait([
@@ -24,6 +27,7 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
           outletId: event.outletId,
           page: event.page,
           pageSize: event.pageSize,
+          search: event.search,
         ),
         OperatorCarLogsApiService.getCarLogsKpis(outletId: event.outletId),
       ]);
@@ -45,13 +49,14 @@ class CarLogsBloc extends Bloc<CarLogsEvent, CarLogsState> {
         newStatus: event.newStatus,
       );
 
-      // After successful update, refresh the car logs
+      // After successful update, refresh the car logs (preserve search)
       if (state is CarLogsLoaded) {
         final currentState = state as CarLogsLoaded;
         add(FetchCarLogs(
           outletId: dotenv.env['OUTLET_ID']!,
           page: currentState.carLogsResponse.page,
           pageSize: currentState.carLogsResponse.pageSize,
+          search: _lastSearch,
         ));
       }
     } catch (e) {
