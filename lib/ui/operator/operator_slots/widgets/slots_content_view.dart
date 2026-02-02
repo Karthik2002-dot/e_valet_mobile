@@ -73,10 +73,10 @@ class _SlotsContentViewState extends State<SlotsContentView> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5,
+              crossAxisCount: 4,
               crossAxisSpacing: screenWidth * 0.02,
               mainAxisSpacing: screenHeight * 0.02,
-              childAspectRatio: 0.7,
+              childAspectRatio: 0.65,
             ),
             itemCount: filteredItems.length,
             itemBuilder: (context, index) {

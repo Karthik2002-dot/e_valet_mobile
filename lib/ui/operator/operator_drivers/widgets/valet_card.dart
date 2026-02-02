@@ -112,7 +112,7 @@ class ValetCard extends StatelessWidget {
                         children: [
                           TextComponent(
                             labelText: valet!.name,
-                            fontSize: screenWidth * 0.018,
+                            fontSize: screenWidth * 0.025,
                             fontWeight: FontWeight.w600,
                             color: AppColors.black,
                             maxLines: 1,
@@ -121,7 +121,7 @@ class ValetCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           TextComponent(
                             labelText: valet!.phone,
-                            fontSize: screenWidth * 0.015,
+                            fontSize: screenWidth * 0.02,
                             color: AppColors.grey,
                           ),
                         ],
@@ -139,7 +139,7 @@ class ValetCard extends StatelessWidget {
                       ),
                       child: TextComponent(
                         labelText: ValetUtils.getStatusLabel(valet!.status),
-                        fontSize: screenWidth * 0.011,
+                        fontSize: screenWidth * 0.02,
                         color: ValetUtils.getStatusColor(valet!.status),
                         fontWeight: FontWeight.w500,
                       ),
@@ -153,7 +153,7 @@ class ValetCard extends StatelessWidget {
                 TextComponent(
                   labelText:
                       '${TextConstants.carsPickedUpLabel}${valet!.carsPickedUp}',
-                  fontSize: screenWidth * 0.015,
+                  fontSize: screenWidth * 0.02,
                   color: AppColors.black,
                 ),
                 const SizedBox(height: 8),
@@ -161,7 +161,7 @@ class ValetCard extends StatelessWidget {
                 TextComponent(
                   labelText:
                       '${TextConstants.carsHandedOverLabel}${valet!.carsHandedOver}',
-                  fontSize: screenWidth * 0.015,
+                  fontSize: screenWidth * 0.02,
                   color: AppColors.black,
                 ),
                 const SizedBox(height: 8),
@@ -169,7 +169,7 @@ class ValetCard extends StatelessWidget {
                 TextComponent(
                   labelText:
                       '${TextConstants.onBreakDurationLabel}${valet!.onBreakDurationMinutes}${TextConstants.minsLabel}',
-                  fontSize: screenWidth * 0.015,
+                  fontSize: screenWidth * 0.02,
                   color: AppColors.black,
                 ),
               ],

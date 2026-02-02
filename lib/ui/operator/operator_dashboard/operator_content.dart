@@ -70,6 +70,41 @@ class _DashboardContentState extends State<DashboardContent> {
     );
   }
 
+  Widget _buildKpiSkeletonCard(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SkeletonLoader(
+              height: MediaQuery.of(context).size.height * 0.012,
+              width: MediaQuery.of(context).size.width * 0.12,
+              borderRadius: 4,
+            ),
+            const SizedBox(height: 8),
+            SkeletonLoader(
+              height: MediaQuery.of(context).size.height * 0.015,
+              width: MediaQuery.of(context).size.width * 0.08,
+              borderRadius: 4,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _dashboardBloc.close();
@@ -89,9 +124,9 @@ class _DashboardContentState extends State<DashboardContent> {
               TextComponent(
                 labelText: TextConstants.dashboardOverview,
                 color: AppColors.black,
-                fontSize: MediaQuery.of(context).size.width * 0.02,
+                fontSize: MediaQuery.of(context).size.height * 0.015,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               Expanded(
                 child:
                     BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
@@ -100,66 +135,20 @@ class _DashboardContentState extends State<DashboardContent> {
                     final isLoaded = state is OperatorDashboardLoaded;
 
                     if (isLoading) {
-                      // Show skeleton loaders for KPIs and columns
+                      // Show skeleton loaders matching KPI card pattern (Row of 4 cards)
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // KPI Skeleton Grid
-                          GridView.count(
-                            shrinkWrap: true,
-                            crossAxisCount: 4,
-                            crossAxisSpacing:
-                                MediaQuery.of(context).size.width * 0.02,
-                            mainAxisSpacing:
-                                MediaQuery.of(context).size.height * 0.02,
-                            childAspectRatio: 2.5,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: List.generate(
-                              4,
-                              (index) => Container(
-                                padding: EdgeInsets.all(
-                                  MediaQuery.of(context).size.width * 0.015,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.grey.withOpacity(0.1),
-                                      spreadRadius: 1,
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SkeletonLoader(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.025,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.05,
-                                      borderRadius: 4,
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.01),
-                                    SkeletonLoader(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.015,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.08,
-                                      borderRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          Row(
+                            children: [
+                              _buildKpiSkeletonCard(context),
+                              const SizedBox(width: 12),
+                              _buildKpiSkeletonCard(context),
+                              const SizedBox(width: 12),
+                              _buildKpiSkeletonCard(context),
+                              const SizedBox(width: 12),
+                              _buildKpiSkeletonCard(context),
+                            ],
                           ),
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.03,
@@ -192,7 +181,7 @@ class _DashboardContentState extends State<DashboardContent> {
                             },
                           ),
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.03,
+                            height: MediaQuery.of(context).size.height * 0.015,
                           ),
                           Expanded(
                             child: DashboardThreeColumnLayout(

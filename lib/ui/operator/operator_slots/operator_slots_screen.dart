@@ -146,6 +146,8 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.arrow_back),
@@ -155,18 +157,34 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                                     widget.onNavigateToTab?.call(0);
                                   },
                                 ),
-                                TextComponent(
-                                  labelText:
-                                      '${TextConstants.parkedCarTitle} (${state.digitalKeyRack.keyRack.length})',
-                                  color: AppColors.black,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.02,
-                                  fontWeight: FontWeight.bold,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextComponent(
+                                      labelText:
+                                          '${TextConstants.parkedCarTitle} (${state.digitalKeyRack.keyRack.length})',
+                                      color: AppColors.black,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.03,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TextComponent(
+                                      labelText:
+                                          TextConstants.parkedCarDescription,
+                                      color: AppColors.grey,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.02,
+                                    ),
+                                  ],
                                 ),
                                 const Spacer(),
                                 SizedBox(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.25,
+                                      MediaQuery.of(context).size.width * 0.4,
                                   child: TextField(
                                     controller: _searchController,
                                     keyboardType: TextInputType.number,
@@ -184,14 +202,14 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                                         color: AppColors.grey,
                                         fontSize:
                                             MediaQuery.of(context).size.width *
-                                                0.012,
+                                                0.02,
                                       ),
                                       prefixIcon: Icon(
                                         Icons.search,
                                         color: AppColors.primary,
                                         size:
                                             MediaQuery.of(context).size.width *
-                                                0.015,
+                                                0.02,
                                       ),
                                       suffixIcon: _searchQuery.isNotEmpty
                                           ? IconButton(
@@ -201,7 +219,7 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                                                 size: MediaQuery.of(context)
                                                         .size
                                                         .width *
-                                                    0.015,
+                                                    0.02,
                                               ),
                                               onPressed: _clearSearch,
                                             )
@@ -239,24 +257,12 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                                     style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                              0.012,
+                                              0.02,
                                       color: AppColors.black,
                                     ),
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 1),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  left:
-                                      48), // Align with title text start (IconButton width + padding)
-                              child: TextComponent(
-                                labelText: TextConstants.parkedCarDescription,
-                                color: AppColors.grey,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.013,
-                              ),
                             ),
                           ],
                         ),

@@ -61,7 +61,7 @@ class ParkedCarCard extends StatelessWidget {
               child: item.photoUrl.isNotEmpty
                   ? Image.network(
                       item.photoUrl,
-                      height: screenHeight * 0.15,
+                      height: screenHeight * 0.08,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
@@ -82,20 +82,42 @@ class ParkedCarCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Card Number
+                        // Card Number and Parked Duration (same row)
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.credit_card,
-                              size: screenWidth * 0.012,
-                              color: AppColors.primary,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.credit_card,
+                                  size: screenWidth * 0.018,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: screenWidth * 0.004),
+                                TextComponent(
+                                  labelText: 'Card #${item.cardNumber}',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.02,
+                                  color: AppColors.black,
+                                ),
+                              ],
                             ),
-                            SizedBox(width: screenWidth * 0.004),
-                            TextComponent(
-                              labelText: 'Card #${item.cardNumber}',
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.013,
-                              color: AppColors.black,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.timer_outlined,
+                                  size: screenWidth * 0.018,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: screenWidth * 0.003),
+                                TextComponent(
+                                  labelText: item.duration,
+                                  fontSize: screenWidth * 0.02,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -107,15 +129,15 @@ class ParkedCarCard extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.location_on_outlined,
-                                size: screenWidth * 0.011,
+                                size: screenWidth * 0.018,
                                 color: AppColors.error,
                               ),
                               SizedBox(width: screenWidth * 0.004),
                               Expanded(
                                 child: TextComponent(
                                   labelText: item.parkingLocation!,
-                                  fontSize: screenWidth * 0.01,
-                                  color: AppColors.grey,
+                                  fontSize: screenWidth * 0.02,
+                                  color: AppColors.black,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   fontWeight: FontWeight.w500,
@@ -129,19 +151,21 @@ class ParkedCarCard extends StatelessWidget {
                         if (item.parkedByName != null &&
                             item.parkedByName!.isNotEmpty) ...[
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Icon(
                                 Icons.person_outline,
-                                size: screenWidth * 0.011,
+                                size: screenWidth * 0.018,
                                 color: AppColors.primary,
                               ),
                               SizedBox(width: screenWidth * 0.004),
                               Expanded(
                                 child: TextComponent(
                                   labelText: 'Parked by ${item.parkedByName}',
-                                  fontSize: screenWidth * 0.009,
-                                  color: AppColors.grey,
-                                  maxLines: 1,
+                                  fontSize: screenWidth * 0.02,
+                                  color: AppColors.black,
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -155,47 +179,13 @@ class ParkedCarCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Duration badge
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.008,
-                            vertical: screenHeight * 0.003,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary.withOpacity(0.15),
-                                AppColors.primary.withOpacity(0.08),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.timer_outlined,
-                                size: screenWidth * 0.01,
-                                color: AppColors.primary,
-                              ),
-                              SizedBox(width: screenWidth * 0.003),
-                              TextComponent(
-                                labelText: item.duration,
-                                fontSize: screenWidth * 0.009,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: screenHeight * 0.006),
                         // Parked time info (converted to IST)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
                               Icons.access_time_rounded,
-                              size: screenWidth * 0.011,
+                              size: screenWidth * 0.018,
                               color: AppColors.grey,
                             ),
                             SizedBox(width: screenWidth * 0.004),
@@ -203,7 +193,7 @@ class ParkedCarCard extends StatelessWidget {
                               child: TextComponent(
                                 labelText: TimeUtils.formatUtcToIstFullDateTime(
                                     item.parkedAt),
-                                fontSize: screenWidth * 0.008,
+                                fontSize: screenWidth * 0.015,
                                 color: AppColors.grey,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -256,7 +246,7 @@ class ParkedCarCard extends StatelessWidget {
 
   Widget _buildPlaceholderImage(double screenWidth, double screenHeight) {
     return Container(
-      height: screenHeight * 0.15,
+      height: screenHeight * 0.05,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,

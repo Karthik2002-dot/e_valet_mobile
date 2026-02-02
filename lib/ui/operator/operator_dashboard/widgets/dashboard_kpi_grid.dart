@@ -17,53 +17,44 @@ class DashboardKpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SizedBox(
-            width: width / 4 - 9,
+    return Row(
+      children: [
+        Expanded(
+          child: KpiCard(
+            title: TextConstants.availableTags,
+            value:
+                '${kpis.availableTags.available}/${kpis.availableTags.total}',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: onAvailableValetsTap,
             child: KpiCard(
-              title: TextConstants.availableTags,
+              title: TextConstants.availableValets,
               value:
-                  '${kpis.availableTags.available}/${kpis.availableTags.total}',
+                  '${kpis.availableValets.available}/${kpis.availableValets.total}',
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: width / 4 - 9,
-            child: GestureDetector(
-              onTap: onAvailableValetsTap,
-              child: KpiCard(
-                title: TextConstants.availableValets,
-                value:
-                    '${kpis.availableValets.available}/${kpis.availableValets.total}',
-              ),
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: KpiCard(
+            title: TextConstants.vehiclesInTransit,
+            value: kpis.vehiclesInTransit.toString(),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: width / 4 - 9,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: onTotalVehiclesParkedTap,
             child: KpiCard(
-              title: TextConstants.vehiclesInTransit,
-              value: kpis.vehiclesInTransit.toString(),
+              title: TextConstants.totalVehiclesParked,
+              value: kpis.totalVehiclesParked.toString(),
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: width / 4 - 9,
-            child: GestureDetector(
-              onTap: onTotalVehiclesParkedTap,
-              child: KpiCard(
-                title: TextConstants.totalVehiclesParked,
-                value: kpis.totalVehiclesParked.toString(),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
