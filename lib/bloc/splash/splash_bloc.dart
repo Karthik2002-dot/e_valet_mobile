@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
-import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
@@ -68,6 +69,23 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           initialDelay:
               const Duration(milliseconds: 1500), // Longer delay for splash
         );
+      }
+
+      // If user is a driver, check status on app restart: OFFLINE means session ended → log out and go to login
+      final isDriver = roles.any((r) => r.contains('driver'));
+      if (isDriver) {
+        try {
+          final driverStatus = await DriverStatusApiService.getDriverStatus();
+          if (driverStatus.isOffline) {
+            await TokenStorage.clearAll();
+            await SessionManager.clearSessionFlags();
+            emit(const SplashCompleted(isAuthenticated: false, roles: []));
+            return;
+          }
+        } catch (e) {
+          // If status fetch fails (e.g. network), still allow navigation to driver home
+          print('Splash: Driver status fetch failed: $e');
+        }
       }
     } catch (e) {
       // Ignore profile fetch failure; fallback to empty roles
