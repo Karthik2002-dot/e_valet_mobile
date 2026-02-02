@@ -74,19 +74,54 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
           message:
               'Camera permission is permanently denied. Please enable camera permission in app settings.',
         ));
+        _isInitializing = false;
         return;
       } else if (status != PermissionStatus.granted) {
         emit(const CarCameraInitializationError(
           message: 'Camera permission is required to use this feature',
         ));
+        _isInitializing = false;
         return;
       }
 
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
+      // Add a small delay to ensure camera service is ready (especially after app restart)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Retry logic for availableCameras() - camera service might not be ready immediately
+      List<CameraDescription> cameras = [];
+      int retryCount = 0;
+      const maxRetries = 3;
+      const retryDelay = Duration(milliseconds: 800);
+      bool camerasObtained = false;
+
+      while (retryCount < maxRetries && !camerasObtained) {
+        try {
+          cameras = await availableCameras();
+          if (cameras.isNotEmpty) {
+            camerasObtained = true;
+            break; // Success, exit retry loop
+          }
+          // If cameras list is empty, wait and retry
+          if (retryCount < maxRetries - 1) {
+            await Future.delayed(retryDelay);
+          }
+        } catch (e) {
+          // If availableCameras() throws an error, wait and retry
+          if (retryCount < maxRetries - 1) {
+            await Future.delayed(retryDelay);
+          } else {
+            // Last retry failed, throw the error
+            rethrow;
+          }
+        }
+        retryCount++;
+      }
+
+      if (!camerasObtained || cameras.isEmpty) {
         emit(const CarCameraInitializationError(
           message: TextConstants.cameraNotAvailable,
         ));
+        _isInitializing = false;
         return;
       }
 
@@ -103,21 +138,79 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
-      // Add timeout to camera initialization
-      await _cameraController!.initialize().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Camera initialization timed out');
-        },
-      );
+      // Verify controller was created successfully
+      if (_cameraController == null) {
+        emit(const CarCameraInitializationError(
+          message:
+              '${TextConstants.errorInitializingCamera}: Failed to create camera controller',
+        ));
+        _isInitializing = false;
+        return;
+      }
+
+      // Add timeout to camera initialization with retry logic
+      bool initialized = false;
+      int initRetryCount = 0;
+      const maxInitRetries = 2;
+      const initRetryDelay = Duration(milliseconds: 1000);
+
+      while (!initialized && initRetryCount < maxInitRetries) {
+        try {
+          await _cameraController!.initialize().timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw Exception('Camera initialization timed out');
+            },
+          );
+          initialized = true;
+        } catch (e) {
+          if (initRetryCount < maxInitRetries - 1) {
+            // Dispose and recreate controller before retry
+            await _cameraController?.dispose();
+            _cameraController = CameraController(
+              camera,
+              ResolutionPreset.medium,
+              enableAudio: false,
+              imageFormatGroup: ImageFormatGroup.jpeg,
+            );
+            await Future.delayed(initRetryDelay);
+          } else {
+            // Last retry failed, throw the error
+            rethrow;
+          }
+          initRetryCount++;
+        }
+      }
+
+      // Final null check before emitting success state
+      if (_cameraController == null ||
+          !_cameraController!.value.isInitialized) {
+        emit(const CarCameraInitializationError(
+          message:
+              '${TextConstants.errorInitializingCamera}: Camera controller not properly initialized',
+        ));
+        _isInitializing = false;
+        return;
+      }
 
       emit(CarCameraInitialized(
         cameraController: _cameraController!,
         isFlashOn: _isFlashOn,
       ));
     } catch (e) {
+      // Clean up on error
+      await _cameraController?.dispose();
+      _cameraController = null;
+
+      // Extract error message, handling null check operator errors
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Null check operator used on a null value')) {
+        errorMessage =
+            'Camera service is not ready yet. Please wait a moment and try again.';
+      }
+
       emit(CarCameraInitializationError(
-        message: '${TextConstants.errorInitializingCamera}: $e',
+        message: '${TextConstants.errorInitializingCamera}: $errorMessage',
       ));
     } finally {
       _isInitializing = false;
