@@ -58,8 +58,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     super.didChangeDependencies();
     _routeObserver?.subscribe(this, ModalRoute.of(context)!);
     // Only initialize if not already initializing
+    // Add a small delay to ensure camera service is ready
     if (!_isInitializing) {
-      _initializeCamera();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && !_isInitializing) {
+          _initializeCamera();
+        }
+      });
     }
   }
 
@@ -82,7 +87,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && !_isInitializing) {
-      _initializeCamera();
+      // Add delay when app resumes to ensure camera service is ready
+      // This is especially important after app is cleared and reopened
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted && !_isInitializing) {
+          _initializeCamera(force: true);
+        }
+      });
     }
   }
 
@@ -125,8 +136,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       _cameraBloc.add(const InitializeCameraRequested());
     }
 
-    // Reset flag after a shorter delay to allow for proper reinitialization
-    Future.delayed(const Duration(seconds: 2), () {
+    // Reset flag after a delay to allow for proper reinitialization
+    // Increased timeout to accommodate retry logic in the bloc
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         _isInitializing = false;
       }
@@ -307,7 +319,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
           : (state as CarCameraFlashToggled).isFlashOn;
 
       // Ensure the camera is initialized
-      // The camera is already initialized when we reach this state
+      if (!cameraController.value.isInitialized) {
+        SnackBars.showErrorSnackBar(
+          blocContext,
+          TextConstants.cameraNotReady,
+        );
+        return;
+      }
 
       // Set flash mode for the photo capture
       await cameraController.setFlashMode(
@@ -318,9 +336,11 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       final image = await cameraController.takePicture();
 
       // Restore flash mode for preview (torch for continuous flash, off for no flash)
-      await cameraController.setFlashMode(
-        isFlashOn ? FlashMode.torch : FlashMode.off,
-      );
+      if (cameraController.value.isInitialized) {
+        await cameraController.setFlashMode(
+          isFlashOn ? FlashMode.torch : FlashMode.off,
+        );
+      }
 
       // Reset camera state before navigating
       blocContext.read<CarCameraBloc>().add(const ValidationReset());
@@ -362,6 +382,15 @@ class _CarCameraScreenState extends State<CarCameraScreen>
           ? state.isFlashOn
           : (state as CarCameraFlashToggled).isFlashOn;
 
+      // Ensure the camera is initialized
+      if (!cameraController.value.isInitialized) {
+        SnackBars.showErrorSnackBar(
+          context,
+          TextConstants.cameraNotReady,
+        );
+        return;
+      }
+
       // Set flash mode for the photo capture
       await cameraController.setFlashMode(
         isFlashOn ? FlashMode.always : FlashMode.off,
@@ -371,9 +400,11 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       final image = await cameraController.takePicture();
 
       // Restore flash mode for preview
-      await cameraController.setFlashMode(
-        isFlashOn ? FlashMode.torch : FlashMode.off,
-      );
+      if (cameraController.value.isInitialized) {
+        await cameraController.setFlashMode(
+          isFlashOn ? FlashMode.torch : FlashMode.off,
+        );
+      }
 
       // Navigate directly to preview screen with parking location
       if (mounted) {
