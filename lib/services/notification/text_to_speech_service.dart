@@ -5,8 +5,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 /// Service for reading notification text aloud with loud, hearable audio.
 /// Used when push notifications are received so the body is spoken clearly.
 class TextToSpeechService {
-  static final TextToSpeechService _instance =
-      TextToSpeechService._internal();
+  static final TextToSpeechService _instance = TextToSpeechService._internal();
   factory TextToSpeechService() => _instance;
   TextToSpeechService._internal();
 

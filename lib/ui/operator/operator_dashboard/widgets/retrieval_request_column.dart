@@ -68,19 +68,16 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
 
     // Left column: only RETRIEVAL_REQUESTED. Right column: all other statuses.
     final retrievalRequested = allRequests
-        .where((r) =>
-            r.status.toUpperCase() == 'RETRIEVAL_REQUESTED')
+        .where((r) => r.status.toUpperCase() == 'RETRIEVAL_REQUESTED')
         .toList();
     final otherStatuses = allRequests
-        .where((r) =>
-            r.status.toUpperCase() != 'RETRIEVAL_REQUESTED')
+        .where((r) => r.status.toUpperCase() != 'RETRIEVAL_REQUESTED')
         .toList()
-      ..sort((a, b) =>
-          _statusOrder(a.status).compareTo(_statusOrder(b.status)));
+      ..sort(
+          (a, b) => _statusOrder(a.status).compareTo(_statusOrder(b.status)));
 
-    final columnRequests = widget.isLeftColumn
-        ? retrievalRequested
-        : otherStatuses;
+    final columnRequests =
+        widget.isLeftColumn ? retrievalRequested : otherStatuses;
 
     if (columnRequests.isEmpty) {
       return Center(

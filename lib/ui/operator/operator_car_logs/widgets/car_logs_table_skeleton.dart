@@ -57,8 +57,7 @@ class CarLogsTableSkeleton extends StatelessWidget {
                       ? Colors.white
                       : AppColors.grey.withOpacity(0.05),
                   border: Border(
-                    bottom: BorderSide(
-                        color: AppColors.grey.withOpacity(0.3)),
+                    bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),
                   ),
                 ),
                 child: Row(

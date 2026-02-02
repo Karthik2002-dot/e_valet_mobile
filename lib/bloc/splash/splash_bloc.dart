@@ -54,25 +54,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));
+      final isDriver = roles.any((r) => r.contains('driver'));
       if (isOperator) {
         outletId = dotenv.env['OUTLET_ID'] ?? '1';
       }
 
-      // Initialize WebSocket connection if user is authenticated
-      if (webSocketBloc != null && userId != null) {
-        // Add delay on splash to ensure network is ready (especially on first launch)
-        await WebSocketHelper.connectAfterLogin(
-          webSocketBloc: webSocketBloc!,
-          outletId: outletId,
-          operatorId: isOperator ? userId : null,
-          driverId: roles.any((r) => r.contains('driver')) ? userId : null,
-          initialDelay:
-              const Duration(milliseconds: 1500), // Longer delay for splash
-        );
-      }
-
-      // If user is a driver, check status on app restart: OFFLINE means session ended → log out and go to login
-      final isDriver = roles.any((r) => r.contains('driver'));
+      // If user is a driver, check status before WebSocket: OFFLINE means session ended → log out and go to login.
+      // Only connect WebSocket when driver is ONLINE (or operator).
       if (isDriver) {
         try {
           final driverStatus = await DriverStatusApiService.getDriverStatus();
@@ -86,6 +74,18 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           // If status fetch fails (e.g. network), still allow navigation to driver home
           print('Splash: Driver status fetch failed: $e');
         }
+      }
+
+      // Initialize WebSocket only when user is allowed to continue (operator, or driver with ONLINE status)
+      if (webSocketBloc != null && userId != null) {
+        await WebSocketHelper.connectAfterLogin(
+          webSocketBloc: webSocketBloc!,
+          outletId: outletId,
+          operatorId: isOperator ? userId : null,
+          driverId: isDriver ? userId : null,
+          initialDelay:
+              const Duration(milliseconds: 1500), // Longer delay for splash
+        );
       }
     } catch (e) {
       // Ignore profile fetch failure; fallback to empty roles

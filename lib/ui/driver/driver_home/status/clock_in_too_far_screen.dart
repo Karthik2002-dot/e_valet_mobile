@@ -120,15 +120,4 @@ class ClockInTooFarScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _continueToDriverHome(BuildContext context) {
-    if (!context.mounted) return;
-    final statusBloc = context.read<DriverStatusBloc>();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const DriverHomeScreen(),
-      ),
-    );
-    statusBloc.add(const DriverStatusStarted());
-  }
 }

@@ -109,8 +109,6 @@ class TextConstants {
   static const String clockInTooFarTitle = 'Too Far From Outlet';
   static const String clockInTooFarSubtitle =
       'You are too far from the check-in location to go online.';
-  static const String clockInTooFarContinue = 'Continue to App';
-
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
