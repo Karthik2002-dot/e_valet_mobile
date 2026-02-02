@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/data_cell_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/data_cell_widget.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 
 class TableDataRowWidget extends StatelessWidget {

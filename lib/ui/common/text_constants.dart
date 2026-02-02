@@ -244,6 +244,10 @@ class TextConstants {
   // Car Logs Screen (Operator)
   static const String carLogsTitle = 'Car Logs';
   static const String carLogsDescription = 'View vehicle activity logs';
+  static const String carLogsKpiTotalParked = 'Total Cars Parked';
+  static const String carLogsKpiInTransit = 'Cars In Transit';
+  static const String carLogsKpiHandovered = 'Cars Handovered';
+  static const String carLogsKpiInLot = 'Cars In Lot';
   static const String totalTrips = 'Total Trips';
   static const String totalDistance = 'Total Distance';
   static const String totalTripsValue = '456';
