@@ -211,7 +211,8 @@ class FirebaseMessagingService implements NotificationService {
           priority: Priority.high,
         );
         // Speak notification body aloud (loud, hearable TTS)
-        final bodyText = notification.body ?? notification.title ?? 'New notification';
+        final bodyText =
+            notification.body ?? notification.title ?? 'New notification';
         _textToSpeechService.speak(bodyText);
       }
 
@@ -249,7 +250,8 @@ class FirebaseMessagingService implements NotificationService {
       });
 
       // Speak notification body aloud when user opens from notification (loud, hearable)
-      final bodyText = message.notification?.body ?? message.notification?.title;
+      final bodyText =
+          message.notification?.body ?? message.notification?.title;
       if (bodyText != null && bodyText.isNotEmpty) {
         _textToSpeechService.speak(bodyText);
       }

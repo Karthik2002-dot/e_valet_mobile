@@ -112,7 +112,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // Automatically clock in (go online) for drivers after successful login
         // Await so clock-in completes before navigate; driver home then shows ONLINE
         if (isDriver) {
-          await _clockInAfterLogin();
+          final clockInError = await _clockInAfterLogin();
+          if (clockInError != null && _isClockInTooFarError(clockInError)) {
+            emit(LoginSuccessClockInTooFar(
+              profile: profile,
+              message: clockInError,
+            ));
+            return;
+          }
         }
 
         emit(LoginSuccess(profile));
@@ -141,9 +148,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(const LoginInitial());
   }
 
-  /// Automatically clock in (go online) for drivers after successful login.
-  /// Awaited before LoginSuccess so driver home status fetch returns ONLINE.
-  Future<void> _clockInAfterLogin() async {
+  /// Returns error message if clock-in failed, null if success.
+  /// Caller uses this to show "too far" screen when appropriate.
+  Future<String?> _clockInAfterLogin() async {
     try {
       log('Starting automatic clock-in after login...');
 
@@ -195,9 +202,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       await DriverStatusApiService.clockIn(clockInRequest);
       log('Automatic clock-in successful after login');
+      return null;
+    } on ApiException catch (e) {
+      log('Failed to clock in automatically after login: ${e.message}');
+      return e.message;
     } catch (e) {
       log('Failed to clock in automatically after login: $e');
-      // Don't fail the login if clock-in fails - this is a background operation
+      return null; // Other errors: continue to driver home as offline
     }
+  }
+
+  /// True if the clock-in error indicates driver is too far from outlet.
+  bool _isClockInTooFarError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('too far') ||
+        (lower.contains('distance') && lower.contains('allowed'));
   }
 }

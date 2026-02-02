@@ -104,6 +104,11 @@ class TextConstants {
       'Please Turn Online To Park a Car';
   static const String cannotParkCarOffline =
       'Can\'t park Car unless you turn Online';
+
+  // Clock-in too far (after login)
+  static const String clockInTooFarTitle = 'Too Far From Outlet';
+  static const String clockInTooFarSubtitle =
+      'You are too far from the check-in location to go online.';
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';

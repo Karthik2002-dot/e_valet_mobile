@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login_form.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/clock_in_too_far_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 
@@ -91,6 +92,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Your account does not have the required permissions to access this application. Please contact your administrator.',
               );
             }
+          } else if (state is LoginSuccessClockInTooFar) {
+            // Driver logged in but clock-in failed (too far from outlet)
+            if (!context.mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ClockInTooFarScreen(message: state.message),
+              ),
+            );
           } else if (state is LoginFailure) {
             SnackBars.showErrorSnackBar(context, state.message);
           }
