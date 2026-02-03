@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,9 +55,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   CarLog? _selectedCarLog;
   bool _showPopup = false;
 
-  // Debounce for search
-  Timer? _searchDebounce;
-  static const Duration _searchDebounceDuration = Duration(milliseconds: 400);
+  // Search runs on: Done key, keyboard close, or space after a word
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -66,6 +64,12 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     _carLogsBloc = CarLogsBloc();
     _isTableLoading = true; // Set loading on initial load
     _fetchCarLogs();
+
+    _searchFocusNode.addListener(() {
+      if (!_searchFocusNode.hasFocus && mounted) {
+        _runSearch();
+      }
+    });
 
     // Provide the refresh method to the parent
     if (widget.onRefreshReady != null) {
@@ -84,9 +88,19 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     ));
   }
 
+  /// Run search with current query. Called on Done, keyboard close, or space after word.
+  void _runSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.trim();
+      _currentPage = 1;
+      _isTableLoading = true;
+    });
+    _fetchCarLogs();
+  }
+
   @override
   void dispose() {
-    _searchDebounce?.cancel();
+    _searchFocusNode.dispose();
     _searchController.dispose();
     _carLogsBloc.close();
     super.dispose();
@@ -310,22 +324,16 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                 width: MediaQuery.of(context).size.width * 0.4,
                                 child: TextField(
                                   controller: _searchController,
+                                  focusNode: _searchFocusNode,
                                   keyboardType: TextInputType.text,
+                                  textInputAction: TextInputAction.search,
+                                  onSubmitted: (_) => _runSearch(),
                                   onChanged: (value) {
-                                    final query = value.trim();
-                                    setState(() => _searchQuery = query);
-                                    _searchDebounce?.cancel();
-                                    _searchDebounce = Timer(
-                                      _searchDebounceDuration,
-                                      () {
-                                        if (!mounted) return;
-                                        setState(() {
-                                          _currentPage = 1;
-                                          _isTableLoading = true;
-                                        });
-                                        _fetchCarLogs();
-                                      },
-                                    );
+                                    setState(() => _searchQuery = value.trim());
+                                    // Search when user types a space (after a word)
+                                    if (value.endsWith(' ')) {
+                                      _runSearch();
+                                    }
                                   },
                                   decoration: InputDecoration(
                                     hintText: TextConstants.carLogsSearchHint,

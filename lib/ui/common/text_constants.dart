@@ -249,17 +249,17 @@ class TextConstants {
   // Car Logs Screen (Operator)
   static const String carLogsTitle = 'Car Logs';
   static const String carLogsDescription = 'View vehicle activity logs';
-  static const String carLogsKpiTotalParked = 'Total Cars Parked';
+  static const String carLogsKpiTotalParked = 'Total Cars';
   static const String carLogsKpiInTransit = 'Cars In Transit';
   static const String carLogsKpiHandovered = 'Cars Handovered';
-  static const String carLogsKpiInLot = 'Cars In Lot';
+  static const String carLogsKpiInLot = 'Parked Cars';
   static const String totalTrips = 'Total Trips';
   static const String totalDistance = 'Total Distance';
   static const String totalTripsValue = '456';
   static const String totalDistanceValue = '2340 km';
 
   // Car Logs Table Headers
-  static const String carLogsTagNumber = 'Tag Number';
+  static const String carLogsTagNumber = 'Card Number';
   static const String carLogsCarStatus = 'Car Status';
   static const String carLogsDuration = 'Duration';
   static const String carLogsParkLocation = 'Park Location';
@@ -268,7 +268,7 @@ class TextConstants {
 
   // Car Logs Search and Messages
   static const String carLogsSearchHint =
-      'Search by tag, status, or parked by...';
+      'Search by card numnber, or parked by...';
   static const String carLogsNoDataMessage = 'No car logs available';
   static const String carLogsErrorMessage = 'Error loading car logs';
 
