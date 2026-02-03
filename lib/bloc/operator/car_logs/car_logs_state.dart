@@ -1,3 +1,4 @@
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_logs_kpis_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_logs_response.dart';
 
 abstract class CarLogsState {
@@ -14,10 +15,14 @@ class CarLogsLoading extends CarLogsState {
 
 class CarLogsLoaded extends CarLogsState {
   final CarLogsResponse carLogsResponse;
+  final CarLogsKpisResponse? kpis;
 
-  const CarLogsLoaded({required this.carLogsResponse});
+  const CarLogsLoaded({
+    required this.carLogsResponse,
+    this.kpis,
+  });
 
-  List<Object> get props => [carLogsResponse];
+  List<Object?> get props => [carLogsResponse, kpis];
 }
 
 class CarLogsError extends CarLogsState {

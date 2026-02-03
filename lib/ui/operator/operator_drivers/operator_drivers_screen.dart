@@ -93,41 +93,108 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
         ],
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(
+              MediaQuery.of(context).size.width * 0.04,
+            ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with back button, title, and description
-                Column(
+                // Header: back button, title + description (left), search (right) — aligned vertically
+                Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      color: AppColors.black,
+                      onPressed: () {
+                        widget.onNavigateToTab?.call(0);
+                      },
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          color: AppColors.black,
-                          onPressed: () {
-                            // Navigate back to dashboard (index 0)
-                            widget.onNavigateToTab?.call(0);
-                          },
-                        ),
                         TextComponent(
                           labelText: TextConstants.valetDashboardTitle,
                           color: AppColors.black,
-                          fontSize: MediaQuery.of(context).size.width * 0.02,
+                          fontSize: MediaQuery.of(context).size.width * 0.03,
                           fontWeight: FontWeight.bold,
+                        ),
+                        const SizedBox(height: 4),
+                        TextComponent(
+                          labelText: TextConstants.valetDashboardDescription,
+                          color: AppColors.grey,
+                          fontSize: MediaQuery.of(context).size.width * 0.02,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 0),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 48), // Align with title text start
-                      child: TextComponent(
-                        labelText: TextConstants.valetDashboardDescription,
-                        color: AppColors.grey,
-                        fontSize: MediaQuery.of(context).size.width * 0.013,
+                    const Spacer(),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.trim();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: TextConstants.searchByNameOrPhone,
+                          hintStyle: TextStyle(
+                            color: AppColors.grey,
+                            fontSize: MediaQuery.of(context).size.width * 0.02,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.primary,
+                            size: MediaQuery.of(context).size.width * 0.02,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: AppColors.grey,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.02,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                    FocusScope.of(context).unfocus();
+                                  },
+                                )
+                              : null,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.02,
+                            vertical: MediaQuery.of(context).size.height * 0.01,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.grey.withOpacity(0.3),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.grey.withOpacity(0.3),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.02,
+                          color: AppColors.black,
+                        ),
                       ),
                     ),
                   ],
@@ -176,48 +243,6 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                       },
                     );
                   },
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.grey.withOpacity(0.3)),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: TextConstants.searchByNameOrPhone,
-                      hintStyle: TextStyle(
-                        color: AppColors.grey,
-                        fontSize: MediaQuery.of(context).size.width * 0.013,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: AppColors.grey,
-                        size: 20,
-                      ),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear,
-                                  color: AppColors.grey, size: 20),
-                              onPressed: () {
-                                _searchController.clear();
-                                FocusScope.of(context).unfocus();
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width * 0.013,
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 24),
                 ValetListView(

@@ -126,10 +126,10 @@ class ValetListView extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 1.8,
+              childAspectRatio: 2,
             ),
             itemCount: filteredValets.length,
             itemBuilder: (context, index) {

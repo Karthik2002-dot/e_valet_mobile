@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/sortable_header_cell_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/sortable_header_cell_widget.dart';
 
 enum SortDirection { none, ascending, descending }
 

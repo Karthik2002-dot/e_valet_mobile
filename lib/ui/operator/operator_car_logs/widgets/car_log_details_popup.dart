@@ -7,8 +7,8 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_event.dart';
-import 'widgets/simple_detail_row.dart';
-import 'widgets/status_detail_row.dart';
+import 'simple_detail_row.dart';
+import 'status_detail_row.dart';
 
 class CarLogDetailsPopup extends StatefulWidget {
   final CarLog carLog;
@@ -31,15 +31,9 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
 
   // Define available status options
   final List<String> _statusOptions = [
-    'CHECKED_IN',
     'PARKED',
-    'RETRIEVAL_REQUESTED',
-    'ASSIGNED',
-    'ACCEPTED',
     'ARRIVED',
-    'REPARKING',
     'COMPLETED',
-    'CANCELLED'
   ];
 
   @override

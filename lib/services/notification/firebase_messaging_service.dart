@@ -9,9 +9,17 @@ import 'package:niloufer_valet_mobile/services/device/device_info_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'notification_service.dart';
 import 'local_notification_service.dart';
+import 'text_to_speech_service.dart';
 
-/// Top-level function to handle background messages
-/// Must be a top-level function (not a class method)
+/// Top-level function to handle background messages.
+/// Must be a top-level function (not a class method).
+///
+/// **Why TTS does not run here:** This handler runs in a separate Dart isolate
+/// when the app is in background or terminated. That isolate has no Flutter
+/// engine and no access to plugins (e.g. flutter_tts). TTS only works when the
+/// app is in the foreground or when the user opens the app from a notification.
+/// On Android, background/terminated TTS is handled by native code in
+/// [ValetFirebaseMessagingService] (Kotlin).
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   log('Background message received: ${message.messageId}');
@@ -26,6 +34,7 @@ class FirebaseMessagingService implements NotificationService {
       LocalNotificationService();
   final NotificationApiService _notificationApiService =
       NotificationApiService();
+  final TextToSpeechService _textToSpeechService = TextToSpeechService();
 
   final StreamController<Map<String, dynamic>> _messageStreamController =
       StreamController<Map<String, dynamic>>.broadcast();
@@ -41,6 +50,9 @@ class FirebaseMessagingService implements NotificationService {
 
       // Initialize local notifications
       await _localNotificationService.initialize();
+
+      // Initialize TTS for speaking notification body aloud (loud, hearable)
+      await _textToSpeechService.initialize();
 
       // Request notification permissions
       await requestPermission();
@@ -186,14 +198,22 @@ class FirebaseMessagingService implements NotificationService {
 
       // Show local notification when app is in foreground
       if (notification != null) {
+        // Include body in payload so TTS can speak it when user taps notification
+        final payloadWithBody = Map<String, dynamic>.from(message.data)
+          ..['body'] = notification.body
+          ..['title'] = notification.title;
         _localNotificationService.showNotification(
           id: message.hashCode,
           title: notification.title ?? 'New Notification',
           body: notification.body ?? '',
-          payload: message.data,
+          payload: payloadWithBody,
           importance: Importance.high,
           priority: Priority.high,
         );
+        // Speak notification body aloud (loud, hearable TTS)
+        final bodyText =
+            notification.body ?? notification.title ?? 'New notification';
+        _textToSpeechService.speak(bodyText);
       }
 
       // Add to stream for BLoC to handle
@@ -228,6 +248,13 @@ class FirebaseMessagingService implements NotificationService {
         'action': 'tap',
         'timestamp': DateTime.now().toIso8601String(),
       });
+
+      // Speak notification body aloud when user opens from notification (loud, hearable)
+      final bodyText =
+          message.notification?.body ?? message.notification?.title;
+      if (bodyText != null && bodyText.isNotEmpty) {
+        _textToSpeechService.speak(bodyText);
+      }
 
       // Navigate to appropriate screen
       _handleNavigation(notificationType, data);

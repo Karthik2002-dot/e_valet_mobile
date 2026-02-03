@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,11 +10,13 @@ import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart'
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_state.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/car_logs_table_widget.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/table_header_row_widget.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/page_button_widget.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/page_size_dropdown_widget.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/car_log_details_popup.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/car_logs_kpi_grid.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/car_logs_table_skeleton.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/car_logs_table_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/table_header_row_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/page_button_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/page_size_dropdown_widget.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/car_log_details_popup.dart';
 
 class OperatorCarLogsScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
@@ -53,6 +56,10 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   CarLog? _selectedCarLog;
   bool _showPopup = false;
 
+  // Debounce for search
+  Timer? _searchDebounce;
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 400);
+
   @override
   void initState() {
     super.initState();
@@ -69,14 +76,17 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   void refresh() {
-    print('OperatorCarLogsScreen: refresh() called'); // Debug log
     _carLogsBloc.add(FetchCarLogs(
       outletId: _outletId,
+      page: _currentPage,
+      pageSize: _itemsPerPage,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     ));
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _carLogsBloc.close();
     super.dispose();
@@ -100,24 +110,12 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
       outletId: _outletId,
       page: _currentPage,
       pageSize: _itemsPerPage,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     ));
   }
 
   int _getTotalPages() {
     return (_totalItems / _itemsPerPage).ceil();
-  }
-
-  List<CarLog> _getFilteredLogs(List<CarLog> logs) {
-    if (_searchQuery.isEmpty) {
-      return logs;
-    }
-
-    final query = _searchQuery.toLowerCase();
-    return logs.where((log) {
-      return log.tagNumber.toString().toLowerCase().contains(query) ||
-          log.displayStatus.toLowerCase().contains(query) ||
-          log.parkedBy.name.toLowerCase().contains(query);
-    }).toList();
   }
 
   void _goToPage(int page) {
@@ -174,6 +172,71 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     });
   }
 
+  Widget _buildSkeletonLayout(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Padding(
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: back, title placeholder, search placeholder
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  color: AppColors.black,
+                  onPressed: () => widget.onNavigateToTab?.call(0),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextComponent(
+                      labelText: TextConstants.carLogsTitle,
+                      color: AppColors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.03,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 4),
+                    TextComponent(
+                      labelText: TextConstants.carLogsDescription,
+                      color: AppColors.grey,
+                      fontSize: MediaQuery.of(context).size.width * 0.02,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  height: 48,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            CarLogsKpiGrid(isLoading: true),
+            const SizedBox(height: 24),
+            Expanded(
+              child: SingleChildScrollView(
+                child: CarLogsTableSkeleton(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -184,9 +247,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             child: BlocBuilder<CarLogsBloc, CarLogsState>(
               builder: (context, state) {
                 if (state is CarLogsLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return _buildSkeletonLayout(context);
                 } else if (state is CarLogsLoaded) {
                   // Update total items from server response
                   _totalItems = state.carLogsResponse.total;
@@ -202,138 +263,137 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                       FocusScope.of(context).unfocus();
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.04,
+                      ),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header with back button, title, and description
-                          Column(
+                          // Header: back button, title + description (left), search (right) — aligned vertically
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                color: AppColors.black,
+                                onPressed: () {
+                                  widget.onNavigateToTab?.call(0);
+                                },
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.arrow_back),
-                                    color: AppColors.black,
-                                    onPressed: () {
-                                      // Navigate back to dashboard (index 0)
-                                      widget.onNavigateToTab?.call(0);
-                                    },
-                                  ),
                                   TextComponent(
                                     labelText:
                                         '${TextConstants.carLogsTitle} (${state.carLogsResponse.total})',
                                     color: AppColors.black,
                                     fontSize:
                                         MediaQuery.of(context).size.width *
-                                            0.02,
+                                            0.03,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                  const Spacer(),
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.25,
-                                    child: TextField(
-                                      controller: _searchController,
-                                      keyboardType: TextInputType.text,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _searchQuery = value;
-                                          _currentPage =
-                                              1; // Reset to first page when search changes
-                                        });
-                                        // For now, keep client-side search since API doesn't support search parameters
-                                      },
-                                      decoration: InputDecoration(
-                                        hintText:
-                                            TextConstants.carLogsSearchHint,
-                                        hintStyle: TextStyle(
-                                          color: AppColors.grey,
-                                          fontSize: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.012,
-                                        ),
-                                        prefixIcon: Icon(
-                                          Icons.search,
-                                          color: AppColors.primary,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.015,
-                                        ),
-                                        suffixIcon: _searchQuery.isNotEmpty
-                                            ? IconButton(
-                                                icon: Icon(
-                                                  Icons.clear,
-                                                  color: AppColors.grey,
-                                                  size: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.015,
-                                                ),
-                                                onPressed: _clearSearch,
-                                              )
-                                            : null,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.01,
-                                          vertical: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.01,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color:
-                                                AppColors.grey.withOpacity(0.3),
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color:
-                                                AppColors.grey.withOpacity(0.3),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: AppColors.primary,
-                                            width: 2,
-                                          ),
-                                        ),
-                                      ),
-                                      style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.012,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
+                                  const SizedBox(height: 4),
+                                  TextComponent(
+                                    labelText: TextConstants.carLogsDescription,
+                                    color: AppColors.grey,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.02,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 0),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 48), // Align with title text start
-                                child: TextComponent(
-                                  labelText: TextConstants.carLogsDescription,
-                                  color: AppColors.grey,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.013,
+                              const Spacer(),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.4,
+                                child: TextField(
+                                  controller: _searchController,
+                                  keyboardType: TextInputType.text,
+                                  onChanged: (value) {
+                                    final query = value.trim();
+                                    setState(() => _searchQuery = query);
+                                    _searchDebounce?.cancel();
+                                    _searchDebounce = Timer(
+                                      _searchDebounceDuration,
+                                      () {
+                                        if (!mounted) return;
+                                        setState(() {
+                                          _currentPage = 1;
+                                          _isTableLoading = true;
+                                        });
+                                        _fetchCarLogs();
+                                      },
+                                    );
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: TextConstants.carLogsSearchHint,
+                                    hintStyle: TextStyle(
+                                      color: AppColors.grey,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.02,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: AppColors.primary,
+                                      size: MediaQuery.of(context).size.width *
+                                          0.02,
+                                    ),
+                                    suffixIcon: _searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(
+                                              Icons.clear,
+                                              color: AppColors.grey,
+                                              size: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.02,
+                                            ),
+                                            onPressed: _clearSearch,
+                                          )
+                                        : null,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.02,
+                                      vertical:
+                                          MediaQuery.of(context).size.height *
+                                              0.01,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: AppColors.grey.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: AppColors.grey.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.primary,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.02,
+                                    color: AppColors.black,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+                          const SizedBox(height: 24),
+                          CarLogsKpiGrid(kpis: state.kpis),
                           const SizedBox(height: 24),
                           if (state.carLogsResponse.logs.isEmpty)
                             Expanded(
@@ -355,7 +415,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                           )
                                         : SingleChildScrollView(
                                             child: CarLogsTableWidget(
-                                              logs: _getFilteredLogs(
+                                              logs: _sortLogs(
                                                   state.carLogsResponse.logs),
                                               sortColumn: _sortColumn,
                                               sortDirection: _sortDirection,
@@ -404,6 +464,9 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                 outletId: _outletId,
                                 page: _currentPage,
                                 pageSize: _itemsPerPage,
+                                search: _searchQuery.isEmpty
+                                    ? null
+                                    : _searchQuery,
                               ));
                             },
                             child: const Text('Retry'),
@@ -523,30 +586,23 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   Widget _buildPaginationControls(List<CarLog> logs) {
-    final filteredLogs = _getFilteredLogs(logs);
-    final displayTotal =
-        _searchQuery.isEmpty ? _totalItems : filteredLogs.length;
     final totalPages = _getTotalPages();
 
-    // Hide pagination when searching (search works on current page only)
-    if (_searchQuery.isNotEmpty || totalPages <= 1) {
+    // Simplified bar when only one page (total from API reflects search)
+    if (totalPages <= 1) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Page size dropdown
             PageSizeDropdownWidget(
               itemsPerPage: _itemsPerPage,
               pageSizeOptions: _pageSizeOptions,
               onPageSizeChanged: _changePageSize,
             ),
-
             const Spacer(),
-
-            // Page info
             Text(
-              '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > displayTotal ? displayTotal : _currentPage * _itemsPerPage} of $displayTotal',
+              '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,

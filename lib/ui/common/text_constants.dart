@@ -104,6 +104,11 @@ class TextConstants {
       'Please Turn Online To Park a Car';
   static const String cannotParkCarOffline =
       'Can\'t park Car unless you turn Online';
+
+  // Clock-in too far (after login)
+  static const String clockInTooFarTitle = 'Too Far From Outlet';
+  static const String clockInTooFarSubtitle =
+      'You are too far from the check-in location to go online.';
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
@@ -244,6 +249,10 @@ class TextConstants {
   // Car Logs Screen (Operator)
   static const String carLogsTitle = 'Car Logs';
   static const String carLogsDescription = 'View vehicle activity logs';
+  static const String carLogsKpiTotalParked = 'Total Cars Parked';
+  static const String carLogsKpiInTransit = 'Cars In Transit';
+  static const String carLogsKpiHandovered = 'Cars Handovered';
+  static const String carLogsKpiInLot = 'Cars In Lot';
   static const String totalTrips = 'Total Trips';
   static const String totalDistance = 'Total Distance';
   static const String totalTripsValue = '456';
@@ -332,8 +341,8 @@ class TextConstants {
 
   // Valet Card Labels
   static const String carsPickedUpLabel = 'Cars Picked Up : ';
-  static const String carsHandedOverLabel = 'Cars Hand overed:';
-  static const String onBreakDurationLabel = 'On-Break Duration: ';
+  static const String carsHandedOverLabel = 'Cars Hand overed : ';
+  static const String onBreakDurationLabel = 'On-Break Duration : ';
   static const String minsLabel = ' mins';
   static const String noValetsFound = 'No valets found';
 

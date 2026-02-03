@@ -26,7 +26,7 @@ class ValetKpisGrid extends StatelessWidget {
       crossAxisCount: 4,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 3,
+      childAspectRatio: 2.5,
       children: [
         ValetKpiCard(
           value: kpis != null ? '${kpis!.totalValets}' : '0',
