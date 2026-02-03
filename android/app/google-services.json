@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "369380969472",
-    "project_id": "niloufer-9351a",
-    "storage_bucket": "niloufer-9351a.firebasestorage.app"
+    "project_number": "12041726976",
+    "project_id": "cafe-niloufer-97a92",
+    "storage_bucket": "cafe-niloufer-97a92.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:369380969472:android:d905e9c63e789117e55ce5",
+        "mobilesdk_app_id": "1:12041726976:android:716dcedbdcda9024e5fce5",
+        "android_client_info": {
+          "package_name": "com.cafeniloufer.ops"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwBtyZq7-9tLf2z95aHtLHHnAyn7RF4XU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12041726976:android:083e11a3f181807ee5fce5",
         "android_client_info": {
           "package_name": "com.niloufer.valet"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCt-yTPq8Yvv8UsoKOIdrZRZ5RNbOvIGJc"
+          "current_key": "AIzaSyAwBtyZq7-9tLf2z95aHtLHHnAyn7RF4XU"
         }
       ],
       "services": {
