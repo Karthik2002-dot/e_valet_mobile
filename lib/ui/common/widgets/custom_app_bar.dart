@@ -3,6 +3,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Widget? leading;
   final List<Widget>? actions;
   final bool showLanguageIcon;
   final double? logoSize;
@@ -10,6 +11,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const CustomAppBar({
     super.key,
+    this.leading,
     this.actions,
     this.showLanguageIcon = false,
     this.logoSize,
@@ -44,6 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.primary,
       elevation: 0,
       automaticallyImplyLeading: false,
+      leading: leading,
       title: SizedBox(
         width: defaultLogoSize,
         height: defaultLogoSize,
