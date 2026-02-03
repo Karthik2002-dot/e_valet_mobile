@@ -25,6 +25,7 @@ class OperatorDashboardBloc
   StreamSubscription<dynamic>? _statsUpdateSubscription;
   StreamSubscription<dynamic>? _driverStatusChangedSubscription;
   StreamSubscription<dynamic>? _newParkingSubscription;
+  StreamSubscription<bool>? _webSocketConnectionSubscription;
 
   OperatorDashboardBloc({
     this.webSocketBloc,
@@ -36,12 +37,14 @@ class OperatorDashboardBloc
     on<CreateManualRetrievalRequest>(_onCreateManualRetrievalRequest);
     on<NewParkingEvent>(_onNewParkingEvent);
 
-    // Setup WebSocket listeners if WebSocketBloc is provided
-    _setupWebSocketListeners();
+    // Monitor WebSocket connection and re-setup listeners on (re)connect
+    _setupWebSocketConnectionMonitoring();
   }
 
-  /// Setup WebSocket listeners for real-time updates
-  void _setupWebSocketListeners() {
+  /// Monitor WebSocket connection and setup/re-setup listeners when connected.
+  /// This ensures event subscriptions are re-established after disconnect/reconnect
+  /// (e.g. after idle timeout), so real-time updates keep working.
+  void _setupWebSocketConnectionMonitoring() {
     if (webSocketBloc == null) {
       print(
         'WebSocketBloc not provided to OperatorDashboardBloc. '
@@ -49,6 +52,38 @@ class OperatorDashboardBloc
       );
       return;
     }
+
+    _webSocketConnectionSubscription =
+        webSocketBloc!.service.connectionStream.listen((isConnected) {
+      if (isConnected) {
+        _setupWebSocketListeners();
+      } else {
+        _cleanupWebSocketListeners();
+      }
+    });
+
+    if (webSocketBloc!.isConnected) {
+      _setupWebSocketListeners();
+    }
+  }
+
+  void _cleanupWebSocketListeners() {
+    _sessionStatusSubscription?.cancel();
+    _sessionStatusSubscription = null;
+    _statsUpdateSubscription?.cancel();
+    _statsUpdateSubscription = null;
+    _driverStatusChangedSubscription?.cancel();
+    _driverStatusChangedSubscription = null;
+    _newParkingSubscription?.cancel();
+    _newParkingSubscription = null;
+  }
+
+  /// Setup WebSocket listeners for real-time updates.
+  /// Called on (re)connect; cleanup is done first to avoid duplicate subscriptions.
+  void _setupWebSocketListeners() {
+    if (webSocketBloc == null) return;
+
+    _cleanupWebSocketListeners();
 
     try {
       // Listen to session:status_changed event
@@ -362,7 +397,7 @@ class OperatorDashboardBloc
 
   @override
   Future<void> close() async {
-    // Cancel WebSocket subscriptions
+    _webSocketConnectionSubscription?.cancel();
     await _sessionStatusSubscription?.cancel();
     await _statsUpdateSubscription?.cancel();
     await _driverStatusChangedSubscription?.cancel();
