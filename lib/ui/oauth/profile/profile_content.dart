@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
@@ -24,29 +25,32 @@ class ProfileContent extends StatelessWidget {
         MediaQuery.of(context).size.width * 0.02,
       ),
       child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(
-                MediaQuery.of(context).size.width * 0.05,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
               ),
-              border: Border.all(
-                color: AppColors.primary,
-                width: 2,
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width * 0.05,
-                vertical: MediaQuery.of(context).size.height * 0.02,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(
+                    MediaQuery.of(context).size.width * 0.05,
+                  ),
+                  border: Border.all(
+                    color: AppColors.primary,
+                    width: 2,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.05,
+                    vertical: MediaQuery.of(context).size.height * 0.02,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                   CircleAvatar(
                     radius: MediaQuery.of(context).size.width * 0.1,
                     backgroundColor: AppColors.primary.withOpacity(0.1),
@@ -138,6 +142,23 @@ class ProfileContent extends StatelessWidget {
               ),
             ),
           ),
+            ), // ConstrainedBox
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.hasData ? snapshot.data!.version : null;
+                if (version == null || version.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return TextComponent(
+                  labelText: version,
+                  fontSize: MediaQuery.of(context).size.width * 0.035,
+                  color: AppColors.grey,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

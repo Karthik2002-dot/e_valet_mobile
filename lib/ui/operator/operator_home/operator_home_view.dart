@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 
 class OperatorHomeView extends StatefulWidget {
@@ -15,8 +16,16 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
   int _selectedIndex = 0;
 
   void _onMenuItemSelected(int index) {
-    setState(() => _selectedIndex = index);
-    // TODO: add navigation for each menu item if needed
+    if (index == 4) {
+      // Profile – navigate to profile screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const ProfileScreen(),
+        ),
+      );
+    } else {
+      setState(() => _selectedIndex = index);
+    }
   }
 
   @override

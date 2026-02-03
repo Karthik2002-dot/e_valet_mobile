@@ -28,7 +28,13 @@ class _ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: const CustomAppBar(),
+      appBar: CustomAppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: AppColors.white,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
