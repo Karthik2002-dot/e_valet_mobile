@@ -61,7 +61,7 @@ class ParkedCarCard extends StatelessWidget {
               child: item.photoUrl.isNotEmpty
                   ? Image.network(
                       item.photoUrl,
-                      height: screenHeight * 0.06,
+                      height: screenHeight * 0.08,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
@@ -145,7 +145,7 @@ class ParkedCarCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: screenHeight * 0.008),
+                          SizedBox(height: screenHeight * 0.002),
                         ],
                         // Parked By (if available)
                         if (item.parkedByName != null &&
@@ -172,7 +172,7 @@ class ParkedCarCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: screenHeight * 0.006),
+                          SizedBox(height: screenHeight * 0.002),
                         ],
                       ],
                     ),
@@ -246,7 +246,7 @@ class ParkedCarCard extends StatelessWidget {
 
   Widget _buildPlaceholderImage(double screenWidth, double screenHeight) {
     return Container(
-      height: screenHeight * 0.06,
+      height: screenHeight * 0.08,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,

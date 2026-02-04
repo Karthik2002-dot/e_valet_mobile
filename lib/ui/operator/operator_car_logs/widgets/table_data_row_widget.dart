@@ -45,6 +45,14 @@ class TableDataRowWidget extends StatelessWidget {
               child: DataCellWidget(
                   text: TimeUtils.formatUtcToIstFullDateTime(log.parkedAt)),
             ),
+            Expanded(
+              flex: 16,
+              child: DataCellWidget(
+                text: log.handoveredAt.isEmpty
+                    ? ''
+                    : TimeUtils.formatUtcToIstFullDateTime(log.handoveredAt),
+              ),
+            ),
           ],
         ),
       ),
