@@ -39,6 +39,13 @@ class FirebaseMessagingService implements NotificationService {
   final StreamController<Map<String, dynamic>> _messageStreamController =
       StreamController<Map<String, dynamic>>.broadcast();
 
+  /// Emits when user opens the app by tapping a retrieval_request notification.
+  /// Driver home should refresh pending/session API and navigate to the right screen.
+  final StreamController<void> _retrievalNotificationTapController =
+      StreamController<void>.broadcast();
+  Stream<void> get onRetrievalNotificationTap =>
+      _retrievalNotificationTapController.stream;
+
   // Navigation key for global navigation
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -284,13 +291,14 @@ class FirebaseMessagingService implements NotificationService {
 
   /// Navigate to appropriate screen based on notification type
   void _handleNavigation(String? type, Map<String, dynamic> data) {
-    if (type == null || navigatorKey.currentContext == null) return;
+    if (type == null) return;
 
     try {
       log('Navigating based on notification type: $type');
 
       switch (type) {
         case 'retrieval_request':
+          _retrievalNotificationTapController.add(null);
           _navigateToRetrievalRequest(data);
           break;
         case 'driver_assigned':
@@ -424,6 +432,7 @@ class FirebaseMessagingService implements NotificationService {
 
   /// Dispose resources
   void dispose() {
+    _retrievalNotificationTapController.close();
     _messageStreamController.close();
   }
 }
