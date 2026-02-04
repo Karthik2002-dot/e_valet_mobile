@@ -285,7 +285,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     // When app is opened from retrieval push notification, refresh pending/session API
     if (!_subscribedToRetrievalTap) {
       try {
-        final fcm = Provider.of<FirebaseMessagingService>(context, listen: false);
+        final fcm =
+            Provider.of<FirebaseMessagingService>(context, listen: false);
         _retrievalNotificationTapSubscription =
             fcm.onRetrievalNotificationTap.listen((_) {
           if (mounted) {
@@ -293,7 +294,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
           }
         });
         _subscribedToRetrievalTap = true;
-      } catch (_) {}
+      } catch (e, stackTrace) {
+        debugPrint('Failed to subscribe to retrieval notification taps: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
     }
   }
 
