@@ -294,8 +294,16 @@ class FirebaseMessagingService implements NotificationService {
     if (type == null) return;
 
     try {
+      // Always emit retrieval-tap event, even if navigator is not yet ready.
+      if (type == 'retrieval_request') {
+        _retrievalNotificationTapController.add(null);
+      }
+      // Ensure navigator is ready before attempting navigation to avoid crashes.
+      if (navigatorKey.currentContext == null) {
+        log('Navigator not ready; skipping navigation for type: $type');
+        return;
+      }
       log('Navigating based on notification type: $type');
-
       switch (type) {
         case 'retrieval_request':
           _retrievalNotificationTapController.add(null);

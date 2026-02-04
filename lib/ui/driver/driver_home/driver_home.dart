@@ -357,11 +357,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                 _refreshPendingSessions();
                 assignedBloc.add(const RefreshAssignedSessions());
               });
+            } else {
+              // Force immediate refresh on every build when not triggered by notification
+              assignedBloc.add(const RefreshAssignedSessions());
             }
-
-            // Force immediate refresh on every build
-            assignedBloc.add(const RefreshAssignedSessions());
-
             // WebSocket listeners are automatically set up in bloc constructor
           } catch (e) {
             _assignedBloc = null;
