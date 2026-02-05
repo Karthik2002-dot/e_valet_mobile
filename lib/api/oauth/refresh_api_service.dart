@@ -52,7 +52,7 @@ class RefreshApiService {
     if (newAccessToken != null && newAccessToken.isNotEmpty) {
       await TokenStorage.saveAccessToken(newAccessToken);
       // Update expiry to 15 minutes from now
-      final expiry = DateTime.now().add(const Duration(minutes: 15));
+      final expiry = DateTime.now().add(const Duration(days: 1));
       await TokenStorage.saveAccessTokenExpiry(expiry);
     }
   }
