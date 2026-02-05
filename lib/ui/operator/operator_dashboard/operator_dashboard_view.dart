@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 import 'operator_screen_router.dart';
@@ -53,6 +54,13 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
     if (index == 5) {
       // Logout
       context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
+    } else if (index == 4) {
+      // Profile – navigate to profile screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const ProfileScreen(),
+        ),
+      );
     } else {
       setState(() => _selectedIndex = index);
     }

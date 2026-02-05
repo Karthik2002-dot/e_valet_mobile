@@ -265,6 +265,7 @@ class TextConstants {
   static const String carLogsParkLocation = 'Park Location';
   static const String carLogsParkedBy = 'Parked By';
   static const String carLogsParkedAt = 'Parked At';
+  static const String carLogsHandoverAt = 'Handover At';
 
   // Car Logs Search and Messages
   static const String carLogsSearchHint =

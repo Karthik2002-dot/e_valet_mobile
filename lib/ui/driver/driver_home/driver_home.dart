@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
@@ -14,6 +15,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_st
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -66,6 +68,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
   final DriverHomeRouteObserver _routeObserver = DriverHomeRouteObserver();
   Timer? _webSocketCheckTimer;
+  StreamSubscription<void>? _retrievalNotificationTapSubscription;
+  bool _refreshPendingFromNotification = false;
+  bool _subscribedToRetrievalTap = false;
 
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
@@ -277,7 +282,23 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       _routeObserver.subscribe(this, route);
     }
 
-    // Builder widget in build() will handle WebSocket checks
+    // When app is opened from retrieval push notification, refresh pending/session API
+    if (!_subscribedToRetrievalTap) {
+      try {
+        final fcm =
+            Provider.of<FirebaseMessagingService>(context, listen: false);
+        _retrievalNotificationTapSubscription =
+            fcm.onRetrievalNotificationTap.listen((_) {
+          if (mounted) {
+            setState(() => _refreshPendingFromNotification = true);
+          }
+        });
+        _subscribedToRetrievalTap = true;
+      } catch (e, stackTrace) {
+        debugPrint('Failed to subscribe to retrieval notification taps: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
+    }
   }
 
   @override
@@ -294,6 +315,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   @override
   void dispose() {
+    _retrievalNotificationTapSubscription?.cancel();
     _webSocketCheckTimer?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
@@ -327,9 +349,18 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             // Store the bloc reference for use in timer callbacks
             _assignedBloc = assignedBloc;
 
-            // Force immediate refresh on every build
-            assignedBloc.add(const RefreshAssignedSessions());
-
+            // When opened from retrieval notification tap, refresh session/pending API first
+            if (_refreshPendingFromNotification) {
+              _refreshPendingFromNotification = false;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                _refreshPendingSessions();
+                assignedBloc.add(const RefreshAssignedSessions());
+              });
+            } else {
+              // Force immediate refresh on every build when not triggered by notification
+              assignedBloc.add(const RefreshAssignedSessions());
+            }
             // WebSocket listeners are automatically set up in bloc constructor
           } catch (e) {
             _assignedBloc = null;
@@ -342,21 +373,24 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                 listener: (blocContext, state) {
                   if (state is AssignedSessionsBackgroundData) {
                     if (state.hasSessions) {
-                      // Check if there are pending sessions that require navigation
-                      // If so, don't show the bottom sheet - navigation will happen instead
                       final driverMenuState =
                           blocContext.read<DriverMenuBloc>().state;
-                      bool shouldShowBottomSheet = true;
 
-                      if (driverMenuState is DriverHomeLoaded) {
-                        final pendingSessions = driverMenuState.pendingSessions;
-                        if (pendingSessions != null) {
-                          // If there's a pending session that requires navigation, don't show bottom sheet
-                          if (pendingSessions.hasArrivedSession ||
-                              pendingSessions.hasAcceptedSession ||
-                              pendingSessions.hasCheckedInSession) {
-                            shouldShowBottomSheet = false;
-                          }
+                      // Wait for pending sessions API to load before deciding.
+                      // When app opens from push notification, pending state (accepted/arrived/etc.)
+                      // must drive navigation to the correct screen, not the bottom sheet.
+                      if (driverMenuState is! DriverHomeLoaded) {
+                        return;
+                      }
+
+                      final pendingSessions = driverMenuState.pendingSessions;
+                      bool shouldShowBottomSheet = true;
+                      if (pendingSessions != null) {
+                        if (pendingSessions.hasArrivedSession ||
+                            pendingSessions.hasAcceptedSession ||
+                            pendingSessions.hasReparkingSession ||
+                            pendingSessions.hasCheckedInSession) {
+                          shouldShowBottomSheet = false;
                         }
                       }
 
