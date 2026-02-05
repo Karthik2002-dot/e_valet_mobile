@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:slide_to_act/slide_to_act.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -78,37 +77,50 @@ class SliderActionButton extends StatelessWidget {
         }
 
         final buttonHeight = height ?? 60.0;
-        // Package requirement: buttonSize (default 60) <= height
-        // If height < 60, we need to set buttonSize to be <= height
-        // If height >= 60, we can use default buttonSize (60)
-        final sliderButtonSize =
-            buttonHeight < 60 ? (buttonHeight - 4.0) : null;
 
         // Calculate radius based on shape preference
         final calculatedRadius = isRound
             ? buttonHeight / 2 // Round: radius = half of height
             : (radius ?? 12); // Square/rounded: use provided radius or default
 
-        return SlideAction(
-          onSubmit: () {
-            onSlideComplete();
-            return null;
-          },
-          text: labelText,
-          textStyle: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: labelColor ?? AppColors.white,
-          ),
-          sliderButtonIcon: Icon(
-            icon,
-            color: AppColors.white,
-            size: 24,
-          ),
+        final effectiveLabelColor = labelColor ?? AppColors.black;
+
+        return SizedBox(
+          width: buttonWidth,
           height: buttonHeight,
-          borderRadius: calculatedRadius,
-          innerColor: buttonColor,
-          outerColor: backgroundColor,
+          child: ElevatedButton(
+            onPressed: isLoading ? null : onSlideComplete,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: backgroundColor,
+              foregroundColor: effectiveLabelColor,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(calculatedRadius),
+                side: BorderSide(color: buttonColor),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: buttonColor,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: TextComponent(
+                    labelText: labelText,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: effectiveLabelColor,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
