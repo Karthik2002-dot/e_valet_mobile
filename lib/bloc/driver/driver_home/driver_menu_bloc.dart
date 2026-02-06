@@ -95,7 +95,6 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
       await DriverStatusApiService.clockOut(clockOutRequest);
       log('Automatic clock-out successful before logout');
     } catch (e) {
-      print('🟡 DRIVER CLOCK-OUT ERROR: Clock-out failed: $e');
       log('Failed to clock out automatically before logout: $e');
       // Don't fail the logout if clock-out fails - this is a background operation
     }

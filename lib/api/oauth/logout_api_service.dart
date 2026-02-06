@@ -42,13 +42,10 @@ class LogoutApiService {
       final json = jsonDecode(httpResponse.body) as Map<String, dynamic>;
       response = LogoutResponse.fromJson(json);
     } on ApiException catch (e) {
-      print(
-          '🟢 LOGOUT API ERROR: ApiException: ${e.message} (code: ${e.code})');
       // even if API fails, local logout should continue
       // Return a default response
       response = LogoutResponse(message: 'Logged out locally');
     } catch (e) {
-      print('🟢 LOGOUT API ERROR: Unknown error: $e');
       response = LogoutResponse(message: 'Logged out locally');
     }
 
