@@ -472,9 +472,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                 outletId: _outletId,
                                 page: _currentPage,
                                 pageSize: _itemsPerPage,
-                                search: _searchQuery.isEmpty
-                                    ? null
-                                    : _searchQuery,
+                                search:
+                                    _searchQuery.isEmpty ? null : _searchQuery,
                               ));
                             },
                             child: const Text('Retry'),
@@ -544,8 +543,10 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
               ? null
               : DateTime.tryParse(b.handoveredAt) ?? DateTime(0);
           if (aValue == null && bValue == null) return 0;
-          if (aValue == null) return _sortDirection == SortDirection.ascending ? 1 : -1;
-          if (bValue == null) return _sortDirection == SortDirection.ascending ? -1 : 1;
+          if (aValue == null)
+            return _sortDirection == SortDirection.ascending ? 1 : -1;
+          if (bValue == null)
+            return _sortDirection == SortDirection.ascending ? -1 : 1;
           break;
         default:
           return 0;

@@ -29,8 +29,9 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Determine background color and image to show
-    final backgroundColor =
-        widget.isLocationBasedParking ? AppColors.headerYellow : AppColors.primary;
+    final backgroundColor = widget.isLocationBasedParking
+        ? AppColors.headerYellow
+        : AppColors.primary;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -113,14 +114,14 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                           setState(() {
                             _isReturningHome = true;
                           });
-                    // Navigate back to the driver home and show the retrieval sheet
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => const DriverHomeScreen(),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                          // Navigate back to the driver home and show the retrieval sheet
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const DriverHomeScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
@@ -134,8 +135,8 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.black),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColors.black),
                           ),
                         )
                       : TextComponent(

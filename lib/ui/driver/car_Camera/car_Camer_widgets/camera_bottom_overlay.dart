@@ -143,21 +143,21 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                   onPressed: _isSubmitLoading
                       ? null
                       : () {
-                    final parkingLocation =
-                        _parkingLocationController.text.trim();
-                    if (parkingLocation.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please enter parking location'),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
-                      return;
-                    }
-                    if (widget.onSubmit != null) {
-                      _runSubmit(context, parkingLocation);
-                    }
-                  },
+                          final parkingLocation =
+                              _parkingLocationController.text.trim();
+                          if (parkingLocation.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Please enter parking location'),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                            return;
+                          }
+                          if (widget.onSubmit != null) {
+                            _runSubmit(context, parkingLocation);
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
