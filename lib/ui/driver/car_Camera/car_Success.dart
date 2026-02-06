@@ -6,7 +6,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
-class CarSuccessScreen extends StatelessWidget {
+class CarSuccessScreen extends StatefulWidget {
   final String? imagePath;
   final bool isLocationBasedParking;
 
@@ -17,13 +17,21 @@ class CarSuccessScreen extends StatelessWidget {
   });
 
   @override
+  State<CarSuccessScreen> createState() => _CarSuccessScreenState();
+}
+
+class _CarSuccessScreenState extends State<CarSuccessScreen> {
+  bool _isReturningHome = false;
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Determine background color and image to show
-    final backgroundColor =
-        isLocationBasedParking ? AppColors.headerYellow : AppColors.primary;
+    final backgroundColor = widget.isLocationBasedParking
+        ? AppColors.headerYellow
+        : AppColors.primary;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -50,7 +58,7 @@ class CarSuccessScreen extends StatelessWidget {
                 padding: EdgeInsets.all(screenWidth * 0.03),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(screenWidth * 0.04),
-                  child: isLocationBasedParking
+                  child: widget.isLocationBasedParking
                       ? // Show car.png image with full display (no cropping)
                       Image.asset(
                           'assets/images/car.png',
@@ -59,9 +67,9 @@ class CarSuccessScreen extends StatelessWidget {
                           fit: BoxFit.contain,
                         )
                       : // Show captured image for normal photo flow
-                      (imagePath != null
+                      (widget.imagePath != null
                           ? Image.file(
-                              File(imagePath!),
+                              File(widget.imagePath!),
                               width: double.infinity,
                               height: double.infinity,
                               fit: BoxFit.cover,
@@ -100,15 +108,20 @@ class CarSuccessScreen extends StatelessWidget {
                 width: double.infinity,
                 height: screenHeight * 0.06,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate back to the driver home and show the retrieval sheet
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => const DriverHomeScreen(),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                  onPressed: _isReturningHome
+                      ? null
+                      : () {
+                          setState(() {
+                            _isReturningHome = true;
+                          });
+                          // Navigate back to the driver home and show the retrieval sheet
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const DriverHomeScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
@@ -116,12 +129,22 @@ class CarSuccessScreen extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: TextComponent(
-                    labelText: TextConstants.returnToHome,
-                    color: AppColors.black,
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  child: _isReturningHome
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColors.black),
+                          ),
+                        )
+                      : TextComponent(
+                          labelText: TextConstants.returnToHome,
+                          color: AppColors.black,
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w600,
+                        ),
                 ),
               ),
             ),

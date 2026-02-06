@@ -4,7 +4,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CameraBottomOverlay extends StatefulWidget {
   final Function(BuildContext) onCapture;
-  final Function(BuildContext, String)? onSubmit;
+  final Future<void> Function(BuildContext, String)? onSubmit;
   final bool positionAtTop;
 
   const CameraBottomOverlay({
@@ -22,6 +22,29 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
   final TextEditingController _parkingLocationController =
       TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _isSubmitLoading = false;
+
+  Future<void> _runSubmit(BuildContext context, String parkingLocation) async {
+    if (_isSubmitLoading) {
+      return;
+    }
+    final onSubmit = widget.onSubmit;
+    if (onSubmit == null) {
+      return;
+    }
+    setState(() {
+      _isSubmitLoading = true;
+    });
+    try {
+      await onSubmit(context, parkingLocation);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -106,7 +129,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {
                   if (widget.onSubmit != null && value.trim().isNotEmpty) {
-                    widget.onSubmit!(context, value.trim());
+                    _runSubmit(context, value.trim());
                   }
                 },
               ),
@@ -117,22 +140,24 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    final parkingLocation =
-                        _parkingLocationController.text.trim();
-                    if (parkingLocation.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please enter parking location'),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
-                      return;
-                    }
-                    if (widget.onSubmit != null) {
-                      widget.onSubmit!(context, parkingLocation);
-                    }
-                  },
+                  onPressed: _isSubmitLoading
+                      ? null
+                      : () {
+                          final parkingLocation =
+                              _parkingLocationController.text.trim();
+                          if (parkingLocation.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Please enter parking location'),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                            return;
+                          }
+                          if (widget.onSubmit != null) {
+                            _runSubmit(context, parkingLocation);
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
@@ -147,13 +172,23 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
-                    'Submit',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.035,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSubmitLoading
+                      ? SizedBox(
+                          width: screenWidth * 0.04,
+                          height: screenWidth * 0.04,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColors.white),
+                          ),
+                        )
+                      : Text(
+                          'Submit',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.035,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ],
             ),
