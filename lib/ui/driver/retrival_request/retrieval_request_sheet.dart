@@ -9,6 +9,7 @@ class RetrievalRequestSheet extends StatelessWidget {
   final AssignedSession? session;
   final String? message;
   final bool isLoading;
+  final bool isAcceptLoading;
   final VoidCallback? onAccept;
 
   const RetrievalRequestSheet({
@@ -16,6 +17,7 @@ class RetrievalRequestSheet extends StatelessWidget {
     this.session,
     this.message,
     this.isLoading = false,
+    this.isAcceptLoading = false,
     this.onAccept,
   });
 
@@ -94,8 +96,9 @@ class RetrievalRequestSheet extends StatelessWidget {
                     child: SizedBox(
                       height: 48,
                       child: ElevatedButton(
-                        onPressed:
-                            onAccept ?? () => Navigator.of(context).pop(),
+                        onPressed: isAcceptLoading
+                            ? null
+                            : (onAccept ?? () => Navigator.of(context).pop()),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           elevation: 2,
@@ -103,20 +106,30 @@ class RetrievalRequestSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextComponent(
-                              labelText: TextConstants.acceptRequest,
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.black,
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward,
-                                color: AppColors.black),
-                          ],
-                        ),
+                        child: isAcceptLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.black),
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextComponent(
+                                    labelText: TextConstants.acceptRequest,
+                                    fontSize: screenWidth * 0.045,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.black,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_forward,
+                                      color: AppColors.black),
+                                ],
+                              ),
                       ),
                     ),
                   ),

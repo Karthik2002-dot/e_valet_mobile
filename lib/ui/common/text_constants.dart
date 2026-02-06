@@ -211,9 +211,9 @@ class TextConstants {
   static const String cancel = 'Cancel';
 
   // Arrival Related
-  static const String slideToConfirmArrival = 'Slide to Confirm Arrival';
-  static const String slideToConfirmHandover = 'Slide to Confirm Handover';
-  static const String slideToCustomerMissing = 'Slide to Customer Missing';
+  static const String slideToConfirmArrival = 'Confirm Arrival';
+  static const String slideToConfirmHandover = 'Confirm Handover';
+  static const String slideToCustomerMissing = 'Customer Missing';
   static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';
 
   // Permission Messages

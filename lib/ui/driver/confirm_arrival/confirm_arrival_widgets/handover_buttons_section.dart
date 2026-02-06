@@ -6,7 +6,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/slider_action_button.dar
 class HandoverButtonsSection extends StatefulWidget {
   final bool isLoading;
   final VoidCallback onConfirmHandover;
-  final VoidCallback? onCustomerMissing;
+  final Future<void> Function()? onCustomerMissing;
 
   const HandoverButtonsSection({
     super.key,
@@ -21,6 +21,7 @@ class HandoverButtonsSection extends StatefulWidget {
 
 class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
   Key _customerMissingKey = UniqueKey();
+  bool _isCustomerMissingLoading = false;
 
   void resetCustomerMissingButton() {
     setState(() {
@@ -51,8 +52,28 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
         SliderActionButton(
           key: _customerMissingKey,
           labelText: TextConstants.slideToCustomerMissing,
-          isLoading: false, // Customer missing doesn't need loading state
-          onSlideComplete: widget.onCustomerMissing ?? () {},
+          isLoading: _isCustomerMissingLoading,
+          onSlideComplete: () async {
+            if (_isCustomerMissingLoading) {
+              return;
+            }
+            final onCustomerMissing = widget.onCustomerMissing;
+            if (onCustomerMissing == null) {
+              return;
+            }
+            setState(() {
+              _isCustomerMissingLoading = true;
+            });
+            try {
+              await onCustomerMissing();
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _isCustomerMissingLoading = false;
+                });
+              }
+            }
+          },
           buttonColor: AppColors.error,
           backgroundColor: AppColors.white,
           labelColor: AppColors.black,
