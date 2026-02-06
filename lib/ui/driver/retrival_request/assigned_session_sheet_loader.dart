@@ -20,6 +20,8 @@ class AssignedSessionSheetLoader extends StatefulWidget {
 
 class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
+  bool _isAcceptLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AssignedSessionsBackgroundBloc,
@@ -95,12 +97,29 @@ class _AssignedSessionSheetLoaderState
                   return BlocListener<RetrivalRequestBloc,
                       RetrivalRequestState>(
                     listener: (context, state) {
+                      if (state is RetrivalRequestLoading) {
+                        if (mounted) {
+                          setState(() {
+                            _isAcceptLoading = true;
+                          });
+                        }
+                      }
                       if (state is RetrivalRequestAccepted) {
                         SnackBars.showSuccessSnackBar(context, state.message);
+                        if (mounted) {
+                          setState(() {
+                            _isAcceptLoading = false;
+                          });
+                        }
                         Navigator.of(context).pop();
                         _navigateToConfirmArrival(context);
                       } else if (state is RetrivalRequestError) {
                         SnackBars.showErrorSnackBar(context, state.message);
+                        if (mounted) {
+                          setState(() {
+                            _isAcceptLoading = false;
+                          });
+                        }
                       }
                     },
                     child: RetrievalRequestSheet(
@@ -110,8 +129,15 @@ class _AssignedSessionSheetLoaderState
                           ? 'No active retrieval requests'
                           : null,
                       isLoading: false,
+                      isAcceptLoading: _isAcceptLoading,
                       onAccept: sessionId != null
                           ? () {
+                              if (_isAcceptLoading) {
+                                return;
+                              }
+                              setState(() {
+                                _isAcceptLoading = true;
+                              });
                               TokenStorage.getSessionIdFromGetApi()
                                   .then((storedSessionId) {
                                 if (storedSessionId != null &&
@@ -123,6 +149,11 @@ class _AssignedSessionSheetLoaderState
                                         );
                                   }
                                 } else {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isAcceptLoading = false;
+                                    });
+                                  }
                                   // log if needed
                                 }
                               });

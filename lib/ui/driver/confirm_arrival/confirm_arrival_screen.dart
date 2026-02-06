@@ -4,7 +4,6 @@ import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arriva
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_state.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
-import 'package:niloufer_valet_mobile/services/driver/customer_missing_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -129,7 +128,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                   );
                             },
                             onCustomerMissing: () {
-                              CustomerMissingDialog.show(
+                              return CustomerMissingDialog.show(
                                 context,
                                 sessionId: widget.session.id,
                                 onCancel: () {

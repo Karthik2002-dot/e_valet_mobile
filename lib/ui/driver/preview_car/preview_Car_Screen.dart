@@ -305,10 +305,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
 
                         // Submit Button
                         PreviewSubmitButton(
-                          onSubmit: isSubmitting
-                              ? () {}
-                              : () => _handleSubmit(context),
+                          onSubmit: () => _handleSubmit(context),
                           isReparking: widget.isReparking,
+                          isLoading: isSubmitting,
                         ),
 
                         // Footer with "Powered By" and logo
