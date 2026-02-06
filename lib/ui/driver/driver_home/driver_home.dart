@@ -72,6 +72,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   bool _refreshPendingFromNotification = false;
   bool _subscribedToRetrievalTap = false;
 
+  /// When opening from retrieval push, assigned sessions may emit before
+  /// [DriverMenuBloc] has loaded; we skip showing the sheet. Set this so we
+  /// re-check when [DriverHomeLoaded] arrives.
+  bool _pendingShowSheetWhenMenuLoaded = false;
+
+  /// When we skip showing the sheet because route isn't current yet (e.g. app
+  /// just resumed from notification), we schedule one retry. This avoids
+  /// scheduling multiple retries.
+  bool _didScheduleSheetRetryForRoute = false;
+
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
 
@@ -325,6 +335,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _hasShownSessionDialog = false; // Reset flag
     _hasNavigatedForStatus = false; // Reset navigation flag
     _hasRequestedPermissions = false; // Reset permission flag
+    _pendingShowSheetWhenMenuLoaded = false;
+    _didScheduleSheetRetryForRoute = false;
     super.dispose();
   }
 
@@ -380,6 +392,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       // When app opens from push notification, pending state (accepted/arrived/etc.)
                       // must drive navigation to the correct screen, not the bottom sheet.
                       if (driverMenuState is! DriverHomeLoaded) {
+                        if (mounted) {
+                          _pendingShowSheetWhenMenuLoaded = true;
+                        }
                         return;
                       }
 
@@ -398,7 +413,22 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted &&
                               ModalRoute.of(blocContext)?.isCurrent == true) {
+                            _didScheduleSheetRetryForRoute = false;
                             _presentAssignedSessionSheet(blocContext);
+                          } else if (mounted &&
+                              !_didScheduleSheetRetryForRoute) {
+                            // Route not current yet (e.g. app just resumed from
+                            // notification tap). Retry once after a short delay.
+                            _didScheduleSheetRetryForRoute = true;
+                            Future.delayed(const Duration(milliseconds: 500),
+                                () {
+                              if (!mounted) return;
+                              try {
+                                blocContext
+                                    .read<AssignedSessionsBackgroundBloc>()
+                                    .add(const RefreshAssignedSessions());
+                              } catch (_) {}
+                            });
                           }
                         });
                       }
@@ -463,6 +493,17 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         break;
                     }
                   } else if (state is DriverHomeLoaded) {
+                    // If we skipped showing the retrieval sheet earlier (opened from
+                    // push) because menu wasn't loaded, re-trigger so the sheet shows now.
+                    if (_pendingShowSheetWhenMenuLoaded && mounted) {
+                      _pendingShowSheetWhenMenuLoaded = false;
+                      try {
+                        context
+                            .read<AssignedSessionsBackgroundBloc>()
+                            .add(const RefreshAssignedSessions());
+                      } catch (_) {}
+                    }
+
                     // Check if there's a CHECKED_IN session and show dialog
                     // Only show once per screen load
 
