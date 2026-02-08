@@ -176,24 +176,35 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
                     : null,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    widget.request.vehicle.photo,
-                    width: MediaQuery.of(context).size.width * 0.1,
-                    height: MediaQuery.of(context).size.width * 0.1,
-                    fit: BoxFit.fill,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: MediaQuery.of(context).size.width * 0.1,
-                        height: MediaQuery.of(context).size.width * 0.1,
-                        color: AppColors.grey.withOpacity(0.3),
-                        child: Icon(
-                          Icons.directions_car,
-                          size: MediaQuery.of(context).size.width * 0.04,
-                          color: AppColors.grey,
+                  child: widget.request.vehicle.photo.isNotEmpty
+                      ? Image.network(
+                          widget.request.vehicle.photo,
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          height: MediaQuery.of(context).size.width * 0.1,
+                          fit: BoxFit.fill,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: MediaQuery.of(context).size.width * 0.1,
+                              height: MediaQuery.of(context).size.width * 0.1,
+                              color: AppColors.grey.withOpacity(0.3),
+                              child: Icon(
+                                Icons.directions_car,
+                                size: MediaQuery.of(context).size.width * 0.04,
+                                color: AppColors.grey,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          height: MediaQuery.of(context).size.width * 0.1,
+                          color: AppColors.grey.withOpacity(0.3),
+                          child: Icon(
+                            Icons.directions_car,
+                            size: MediaQuery.of(context).size.width * 0.04,
+                            color: AppColors.grey,
+                          ),
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
               SizedBox(

@@ -161,27 +161,44 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                         : null,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        request.vehicle.photo,
-                        width: MediaQuery.of(context).size.width * 0.08,
-                        height: MediaQuery.of(context).size.width * 0.06,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width * 0.08,
-                            height: MediaQuery.of(context).size.width * 0.06,
-                            decoration: BoxDecoration(
-                              color: AppColors.grey.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
+                      child: request.vehicle.photo.isNotEmpty
+                          ? Image.network(
+                              request.vehicle.photo,
+                              width: MediaQuery.of(context).size.width * 0.08,
+                              height: MediaQuery.of(context).size.width * 0.06,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.08,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.06,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.grey.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.directions_car,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.035,
+                                    color: AppColors.grey,
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              width: MediaQuery.of(context).size.width * 0.08,
+                              height: MediaQuery.of(context).size.width * 0.06,
+                              decoration: BoxDecoration(
+                                color: AppColors.grey.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.directions_car,
+                                size: MediaQuery.of(context).size.width * 0.035,
+                                color: AppColors.grey,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.directions_car,
-                              size: MediaQuery.of(context).size.width * 0.035,
-                              color: AppColors.grey,
-                            ),
-                          );
-                        },
-                      ),
                     ),
                   ),
                   SizedBox(width: MediaQuery.of(context).size.width * 0.015),
