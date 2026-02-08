@@ -217,7 +217,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
                   return SizedBox(
                     height: widget.isDesktop
-                        ? widget.screenHeight * 0.06
+                        ? widget.screenHeight * 0.07
                         : widget.isTablet
                             ? widget.screenHeight * 0.07
                             : widget.screenHeight * 0.062,
@@ -228,8 +228,9 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         backgroundColor: AppColors.primary,
                         disabledBackgroundColor: AppColors.greyLight,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(widget.screenWidth * 0.02),
+                          borderRadius: BorderRadius.circular(
+                            widget.screenWidth * 0.02,
+                          ),
                         ),
                         elevation: 0,
                       ),
@@ -257,22 +258,24 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                                 TextComponent(
                                   labelText: TextConstants.submitButton,
                                   fontSize: widget.isDesktop
-                                      ? widget.screenWidth * 0.014
+                                      ? widget.screenWidth * 0.02
                                       : widget.isTablet
-                                          ? widget.screenWidth * 0.022
-                                          : widget.screenWidth * 0.04,
+                                          ? widget.screenWidth * 0.03
+                                          : widget.screenWidth * 0.05,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.white,
                                 ),
-                                SizedBox(width: widget.screenWidth * 0.02),
+                                SizedBox(
+                                  width: widget.screenWidth * 0.02,
+                                ),
                                 Icon(
                                   Icons.arrow_forward,
                                   color: AppColors.white,
                                   size: widget.isDesktop
-                                      ? widget.screenWidth * 0.015
+                                      ? widget.screenWidth * 0.02
                                       : widget.isTablet
-                                          ? widget.screenWidth * 0.025
-                                          : widget.screenWidth * 0.045,
+                                          ? widget.screenWidth * 0.03
+                                          : widget.screenWidth * 0.05,
                                 ),
                               ],
                             ),

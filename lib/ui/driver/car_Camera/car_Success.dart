@@ -101,12 +101,12 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
             // Return To Home button
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.15,
+                horizontal: screenWidth * 0.1,
                 vertical: screenHeight * 0.03,
               ),
               child: SizedBox(
                 width: double.infinity,
-                height: screenHeight * 0.06,
+                height: screenHeight * 0.07,
                 child: ElevatedButton(
                   onPressed: _isReturningHome
                       ? null
@@ -142,7 +142,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                       : TextComponent(
                           labelText: TextConstants.returnToHome,
                           color: AppColors.black,
-                          fontSize: screenWidth * 0.04,
+                          fontSize: screenWidth * 0.06,
                           fontWeight: FontWeight.w600,
                         ),
                 ),
