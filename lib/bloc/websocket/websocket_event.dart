@@ -20,6 +20,11 @@ class DisconnectWebSocket extends WebSocketEvent {
   const DisconnectWebSocket();
 }
 
+/// Event to reconnect when app returns from background (uses last url/auth/query).
+class ReconnectWebSocket extends WebSocketEvent {
+  const ReconnectWebSocket();
+}
+
 /// Event to join a specific room
 class JoinRoom extends WebSocketEvent {
   final String roomType;

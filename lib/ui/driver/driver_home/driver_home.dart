@@ -72,6 +72,18 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   bool _refreshPendingFromNotification = false;
   bool _subscribedToRetrievalTap = false;
 
+  /// When opening from retrieval push, assigned sessions may emit before
+  /// [DriverMenuBloc] has loaded; we skip showing the sheet. Set this so we
+  /// re-check when [DriverHomeLoaded] arrives.
+  bool _pendingShowSheetWhenMenuLoaded = false;
+
+  /// When we skip showing the sheet because route isn't current yet (e.g. app
+  /// just resumed from notification), we schedule one retry. This avoids
+  /// scheduling multiple retries.
+  bool _didScheduleSheetRetryForRoute = false;
+  bool _pendingShowSheetWhenRouteCurrent = false;
+  bool _isShowingAssignedSheet = false;
+
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
 
@@ -84,6 +96,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Track if permissions have been requested
   bool _hasRequestedPermissions = false;
 
+  // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
+  bool _assignedSessionsPollingStarted = false;
+
   void _refreshPendingSessions() {
     try {
       context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
@@ -93,6 +108,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   }
 
   void _presentAssignedSessionSheet(BuildContext context) {
+    _isShowingAssignedSheet = true;
     _dismissNotifier.value = false;
     _dismissTimer?.cancel();
     _dismissTimer = Timer(const Duration(seconds: 60), () {
@@ -159,6 +175,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       ),
     ).then((_) {
       _cleanupTimer();
+      _isShowingAssignedSheet = false;
     });
   }
 
@@ -166,6 +183,21 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _dismissTimer?.cancel();
     _dismissTimer = null;
     _dismissNotifier.value = false;
+  }
+
+  void _closeAssignedSessionSheetIfOpen(BuildContext context) {
+    if (!_isShowingAssignedSheet) return;
+    // Try root navigator first since modal sheets may be attached there.
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    if (rootNavigator.canPop()) {
+      rootNavigator.pop();
+      return;
+    }
+    // Fallback to local navigator.
+    final localNavigator = Navigator.of(context);
+    if (localNavigator.canPop()) {
+      localNavigator.pop();
+    }
   }
 
   @override
@@ -220,7 +252,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   }
 
   void _onRouteChanged() {
-    // The Builder widget in build() will handle the refresh
+    if (!mounted) return;
+    if (_pendingShowSheetWhenRouteCurrent) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _attemptShowAssignedSessionSheet(context);
+      });
+    }
   }
 
   void _startWebSocketHealthCheck() {
@@ -315,17 +353,60 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   @override
   void dispose() {
+    _assignedBloc?.add(const StopAssignedSessionsPolling());
     _retrievalNotificationTapSubscription?.cancel();
     _webSocketCheckTimer?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _assignedBloc = null; // Clear bloc reference
+    _assignedSessionsPollingStarted = false;
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
     _hasNavigatedForStatus = false; // Reset navigation flag
     _hasRequestedPermissions = false; // Reset permission flag
+    _pendingShowSheetWhenMenuLoaded = false;
+    _didScheduleSheetRetryForRoute = false;
+    _pendingShowSheetWhenRouteCurrent = false;
+    _isShowingAssignedSheet = false;
     super.dispose();
+  }
+
+  void _attemptShowAssignedSessionSheet(BuildContext blocContext) {
+    if (!mounted || _isShowingAssignedSheet) return;
+
+    if (ModalRoute.of(blocContext)?.isCurrent != true) {
+      _pendingShowSheetWhenRouteCurrent = true;
+      return;
+    }
+
+    final assignedState =
+        blocContext.read<AssignedSessionsBackgroundBloc>().state;
+    if (assignedState is! AssignedSessionsBackgroundData ||
+        !assignedState.hasSessions) {
+      return;
+    }
+
+    final driverMenuState = blocContext.read<DriverMenuBloc>().state;
+    if (driverMenuState is! DriverHomeLoaded) {
+      _pendingShowSheetWhenMenuLoaded = true;
+      return;
+    }
+
+    final pendingSessions = driverMenuState.pendingSessions;
+    final hasBlockingStatus = pendingSessions != null &&
+        (pendingSessions.hasArrivedSession ||
+            pendingSessions.hasAcceptedSession ||
+            pendingSessions.hasReparkingSession ||
+            pendingSessions.hasCheckedInSession);
+    if (hasBlockingStatus) {
+      return;
+    }
+
+    _pendingShowSheetWhenMenuLoaded = false;
+    _pendingShowSheetWhenRouteCurrent = false;
+    _didScheduleSheetRetryForRoute = false;
+    _presentAssignedSessionSheet(blocContext);
   }
 
   @override
@@ -349,6 +430,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             // Store the bloc reference for use in timer callbacks
             _assignedBloc = assignedBloc;
 
+            // Start 5-second polling for assigned-to-me API while user is on this screen
+            if (!_assignedSessionsPollingStarted) {
+              _assignedSessionsPollingStarted = true;
+              assignedBloc.add(const StartAssignedSessionsPolling());
+            }
+
             // When opened from retrieval notification tap, refresh session/pending API first
             if (_refreshPendingFromNotification) {
               _refreshPendingFromNotification = false;
@@ -371,45 +458,32 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               BlocListener<AssignedSessionsBackgroundBloc,
                   AssignedSessionsBackgroundState>(
                 listener: (blocContext, state) {
-                  if (state is AssignedSessionsBackgroundData) {
-                    if (state.hasSessions) {
-                      final driverMenuState =
-                          blocContext.read<DriverMenuBloc>().state;
-
-                      // Wait for pending sessions API to load before deciding.
-                      // When app opens from push notification, pending state (accepted/arrived/etc.)
-                      // must drive navigation to the correct screen, not the bottom sheet.
-                      if (driverMenuState is! DriverHomeLoaded) {
-                        return;
-                      }
-
-                      final pendingSessions = driverMenuState.pendingSessions;
-                      bool shouldShowBottomSheet = true;
-                      if (pendingSessions != null) {
-                        if (pendingSessions.hasArrivedSession ||
-                            pendingSessions.hasAcceptedSession ||
-                            pendingSessions.hasReparkingSession ||
-                            pendingSessions.hasCheckedInSession) {
-                          shouldShowBottomSheet = false;
-                        }
-                      }
-
-                      if (shouldShowBottomSheet) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted &&
-                              ModalRoute.of(blocContext)?.isCurrent == true) {
-                            _presentAssignedSessionSheet(blocContext);
-                          }
-                        });
-                      }
-                    }
-                  } else if (state is AssignedSessionsCancelled) {
-                    // Close the bottom sheet if open
-                    if (Navigator.of(blocContext).canPop()) {
-                      Navigator.of(blocContext).pop();
-                    }
-                    _cleanupTimer(); // Ensure timer is cleaned up
+                  // Only "data available" means AssignedSessionsBackgroundData with sessions
+                  final hasData = state is AssignedSessionsBackgroundData &&
+                      state.hasSessions;
+                  // No data (empty, initial, or cancelled) → close sheet; never show empty sheet
+                  if (!hasData) {
+                    _closeAssignedSessionSheetIfOpen(blocContext);
+                    return;
                   }
+                  // Data available → show sheet only when we have sessions (with data)
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    if (ModalRoute.of(blocContext)?.isCurrent == true) {
+                      _attemptShowAssignedSessionSheet(blocContext);
+                    } else if (!_didScheduleSheetRetryForRoute) {
+                      _pendingShowSheetWhenRouteCurrent = true;
+                      _didScheduleSheetRetryForRoute = true;
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (!mounted) return;
+                        try {
+                          blocContext
+                              .read<AssignedSessionsBackgroundBloc>()
+                              .add(const RefreshAssignedSessions());
+                        } catch (_) {}
+                      });
+                    }
+                  });
                 },
               ),
               // Add WebSocket connection monitoring
@@ -463,6 +537,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         break;
                     }
                   } else if (state is DriverHomeLoaded) {
+                    // If we skipped showing the retrieval sheet earlier (opened from
+                    // push) because menu wasn't loaded, re-trigger so the sheet shows now.
+                    if (_pendingShowSheetWhenMenuLoaded && mounted) {
+                      _pendingShowSheetWhenMenuLoaded = false;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        _attemptShowAssignedSessionSheet(context);
+                      });
+                    }
+
                     // Check if there's a CHECKED_IN session and show dialog
                     // Only show once per screen load
 
@@ -473,10 +557,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         state.pendingSessions!.hasArrivedSession) {
                       _hasNavigatedForStatus = true;
                       // Close bottom sheet if open before navigating
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                        _cleanupTimer();
-                      }
+                      _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
                             ModalRoute.of(context)?.isCurrent == true) {
@@ -508,10 +589,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         state.pendingSessions!.hasAcceptedSession) {
                       _hasNavigatedForStatus = true;
                       // Close bottom sheet if open before navigating
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                        _cleanupTimer();
-                      }
+                      _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
                             ModalRoute.of(context)?.isCurrent == true) {
@@ -542,10 +620,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         state.pendingSessions!.hasReparkingSession) {
                       _hasNavigatedForStatus = true;
                       // Close bottom sheet if open before navigating
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                        _cleanupTimer();
-                      }
+                      _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
                             ModalRoute.of(context)?.isCurrent == true) {

@@ -26,6 +26,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   WebSocketBloc() : super(const WebSocketInitial()) {
     on<ConnectWebSocket>(_onConnectWebSocket);
     on<DisconnectWebSocket>(_onDisconnectWebSocket);
+    on<ReconnectWebSocket>(_onReconnectWebSocket);
     on<JoinRoom>(_onJoinRoom);
     on<LeaveRoom>(_onLeaveRoom);
     on<ListenToEvent>(_onListenToEvent);
@@ -283,6 +284,24 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     Emitter<WebSocketState> emit,
   ) async {
     emit(const WebSocketDisconnected(reason: 'Connection lost'));
+  }
+
+  /// Reconnect when app returns from background (uses stored url/auth/query).
+  Future<void> _onReconnectWebSocket(
+    ReconnectWebSocket event,
+    Emitter<WebSocketState> emit,
+  ) async {
+    if (_lastUrl == null || _lastUrl!.isEmpty) {
+      return;
+    }
+    if (_webSocketService.isConnected) {
+      return;
+    }
+    add(ConnectWebSocket(
+      url: _lastUrl!,
+      auth: _lastAuth,
+      query: _lastQuery,
+    ));
   }
 
   /// Refresh token and reconnect to WebSocket

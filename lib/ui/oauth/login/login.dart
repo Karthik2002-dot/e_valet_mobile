@@ -12,8 +12,12 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login_form.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/clock_in_too_far_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -93,12 +97,55 @@ class _LoginScreenState extends State<LoginScreen> {
               );
             }
           } else if (state is LoginSuccessClockInTooFar) {
-            // Driver logged in but clock-in failed (too far from outlet)
+            // Driver logged in but clock-in failed (too far from outlet).
+            // Provide DriverMenuBloc so app bar overflow menu (profile/logout) works.
             if (!context.mounted) return;
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => ClockInTooFarScreen(message: state.message),
+                builder: (_) => BlocProvider<DriverMenuBloc>(
+                  create: (_) => DriverMenuBloc(),
+                  child: BlocListener<DriverMenuBloc, DriverMenuState>(
+                    listener: (ctx, menuState) {
+                      if (menuState is DriverMenuLogoutSuccess) {
+                        SnackBars.showSuccessSnackBar(
+                            ctx, menuState.response.message);
+                        Navigator.of(ctx).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (__) => const LoginScreen(),
+                          ),
+                          (route) => false,
+                        );
+                        ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+                      } else if (menuState is DriverMenuLogoutFailure) {
+                        SnackBars.showErrorSnackBar(ctx, menuState.message);
+                        Navigator.of(ctx).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (__) => const LoginScreen(),
+                          ),
+                          (route) => false,
+                        );
+                        ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+                      } else if (menuState is DriverMenuAction) {
+                        switch (menuState.action) {
+                          case DriverMenuActionType.profile:
+                            Navigator.of(ctx).push(
+                              MaterialPageRoute(
+                                builder: (__) => const ProfileScreen(),
+                              ),
+                            );
+                            ctx
+                                .read<DriverMenuBloc>()
+                                .add(const DriverMenuReset());
+                            break;
+                          case DriverMenuActionType.logout:
+                            break;
+                        }
+                      }
+                    },
+                    child: ClockInTooFarScreen(message: state.message),
+                  ),
+                ),
               ),
             );
           } else if (state is LoginFailure) {
