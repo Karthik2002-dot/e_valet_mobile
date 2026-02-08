@@ -96,6 +96,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Track if permissions have been requested
   bool _hasRequestedPermissions = false;
 
+  // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
+  bool _assignedSessionsPollingStarted = false;
+
   void _refreshPendingSessions() {
     try {
       context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
@@ -350,11 +353,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   @override
   void dispose() {
+    _assignedBloc?.add(const StopAssignedSessionsPolling());
     _retrievalNotificationTapSubscription?.cancel();
     _webSocketCheckTimer?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _assignedBloc = null; // Clear bloc reference
+    _assignedSessionsPollingStarted = false;
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
@@ -425,6 +430,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             // Store the bloc reference for use in timer callbacks
             _assignedBloc = assignedBloc;
 
+            // Start 5-second polling for assigned-to-me API while user is on this screen
+            if (!_assignedSessionsPollingStarted) {
+              _assignedSessionsPollingStarted = true;
+              assignedBloc.add(const StartAssignedSessionsPolling());
+            }
+
             // When opened from retrieval notification tap, refresh session/pending API first
             if (_refreshPendingFromNotification) {
               _refreshPendingFromNotification = false;
@@ -447,35 +458,32 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               BlocListener<AssignedSessionsBackgroundBloc,
                   AssignedSessionsBackgroundState>(
                 listener: (blocContext, state) {
-                  if (state is AssignedSessionsBackgroundData) {
-                    if (!state.hasSessions) {
-                      _closeAssignedSessionSheetIfOpen(blocContext);
-                      return;
-                    }
-                    if (state.hasSessions) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // Only "data available" means AssignedSessionsBackgroundData with sessions
+                  final hasData = state is AssignedSessionsBackgroundData &&
+                      state.hasSessions;
+                  // No data (empty, initial, or cancelled) → close sheet; never show empty sheet
+                  if (!hasData) {
+                    _closeAssignedSessionSheetIfOpen(blocContext);
+                    return;
+                  }
+                  // Data available → show sheet only when we have sessions (with data)
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    if (ModalRoute.of(blocContext)?.isCurrent == true) {
+                      _attemptShowAssignedSessionSheet(blocContext);
+                    } else if (!_didScheduleSheetRetryForRoute) {
+                      _pendingShowSheetWhenRouteCurrent = true;
+                      _didScheduleSheetRetryForRoute = true;
+                      Future.delayed(const Duration(milliseconds: 500), () {
                         if (!mounted) return;
-                        if (ModalRoute.of(blocContext)?.isCurrent == true) {
-                          _attemptShowAssignedSessionSheet(blocContext);
-                        } else if (!_didScheduleSheetRetryForRoute) {
-                          _pendingShowSheetWhenRouteCurrent = true;
-                          _didScheduleSheetRetryForRoute = true;
-                          Future.delayed(const Duration(milliseconds: 500),
-                              () {
-                            if (!mounted) return;
-                            try {
-                              blocContext
-                                  .read<AssignedSessionsBackgroundBloc>()
-                                  .add(const RefreshAssignedSessions());
-                            } catch (_) {}
-                          });
-                        }
+                        try {
+                          blocContext
+                              .read<AssignedSessionsBackgroundBloc>()
+                              .add(const RefreshAssignedSessions());
+                        } catch (_) {}
                       });
                     }
-                  } else if (state is AssignedSessionsCancelled) {
-                    // Close the bottom sheet if open
-                    _closeAssignedSessionSheetIfOpen(blocContext);
-                  }
+                  });
                 },
               ),
               // Add WebSocket connection monitoring

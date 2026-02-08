@@ -13,6 +13,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
   StreamSubscription<dynamic>? _retrievalAssignedSubscription;
   StreamSubscription<bool>? _webSocketConnectionSubscription;
   StreamSubscription<dynamic>? _retrievalCancelledSubscription;
+  Timer? _pollingTimer;
 
   AssignedSessionsBackgroundBloc({this.webSocketBloc})
       : super(const AssignedSessionsBackgroundInitial()) {
@@ -143,14 +144,19 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     StartAssignedSessionsPolling event,
     Emitter<AssignedSessionsBackgroundState> emit,
   ) {
-    // Polling removed: WebSocket pushes updates, and manual refresh is available
+    _pollingTimer?.cancel();
+    // Background refresh every 5s: no loading state, non-blocking; UI stays responsive
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      add(const RefreshAssignedSessions());
+    });
   }
 
   void _onStopPolling(
     StopAssignedSessionsPolling event,
     Emitter<AssignedSessionsBackgroundState> emit,
   ) {
-    // Polling removed: nothing to stop
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   void _onRefreshAssignedSessions(
@@ -179,11 +185,11 @@ class AssignedSessionsBackgroundBloc extends Bloc<
   ) async {
     try {
       final sessions = await AssignedSessionsApiService.fetchAssignedSessions();
-
-      // Always emit new data - ensures UI updates for both initial load and WebSocket events
+      // Background refresh: emit new data only; no loading/error state so UI is not disturbed
       emit(AssignedSessionsBackgroundData(sessions));
     } catch (e) {
       print('Failed to fetch assigned sessions: $e');
+      // Intentionally no emit on error — background refresh stays silent
     }
   }
 
@@ -223,6 +229,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
 
   @override
   Future<void> close() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
     // Cancel WebSocket subscriptions
     _retrievalAssignedSubscription?.cancel();
     _retrievalCancelledSubscription?.cancel();
