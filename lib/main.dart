@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/common/connectivity_wrapper.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
 import 'package:provider/provider.dart';
 
@@ -38,33 +39,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // Provide FirebaseMessagingService to the entire app
-        Provider<FirebaseMessagingService>.value(
-          value: firebaseMessagingService,
-        ),
-      ],
-      child: MultiBlocProvider(
+    return ConnectivityWrapper(
+      child: MultiProvider(
         providers: [
-          BlocProvider<WebSocketBloc>(
-            create: (context) => WebSocketBloc(),
-            lazy: false,
-          ),
-          BlocProvider<SplashBloc>(
-            create: (context) => SplashBloc(
-              webSocketBloc: context.read<WebSocketBloc>(),
-            ),
-          ),
-          BlocProvider<DriverStatusBloc>(
-            create: (context) => DriverStatusBloc(),
+          // Provide FirebaseMessagingService to the entire app
+          Provider<FirebaseMessagingService>.value(
+            value: firebaseMessagingService,
           ),
         ],
-        child: MaterialApp(
-          title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
-          navigatorKey: FirebaseMessagingService.navigatorKey,
-          home: const SplashScreen(),
-          debugShowCheckedModeBanner: false,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<WebSocketBloc>(
+              create: (context) => WebSocketBloc(),
+              lazy: false,
+            ),
+            BlocProvider<SplashBloc>(
+              create: (context) => SplashBloc(
+                webSocketBloc: context.read<WebSocketBloc>(),
+              ),
+            ),
+            BlocProvider<DriverStatusBloc>(
+              create: (context) => DriverStatusBloc(),
+            ),
+          ],
+          child: MaterialApp(
+            title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
+            navigatorKey: FirebaseMessagingService.navigatorKey,
+            home: const SplashScreen(),
+            debugShowCheckedModeBanner: false,
+          ),
         ),
       ),
     );
