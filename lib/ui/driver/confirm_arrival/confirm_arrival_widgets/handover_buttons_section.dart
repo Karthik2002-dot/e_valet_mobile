@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/slider_action_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class HandoverButtonsSection extends StatefulWidget {
   final bool isLoading;
@@ -29,55 +29,100 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
     });
   }
 
+  Widget _buildActionButton({
+    Key? key,
+    required String label,
+    required IconData icon,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required bool isLoading,
+    required VoidCallback? onPressed,
+  }) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return SizedBox(
+      key: key,
+      width: double.infinity,
+      height: screenHeight * 0.07,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          foregroundColor: foregroundColor,
+          disabledBackgroundColor: backgroundColor.withOpacity(0.7),
+          disabledForegroundColor: foregroundColor.withOpacity(0.7),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: screenHeight * 0.03,
+                    color: foregroundColor,
+                  ),
+                  const SizedBox(width: 10),
+                  TextComponent(
+                    labelText: label,
+                    fontSize: screenHeight * 0.025,
+                    fontWeight: FontWeight.w600,
+                    color: foregroundColor,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Column(
       children: [
-        // Confirm Handover Slide Button
-        SliderActionButton(
-          labelText: TextConstants.slideToConfirmHandover,
-          isLoading: widget.isLoading,
-          backgroundColor: AppColors.white,
-          onSlideComplete: widget.onConfirmHandover,
-          buttonColor: AppColors.primary,
-          labelColor: AppColors.black,
+        _buildActionButton(
+          label: TextConstants.slideToConfirmHandover,
           icon: Icons.handshake,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.black,
+          isLoading: widget.isLoading,
+          onPressed: widget.onConfirmHandover,
         ),
-
-        SizedBox(height: screenHeight * 0.02),
-
-        // Customer Missing Slide Button
-        SliderActionButton(
+        SizedBox(height: screenHeight * 0.018),
+        _buildActionButton(
           key: _customerMissingKey,
-          labelText: TextConstants.slideToCustomerMissing,
+          label: TextConstants.slideToCustomerMissing,
+          icon: Icons.warning,
+          backgroundColor: AppColors.error,
+          foregroundColor: AppColors.white,
           isLoading: _isCustomerMissingLoading,
-          onSlideComplete: () async {
-            if (_isCustomerMissingLoading) {
-              return;
-            }
+          onPressed: () async {
+            if (_isCustomerMissingLoading) return;
             final onCustomerMissing = widget.onCustomerMissing;
-            if (onCustomerMissing == null) {
-              return;
-            }
-            setState(() {
-              _isCustomerMissingLoading = true;
-            });
+            if (onCustomerMissing == null) return;
+            setState(() => _isCustomerMissingLoading = true);
             try {
               await onCustomerMissing();
             } finally {
               if (mounted) {
-                setState(() {
-                  _isCustomerMissingLoading = false;
-                });
+                setState(() => _isCustomerMissingLoading = false);
               }
             }
           },
-          buttonColor: AppColors.error,
-          backgroundColor: AppColors.white,
-          labelColor: AppColors.black,
-          icon: Icons.warning,
         ),
       ],
     );
