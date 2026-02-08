@@ -365,4 +365,11 @@ class TextConstants {
   static const String cancelButton = 'Cancel';
   static String failedToUpdateStatus(String error) =>
       'Failed to update status: $error';
+
+  // No Internet
+  static const String noInternetTitle =
+      'Internet is slow or not there';
+  static const String noInternetSubtitle =
+      'Please check your connection and try again.';
+  static const String retryConnection = 'Retry';
 }
