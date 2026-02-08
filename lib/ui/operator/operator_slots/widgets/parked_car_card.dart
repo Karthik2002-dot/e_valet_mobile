@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 
@@ -52,24 +53,29 @@ class ParkedCarCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Vehicle Image (no overlay badge)
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
+            // Vehicle Image (no overlay badge) - tap to view full size
+            GestureDetector(
+              onTap: item.photoUrl.isNotEmpty
+                  ? () => FullImageViewerDialog.show(context, item.photoUrl)
+                  : null,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+                child: item.photoUrl.isNotEmpty
+                    ? Image.network(
+                        item.photoUrl,
+                        height: screenHeight * 0.08,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholderImage(
+                              screenWidth, screenHeight);
+                        },
+                      )
+                    : _buildPlaceholderImage(screenWidth, screenHeight),
               ),
-              child: item.photoUrl.isNotEmpty
-                  ? Image.network(
-                      item.photoUrl,
-                      height: screenHeight * 0.08,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholderImage(
-                            screenWidth, screenHeight);
-                      },
-                    )
-                  : _buildPlaceholderImage(screenWidth, screenHeight),
             ),
             // Card Info Section
             Expanded(
