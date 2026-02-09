@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/api/driver/image_API.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/accept_response.dart';
+import 'package:niloufer_valet_mobile/services/image/image_compression_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class RetrievalAcceptApiService {
@@ -52,9 +53,11 @@ class RetrievalAcceptApiService {
       final pendingPhotoPath = await TokenStorage.getPendingPhotoPath();
       if (pendingPhotoPath != null && pendingPhotoPath.isNotEmpty) {
         try {
+          final compressedPath =
+              await ImageCompressionService.compressImage(pendingPhotoPath);
           // Create park request with photo and GPS data from accept call
           final parkRequest = ParkRequest(
-            imagePath: pendingPhotoPath,
+            imagePath: compressedPath,
             latitude: latitude,
             longitude: longitude,
             // accuracy is optional, so we don't include it here

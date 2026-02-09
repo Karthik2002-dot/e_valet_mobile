@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
+import 'package:niloufer_valet_mobile/services/image/image_compression_service.dart';
 
 class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
   PreviewCarBloc() : super(const PreviewCarInitial()) {
@@ -20,12 +21,19 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     emit(const PreviewCarSubmitting());
 
     try {
+      // Compress image before upload when a photo is provided
+      String? imagePathToUse = event.imagePath;
+      if (imagePathToUse != null && imagePathToUse.isNotEmpty) {
+        imagePathToUse =
+            await ImageCompressionService.compressImage(imagePathToUse);
+      }
+
       if (event.isReparking) {
         // Create repark request model with GPS data
         // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
         // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
         final reparkRequest = ReparkPhotoRequest(
-          imagePath: event.imagePath,
+          imagePath: imagePathToUse,
           latitude: event.latitude,
           longitude: event.longitude,
           accuracy: event.accuracy,
@@ -42,7 +50,7 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
         // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
         // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
         final parkRequest = ParkRequest(
-          imagePath: event.imagePath,
+          imagePath: imagePathToUse,
           latitude: event.latitude,
           longitude: event.longitude,
           accuracy: event.accuracy,
