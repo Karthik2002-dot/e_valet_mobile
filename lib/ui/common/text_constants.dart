@@ -366,9 +366,5 @@ class TextConstants {
   static String failedToUpdateStatus(String error) =>
       'Failed to update status: $error';
 
-  // No Internet
-  static const String noInternetTitle = 'Internet is slow or Unavailable';
-  static const String noInternetSubtitle =
-      'Please check your connection and try again.';
-  static const String retryConnection = 'Retry';
+  static const String noInternetConnection = 'No internet connection';
 }
