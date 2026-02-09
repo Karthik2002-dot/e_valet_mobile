@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'connectivity_event.dart';
 import 'connectivity_state.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
 
 class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final Connectivity _connectivity = Connectivity();
@@ -35,9 +36,14 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
 
   void _updateState(
       List<ConnectivityResult> results, Emitter<ConnectivityState> emit) {
-    if (results.contains(ConnectivityResult.none) && results.length == 1) {
+    bool isOffline =
+        results.contains(ConnectivityResult.none) && results.length == 1;
+
+    if (isOffline) {
       emit(ConnectivityOffline());
     } else {
+      // Trigger sync immediately when back online
+      OfflineParkingService.syncPendingData();
       emit(ConnectivityOnline());
     }
   }

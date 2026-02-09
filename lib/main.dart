@@ -12,6 +12,10 @@ import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
+import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
@@ -24,7 +28,13 @@ void main() async {
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
+  Hive.registerAdapter(CheckinRequestAdapter());
+  Hive.registerAdapter(OfflineParkingPhotoAdapter());
+  await OfflineParkingService.init();
   await TokenStorage.init();
+
+  // Initialize Background Sync
+  await BackgroundSyncService.init();
 
   // Initialize Firebase
   await Firebase.initializeApp();
