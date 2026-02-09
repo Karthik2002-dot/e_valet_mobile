@@ -134,63 +134,59 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                 },
               ),
             ),
-            SizedBox(height: screenHeight * 0.01), // Reduced spacing
-            // Submit Button - Small button at right corner
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: _isSubmitLoading
-                      ? null
-                      : () {
-                          final parkingLocation =
-                              _parkingLocationController.text.trim();
-                          if (parkingLocation.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Please enter parking location'),
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                            return;
-                          }
-                          if (widget.onSubmit != null) {
-                            _runSubmit(context, parkingLocation);
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.06,
-                      vertical:
-                          screenHeight * 0.008, // Reduced vertical padding
-                    ),
-                    minimumSize:
-                        Size(0, screenHeight * 0.035), // Slightly reduced
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            SizedBox(height: screenHeight * 0.012),
+            // Submit Button - Full width, taller, with loader when submitting
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSubmitLoading
+                    ? null
+                    : () {
+                        final parkingLocation =
+                            _parkingLocationController.text.trim();
+                        if (parkingLocation.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  const Text('Please enter parking location'),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                          return;
+                        }
+                        if (widget.onSubmit != null) {
+                          _runSubmit(context, parkingLocation);
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.018,
                   ),
-                  child: _isSubmitLoading
-                      ? SizedBox(
-                          width: screenWidth * 0.04,
-                          height: screenWidth * 0.04,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
-                          ),
-                        )
-                      : Text(
-                          'Submit',
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.035,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  minimumSize: Size(double.infinity, screenHeight * 0.052),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ],
+                child: _isSubmitLoading
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                        ),
+                      )
+                    : Text(
+                        'Submit',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
             ),
           ],
         ),

@@ -22,7 +22,7 @@ class PreviewSubmitButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: screenHeight * 0.065,
+      height: screenHeight * 0.07,
       child: ElevatedButton(
         onPressed: isLoading ? null : onSubmit,
         style: ElevatedButton.styleFrom(
@@ -48,15 +48,14 @@ class PreviewSubmitButton extends StatelessWidget {
                     labelText: isReparking
                         ? TextConstants.submitRePark
                         : TextConstants.submitButton,
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w600,
+                    fontSize: screenWidth * 0.06,
                     color: AppColors.white,
                   ),
                   SizedBox(width: screenWidth * 0.02),
                   Icon(
                     Icons.arrow_forward,
                     color: AppColors.white,
-                    size: screenWidth * 0.045,
+                    size: screenWidth * 0.06,
                   ),
                 ],
               ),

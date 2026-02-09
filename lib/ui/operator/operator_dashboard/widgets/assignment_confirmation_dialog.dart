@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
@@ -151,28 +152,53 @@ class AssignmentConfirmationDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      request.vehicle.photo,
-                      width: MediaQuery.of(context).size.width * 0.08,
-                      height: MediaQuery.of(context).size.width * 0.06,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width * 0.08,
-                          height: MediaQuery.of(context).size.width * 0.06,
-                          decoration: BoxDecoration(
-                            color: AppColors.grey.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.directions_car,
-                            size: MediaQuery.of(context).size.width * 0.035,
-                            color: AppColors.grey,
-                          ),
-                        );
-                      },
+                  GestureDetector(
+                    onTap: request.vehicle.photo.isNotEmpty
+                        ? () => FullImageViewerDialog.show(
+                              context,
+                              request.vehicle.photo,
+                            )
+                        : null,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: request.vehicle.photo.isNotEmpty
+                          ? Image.network(
+                              request.vehicle.photo,
+                              width: MediaQuery.of(context).size.width * 0.08,
+                              height: MediaQuery.of(context).size.width * 0.06,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.08,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.06,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.grey.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.directions_car,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.035,
+                                    color: AppColors.grey,
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              width: MediaQuery.of(context).size.width * 0.08,
+                              height: MediaQuery.of(context).size.width * 0.06,
+                              decoration: BoxDecoration(
+                                color: AppColors.grey.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.directions_car,
+                                size: MediaQuery.of(context).size.width * 0.035,
+                                color: AppColors.grey,
+                              ),
+                            ),
                     ),
                   ),
                   SizedBox(width: MediaQuery.of(context).size.width * 0.015),

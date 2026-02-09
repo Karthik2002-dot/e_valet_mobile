@@ -306,7 +306,6 @@ class FirebaseMessagingService implements NotificationService {
       log('Navigating based on notification type: $type');
       switch (type) {
         case 'retrieval_request':
-          _retrievalNotificationTapController.add(null);
           _navigateToRetrievalRequest(data);
           break;
         case 'driver_assigned':

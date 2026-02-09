@@ -28,9 +28,11 @@ class _AssignedSessionSheetLoaderState
         AssignedSessionsBackgroundState>(
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
-          final rawSession = assignedState.sessions.isNotEmpty
-              ? assignedState.sessions.first
-              : null;
+          // Never show empty sheet content — when no sessions, parent closes sheet
+          if (!assignedState.hasSessions) {
+            return const SizedBox.shrink();
+          }
+          final rawSession = assignedState.sessions.first;
 
           AssignedSession? typedSession;
           String? sessionId;

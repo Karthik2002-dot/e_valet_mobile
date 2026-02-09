@@ -94,7 +94,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 8, bottom: 8),
                     child: SizedBox(
-                      height: 48,
+                      height: 55,
                       child: ElevatedButton(
                         onPressed: isAcceptLoading
                             ? null
@@ -121,13 +121,16 @@ class RetrievalRequestSheet extends StatelessWidget {
                                 children: [
                                   TextComponent(
                                     labelText: TextConstants.acceptRequest,
-                                    fontSize: screenWidth * 0.045,
+                                    fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.black,
                                   ),
                                   const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward,
-                                      color: AppColors.black),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    size: screenWidth * 0.06,
+                                    color: AppColors.black,
+                                  ),
                                 ],
                               ),
                       ),

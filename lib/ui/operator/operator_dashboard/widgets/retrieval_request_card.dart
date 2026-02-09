@@ -7,6 +7,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/availab
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/retrieval_request_utils.dart';
@@ -165,26 +166,45 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Vehicle Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  widget.request.vehicle.photo,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                  height: MediaQuery.of(context).size.width * 0.1,
-                  fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: MediaQuery.of(context).size.width * 0.1,
-                      height: MediaQuery.of(context).size.width * 0.1,
-                      color: AppColors.grey.withOpacity(0.3),
-                      child: Icon(
-                        Icons.directions_car,
-                        size: MediaQuery.of(context).size.width * 0.04,
-                        color: AppColors.grey,
-                      ),
-                    );
-                  },
+              // Vehicle Image - tap to view full size
+              GestureDetector(
+                onTap: widget.request.vehicle.photo.isNotEmpty
+                    ? () => FullImageViewerDialog.show(
+                          context,
+                          widget.request.vehicle.photo,
+                        )
+                    : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: widget.request.vehicle.photo.isNotEmpty
+                      ? Image.network(
+                          widget.request.vehicle.photo,
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          height: MediaQuery.of(context).size.width * 0.1,
+                          fit: BoxFit.fill,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: MediaQuery.of(context).size.width * 0.1,
+                              height: MediaQuery.of(context).size.width * 0.1,
+                              color: AppColors.grey.withOpacity(0.3),
+                              child: Icon(
+                                Icons.directions_car,
+                                size: MediaQuery.of(context).size.width * 0.04,
+                                color: AppColors.grey,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          height: MediaQuery.of(context).size.width * 0.1,
+                          color: AppColors.grey.withOpacity(0.3),
+                          child: Icon(
+                            Icons.directions_car,
+                            size: MediaQuery.of(context).size.width * 0.04,
+                            color: AppColors.grey,
+                          ),
+                        ),
                 ),
               ),
               SizedBox(
