@@ -24,7 +24,8 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
       // Compress image before upload when a photo is provided
       String? imagePathToUse = event.imagePath;
       if (imagePathToUse != null && imagePathToUse.isNotEmpty) {
-        imagePathToUse = await ImageCompressionService.compressImage(imagePathToUse);
+        imagePathToUse =
+            await ImageCompressionService.compressImage(imagePathToUse);
       }
 
       if (event.isReparking) {
