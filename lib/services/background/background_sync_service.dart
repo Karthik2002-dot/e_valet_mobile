@@ -18,10 +18,10 @@ void callbackDispatcher() {
       await Hive.initFlutter();
 
       // Register adapter if not already registered
-      if (!Hive.isAdapterRegistered(1)) {
+      if (!Hive.isAdapterRegistered(CheckinRequestAdapter().typeId)) {
         Hive.registerAdapter(CheckinRequestAdapter());
       }
-      if (!Hive.isAdapterRegistered(2)) {
+      if (!Hive.isAdapterRegistered(OfflineParkingPhotoAdapter().typeId)) {
         Hive.registerAdapter(OfflineParkingPhotoAdapter());
       }
 
