@@ -14,6 +14,7 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/man
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
+import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
@@ -32,6 +33,9 @@ class DashboardContent extends StatefulWidget {
 class _DashboardContentState extends State<DashboardContent> {
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
+  final TextToSpeechService _ttsService = TextToSpeechService();
+  final Set<String> _knownRequestIds = <String>{};
+  bool _hasLoadedOnce = false;
 
   @override
   void initState() {
@@ -68,6 +72,40 @@ class _DashboardContentState extends State<DashboardContent> {
         refreshRequests: true,
       ),
     );
+  }
+
+  void _handleRetrievalRequestUpdates(
+    RetrievalRequestsResponse retrievalRequests,
+  ) {
+    final currentIds = retrievalRequests.requests
+        .map((request) => request.sessionId)
+        .toSet();
+
+    if (!_hasLoadedOnce) {
+      _knownRequestIds
+        ..clear()
+        ..addAll(currentIds);
+      _hasLoadedOnce = true;
+      return;
+    }
+
+    final newRequests = retrievalRequests.requests.where((request) {
+      if (_knownRequestIds.contains(request.sessionId)) {
+        return false;
+      }
+      return request.status.toUpperCase() == 'RETRIEVAL_REQUESTED';
+    }).toList();
+
+    _knownRequestIds
+      ..clear()
+      ..addAll(currentIds);
+
+    if (newRequests.isEmpty) return;
+
+    final announcement = newRequests
+        .map((request) => 'Card ${request.cardNumber}')
+        .join('. ');
+    _ttsService.speak(announcement);
   }
 
   Widget _buildKpiSkeletonCard(BuildContext context) {
@@ -129,7 +167,12 @@ class _DashboardContentState extends State<DashboardContent> {
               const SizedBox(height: 12),
               Expanded(
                 child:
-                    BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
+                    BlocConsumer<OperatorDashboardBloc, OperatorDashboardState>(
+                  listener: (context, state) {
+                    if (state is OperatorDashboardLoaded) {
+                      _handleRetrievalRequestUpdates(state.retrievalRequests);
+                    }
+                  },
                   builder: (context, state) {
                     final isLoading = state is OperatorDashboardLoading;
                     final isLoaded = state is OperatorDashboardLoaded;
