@@ -35,6 +35,9 @@ class _DashboardContentState extends State<DashboardContent> {
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final TextToSpeechService _ttsService = TextToSpeechService();
   final Set<String> _knownRequestIds = <String>{};
+  final List<String> _ttsQueue = <String>[];
+  final Duration _ttsPause = const Duration(milliseconds: 500);
+  bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
 
   @override
@@ -77,9 +80,8 @@ class _DashboardContentState extends State<DashboardContent> {
   void _handleRetrievalRequestUpdates(
     RetrievalRequestsResponse retrievalRequests,
   ) {
-    final currentIds = retrievalRequests.requests
-        .map((request) => request.sessionId)
-        .toSet();
+    final currentIds =
+        retrievalRequests.requests.map((request) => request.sessionId).toSet();
 
     if (!_hasLoadedOnce) {
       _knownRequestIds
@@ -102,10 +104,30 @@ class _DashboardContentState extends State<DashboardContent> {
 
     if (newRequests.isEmpty) return;
 
-    final announcement = newRequests
-        .map((request) => 'Card ${request.cardNumber}')
-        .join('. ');
-    _ttsService.speak(announcement);
+    final announcements =
+        newRequests.map((request) => 'Card ${request.cardNumber}').toList();
+    _enqueueAnnouncements(announcements);
+  }
+
+  void _enqueueAnnouncements(List<String> announcements) {
+    _ttsQueue.addAll(announcements);
+    _processTtsQueue();
+  }
+
+  Future<void> _processTtsQueue() async {
+    if (_isSpeaking || _ttsQueue.isEmpty) return;
+    _isSpeaking = true;
+    await _ttsService.stop();
+
+    while (_ttsQueue.isNotEmpty) {
+      final announcement = _ttsQueue.removeAt(0);
+      await _ttsService.speak(announcement);
+      if (_ttsQueue.isNotEmpty) {
+        await Future.delayed(_ttsPause);
+      }
+    }
+
+    _isSpeaking = false;
   }
 
   Widget _buildKpiSkeletonCard(BuildContext context) {
@@ -145,6 +167,7 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void dispose() {
+    _ttsService.stop();
     _dashboardBloc.close();
     super.dispose();
   }
