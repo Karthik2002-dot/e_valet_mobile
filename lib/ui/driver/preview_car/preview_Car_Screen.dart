@@ -36,6 +36,9 @@ class PreviewCarScreen extends StatefulWidget {
 class _PreviewCarScreenState extends State<PreviewCarScreen> {
   String? _currentParkingLocation;
 
+  /// Prevents multiple rapid taps from triggering duplicate submissions
+  bool _isProcessing = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,9 +51,15 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
   }
 
   Future<void> _handleSubmit(BuildContext context) async {
+    // Guard: prevent multiple rapid taps immediately
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
     try {
       // Get current GPS location
       final coordinates = await LocationService.getCurrentCoordinates();
+
+      if (!context.mounted) return;
 
       // Submit with GPS data
       context.read<PreviewCarBloc>().add(
@@ -68,9 +77,12 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             ),
           );
     } on ApiException catch (e) {
-      // Show error if GPS location cannot be obtained
+      if (!context.mounted) return;
+      setState(() => _isProcessing = false);
       SnackBars.showErrorSnackBar(context, e.message);
     } catch (e) {
+      if (!context.mounted) return;
+      setState(() => _isProcessing = false);
       SnackBars.showErrorSnackBar(
         context,
         'Failed to get location. Please try again.',
@@ -192,7 +204,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               ),
             );
           } else if (state is PreviewCarError) {
-            // Show error message
+            setState(() => _isProcessing = false);
             SnackBars.showErrorSnackBar(
               context,
               state.message,
@@ -201,7 +213,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
         },
         child: BlocBuilder<PreviewCarBloc, PreviewCarState>(
           builder: (context, state) {
-            final isSubmitting = state is PreviewCarSubmitting;
+            final isSubmitting = state is PreviewCarSubmitting || _isProcessing;
 
             return Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
@@ -315,17 +327,6 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                       ],
                     ),
                   ),
-
-                  // Loading overlay when submitting
-                  if (isSubmitting)
-                    Container(
-                      color: AppColors.black.withOpacity(0.5),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             );
