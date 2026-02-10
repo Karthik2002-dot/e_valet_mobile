@@ -15,6 +15,10 @@ class InitiateReparkBloc
     InitiateReparkRequested event,
     Emitter<InitiateReparkState> emit,
   ) async {
+    // Guard: ignore duplicate requests when already loading or succeeded
+    if (state is InitiateReparkLoading || state is InitiateReparkSuccess) {
+      return;
+    }
     emit(const InitiateReparkLoading());
 
     try {

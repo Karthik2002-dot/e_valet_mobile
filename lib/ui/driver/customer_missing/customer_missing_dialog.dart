@@ -11,7 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 
-class CustomerMissingDialog extends StatelessWidget {
+class CustomerMissingDialog extends StatefulWidget {
   final String sessionId;
   final VoidCallback? onCancel;
 
@@ -38,6 +38,14 @@ class CustomerMissingDialog extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  State<CustomerMissingDialog> createState() => _CustomerMissingDialogState();
+}
+
+class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
+  /// Prevents multiple rapid taps from triggering duplicate actions
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,27 +124,33 @@ class CustomerMissingDialog extends StatelessWidget {
             BlocConsumer<InitiateReparkBloc, InitiateReparkState>(
               listener: (context, state) {
                 if (state is InitiateReparkSuccess) {
-                  Navigator.of(context).pop();
-                  // Navigate to camera screen for reparking
+                  if (!context.mounted) return;
+                  SnackBars.showSuccessSnackBar(
+                      context, state.response.message);
+                  final navigator = Navigator.of(context);
+                  navigator.pop();
+                  // Navigate to camera screen for reparking (navigator stays valid after pop)
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.of(context).pushReplacement(
+                    navigator.pushReplacement(
                       MaterialPageRoute(
                         builder: (context) => CarCameraScreen(
-                          sessionId: sessionId,
+                          sessionId: widget.sessionId,
                           isReparking: true,
                           preventBackNavigation: true,
                         ),
                       ),
                     );
                   });
-                  SnackBars.showSuccessSnackBar(
-                      context, state.response.message);
                 } else if (state is InitiateReparkError) {
-                  SnackBars.showErrorSnackBar(context, state.message);
+                  setState(() => _isProcessing = false);
+                  if (context.mounted) {
+                    SnackBars.showErrorSnackBar(context, state.message);
+                  }
                 }
               },
               builder: (context, state) {
-                final isLoading = state is InitiateReparkLoading;
+                final isLoading =
+                    state is InitiateReparkLoading || _isProcessing;
                 return SizedBox(
                   width: double.infinity,
                   height: screenHeight * 0.055,
@@ -144,6 +158,10 @@ class CustomerMissingDialog extends StatelessWidget {
                     onPressed: isLoading
                         ? null
                         : () async {
+                            // Guard: prevent multiple rapid taps immediately
+                            if (_isProcessing) return;
+                            setState(() => _isProcessing = true);
+
                             try {
                               // Request location permission if needed
                               LocationPermission permission =
@@ -156,6 +174,8 @@ class CustomerMissingDialog extends StatelessWidget {
                               if (permission == LocationPermission.denied ||
                                   permission ==
                                       LocationPermission.deniedForever) {
+                                if (!context.mounted) return;
+                                setState(() => _isProcessing = false);
                                 SnackBars.showErrorSnackBar(
                                   context,
                                   'Location permission is required to initiate repark.',
@@ -167,16 +187,20 @@ class CustomerMissingDialog extends StatelessWidget {
                               final position =
                                   await LocationService.getCurrentLocation();
 
+                              if (!context.mounted) return;
+
                               // Trigger the API call
                               context.read<InitiateReparkBloc>().add(
                                     InitiateReparkRequested(
-                                      sessionId: sessionId,
+                                      sessionId: widget.sessionId,
                                       latitude: position.latitude,
                                       longitude: position.longitude,
                                       accuracy: position.accuracy,
                                     ),
                                   );
                             } catch (e) {
+                              if (!context.mounted) return;
+                              setState(() => _isProcessing = false);
                               SnackBars.showErrorSnackBar(
                                 context,
                                 'Failed to get location: ${e.toString()}',
@@ -228,13 +252,14 @@ class CustomerMissingDialog extends StatelessWidget {
             // Cancel Button
             BlocBuilder<InitiateReparkBloc, InitiateReparkState>(
               builder: (context, state) {
-                final isLoading = state is InitiateReparkLoading;
+                final isLoading =
+                    state is InitiateReparkLoading || _isProcessing;
                 return TextButton(
                   onPressed: isLoading
                       ? null
                       : () {
                           Navigator.of(context).pop();
-                          onCancel?.call();
+                          widget.onCancel?.call();
                         },
                   child: TextComponent(
                     labelText: TextConstants.cancel,
