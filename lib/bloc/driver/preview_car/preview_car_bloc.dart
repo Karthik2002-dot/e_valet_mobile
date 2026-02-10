@@ -3,7 +3,7 @@ import 'package:niloufer_valet_mobile/api/driver/image_API.dart';
 import 'package:niloufer_valet_mobile/api/driver/re-park_api.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
-
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
 import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
@@ -22,6 +22,10 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     SubmitPhotoRequested event,
     Emitter<PreviewCarState> emit,
   ) async {
+    // Guard: ignore duplicate submissions when already submitting or succeeded
+    if (state is PreviewCarSubmitting || state is PreviewCarSuccess) {
+      return;
+    }
     emit(const PreviewCarSubmitting());
 
     String? imagePathToUse = event.imagePath;
@@ -62,6 +66,14 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
 
       emit(const PreviewCarSuccess());
     } catch (e) {
+      // If vehicle is already parked (duplicate request), treat as success
+      final msg = e is ApiException ? e.message : e.toString();
+      if (msg.contains('PARKED') && msg.contains('CHECKED_IN')) {
+        debugPrint('Vehicle already parked, treating as success');
+        emit(const PreviewCarSuccess());
+        return;
+      }
+
       debugPrint('❌ Online upload failed, falling back to offline storage: $e');
 
       try {
