@@ -17,13 +17,6 @@ class OfflineParkingService {
     await Hive.openBox<OfflineParkingPhoto>(_photoBoxName);
   }
 
-  static Future<void> saveCheckin(CheckinRequest request) async {
-    final box = Hive.box<CheckinRequest>(_boxName);
-    // Use a timestamp as key to ensure order
-    await box.add(request);
-    debugPrint('Offline checkin saved: ${request.cardNumber}');
-  }
-
   static Future<void> saveParkingPhoto(OfflineParkingPhoto photo) async {
     final box = Hive.box<OfflineParkingPhoto>(_photoBoxName);
     await box.add(photo);

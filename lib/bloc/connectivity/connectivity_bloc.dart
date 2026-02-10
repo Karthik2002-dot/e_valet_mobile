@@ -37,8 +37,7 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   void _updateState(
       List<ConnectivityResult> results, Emitter<ConnectivityState> emit) {
     bool isOffline =
-        results.contains(ConnectivityResult.none) && results.length == 1;
-
+        results.isEmpty || results.every((r) => r == ConnectivityResult.none);
     if (isOffline) {
       emit(ConnectivityOffline());
     } else {

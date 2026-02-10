@@ -28,8 +28,14 @@ void main() async {
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
-  Hive.registerAdapter(CheckinRequestAdapter());
-  Hive.registerAdapter(OfflineParkingPhotoAdapter());
+  final checkinRequestAdapter = CheckinRequestAdapter();
+  if (!Hive.isAdapterRegistered(checkinRequestAdapter.typeId)) {
+    Hive.registerAdapter(checkinRequestAdapter);
+  }
+  final offlineParkingPhotoAdapter = OfflineParkingPhotoAdapter();
+  if (!Hive.isAdapterRegistered(offlineParkingPhotoAdapter.typeId)) {
+    Hive.registerAdapter(offlineParkingPhotoAdapter);
+  }
   await OfflineParkingService.init();
   await TokenStorage.init();
 
@@ -108,7 +114,7 @@ class MyApp extends StatelessWidget {
                   messenger.clearMaterialBanners();
                 }
               },
-              child: child!,
+              child: child ?? const SizedBox.shrink(),
             );
           },
         ),
