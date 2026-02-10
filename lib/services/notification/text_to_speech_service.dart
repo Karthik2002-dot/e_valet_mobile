@@ -22,6 +22,7 @@ class TextToSpeechService {
       // Slightly slower rate for clarity (0.4–0.5 is clear; 0.0 = slowest)
       await _flutterTts.setSpeechRate(0.45);
       await _flutterTts.setPitch(1.0);
+      await _flutterTts.awaitSpeakCompletion(true);
 
       // On iOS, route audio to speaker (not earpiece) so it's loud and hearable
       if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -35,7 +36,6 @@ class TextToSpeechService {
       }
 
       _isInitialized = true;
-      log('TextToSpeechService initialized (volume: max, speaker output)');
     } catch (e) {
       log('Error initializing TextToSpeechService: $e');
     }
@@ -53,7 +53,6 @@ class TextToSpeechService {
 
       await _flutterTts.setVolume(1.0);
       await _flutterTts.speak(trimmed);
-      log('TTS speaking: $trimmed');
     } catch (e) {
       log('Error in TTS speak: $e');
     }
