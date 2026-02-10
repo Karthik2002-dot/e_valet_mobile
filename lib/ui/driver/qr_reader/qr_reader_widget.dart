@@ -14,6 +14,9 @@ class QrReaderWidget extends StatefulWidget {
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
+  /// When set, the scanner container fills this width/height (e.g. full container in park flow).
+  final double? fillWidth;
+  final double? fillHeight;
 
   const QrReaderWidget({
     super.key,
@@ -21,6 +24,8 @@ class QrReaderWidget extends StatefulWidget {
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    this.fillWidth,
+    this.fillHeight,
   });
 
   @override
@@ -291,18 +296,23 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
       _checkAndStartCameraForInitialState();
     }
 
-    final scannerHeight = widget.isDesktop
-        ? widget.screenHeight * 0.25
-        : widget.isTablet
-            ? widget.screenHeight * 0.28
-            : widget.screenHeight * 0.25;
+    final useFillSize =
+        widget.fillWidth != null && widget.fillHeight != null;
+    final scannerContainerWidth = useFillSize
+        ? widget.fillWidth!
+        : (widget.screenWidth * 0.85);
+    final scannerHeight = useFillSize
+        ? widget.fillHeight!
+        : (widget.isDesktop
+            ? widget.screenHeight * 0.25
+            : widget.isTablet
+                ? widget.screenHeight * 0.28
+                : widget.screenHeight * 0.25);
 
     final borderWidth = widget.screenWidth * 0.005;
     final borderRadius = widget.screenWidth * 0.03;
-    final scannerContainerWidth = widget.screenWidth * 0.85;
 
-    return Center(
-      child: Container(
+    final container = Container(
         width: scannerContainerWidth,
         height: scannerHeight,
         decoration: BoxDecoration(
@@ -414,7 +424,8 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
             ),
           ),
         ),
-      ),
-    );
+      );
+
+    return useFillSize ? container : Center(child: container);
   }
 }

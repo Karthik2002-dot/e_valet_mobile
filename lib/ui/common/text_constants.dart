@@ -99,6 +99,11 @@ class TextConstants {
       'Hi $driverName, Ready to Park?';
   static const String scanKeyTagInstruction =
       'Scan the key tag to start the parking process.';
+  static const String parkVehicle = 'Park Vehicle';
+  static const String retrieveVehicle = 'Retrieve Vehicle';
+  static const String vehicleDetailsTitle = 'Vehicle details';
+  static const String scanTabLabel = 'Scan';
+  static const String typeIdNumberTabLabel = 'Type ID Number';
   static const String enterTagNumberLink = 'Or enter the tag number';
   static const String pleaseTurnOnlineToPark =
       'Please Turn Online To Park a Car';
