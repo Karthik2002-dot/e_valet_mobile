@@ -17,8 +17,11 @@ import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_serv
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,12 +89,13 @@ class MyApp extends StatelessWidget {
             lazy: false, // Start listening immediately
           ),
         ],
-        child: MaterialApp(
-          title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
-          navigatorKey: FirebaseMessagingService.navigatorKey,
-          home: const SplashScreen(),
-          debugShowCheckedModeBanner: false,
-          builder: (context, child) {
+        child: _AppLifecycleHandler(
+          child: MaterialApp(
+            title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
+            navigatorKey: FirebaseMessagingService.navigatorKey,
+            home: const SplashScreen(),
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) {
             return BlocListener<ConnectivityBloc, ConnectivityState>(
               listener: (context, state) {
                 final messenger = ScaffoldMessenger.of(context);
@@ -117,6 +121,7 @@ class MyApp extends StatelessWidget {
               child: child ?? const SizedBox.shrink(),
             );
           },
+        ),
         ),
       ),
     );
@@ -154,6 +159,32 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
       } catch (_) {}
+      _checkDriverStatusOnResume();
+    }
+  }
+
+  /// When app is opened (resumed from background), re-check driver status.
+  /// If driver is OFFLINE, clear session and navigate to login.
+  Future<void> _checkDriverStatusOnResume() async {
+    final hasToken = await TokenStorage.getAccessToken();
+    if (hasToken == null || hasToken.isEmpty) return;
+
+    try {
+      final driverStatus = await DriverStatusApiService.getDriverStatus();
+      if (driverStatus.isOffline) {
+        await TokenStorage.clearAll();
+        await SessionManager.clearSessionFlags();
+        if (!mounted) return;
+        final nav = FirebaseMessagingService.navigatorKey.currentContext;
+        if (nav != null) {
+          Navigator.of(nav).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      }
+    } catch (_) {
+      // Not a driver, or network error: do nothing
     }
   }
 
