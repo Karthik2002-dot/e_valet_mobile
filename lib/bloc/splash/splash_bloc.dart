@@ -50,7 +50,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     try {
       final profile = await ProfileApiService.getProfile();
       roles = profile.normalizedRoles;
-      userId = profile.user.id;
+      userId = profile.user?.id;
 
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));
@@ -59,7 +59,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         outletId = dotenv.env['OUTLET_ID'] ?? '1';
       }
 
-      // Driver: getDriverStatus is the gate when opening the app — offline → login, online → home.
+      // If user is a driver, check status before WebSocket: OFFLINE means session ended → log out and go to login.
+      // Only connect WebSocket when driver is ONLINE (or operator).
       if (isDriver) {
         try {
           final driverStatus = await DriverStatusApiService.getDriverStatus();
@@ -69,15 +70,14 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
             emit(const SplashCompleted(isAuthenticated: false, roles: []));
             return;
           }
-          // Online (or ON_BREAK): continue to driver home
         } catch (e) {
-          // Status fetch failed (e.g. network): allow navigation to driver home so they can retry there
+          // If status fetch fails (e.g. network), still allow navigation to driver home
           print('Splash: Driver status fetch failed: $e');
         }
       }
 
       // Initialize WebSocket only when user is allowed to continue (operator, or driver with ONLINE status)
-      if (webSocketBloc != null) {
+      if (webSocketBloc != null && userId != null) {
         await WebSocketHelper.connectAfterLogin(
           webSocketBloc: webSocketBloc!,
           outletId: outletId,
