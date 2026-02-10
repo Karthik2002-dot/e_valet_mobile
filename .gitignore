@@ -46,3 +46,8 @@ app.*.map.json
 
 .env
 niloufer-valet-keystore.jks
+
+pubspec.lock
+GeneratedPluginRegistrant.swift
+generated_plugin_registrant.cc
+generated_plugins.cmake

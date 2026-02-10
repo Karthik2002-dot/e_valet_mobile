@@ -9,9 +9,19 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/ui/common/connectivity_wrapper.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
+import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
+import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +31,19 @@ void main() async {
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
+  final checkinRequestAdapter = CheckinRequestAdapter();
+  if (!Hive.isAdapterRegistered(checkinRequestAdapter.typeId)) {
+    Hive.registerAdapter(checkinRequestAdapter);
+  }
+  final offlineParkingPhotoAdapter = OfflineParkingPhotoAdapter();
+  if (!Hive.isAdapterRegistered(offlineParkingPhotoAdapter.typeId)) {
+    Hive.registerAdapter(offlineParkingPhotoAdapter);
+  }
+  await OfflineParkingService.init();
   await TokenStorage.init();
+
+  // Initialize Background Sync
+  await BackgroundSyncService.init();
 
   // Initialize Firebase
   await Firebase.initializeApp();
@@ -40,35 +62,66 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConnectivityWrapper(
-      child: MultiProvider(
+    return MultiProvider(
+      providers: [
+        // Provide FirebaseMessagingService to the entire app
+        Provider<FirebaseMessagingService>.value(
+          value: firebaseMessagingService,
+        ),
+      ],
+      child: MultiBlocProvider(
         providers: [
-          // Provide FirebaseMessagingService to the entire app
-          Provider<FirebaseMessagingService>.value(
-            value: firebaseMessagingService,
+          BlocProvider<WebSocketBloc>(
+            create: (context) => WebSocketBloc(),
+            lazy: false,
+          ),
+          BlocProvider<SplashBloc>(
+            create: (context) => SplashBloc(
+              webSocketBloc: context.read<WebSocketBloc>(),
+            ),
+          ),
+          BlocProvider<DriverStatusBloc>(
+            create: (context) => DriverStatusBloc(),
+          ),
+          // Add ConnectivityBloc
+          BlocProvider<ConnectivityBloc>(
+            create: (context) => ConnectivityBloc(),
+            lazy: false, // Start listening immediately
           ),
         ],
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider<WebSocketBloc>(
-              create: (context) => WebSocketBloc(),
-              lazy: false,
-            ),
-            BlocProvider<SplashBloc>(
-              create: (context) => SplashBloc(
-                webSocketBloc: context.read<WebSocketBloc>(),
-              ),
-            ),
-            BlocProvider<DriverStatusBloc>(
-              create: (context) => DriverStatusBloc(),
-            ),
-          ],
+        child: _AppLifecycleHandler(
           child: MaterialApp(
             title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
             navigatorKey: FirebaseMessagingService.navigatorKey,
             home: const SplashScreen(),
             debugShowCheckedModeBanner: false,
-          ),
+            builder: (context, child) {
+            return BlocListener<ConnectivityBloc, ConnectivityState>(
+              listener: (context, state) {
+                final messenger = ScaffoldMessenger.of(context);
+                if (state is ConnectivityOffline) {
+                  messenger.clearMaterialBanners();
+                  messenger.showMaterialBanner(
+                    MaterialBanner(
+                      backgroundColor: Colors.red,
+                      content: TextComponent(
+                        labelText: TextConstants.noInternetConnection,
+                        color: Colors.white,
+                        textAlign: TextAlign.center,
+                      ),
+                      actions: [
+                        const SizedBox.shrink(),
+                      ],
+                    ),
+                  );
+                } else if (state is ConnectivityOnline) {
+                  messenger.clearMaterialBanners();
+                }
+              },
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+        ),
         ),
       ),
     );
@@ -106,6 +159,32 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
       } catch (_) {}
+      _checkDriverStatusOnResume();
+    }
+  }
+
+  /// When app is opened (resumed from background), re-check driver status.
+  /// If driver is OFFLINE, clear session and navigate to login.
+  Future<void> _checkDriverStatusOnResume() async {
+    final hasToken = await TokenStorage.getAccessToken();
+    if (hasToken == null || hasToken.isEmpty) return;
+
+    try {
+      final driverStatus = await DriverStatusApiService.getDriverStatus();
+      if (driverStatus.isOffline) {
+        await TokenStorage.clearAll();
+        await SessionManager.clearSessionFlags();
+        if (!mounted) return;
+        final nav = FirebaseMessagingService.navigatorKey.currentContext;
+        if (nav != null) {
+          Navigator.of(nav).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      }
+    } catch (_) {
+      // Not a driver, or network error: do nothing
     }
   }
 

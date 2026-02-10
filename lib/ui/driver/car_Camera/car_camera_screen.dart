@@ -34,6 +34,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     with WidgetsBindingObserver, RouteAware {
   late CarCameraBloc _cameraBloc;
   bool _isInitializing = false;
+  bool _isCapturing = false;
   RouteObserver<ModalRoute>? _routeObserver;
   Orientation? _currentOrientation;
 
@@ -42,7 +43,6 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     super.initState();
     _cameraBloc = CarCameraBloc();
     _routeObserver = RouteObserver<ModalRoute>();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addObserver(this);
     // Set preferred orientations to allow landscape
     SystemChrome.setPreferredOrientations([
@@ -116,6 +116,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     // Handle orientation changes
     final orientation = MediaQuery.of(context).orientation;
     if (_currentOrientation != orientation) {
+      // Prevent re-initialization if capturing to avoid crash
+      if (_isCapturing) return;
+
       _currentOrientation = orientation;
       // Reinitialize camera when orientation changes
       if (!_isInitializing) {
@@ -310,7 +313,11 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       return;
     }
 
+    // specific prevention for capture
+    if (_isCapturing) return;
+
     try {
+      _isCapturing = true;
       final cameraController = state is CarCameraInitialized
           ? state.cameraController
           : (state as CarCameraFlashToggled).cameraController;
@@ -358,6 +365,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
           '${TextConstants.errorCapturingPhoto}: $e',
         );
       }
+    } finally {
+      _isCapturing = false;
     }
   }
 
@@ -374,7 +383,10 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       return;
     }
 
+    if (_isCapturing) return;
+
     try {
+      _isCapturing = true;
       final cameraController = state is CarCameraInitialized
           ? state.cameraController
           : (state as CarCameraFlashToggled).cameraController;
@@ -426,6 +438,10 @@ class _CarCameraScreenState extends State<CarCameraScreen>
           context,
           '${TextConstants.errorCapturingPhoto}: $e',
         );
+      }
+    } finally {
+      if (mounted) {
+        _isCapturing = false;
       }
     }
   }
