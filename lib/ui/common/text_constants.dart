@@ -104,6 +104,7 @@ class TextConstants {
   static const String vehicleDetailsTitle = 'Vehicle details';
   static const String scanTabLabel = 'Scan';
   static const String typeIdNumberTabLabel = 'Type ID Number';
+  static const String typeParkingNumberTabLabel = 'Type Parking Number';
   static const String enterTagNumberLink = 'Or enter the tag number';
   static const String pleaseTurnOnlineToPark =
       'Please Turn Online To Park a Car';
@@ -158,6 +159,14 @@ class TextConstants {
   static const String tagNumberLabel = 'Tag Number';
   static const String tagNumberHint = 'Enter Badge Number';
   static const String scanTagNumberLink = 'Or scan the tag number';
+
+  // Third screen (after QR/tag submit) - Parking location for tag flow
+  static const String enterParkingLocationToProceed =
+      'Enter the Parking Location to Proceed';
+  static const String parkingLocationLabel = 'Parking Location';
+  static const String parkingLocationHint = 'Enter Badge Number';
+  static const String pleaseEnterParkingLocation =
+      'Please enter parking location';
 
   // QR Status Messages
   static const String scannedSuccess = 'Scanned Success';

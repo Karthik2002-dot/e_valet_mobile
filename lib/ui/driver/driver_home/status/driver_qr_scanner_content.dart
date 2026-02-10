@@ -16,7 +16,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 
 class DriverQrScannerContent extends StatefulWidget {
   final double screenWidth;
@@ -46,6 +46,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   int _selectedTab = 0; // 0 = Scan, 1 = Type ID Number
   bool _showCamera = false; // true after 2 sec Lottie intro in scan area
   Timer? _introTimer;
+  /// Set when submitting so third screen knows whether to show parking location form (tag) or go straight to Lottie (QR).
+  bool _lastSubmissionWasTagNumber = false;
 
   @override
   void initState() {
@@ -65,6 +67,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   void _handleSubmit(BuildContext submitContext) {
     final qrState = submitContext.read<QrBloc>().state;
     if (qrState.qrData != null) {
+      _lastSubmissionWasTagNumber = false;
       submitContext.read<TagSubmissionBloc>().add(
             QrCodeSubmitted(qrState.qrData!),
           );
@@ -80,6 +83,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
         );
         return;
       }
+      _lastSubmissionWasTagNumber = true;
       final statusState = submitContext.read<DriverStatusBloc>().state;
       int outletId = int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1;
       if (statusState is DriverStatusLoaded) {
@@ -101,16 +105,26 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
             listener: (context, submissionState) {
               if (submissionState is TagSubmissionSuccess) {
                 context.read<QrBloc>().add(const QrResetRequested());
+                // Third screen: parking location form (if tag) or Carphoto.json 2s, then camera
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CarCameraScreen(
-                      sessionId: null,
-                      preventBackNavigation: true,
+                    builder: (context) => CarPhotoIntroScreen(
+                      cameViaTagNumber: _lastSubmissionWasTagNumber,
+                      onReturnFromCamera: () {
+                        widget.onReturnFromCarCamera?.call();
+                        if (mounted) {
+                          _introTimer?.cancel();
+                          setState(() => _showCamera = false);
+                          _introTimer = Timer(const Duration(seconds: 2), () {
+                            if (mounted) setState(() => _showCamera = true);
+                          });
+                        }
+                      },
                     ),
                   ),
                 ).then((_) {
-                  // When user returns from Car Camera: reset scan intro and tell parent to show home (two cards).
+                  // When user returns from third screen (e.g. back before camera): reset and show home
                   widget.onReturnFromCarCamera?.call();
                   if (mounted) {
                     _introTimer?.cancel();
@@ -146,7 +160,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
               ),
             ),
             SizedBox(height: widget.screenHeight * 0.016),
-            // Tabs: Scan | Type ID Number
+            // Tabs: Scan | Type Parking Number (same as third screen)
             _buildTabs(),
             SizedBox(height: widget.screenHeight * 0.018),
             Expanded(
@@ -179,7 +193,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
           Expanded(
             child: _TabChip(
               icon: Icons.dialpad,
-              label: TextConstants.typeIdNumberTabLabel,
+              label: TextConstants.typeParkingNumberTabLabel,
               isActive: !isScan,
               onTap: () => setState(() => _selectedTab = 1),
             ),

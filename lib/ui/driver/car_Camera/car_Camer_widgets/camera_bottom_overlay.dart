@@ -6,12 +6,15 @@ class CameraBottomOverlay extends StatefulWidget {
   final Function(BuildContext) onCapture;
   final Future<void> Function(BuildContext, String)? onSubmit;
   final bool positionAtTop;
+  /// Pre-fill parking location (e.g. from third screen when user entered via tag number).
+  final String? initialParkingLocation;
 
   const CameraBottomOverlay({
     super.key,
     required this.onCapture,
     this.onSubmit,
     this.positionAtTop = false,
+    this.initialParkingLocation,
   });
 
   @override
@@ -49,6 +52,10 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialParkingLocation;
+    if (initial != null && initial.isNotEmpty) {
+      _parkingLocationController.text = initial;
+    }
     _focusNode.addListener(() {
       if (mounted) {
         setState(() {});
