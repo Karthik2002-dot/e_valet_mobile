@@ -96,32 +96,32 @@ class MyApp extends StatelessWidget {
             home: const SplashScreen(),
             debugShowCheckedModeBanner: false,
             builder: (context, child) {
-            return BlocListener<ConnectivityBloc, ConnectivityState>(
-              listener: (context, state) {
-                final messenger = ScaffoldMessenger.of(context);
-                if (state is ConnectivityOffline) {
-                  messenger.clearMaterialBanners();
-                  messenger.showMaterialBanner(
-                    MaterialBanner(
-                      backgroundColor: Colors.red,
-                      content: TextComponent(
-                        labelText: TextConstants.noInternetConnection,
-                        color: Colors.white,
-                        textAlign: TextAlign.center,
+              return BlocListener<ConnectivityBloc, ConnectivityState>(
+                listener: (context, state) {
+                  final messenger = ScaffoldMessenger.of(context);
+                  if (state is ConnectivityOffline) {
+                    messenger.clearMaterialBanners();
+                    messenger.showMaterialBanner(
+                      MaterialBanner(
+                        backgroundColor: Colors.red,
+                        content: TextComponent(
+                          labelText: TextConstants.noInternetConnection,
+                          color: Colors.white,
+                          textAlign: TextAlign.center,
+                        ),
+                        actions: [
+                          const SizedBox.shrink(),
+                        ],
                       ),
-                      actions: [
-                        const SizedBox.shrink(),
-                      ],
-                    ),
-                  );
-                } else if (state is ConnectivityOnline) {
-                  messenger.clearMaterialBanners();
-                }
-              },
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
-        ),
+                    );
+                  } else if (state is ConnectivityOnline) {
+                    messenger.clearMaterialBanners();
+                  }
+                },
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
+          ),
         ),
       ),
     );
