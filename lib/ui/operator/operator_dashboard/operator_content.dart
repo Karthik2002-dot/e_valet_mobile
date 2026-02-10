@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,8 +37,11 @@ class _DashboardContentState extends State<DashboardContent> {
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final TextToSpeechService _ttsService = TextToSpeechService();
   final Set<String> _knownRequestIds = <String>{};
+  final Set<String> _highlightedRequestIds = <String>{};
+  final Map<String, Timer> _highlightTimers = <String, Timer>{};
   final List<String> _ttsQueue = <String>[];
   final Duration _ttsPause = const Duration(milliseconds: 500);
+  final Duration _highlightDuration = const Duration(seconds: 30);
   bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
 
@@ -107,6 +112,25 @@ class _DashboardContentState extends State<DashboardContent> {
     final announcements =
         newRequests.map((request) => 'Card ${request.cardNumber}').toList();
     _enqueueAnnouncements(announcements);
+
+    for (final request in newRequests) {
+      _startHighlight(request.sessionId);
+    }
+  }
+
+  void _startHighlight(String sessionId) {
+    _highlightTimers[sessionId]?.cancel();
+    _highlightTimers[sessionId] = Timer(_highlightDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _highlightedRequestIds.remove(sessionId);
+        _highlightTimers.remove(sessionId);
+      });
+    });
+
+    setState(() {
+      _highlightedRequestIds.add(sessionId);
+    });
   }
 
   void _enqueueAnnouncements(List<String> announcements) {
@@ -167,6 +191,10 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void dispose() {
+    for (final timer in _highlightTimers.values) {
+      timer.cancel();
+    }
+    _highlightTimers.clear();
     _ttsService.stop();
     _dashboardBloc.close();
     super.dispose();
@@ -227,6 +255,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                   OperatorAvailableDriversResponse(drivers: []),
                               onAssignmentComplete: () {},
                               isLoading: true,
+                              highlightedRequestIds: const <String>{},
                             ),
                           ),
                         ],
@@ -262,6 +291,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                 );
                               },
                               isLoading: false,
+                              highlightedRequestIds: _highlightedRequestIds,
                             ),
                           ),
                         ],
