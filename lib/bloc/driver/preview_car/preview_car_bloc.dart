@@ -3,10 +3,14 @@ import 'package:niloufer_valet_mobile/api/driver/image_API.dart';
 import 'package:niloufer_valet_mobile/api/driver/re-park_api.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
-import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+
 import 'package:niloufer_valet_mobile/models/driver/park/park_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/re-park/repark_photo_request.dart';
+import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
+import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:niloufer_valet_mobile/services/image/image_compression_service.dart';
+import 'package:flutter/foundation.dart';
 
 class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
   PreviewCarBloc() : super(const PreviewCarInitial()) {
@@ -20,58 +24,71 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
   ) async {
     emit(const PreviewCarSubmitting());
 
+    String? imagePathToUse = event.imagePath;
+
     try {
       // Compress image before upload when a photo is provided
-      String? imagePathToUse = event.imagePath;
       if (imagePathToUse != null && imagePathToUse.isNotEmpty) {
         imagePathToUse =
             await ImageCompressionService.compressImage(imagePathToUse);
       }
 
+      // Try online upload first
       if (event.isReparking) {
-        // Create repark request model with GPS data
-        // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
-        // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
-        final reparkRequest = ReparkPhotoRequest(
+        final request = ReparkPhotoRequest(
           imagePath: imagePathToUse,
           latitude: event.latitude,
           longitude: event.longitude,
           accuracy: event.accuracy,
           parkingLocation: event.parkingLocation,
         );
-
-        // Upload re-parked car data to repark API
         await ReparkApiService.uploadReparkPhoto(
+          request: request,
           sessionId: event.sessionId,
-          request: reparkRequest,
         );
       } else {
-        // Create park request model with GPS data
-        // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
-        // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
-        final parkRequest = ParkRequest(
+        final request = ParkRequest(
           imagePath: imagePathToUse,
           latitude: event.latitude,
           longitude: event.longitude,
           accuracy: event.accuracy,
           parkingLocation: event.parkingLocation,
         );
-
-        // Upload parking data to park API
         await ImageApiService.uploadParkingPhoto(
-          request: parkRequest,
+          request: request,
           sessionId: event.sessionId,
         );
       }
 
       emit(const PreviewCarSuccess());
-    } on ApiException catch (e) {
-      print('❌ Photo upload failed: ${e.message}');
-      emit(PreviewCarError(message: e.message));
     } catch (e) {
-      print('❌ Unknown error during photo upload: $e');
-      emit(const PreviewCarError(
-          message: 'Failed to upload photo. Please try again.'));
+      debugPrint('❌ Online upload failed, falling back to offline storage: $e');
+
+      try {
+        // Save photo to offline storage
+        final offlinePhoto = OfflineParkingPhoto(
+          imagePath: imagePathToUse, // Use the compressed path
+          latitude: event.latitude,
+          longitude: event.longitude,
+          accuracy: event.accuracy,
+          parkingLocation: event.parkingLocation,
+          sessionId: event.sessionId,
+          isReparking: event.isReparking,
+          timestamp: DateTime.now().toIso8601String(),
+        );
+
+        await OfflineParkingService.saveParkingPhoto(offlinePhoto);
+
+        // Trigger background sync
+        await BackgroundSyncService.triggerSync();
+
+        // Emit success immediately
+        emit(const PreviewCarSuccess());
+      } catch (dbError) {
+        debugPrint('❌ Failed to save offline photo: $dbError');
+        emit(const PreviewCarError(
+            message: 'Failed to save photo. Please try again.'));
+      }
     }
   }
 
