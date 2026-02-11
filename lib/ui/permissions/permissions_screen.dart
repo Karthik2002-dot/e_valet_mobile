@@ -3,7 +3,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/version/version_check_screen.dart';
+import 'package:niloufer_valet_mobile/ui/version/version_check_args.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
@@ -20,7 +20,10 @@ class PermissionsScreen extends StatefulWidget {
     super.key,
     this.args,
     this.returnToPrevious = false,
-  });
+  }) : assert(
+          returnToPrevious || args != null,
+          'args is required when returnToPrevious is false (initial flow).',
+        );
 
   @override
   State<PermissionsScreen> createState() => _PermissionsScreenState();
@@ -63,6 +66,8 @@ class _PermissionsScreenState extends State<PermissionsScreen>
   }
 
   bool get _allGranted =>
+      !_loading &&
+      _statuses.isNotEmpty &&
       _statuses.values.every((s) => s == PermissionStatusType.granted);
 
   Future<void> _onPermissionTap(Permission permission) async {

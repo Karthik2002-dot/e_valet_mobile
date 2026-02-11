@@ -78,7 +78,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
       }
       if (status != PermissionStatus.granted) {
         emit(const CarCameraInitializationError(
-          message: 'Camera permission is required. Please enable it in app settings.',
+          message:
+              'Camera permission is required. Please enable it in app settings.',
         ));
         _isInitializing = false;
         return;

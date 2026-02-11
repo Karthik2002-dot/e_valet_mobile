@@ -142,6 +142,8 @@ class _AppLifecycleHandler extends StatefulWidget {
 
 class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
     with WidgetsBindingObserver {
+  bool _isShowingPermissionsScreen = false;
+
   @override
   void initState() {
     super.initState();
@@ -166,14 +168,22 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
 
   Future<void> _checkPermissionsOnResume() async {
     if (!PermissionsService.permissionsCompletedOnce) return;
+    if (_isShowingPermissionsScreen) return;
     final allGranted = await PermissionsService.areAllGranted();
     if (allGranted) return;
     if (!mounted) return;
-    Navigator.of(context).push(
+    _isShowingPermissionsScreen = true;
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(
         builder: (_) => const PermissionsScreen(returnToPrevious: true),
       ),
-    );
+    )
+        .then((_) {
+      if (mounted) {
+        setState(() => _isShowingPermissionsScreen = false);
+      }
+    });
   }
 
   @override

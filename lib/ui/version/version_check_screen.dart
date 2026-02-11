@@ -4,23 +4,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/version/mandatory_update_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/version/version_check_args.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-
-/// Arguments passed from splash after [SplashCompleted].
-class VersionCheckArgs {
-  final bool isAuthenticated;
-  final List<String> roles;
-
-  const VersionCheckArgs({
-    required this.isAuthenticated,
-    required this.roles,
-  });
-}
 
 /// Wrapper that shows the destination screen and runs version check as a popup
 /// (dialog) on top. No dedicated version-check screen — only a small dialog.
@@ -34,10 +24,13 @@ class VersionCheckScreen extends StatefulWidget {
 }
 
 class _VersionCheckScreenState extends State<VersionCheckScreen> {
+  bool _loadingDialogDismissed = false;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _runVersionCheckPopup());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _runVersionCheckPopup());
   }
 
   Widget _buildDestination() {
@@ -92,10 +85,11 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
 
       if (!mounted) return;
       Navigator.of(context).pop(); // dismiss "Checking for updates..." dialog
+      _loadingDialogDismissed = true;
 
       if (remoteBuildNumber != null &&
           VersionService.isLocalVersionLowerThan(
-          localVersion, remoteBuildNumber)) {
+              localVersion, remoteBuildNumber)) {
         await MandatoryUpdateDialog.show(context);
         return;
       }
@@ -103,6 +97,7 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
       if (!mounted) return;
 
       final allPermissionsGranted = await PermissionsService.areAllGranted();
+      if (!mounted) return;
       if (allPermissionsGranted) {
         PermissionsService.setPermissionsCompletedOnce();
         _navigateToDestination(context, widget.args);
@@ -116,7 +111,9 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
       );
     } catch (_) {
       if (!mounted) return;
-      Navigator.of(context).pop();
+      if (!_loadingDialogDismissed) {
+        Navigator.of(context).pop();
+      }
       final allGranted = await PermissionsService.areAllGranted();
       if (!mounted) return;
       if (allGranted) {

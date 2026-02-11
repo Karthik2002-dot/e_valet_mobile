@@ -178,7 +178,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
         return AnimatedBuilder(
           animation: _highlightAnimation,
           builder: (context, child) {
-            final pulse = widget.isHighlighted ? _highlightAnimation.value : 0.0;
+            final pulse =
+                widget.isHighlighted ? _highlightAnimation.value : 0.0;
             final baseBorderColor =
                 _isDraggingOver ? AppColors.primary : _statusColor();
             final baseBackgroundColor = _isDraggingOver
@@ -218,12 +219,16 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                   12,
                 ),
                 border: Border.all(
-                  color: _isDraggingOver ? AppColors.primary : highlightBorderColor,
+                  color: _isDraggingOver
+                      ? AppColors.primary
+                      : highlightBorderColor,
                   width: _isDraggingOver ? 3 : 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: _isDraggingOver ? baseShadowColor : highlightShadowColor,
+                    color: _isDraggingOver
+                        ? baseShadowColor
+                        : highlightShadowColor,
                     spreadRadius: _isDraggingOver ? 2 : 1,
                     blurRadius: _isDraggingOver ? 8 : 4,
                     offset: const Offset(0, 2),
@@ -251,14 +256,15 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                               fit: BoxFit.fill,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  width: MediaQuery.of(context).size.width * 0.1,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.1,
                                   height:
                                       MediaQuery.of(context).size.width * 0.1,
                                   color: AppColors.grey.withOpacity(0.3),
                                   child: Icon(
                                     Icons.directions_car,
-                                    size:
-                                        MediaQuery.of(context).size.width * 0.04,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.04,
                                     color: AppColors.grey,
                                   ),
                                 );
@@ -321,12 +327,13 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                             widget.request.vehicle.parkingLocation.isNotEmpty)
                           Padding(
                             padding: EdgeInsets.only(
-                                top: MediaQuery.of(context).size.height * 0.004),
+                                top:
+                                    MediaQuery.of(context).size.height * 0.004),
                             child: Row(
                               children: [
                                 Icon(Icons.local_parking,
-                                    size:
-                                        MediaQuery.of(context).size.width * 0.018,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.018,
                                     color: AppColors.primary),
                                 const SizedBox(width: 4),
                                 Flexible(
@@ -334,7 +341,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                     labelText:
                                         widget.request.vehicle.parkingLocation,
                                     fontSize:
-                                        MediaQuery.of(context).size.width * 0.014,
+                                        MediaQuery.of(context).size.width *
+                                            0.014,
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -409,8 +417,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                               },
                               child: Icon(
                                 Icons.phone_outlined,
-                                size:
-                                    MediaQuery.of(context).size.width * 0.016,
+                                size: MediaQuery.of(context).size.width * 0.016,
                                 color: AppColors.grey,
                               ),
                             ),

@@ -37,12 +37,14 @@ class PermissionsService {
 
   static PermissionStatusType _fromStatus(PermissionStatus status) {
     if (status.isGranted) return PermissionStatusType.granted;
-    if (status.isPermanentlyDenied) return PermissionStatusType.permanentlyDenied;
+    if (status.isPermanentlyDenied)
+      return PermissionStatusType.permanentlyDenied;
     return PermissionStatusType.denied;
   }
 
   /// Returns current status for each of the three permissions.
-  static Future<Map<Permission, PermissionStatusType>> checkAllPermissions() async {
+  static Future<Map<Permission, PermissionStatusType>>
+      checkAllPermissions() async {
     final map = <Permission, PermissionStatusType>{};
     for (final p in _requiredPermissions) {
       final status = await p.status;
