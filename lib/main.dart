@@ -20,6 +20,8 @@ import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.d
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
+import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -116,7 +118,9 @@ class MyApp extends StatelessWidget {
                   messenger.clearMaterialBanners();
                 }
               },
-              child: child ?? const SizedBox.shrink(),
+              child: _AppLifecycleHandler(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         ),
@@ -156,7 +160,20 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
       } catch (_) {}
+      _checkPermissionsOnResume();
     }
+  }
+
+  Future<void> _checkPermissionsOnResume() async {
+    if (!PermissionsService.permissionsCompletedOnce) return;
+    final allGranted = await PermissionsService.areAllGranted();
+    if (allGranted) return;
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const PermissionsScreen(returnToPrevious: true),
+      ),
+    );
   }
 
   @override

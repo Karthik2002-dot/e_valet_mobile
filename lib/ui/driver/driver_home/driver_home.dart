@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
@@ -14,9 +12,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_ev
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
-import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
-import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
@@ -86,15 +82,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
+  WebSocketBloc? _webSocketBloc;
 
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
 
   // Track if we've already navigated for accepted/arrived sessions
   bool _hasNavigatedForStatus = false;
-
-  // Track if permissions have been requested
-  bool _hasRequestedPermissions = false;
 
   // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
   bool _assignedSessionsPollingStarted = false;
@@ -206,49 +200,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _routeObserver.setOnRouteChanged(_onRouteChanged);
 
-    // Request permissions when driver home screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _requestPermissions();
-    });
+    // Location and camera are requested on PermissionsScreen before reaching this screen.
 
     // Start periodic WebSocket health check
     _startWebSocketHealthCheck();
-  }
-
-  Future<void> _requestPermissions() async {
-    // Only request once per screen load
-    if (_hasRequestedPermissions) return;
-    _hasRequestedPermissions = true;
-
-    // Request Location Permission
-    LocationPermission locationPermission =
-        await LocationService.checkPermission();
-    if (locationPermission == LocationPermission.denied) {
-      locationPermission = await LocationService.requestPermission();
-    }
-
-    if (locationPermission != LocationPermission.denied &&
-        locationPermission != LocationPermission.deniedForever) {
-      // Get current location and store it
-      try {
-        final position = await LocationService.getCurrentLocation();
-        final latitude = position.latitude;
-        final longitude = position.longitude;
-        final location =
-            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-
-        await TokenStorage.saveCurrentLocation(
-          latitude: latitude,
-          longitude: longitude,
-          location: location,
-        );
-      } catch (e) {
-        // Continue even if location fetch fails
-      }
-    }
-
-    // Request Camera Permission
-    await Permission.camera.request();
   }
 
   void _onRouteChanged() {
@@ -271,20 +226,17 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   void _checkWebSocketHealth() {
     try {
-      // Use stored bloc reference instead of context.read() to avoid Provider errors
-      if (_assignedBloc == null) {
-        return;
-      }
+      if (_assignedBloc == null || _webSocketBloc == null) return;
+      if (_assignedBloc!.isClosed || _webSocketBloc!.isClosed) return;
 
-      final webSocketBloc = context.read<WebSocketBloc>();
-
-      // If WebSocket is connected but we don't have sessions, refresh
-      if (webSocketBloc.isConnected &&
+      if (_webSocketBloc!.isConnected &&
           _assignedBloc!.state is AssignedSessionsBackgroundInitial) {
-        _assignedBloc!.add(const RefreshAssignedSessions());
+        if (!_assignedBloc!.isClosed) {
+          _assignedBloc!.add(const RefreshAssignedSessions());
+        }
       }
     } catch (e) {
-      print('WebSocket health check error: $e');
+      debugPrint('WebSocket health check error: $e');
     }
   }
 
@@ -313,6 +265,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _webSocketBloc ??= context.read<WebSocketBloc>();
 
     // Subscribe to route changes
     final route = ModalRoute.of(context);
@@ -353,18 +306,24 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   @override
   void dispose() {
-    _assignedBloc?.add(const StopAssignedSessionsPolling());
-    _retrievalNotificationTapSubscription?.cancel();
     _webSocketCheckTimer?.cancel();
+    try {
+      if (_assignedBloc != null && !_assignedBloc!.isClosed) {
+        _assignedBloc!.add(const StopAssignedSessionsPolling());
+      }
+    } catch (_) {
+      // Bloc may already be closed during teardown
+    }
+    _retrievalNotificationTapSubscription?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
-    _assignedBloc = null; // Clear bloc reference
+    _assignedBloc = null;
+    _webSocketBloc = null;
     _assignedSessionsPollingStarted = false;
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
     _hasNavigatedForStatus = false; // Reset navigation flag
-    _hasRequestedPermissions = false; // Reset permission flag
     _pendingShowSheetWhenMenuLoaded = false;
     _didScheduleSheetRetryForRoute = false;
     _pendingShowSheetWhenRouteCurrent = false;

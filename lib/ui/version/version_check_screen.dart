@@ -7,6 +7,8 @@ import 'package:niloufer_valet_mobile/ui/version/mandatory_update_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
+import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
+import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 
 /// Arguments passed from splash after [SplashCompleted].
@@ -35,25 +37,7 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _runVersionCheckPopup().whenComplete(() {
-        if (!mounted) return;
-        _showSnackBarIfNeeded();
-      });
-    });
-  }
-
-  void _showSnackBarIfNeeded() {
-    final args = widget.args;
-    if (!args.isAuthenticated) return;
-    final isOperator = args.roles.any((r) => r.contains('operator'));
-    final isDriver = args.roles.any((r) => r.contains('driver'));
-    if (isOperator || isDriver) return;
-    if (!mounted) return;
-    SnackBars.showErrorSnackBar(
-      context,
-      'Your account does not have the required permissions to access this app. Please contact your administrator.',
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runVersionCheckPopup());
   }
 
   Widget _buildDestination() {
@@ -109,15 +93,71 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
       if (!mounted) return;
       Navigator.of(context).pop(); // dismiss "Checking for updates..." dialog
 
-      if (remoteBuildNumber == null) return;
-
-      if (VersionService.isLocalVersionLowerThan(
+      if (remoteBuildNumber != null &&
+          VersionService.isLocalVersionLowerThan(
           localVersion, remoteBuildNumber)) {
         await MandatoryUpdateDialog.show(context);
+        return;
       }
+
+      if (!mounted) return;
+
+      final allPermissionsGranted = await PermissionsService.areAllGranted();
+      if (allPermissionsGranted) {
+        PermissionsService.setPermissionsCompletedOnce();
+        _navigateToDestination(context, widget.args);
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => PermissionsScreen(args: widget.args),
+        ),
+      );
     } catch (_) {
-      if (mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      final allGranted = await PermissionsService.areAllGranted();
+      if (!mounted) return;
+      if (allGranted) {
+        PermissionsService.setPermissionsCompletedOnce();
+        _navigateToDestination(context, widget.args);
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => PermissionsScreen(args: widget.args),
+          ),
+        );
+      }
     }
+  }
+
+  void _navigateToDestination(BuildContext context, VersionCheckArgs args) {
+    if (args.isAuthenticated) {
+      final isOperator = args.roles.any((r) => r.contains('operator'));
+      final isDriver = args.roles.any((r) => r.contains('driver'));
+      if (isOperator) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const OperatorDashboardScreen(),
+          ),
+        );
+        return;
+      }
+      if (isDriver) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+        );
+        return;
+      }
+      SnackBars.showErrorSnackBar(
+        context,
+        'Your account does not have the required permissions to access this app.',
+      );
+    }
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   @override
