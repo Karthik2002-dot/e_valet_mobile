@@ -22,8 +22,10 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     SubmitPhotoRequested event,
     Emitter<PreviewCarState> emit,
   ) async {
+    debugPrint('[PreviewCarBloc] SubmitPhotoRequested received: imagePath=${event.imagePath}, parkingLocation=${event.parkingLocation}, sessionId=${event.sessionId}');
     // Guard: ignore duplicate submissions when already submitting or succeeded
     if (state is PreviewCarSubmitting || state is PreviewCarSuccess) {
+      debugPrint('[PreviewCarBloc] Ignoring duplicate: state=${state.runtimeType}');
       return;
     }
     emit(const PreviewCarSubmitting());
@@ -33,11 +35,13 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     try {
       // Compress image before upload when a photo is provided
       if (imagePathToUse != null && imagePathToUse.isNotEmpty) {
+        debugPrint('[PreviewCarBloc] Compressing image...');
         imagePathToUse =
             await ImageCompressionService.compressImage(imagePathToUse);
       }
 
       // Try online upload first
+      debugPrint('[PreviewCarBloc] Calling Park API (isReparking=${event.isReparking})...');
       if (event.isReparking) {
         final request = ReparkPhotoRequest(
           imagePath: imagePathToUse,
@@ -63,13 +67,15 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
           sessionId: event.sessionId,
         );
       }
-
+      debugPrint('[PreviewCarBloc] Park API success, emitting PreviewCarSuccess');
       emit(const PreviewCarSuccess());
     } catch (e) {
-      // If vehicle is already parked (duplicate request), treat as success
-      final msg = e is ApiException ? e.message : e.toString();
-      if (msg.contains('PARKED') && msg.contains('CHECKED_IN')) {
-        debugPrint('Vehicle already parked, treating as success');
+      debugPrint('[PreviewCarBloc] Park API error: $e');
+      // If vehicle is already parked or session already in progress, treat as success
+      final msg = (e is ApiException ? e.message : e.toString()).toUpperCase();
+      if ((msg.contains('PARKED') && msg.contains('CHECKED_IN')) ||
+          (msg.contains('ALREADY') && msg.contains('CHECKED'))) {
+        debugPrint('Park/session already in progress, treating as success');
         emit(const PreviewCarSuccess());
         return;
       }

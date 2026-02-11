@@ -1,16 +1,30 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_preview_widget.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_top_overlay.dart';
+import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
+import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
-/// Third screen in park flow: same layout as second screen (Vehicle details + Scan | Type Parking Number).
-/// - Scan tab: dark grey area with Carphoto.json for 2 seconds, then camera opens.
-/// - Type Parking Number tab: parking location form; on submit → Carphoto.json 2 sec then camera.
+/// Third screen: Vehicle details + Scan | Type Parking Number.
+/// - Scan tab: Carphoto.json 2 sec → camera in same area (no separate screen). Capture → validate → Park API → Car Success.
+/// - Type Parking Number tab: enter parking location → Submit → Park API → Car Success.
+/// Old camera/preview screens are not used in this flow.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
@@ -30,21 +44,21 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  /// 0 = Scan (Carphoto.json), 1 = Type Parking Number (form)
   int _selectedTab = 0;
-  /// true when showing Carphoto.json and 2 sec timer is running before opening camera
+  /// 0 = Lottie (2 sec), 1 = camera in same area
+  int _scanPhase = 0;
   bool _showLottieThenCamera = false;
-  String? _parkingLocationForCamera;
   Timer? _lottieTimer;
+  late CarCameraBloc _cameraBloc;
+  bool _isCapturing = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedTab = widget.cameViaTagNumber ? 1 : 0;
-    if (!widget.cameViaTagNumber) {
-      _showLottieThenCamera = true;
-      _startLottieTimer();
-    }
+    _cameraBloc = CarCameraBloc();
+    _selectedTab = 0;
+    _showLottieThenCamera = true;
+    _startLottieTimer();
   }
 
   void _startLottieTimer() {
@@ -52,51 +66,171 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     _lottieTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       _lottieTimer = null;
-      _openCamera(_parkingLocationForCamera);
+      setState(() {
+        _scanPhase = 1;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _cameraBloc.add(const InitializeCameraRequested());
+      });
     });
   }
 
-  void _openCamera(String? initialParkingLocation) {
+  void _onSelectTypeParkingNumberTab() {
+    _lottieTimer?.cancel();
+    setState(() {
+      _showLottieThenCamera = false;
+      _selectedTab = 1;
+    });
+  }
+
+  void _onSelectScanTab() {
+    if (_showLottieThenCamera) return;
+    setState(() {
+      _selectedTab = 0;
+      _showLottieThenCamera = true;
+      _scanPhase = 0;
+    });
+    _startLottieTimer();
+  }
+
+  /// [blocContext] must be a context that has PreviewCarBloc as ancestor (e.g. from Builder/BlocBuilder under the provider).
+  Future<void> _submitParkApi(
+    BuildContext blocContext, {
+    String? imagePath,
+    String? parkingLocation,
+  }) async {
+    debugPrint('[CarPhotoIntro] _submitParkApi called: imagePath=$imagePath, parkingLocation=$parkingLocation');
     if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CarCameraScreen(
-          sessionId: null,
-          preventBackNavigation: true,
-          initialParkingLocation: initialParkingLocation,
-        ),
-      ),
-    ).then((_) {
+    try {
+      debugPrint('[CarPhotoIntro] Getting sessionId...');
+      final sessionId = await TokenStorage.getSessionId();
+      debugPrint('[CarPhotoIntro] sessionId=${sessionId ?? "null"}');
       if (!mounted) return;
-      Navigator.of(context).pop();
-      widget.onReturnFromCamera?.call();
-    });
-  }
-
-  void _onSubmitParkingLocation() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final location = _parkingLocationController.text.trim();
-      if (location.isEmpty) {
+      if (sessionId == null || sessionId.isEmpty) {
+        debugPrint('[CarPhotoIntro] No sessionId - showing error');
         SnackBars.showErrorSnackBar(
-          context,
-          TextConstants.pleaseEnterParkingLocation,
+          blocContext,
+          'No active session. Please scan or enter badge number first.',
         );
         return;
       }
-      setState(() {
-        _parkingLocationForCamera = location;
-        _showLottieThenCamera = true;
-        _selectedTab = 0; // switch to Scan tab to show Carphoto.json
-      });
-      _startLottieTimer();
+      debugPrint('[CarPhotoIntro] Getting coordinates...');
+      final coordinates = await LocationService.getCurrentCoordinates();
+      debugPrint('[CarPhotoIntro] coordinates=$coordinates');
+      if (!mounted) return;
+      debugPrint('[CarPhotoIntro] Dispatching SubmitPhotoRequested to PreviewCarBloc');
+      blocContext.read<PreviewCarBloc>().add(
+            SubmitPhotoRequested(
+              imagePath: imagePath,
+              sessionId: sessionId,
+              isReparking: false,
+              latitude: coordinates['latitude']!,
+              longitude: coordinates['longitude']!,
+              accuracy: coordinates['accuracy'],
+              parkingLocation: parkingLocation,
+            ),
+          );
+      debugPrint('[CarPhotoIntro] SubmitPhotoRequested dispatched');
+    } on ApiException catch (e) {
+      debugPrint('[CarPhotoIntro] ApiException: ${e.message} (${e.code})');
+      if (mounted) SnackBars.showErrorSnackBar(blocContext, e.message);
+    } catch (e, st) {
+      debugPrint('[CarPhotoIntro] Exception in _submitParkApi: $e');
+      debugPrint('[CarPhotoIntro] StackTrace: $st');
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          blocContext,
+          e.toString().contains('location') || e.toString().contains('Location')
+              ? 'Please enable location and try again.'
+              : 'Failed to submit. Please try again.',
+        );
+      }
     }
+  }
+
+  void _onCapturePhoto(BuildContext ctx) async {
+    final state = ctx.read<CarCameraBloc>().state;
+    if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
+      SnackBars.showErrorSnackBar(ctx, TextConstants.cameraNotReady);
+      return;
+    }
+    if (_isCapturing) return;
+    try {
+      _isCapturing = true;
+      final cameraController = state is CarCameraInitialized
+          ? state.cameraController
+          : (state as CarCameraFlashToggled).cameraController;
+      final isFlashOn = state is CarCameraInitialized
+          ? state.isFlashOn
+          : (state as CarCameraFlashToggled).isFlashOn;
+      if (!cameraController.value.isInitialized) {
+        SnackBars.showErrorSnackBar(ctx, TextConstants.cameraNotReady);
+        return;
+      }
+      await cameraController.setFlashMode(
+        isFlashOn ? FlashMode.always : FlashMode.off,
+      );
+      final image = await cameraController.takePicture();
+      if (cameraController.value.isInitialized) {
+        await cameraController.setFlashMode(
+          isFlashOn ? FlashMode.torch : FlashMode.off,
+        );
+      }
+      ctx.read<CarCameraBloc>().add(const ValidationReset());
+      if (mounted) {
+        ctx.read<CarCameraBloc>().add(ValidateImageRequested(image.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBars.showErrorSnackBar(
+          ctx,
+          '${TextConstants.errorCapturingPhoto}: $e',
+        );
+      }
+    } finally {
+      if (mounted) _isCapturing = false;
+    }
+  }
+
+  /// [blocContext] must be from a widget under BlocProvider<PreviewCarBloc> (e.g. the BlocBuilder's context).
+  void _onSubmitParkingLocation(BuildContext blocContext) {
+    debugPrint('[CarPhotoIntro] _onSubmitParkingLocation called');
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      debugPrint('[CarPhotoIntro] Form validation failed');
+      return;
+    }
+    final location = _parkingLocationController.text.trim();
+    if (location.isEmpty) {
+      debugPrint('[CarPhotoIntro] Parking location empty');
+      SnackBars.showErrorSnackBar(
+        blocContext,
+        TextConstants.pleaseEnterParkingLocation,
+      );
+      return;
+    }
+    debugPrint('[CarPhotoIntro] Submitting parking location: $location');
+    _lastSubmittedImagePath = null; // location-only submit
+    _submitParkApi(blocContext, parkingLocation: location);
+  }
+
+  void _navigateToCarSuccess({String? imagePath, bool isLocationBased = false}) {
+    if (!mounted) return;
+    widget.onReturnFromCamera?.call();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CarSuccessScreen(
+          imagePath: isLocationBased ? null : imagePath,
+          isLocationBasedParking: isLocationBased,
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _lottieTimer?.cancel();
     _parkingLocationController.dispose();
+    _cameraBloc.close();
     super.dispose();
   }
 
@@ -105,36 +239,77 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     final w = MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.lightBeigeBackground,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Same header as second screen: Vehicle details
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: h * 0.018),
-              color: AppColors.white,
-              child: Center(
-                child: TextComponent(
-                  labelText: TextConstants.vehicleDetailsTitle,
-                  fontSize: w * 0.055,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-              ),
+    return BlocProvider<PreviewCarBloc>(
+      create: (_) => PreviewCarBloc(),
+      child: BlocProvider<CarCameraBloc>.value(
+        value: _cameraBloc,
+        child: BlocListener<PreviewCarBloc, PreviewCarState>(
+          listener: (context, state) {
+            debugPrint('[CarPhotoIntro] PreviewCarBloc state: ${state.runtimeType}');
+            if (state is PreviewCarSuccess) {
+              debugPrint('[CarPhotoIntro] PreviewCarSuccess - navigating to CarSuccessScreen');
+              _navigateToCarSuccess(
+                imagePath: _lastSubmittedImagePath,
+                isLocationBased: _lastSubmittedImagePath == null,
+              );
+            } else if (state is PreviewCarError) {
+              debugPrint('[CarPhotoIntro] PreviewCarError: ${state.message}');
+              SnackBars.showErrorSnackBar(context, state.message);
+            }
+          },
+          child: BlocListener<CarCameraBloc, CarCameraState>(
+            listener: (context, state) {
+              if (state is CarCameraValidationSuccess) {
+                _lastSubmittedImagePath = state.imagePath;
+                _submitParkApi(context, imagePath: state.imagePath);
+              } else if (state is CarCameraValidationError) {
+                SnackBars.showErrorSnackBar(context, state.message);
+                context.read<CarCameraBloc>().add(const ValidationReset());
+              }
+            },
+            child: Builder(
+              builder: (bodyContext) {
+                return Scaffold(
+                  backgroundColor: AppColors.lightBeigeBackground,
+                  body: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader(h, w),
+                        SizedBox(height: h * 0.016),
+                        _buildTabs(w),
+                        SizedBox(height: h * 0.018),
+                        Expanded(
+                          child: _selectedTab == 0
+                              ? _buildScanTabContent(w, h)
+                              : _buildTypeParkingNumberContent(w, h, bodyContext),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-            SizedBox(height: h * 0.016),
-            // Tabs: Scan | Type Parking Number (same as second screen)
-            _buildTabs(w),
-            SizedBox(height: h * 0.018),
-            Expanded(
-              child: _selectedTab == 0
-                  ? _buildScanTabContent(w, h)
-                  : _buildTypeParkingNumberContent(w, h),
-            ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Tracks last submitted image path so we can pass to CarSuccessScreen (null = location-only).
+  String? _lastSubmittedImagePath;
+
+  Widget _buildHeader(double h, double w) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: h * 0.018),
+      color: AppColors.white,
+      child: Center(
+        child: TextComponent(
+          labelText: TextConstants.vehicleDetailsTitle,
+          fontSize: w * 0.055,
+          fontWeight: FontWeight.w600,
+          color: AppColors.black,
         ),
       ),
     );
@@ -151,9 +326,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               icon: Icons.qr_code_scanner,
               label: TextConstants.scanTabLabel,
               isActive: isScan,
-              onTap: _showLottieThenCamera
-                  ? null
-                  : () => setState(() => _selectedTab = 0),
+              onTap: _showLottieThenCamera ? null : _onSelectScanTab,
             ),
           ),
           SizedBox(width: w * 0.025),
@@ -163,7 +336,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               label: TextConstants.typeParkingNumberTabLabel,
               isActive: !isScan,
               onTap: _showLottieThenCamera
-                  ? null
+                  ? _onSelectTypeParkingNumberTab
                   : () => setState(() => _selectedTab = 1),
             ),
           ),
@@ -172,9 +345,60 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     );
   }
 
-  /// Scan tab: dark grey area, white-outline frame, Carphoto.json, orange circle at bottom (exact like image)
   Widget _buildScanTabContent(double w, double h) {
     final padding = w * 0.02;
+    if (_scanPhase == 0) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: padding),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFF3A3A3A),
+            borderRadius: BorderRadius.circular(w * 0.04),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(w * 0.04),
+                      border: Border.all(color: AppColors.white, width: 2.5),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Lottie.asset(
+                      'assets/jsons/Carphoto.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: h * 0.018,
+                child: Container(
+                  width: w * 0.2,
+                  height: w * 0.2,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.actionButtonYellow,
+                    border: Border.all(color: AppColors.white, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Phase 1: camera in same area (same layout as old camera: preview + flash + capture)
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: padding),
       child: Container(
@@ -183,50 +407,88 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           color: const Color(0xFF3A3A3A),
           borderRadius: BorderRadius.circular(w * 0.04),
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
+        clipBehavior: Clip.antiAlias,
+        child: BlocBuilder<CarCameraBloc, CarCameraState>(
+          builder: (context, state) {
+            final isReady = state is CarCameraInitialized ||
+                state is CarCameraFlashToggled ||
+                state is CarCameraValidationError;
+            final controller = state is CarCameraInitialized
+                ? state.cameraController
+                : state is CarCameraFlashToggled
+                    ? state.cameraController
+                    : state is CarCameraValidationError
+                        ? state.cameraController
+                        : null;
+            final isFlashOn = state is CarCameraInitialized
+                ? state.isFlashOn
+                : state is CarCameraFlashToggled
+                    ? state.isFlashOn
+                    : state is CarCameraValidationError
+                        ? state.isFlashOn
+                        : false;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.white, width: 2.5),
+                      borderRadius: BorderRadius.circular(w * 0.04),
+                    ),
+                    child: CameraPreviewWidget(
+                      isCameraInitialized: isReady && controller != null,
+                      cameraController: controller,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: CameraTopOverlay(
+                    isFlashOn: isFlashOn,
+                    onFlashToggle: () =>
+                        context.read<CarCameraBloc>().add(const ToggleFlashRequested()),
+                    topOffset: 0,
+                  ),
+                ),
+                Positioned(
+                  bottom: h * 0.018,
+                  child: Material(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(w * 0.04),
-                    border: Border.all(color: AppColors.white, width: 2.5),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Lottie.asset(
-                    'assets/jsons/Carphoto.json',
-                    fit: BoxFit.contain,
-                    repeat: true,
+                    child: InkWell(
+                      onTap: () {
+                        if (_isCapturing) return;
+                        final s = context.read<CarCameraBloc>().state;
+                        if (s is CarCameraInitialized ||
+                            s is CarCameraFlashToggled ||
+                            s is CarCameraValidationError) {
+                          _onCapturePhoto(context);
+                        }
+                      },
+                      customBorder: const CircleBorder(),
+                      child: Container(
+                        width: w * 0.2,
+                        height: w * 0.2,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.actionButtonYellow,
+                          border: Border.all(color: AppColors.white, width: 2),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              bottom: h * 0.018,
-              child: Container(
-                width: w * 0.2,
-                height: w * 0.2,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.actionButtonYellow,
-                  border: Border.all(color: AppColors.white, width: 2),
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  /// Type Parking Number tab: same form as design (Enter the Parking Location to Proceed, etc.)
-  Widget _buildTypeParkingNumberContent(double w, double h) {
+  Widget _buildTypeParkingNumberContent(double w, double h, BuildContext blocContext) {
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: w * 0.04),
       child: Column(
@@ -272,7 +534,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     controller: _parkingLocationController,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.done,
-                    onSubmitEditing: _onSubmitParkingLocation,
+                    onSubmitEditing: () => _onSubmitParkingLocation(blocContext),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return TextConstants.pleaseEnterParkingLocation;
@@ -286,38 +548,52 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             ),
           ),
           SizedBox(height: h * 0.025),
-          SizedBox(
-            width: double.infinity,
-            height: h * 0.062,
-            child: ElevatedButton(
-              onPressed: _onSubmitParkingLocation,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.actionButtonYellow,
-                foregroundColor: AppColors.white,
-                disabledBackgroundColor: AppColors.greyLight,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(w * 0.025),
+          BlocBuilder<PreviewCarBloc, PreviewCarState>(
+            builder: (context, state) {
+              final isLoading = state is PreviewCarSubmitting;
+              return SizedBox(
+                width: double.infinity,
+                height: h * 0.062,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : () => _onSubmitParkingLocation(blocContext),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.actionButtonYellow,
+                    foregroundColor: AppColors.white,
+                    disabledBackgroundColor: AppColors.greyLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(w * 0.025),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextComponent(
+                              labelText: TextConstants.submitButton,
+                              fontSize: w * 0.045,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                            ),
+                            SizedBox(width: w * 0.02),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: AppColors.white,
+                              size: w * 0.05,
+                            ),
+                          ],
+                        ),
                 ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextComponent(
-                    labelText: TextConstants.submitButton,
-                    fontSize: w * 0.045,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
-                  ),
-                  SizedBox(width: w * 0.02),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.white,
-                    size: w * 0.05,
-                  ),
-                ],
-              ),
-            ),
+              );
+            },
           ),
           SizedBox(height: h * 0.02),
         ],
