@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_event.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/version/version_check_args.dart';
 import 'package:niloufer_valet_mobile/ui/version/version_check_screen.dart';
 
 class SplashScreen extends StatefulWidget {

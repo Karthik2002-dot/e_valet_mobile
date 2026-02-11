@@ -61,8 +61,7 @@ class FirebaseMessagingService implements NotificationService {
       // Initialize TTS for speaking notification body aloud (loud, hearable)
       await _textToSpeechService.initialize();
 
-      // Request notification permissions
-      await requestPermission();
+      // Notification permission is requested on PermissionsScreen (before main app).
 
       // Get FCM token (but don't register yet - wait for login)
       final token = await getToken();
