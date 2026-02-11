@@ -367,4 +367,10 @@ class TextConstants {
       'Failed to update status: $error';
 
   static const String noInternetConnection = 'No internet connection';
+
+  // Mandatory Update Dialog
+  static const String mandatoryUpdateDialogTitle = 'New version available!';
+  static const String mandatoryUpdateDialogSubtitle =
+      'Please update to continue using the app.';
+  static const String mandatoryUpdateDialogUpdateNow = 'Update Now';
 }
