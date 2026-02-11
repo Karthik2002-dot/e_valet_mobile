@@ -12,6 +12,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
   final bool isLoading;
+  final Set<String> highlightedRequestIds;
 
   const DashboardThreeColumnLayout({
     super.key,
@@ -19,6 +20,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
     required this.availableDrivers,
     required this.onAssignmentComplete,
     this.isLoading = false,
+    this.highlightedRequestIds = const <String>{},
   });
 
   @override
@@ -52,6 +54,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   onAssignmentComplete: onAssignmentComplete,
                   isLoading: isLoading,
                   isLeftColumn: true,
+                  highlightedRequestIds: highlightedRequestIds,
                 ),
               ),
               SizedBox(width: MediaQuery.of(context).size.width * 0.02),
@@ -63,6 +66,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   onAssignmentComplete: onAssignmentComplete,
                   isLoading: isLoading,
                   isLeftColumn: false,
+                  highlightedRequestIds: highlightedRequestIds,
                 ),
               ),
             ],
