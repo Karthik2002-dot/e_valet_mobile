@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -7,7 +8,6 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Arguments passed from splash after [SplashCompleted].
 class VersionCheckArgs {
@@ -36,8 +36,10 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _runVersionCheckPopup();
-      _showSnackBarIfNeeded();
+      _runVersionCheckPopup().whenComplete(() {
+        if (!mounted) return;
+        _showSnackBarIfNeeded();
+      });
     });
   }
 
@@ -71,7 +73,7 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => PopScope(
+      builder: (_) => PopScope(
         canPop: false,
         child: AlertDialog(
           content: Row(
@@ -87,12 +89,10 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
               ),
               const SizedBox(width: 20),
               Expanded(
-                child: Text(
-                  'Checking for updates...',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: AppColors.black,
-                  ),
+                child: TextComponent(
+                  labelText: 'Checking for updates...',
+                  fontSize: 16,
+                  color: AppColors.black,
                 ),
               ),
             ],
@@ -111,7 +111,8 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
 
       if (remoteBuildNumber == null) return;
 
-      if (VersionService.isLocalVersionLowerThan(localVersion, remoteBuildNumber)) {
+      if (VersionService.isLocalVersionLowerThan(
+          localVersion, remoteBuildNumber)) {
         await MandatoryUpdateDialog.show(context);
       }
     } catch (_) {

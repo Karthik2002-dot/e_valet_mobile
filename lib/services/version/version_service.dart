@@ -1,8 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:niloufer_valet_mobile/api/core/app_version_api_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
 /// Service for mandatory app version check.
-/// - Calls API at most once per day (first app open of the day).
+/// - Calls API at most once per day (first app open of the day) via [AppVersionApiService].
 /// - Stores lastCheckedDate (yyyy-MM-dd) and remoteBuildNumber in Hive.
 /// - Offline/errors: returns null so app can skip check gracefully.
 class VersionService {
@@ -11,9 +12,6 @@ class VersionService {
   static const String _boxName = 'version_prefs';
   static const String _lastCheckedDateKey = 'lastCheckedDate';
   static const String _remoteBuildNumberKey = 'remoteBuildNumber';
-
-  static const String _versionApiUrl =
-      'https://e-valet-service-aaw8.onrender.com/api/v1/app-version/build-number';
 
   static late Box _box;
 
@@ -41,22 +39,16 @@ class VersionService {
         return _box.get(_remoteBuildNumberKey) as String?;
       }
 
-      final dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
-          headers: {'Accept': 'application/json'},
-        ),
-      );
-      final response = await dio.get<Map<String, dynamic>>(_versionApiUrl);
-      final data = response.data;
-      final buildNumber = data?['buildNumber'] as String?;
+      final response = await AppVersionApiService.getBuildNumber();
+      final buildNumber = response.buildNumber;
 
-      if (buildNumber != null && buildNumber.isNotEmpty) {
+      if (buildNumber.isNotEmpty) {
         await _box.put(_lastCheckedDateKey, today);
         await _box.put(_remoteBuildNumberKey, buildNumber);
         return buildNumber;
       }
+      return _box.get(_remoteBuildNumberKey) as String?;
+    } on ApiException {
       return _box.get(_remoteBuildNumberKey) as String?;
     } catch (_) {
       return _box.get(_remoteBuildNumberKey) as String?;
@@ -78,9 +70,6 @@ class VersionService {
   }
 
   static List<int> _parseVersion(String v) {
-    return v
-        .split('.')
-        .map((e) => int.tryParse(e.trim()) ?? 0)
-        .toList();
+    return v.split('.').map((e) => int.tryParse(e.trim()) ?? 0).toList();
   }
 }
