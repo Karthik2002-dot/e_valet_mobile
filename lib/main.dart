@@ -9,6 +9,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/version/version_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
@@ -19,6 +20,8 @@ import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.d
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
+import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +41,7 @@ void main() async {
   }
   await OfflineParkingService.init();
   await TokenStorage.init();
+  await VersionService.init();
 
   // Initialize Background Sync
   await BackgroundSyncService.init();
@@ -114,7 +118,9 @@ class MyApp extends StatelessWidget {
                   messenger.clearMaterialBanners();
                 }
               },
-              child: child ?? const SizedBox.shrink(),
+              child: _AppLifecycleHandler(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         ),
@@ -136,6 +142,8 @@ class _AppLifecycleHandler extends StatefulWidget {
 
 class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
     with WidgetsBindingObserver {
+  bool _isShowingPermissionsScreen = false;
+
   @override
   void initState() {
     super.initState();
@@ -154,7 +162,28 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
       } catch (_) {}
+      _checkPermissionsOnResume();
     }
+  }
+
+  Future<void> _checkPermissionsOnResume() async {
+    if (!PermissionsService.permissionsCompletedOnce) return;
+    if (_isShowingPermissionsScreen) return;
+    final allGranted = await PermissionsService.areAllGranted();
+    if (allGranted) return;
+    if (!mounted) return;
+    _isShowingPermissionsScreen = true;
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+        builder: (_) => const PermissionsScreen(returnToPrevious: true),
+      ),
+    )
+        .then((_) {
+      if (mounted) {
+        setState(() => _isShowingPermissionsScreen = false);
+      }
+    });
   }
 
   @override

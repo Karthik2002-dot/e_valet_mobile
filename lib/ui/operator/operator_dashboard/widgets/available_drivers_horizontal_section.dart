@@ -31,10 +31,12 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
           fontSize: MediaQuery.of(context).size.height * 0.015,
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.05,
-          child: isLoading ? _buildSkeleton(context) : _buildContent(context),
-        ),
+        isLoading
+            ? SizedBox(
+                height: MediaQuery.of(context).size.height * 0.05,
+                child: _buildSkeleton(context),
+              )
+            : _buildContent(context),
       ],
     );
   }
@@ -124,7 +126,11 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 40, color: AppColors.grey),
+            Icon(
+              Icons.check_circle_outline,
+              size: 40,
+              color: AppColors.grey,
+            ),
             const SizedBox(height: 8),
             TextComponent(
               labelText: TextConstants.noAvailableDrivers,
@@ -136,28 +142,27 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: freeDrivers.length,
-      itemBuilder: (context, index) {
-        final driver = freeDrivers[index];
-        final isRecommended = driver.name == recommendedDriverName;
-        return Padding(
-          padding: EdgeInsets.only(
-            right: MediaQuery.of(context).size.width * 0.015,
-          ),
-          child: IntrinsicWidth(
-            child: Center(
-              child: AvailableDriversCard(
-                driver: driver,
-                isRecommended: isRecommended,
-                recommendedCardNumber: recommendedCardNumber,
-                compact: true,
+    return IntrinsicHeight(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < freeDrivers.length; i++) ...[
+              if (i > 0) SizedBox(width: MediaQuery.of(context).size.width * 0.015),
+              IntrinsicWidth(
+                child: AvailableDriversCard(
+                  driver: freeDrivers[i],
+                  isRecommended: freeDrivers[i].name == recommendedDriverName,
+                  recommendedCardNumber: recommendedCardNumber,
+                  compact: true,
+                ),
               ),
-            ),
-          ),
-        );
-      },
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

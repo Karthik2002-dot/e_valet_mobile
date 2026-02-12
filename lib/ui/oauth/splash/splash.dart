@@ -5,11 +5,9 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_event.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/version/version_check_args.dart';
+import 'package:niloufer_valet_mobile/ui/version/version_check_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -44,41 +42,17 @@ class _SplashScreenState extends State<SplashScreen>
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashCompleted) {
-          if (state.isAuthenticated) {
-            // Route based on roles
-            final isOperator = state.roles.any((r) => r.contains('operator'));
-            final isDriver = state.roles.any((r) => r.contains('driver'));
-
-            // Prefer operator when both roles exist
-            if (isOperator) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const OperatorDashboardScreen()),
-              );
-            } else if (isDriver) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
-              );
-            } else {
-              // Unknown/unsupported role — show error and send to login
-              SnackBars.showErrorSnackBar(
-                context,
-                'Your account does not have the required permissions to access this app. Please contact your administrator.',
-              );
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            }
-          } else {
-            // User is not logged in, navigate to login
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-            );
-          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VersionCheckScreen(
+                args: VersionCheckArgs(
+                  isAuthenticated: state.isAuthenticated,
+                  roles: state.roles,
+                ),
+              ),
+            ),
+          );
         }
       },
       child: BlocBuilder<SplashBloc, SplashState>(

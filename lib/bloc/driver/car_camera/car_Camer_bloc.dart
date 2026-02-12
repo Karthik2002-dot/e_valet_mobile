@@ -66,9 +66,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
       // Emit initial state to show loading
       emit(const CarCameraInitial());
 
-      // Request camera permission first
-      final status = await Permission.camera.request();
-
+      // Camera permission is requested on PermissionsScreen; only check here.
+      final status = await Permission.camera.status;
       if (status == PermissionStatus.permanentlyDenied) {
         emit(const CarCameraInitializationError(
           message:
@@ -76,9 +75,11 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         ));
         _isInitializing = false;
         return;
-      } else if (status != PermissionStatus.granted) {
+      }
+      if (status != PermissionStatus.granted) {
         emit(const CarCameraInitializationError(
-          message: 'Camera permission is required to use this feature',
+          message:
+              'Camera permission is required. Please enable it in app settings.',
         ));
         _isInitializing = false;
         return;

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/compact_driver_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/driver_card_content.dart';
-import 'package:niloufer_valet_mobile/utils/driver_utils.dart';
 
 class AvailableDriversCard extends StatelessWidget {
   final AvailableDriver driver;
@@ -51,7 +49,11 @@ class AvailableDriversCard extends StatelessWidget {
                   ),
                 ],
               ),
-              child: _CompactDriverContent(driver: driver),
+              child: CompactDriverContent(
+                driver: driver,
+                isRecommended: isRecommended,
+                recommendedCardNumber: recommendedCardNumber,
+              ),
             ),
           ),
         ),
@@ -66,7 +68,11 @@ class AvailableDriversCard extends StatelessWidget {
               color: AppColors.grey.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: _CompactDriverContent(driver: driver),
+            child: CompactDriverContent(
+              driver: driver,
+              isRecommended: isRecommended,
+              recommendedCardNumber: recommendedCardNumber,
+            ),
           ),
         ),
         child: Container(
@@ -77,11 +83,16 @@ class AvailableDriversCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
+            border: isRecommended
+                ? Border.all(color: AppColors.primary, width: 1.5)
+                : null,
             boxShadow: [
               BoxShadow(
-                color: AppColors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 4,
+                color: isRecommended
+                    ? AppColors.primary.withOpacity(0.2)
+                    : AppColors.grey.withOpacity(0.1),
+                spreadRadius: isRecommended ? 1.5 : 1,
+                blurRadius: isRecommended ? 6 : 4,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -90,7 +101,11 @@ class AvailableDriversCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _CompactDriverContent(driver: driver),
+              CompactDriverContent(
+                driver: driver,
+                isRecommended: isRecommended,
+                recommendedCardNumber: recommendedCardNumber,
+              ),
             ],
           ),
         ),
@@ -172,56 +187,6 @@ class AvailableDriversCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Compact content: name and phone only, each max 1 line. Card width fits content.
-class _CompactDriverContent extends StatelessWidget {
-  final AvailableDriver driver;
-
-  const _CompactDriverContent({required this.driver});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 14,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
-          child: TextComponent(
-            labelText: DriverUtils.getInitials(driver.name),
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        SizedBox(width: MediaQuery.of(context).size.width * 0.015),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextComponent(
-              labelText: driver.name,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.002),
-            TextComponent(
-              labelText: driver.phone,
-              fontSize: 12,
-              color: AppColors.grey,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
