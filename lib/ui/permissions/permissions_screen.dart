@@ -29,10 +29,17 @@ class PermissionsScreen extends StatefulWidget {
   State<PermissionsScreen> createState() => _PermissionsScreenState();
 }
 
+const List<Permission> _requiredPermissions = [
+  Permission.location,
+  Permission.camera,
+  Permission.notification,
+];
+
 class _PermissionsScreenState extends State<PermissionsScreen>
     with WidgetsBindingObserver {
   Map<Permission, PermissionStatusType> _statuses = {};
   bool _loading = true;
+  bool _autoRequestDone = false;
 
   @override
   void initState() {
@@ -62,6 +69,29 @@ class _PermissionsScreenState extends State<PermissionsScreen>
         _statuses = map;
         _loading = false;
       });
+      // After first load, auto-request any permission that is not granted (once per visit)
+      if (!_autoRequestDone &&
+          map.values.any((s) => s != PermissionStatusType.granted)) {
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _requestAllNotGranted());
+      }
+    }
+  }
+
+  /// Request each required permission that is not yet granted; update UI after each.
+  Future<void> _requestAllNotGranted() async {
+    if (!mounted) return;
+    setState(() => _autoRequestDone = true);
+
+    for (final permission in _requiredPermissions) {
+      if (!mounted) return;
+      final current = _statuses[permission];
+      if (current == PermissionStatusType.granted) continue;
+
+      final status = await PermissionsService.request(permission);
+      if (!mounted) return;
+      setState(() => _statuses[permission] = status);
+      // Do not show bottom sheet during auto-request; only when user taps the row (see _onPermissionTap).
     }
   }
 
@@ -69,6 +99,22 @@ class _PermissionsScreenState extends State<PermissionsScreen>
       !_loading &&
       _statuses.isNotEmpty &&
       _statuses.values.every((s) => s == PermissionStatusType.granted);
+
+  /// First required permission that is not granted (in order: Location, Camera, Notifications).
+  Permission? get _firstMissingPermission {
+    if (_loading || _statuses.isEmpty) return null;
+    for (final p in _requiredPermissions) {
+      if (_statuses[p] != PermissionStatusType.granted) return p;
+    }
+    return null;
+  }
+
+  static String _permissionButtonLabel(Permission permission) {
+    if (permission == Permission.location) return 'Allow Location';
+    if (permission == Permission.camera) return 'Allow Camera';
+    if (permission == Permission.notification) return 'Allow Notifications';
+    return 'Allow permission';
+  }
 
   Future<void> _onPermissionTap(Permission permission) async {
     final status = await PermissionsService.request(permission);
@@ -96,7 +142,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
             children: [
               TextComponent(
                 labelText:
-                    'To grant permission, go to your Device settings » Permissions » Allow',
+                    'You denied this permission multiple times. To enable it, open your device settings and turn the permission on for this app.',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
@@ -265,7 +311,16 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                   width: double.infinity,
                   height: 52,
                   child: FilledButton(
-                    onPressed: _allGranted ? _onContinue : null,
+                    onPressed: _loading
+                        ? null
+                        : (_allGranted
+                            ? _onContinue
+                            : () {
+                                final missing = _firstMissingPermission;
+                                if (missing != null) {
+                                  _onPermissionTap(missing);
+                                }
+                              }),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.qrSuccessColor,
                       disabledBackgroundColor: AppColors.greyLight,
@@ -275,7 +330,11 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                       ),
                     ),
                     child: TextComponent(
-                      labelText: 'Continue',
+                      labelText: _allGranted
+                          ? 'Continue'
+                          : (_firstMissingPermission != null
+                              ? _permissionButtonLabel(_firstMissingPermission!)
+                              : 'Continue'),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -307,7 +366,8 @@ class _PermissionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isGranted = status == PermissionStatusType.granted;
+    final isPermanentlyDenied =
+        status == PermissionStatusType.permanentlyDenied;
     return Material(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
@@ -342,7 +402,7 @@ class _PermissionRow extends StatelessWidget {
                           color: AppColors.black,
                         ),
                         const SizedBox(width: 8),
-                        _StatusChip(allowed: isGranted),
+                        _StatusChip(status: status),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -352,6 +412,16 @@ class _PermissionRow extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                       color: AppColors.mutedText,
                     ),
+                    if (isPermanentlyDenied) ...[
+                      const SizedBox(height: 6),
+                      TextComponent(
+                        labelText:
+                            'Denied multiple times. Tap to open Settings.',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.mutedText,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -364,23 +434,41 @@ class _PermissionRow extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  final bool allowed;
+  final PermissionStatusType status;
 
-  const _StatusChip({required this.allowed});
+  const _StatusChip({required this.status});
 
   @override
   Widget build(BuildContext context) {
+    final allowed = status == PermissionStatusType.granted;
+    final permanentlyDenied = status == PermissionStatusType.permanentlyDenied;
+    String label;
+    Color bgColor;
+    Color textColor;
+    if (allowed) {
+      label = 'Allowed';
+      bgColor = AppColors.qrSuccessBg;
+      textColor = AppColors.qrSuccessColor;
+    } else if (permanentlyDenied) {
+      label = 'Open Settings';
+      bgColor = AppColors.primarySoft;
+      textColor = AppColors.primaryDark;
+    } else {
+      label = 'Required';
+      bgColor = AppColors.primarySoft;
+      textColor = AppColors.primaryDark;
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: allowed ? AppColors.qrSuccessBg : AppColors.primarySoft,
+        color: bgColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextComponent(
-        labelText: allowed ? 'Allowed' : 'Required',
+        labelText: label,
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: allowed ? AppColors.qrSuccessColor : AppColors.primaryDark,
+        color: textColor,
       ),
     );
   }
