@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_slots/operator_slots_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_drivers_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/operator_car_logs_screen.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_parked_car/operator_parked_car_screen.dart';
 
 class OperatorScreenRouter {
   static Widget getScreen(
@@ -16,7 +16,7 @@ class OperatorScreenRouter {
       case 0:
         return dashboardContent;
       case 1:
-        return OperatorSlotsScreen(
+        return OperatorParkedCarScreen(
           key: ValueKey(refreshKey),
           onRefreshReady: onSlotsRefreshReady,
           onNavigateToTab: onNavigateToTab,

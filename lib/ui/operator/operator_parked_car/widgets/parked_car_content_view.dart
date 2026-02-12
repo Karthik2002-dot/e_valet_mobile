@@ -5,14 +5,14 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rac
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/parked_car_card.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_parked_car/widgets/parked_car_card.dart';
 
-class SlotsContentView extends StatefulWidget {
+class ParkedCarContentView extends StatefulWidget {
   final DigitalKeyRackResponse digitalKeyRack;
   final String searchQuery;
   final Function(int cardNumber, String sessionId)? onManualRequest;
 
-  const SlotsContentView({
+  const ParkedCarContentView({
     super.key,
     required this.digitalKeyRack,
     required this.searchQuery,
@@ -20,10 +20,10 @@ class SlotsContentView extends StatefulWidget {
   });
 
   @override
-  State<SlotsContentView> createState() => _SlotsContentViewState();
+  State<ParkedCarContentView> createState() => _ParkedCarContentViewState();
 }
 
-class _SlotsContentViewState extends State<SlotsContentView> {
+class _ParkedCarContentViewState extends State<ParkedCarContentView> {
   List<KeyRackItem> _getFilteredAndSortedItems() {
     final items = widget.digitalKeyRack.keyRack;
 
@@ -69,25 +69,33 @@ class _SlotsContentViewState extends State<SlotsContentView> {
             ),
             SizedBox(height: screenHeight * 0.015),
           ],
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: screenWidth * 0.02,
-              mainAxisSpacing: screenHeight * 0.02,
-              childAspectRatio: 0.65,
-            ),
-            itemCount: filteredItems.length,
-            itemBuilder: (context, index) {
-              final item = filteredItems[index];
-              final isMatch = widget.searchQuery.isNotEmpty &&
-                  item.cardNumber.toString().contains(widget.searchQuery);
-
-              return ParkedCarCard(
-                item: item,
-                onManualRequest: widget.onManualRequest,
-                isHighlighted: isMatch,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const crossAxisCount = 4;
+              final spacing = screenWidth * 0.02;
+              final runSpacing = screenHeight * 0.02;
+              final itemWidth = (constraints.maxWidth -
+                      (spacing * (crossAxisCount - 1))) /
+                  crossAxisCount;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: runSpacing,
+                children: [
+                  for (var i = 0; i < filteredItems.length; i++) ...[
+                    SizedBox(
+                      width: itemWidth,
+                      child: ParkedCarCard(
+                        item: filteredItems[i],
+                        onManualRequest: widget.onManualRequest,
+                        isHighlighted: widget.searchQuery.isNotEmpty &&
+                            filteredItems[i]
+                                .cardNumber
+                                .toString()
+                                .contains(widget.searchQuery),
+                      ),
+                    ),
+                  ],
+                ],
               );
             },
           ),
