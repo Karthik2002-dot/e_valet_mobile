@@ -12,23 +12,24 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/operator/operator_slots/widgets/slots_content_view.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_parked_car/widgets/parked_car_content_view.dart';
 
-class OperatorSlotsScreen extends StatefulWidget {
+class OperatorParkedCarScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
   final Function(int)? onNavigateToTab;
 
-  const OperatorSlotsScreen({
+  const OperatorParkedCarScreen({
     super.key,
     this.onRefreshReady,
     this.onNavigateToTab,
   });
 
   @override
-  State<OperatorSlotsScreen> createState() => _OperatorSlotsScreenState();
+  State<OperatorParkedCarScreen> createState() =>
+      _OperatorParkedCarScreenState();
 }
 
-class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
+class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
   final _apiService = OperatorManualRetrievalApiService();
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   bool _isProcessing = false;
@@ -267,7 +268,7 @@ class _OperatorSlotsScreenState extends State<OperatorSlotsScreen> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        SlotsContentView(
+                        ParkedCarContentView(
                           digitalKeyRack: state.digitalKeyRack,
                           searchQuery: _searchQuery,
                           onManualRequest: _handleManualRequest,
