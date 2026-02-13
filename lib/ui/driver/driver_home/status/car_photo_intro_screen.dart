@@ -12,31 +12,35 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_preview_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_top_overlay.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
+import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_Screen.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
-import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart';
 
 /// Third screen: Vehicle details + Location/Vehicle Number | Car Photo tabs.
 /// - [cameViaTagNumber] true (tag flow): default tab is Parking Number (location + vehicle number form).
-/// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area. Capture → validate → Park API → Car Success.
-/// - Scan tab: Carphoto.json 2 sec → camera. Capture → validate → Park API → Car Success.
-/// - Parking Number tab: enter parking location + vehicle number → Submit → Park API → Car Success.
+/// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area.
+/// - Scan tab: Carphoto.json 2 sec → camera → Capture → validate → Preview screen → user taps Submit → Park/Repark API → Car Success.
+/// - Parking Number tab: enter parking location + vehicle number → Submit → Preview screen → user taps Submit → Park/Repark API → Car Success.
+/// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
+
+  /// When opening from a pending session (e.g. CHECKED_IN card), pass sessionId so the screen can submit without scanning first.
+  final String? sessionId;
+
+  /// True when continuing a reparking flow (pending REPARKING).
+  final bool isReparking;
 
   const CarPhotoIntroScreen({
     super.key,
     required this.cameViaTagNumber,
     this.onReturnFromCamera,
+    this.sessionId,
+    this.isReparking = false,
   });
 
   @override
@@ -73,6 +77,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       _scanPhase = 0;
       _startLottieTimer();
     }
+    if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
+      TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
+        debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
+      });
+    }
   }
 
   void _startLottieTimer() {
@@ -104,60 +113,49 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     _startLottieTimer();
   }
 
-  /// [blocContext] must be a context that has PreviewCarBloc as ancestor (e.g. from Builder/BlocBuilder under the provider).
-  Future<void> _submitParkApi(
-    BuildContext blocContext, {
+  /// Navigate to preview screen so user can confirm and submit from there (Park/Repark API runs on preview submit).
+  Future<void> _navigateToPreview(
+    BuildContext context, {
     String? imagePath,
     String? parkingLocation,
     String? vehicleNumber,
   }) async {
     debugPrint(
-        '[CarPhotoIntro] _submitParkApi called: imagePath=$imagePath, parkingLocation=$parkingLocation, vehicleNumber=$vehicleNumber');
+        '[CarPhotoIntro] _navigateToPreview: imagePath=$imagePath, parkingLocation=$parkingLocation, vehicleNumber=$vehicleNumber');
     if (!mounted) return;
     try {
-      debugPrint('[CarPhotoIntro] Getting sessionId...');
       final sessionId = await TokenStorage.getSessionId();
-      debugPrint('[CarPhotoIntro] sessionId=${sessionId ?? "null"}');
       if (!mounted) return;
       if (sessionId == null || sessionId.isEmpty) {
-        debugPrint('[CarPhotoIntro] No sessionId - showing error');
         SnackBars.showErrorSnackBar(
-          blocContext,
+          context,
           'No active session. Please scan or enter badge number first.',
         );
         return;
       }
-      debugPrint('[CarPhotoIntro] Getting coordinates...');
-      final coordinates = await LocationService.getCurrentCoordinates();
-      debugPrint('[CarPhotoIntro] coordinates=$coordinates');
       if (!mounted) return;
-      debugPrint(
-          '[CarPhotoIntro] Dispatching SubmitPhotoRequested to PreviewCarBloc');
-      blocContext.read<PreviewCarBloc>().add(
-            SubmitPhotoRequested(
-              imagePath: imagePath,
-              sessionId: sessionId,
-              isReparking: false,
-              latitude: coordinates['latitude']!,
-              longitude: coordinates['longitude']!,
-              accuracy: coordinates['accuracy'],
-              parkingLocation: parkingLocation,
-              vehicleNumber: vehicleNumber,
-            ),
-          );
-      debugPrint('[CarPhotoIntro] SubmitPhotoRequested dispatched');
-    } on ApiException catch (e) {
-      debugPrint('[CarPhotoIntro] ApiException: ${e.message} (${e.code})');
-      if (mounted) SnackBars.showErrorSnackBar(blocContext, e.message);
-    } catch (e, st) {
-      debugPrint('[CarPhotoIntro] Exception in _submitParkApi: $e');
-      debugPrint('[CarPhotoIntro] StackTrace: $st');
+      final isFromScan = imagePath != null && imagePath.isNotEmpty;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PreviewCarScreen(
+            imagePath: imagePath,
+            sessionId: sessionId,
+            isReparking: widget.isReparking,
+            parkingLocation: parkingLocation,
+            vehicleNumber: vehicleNumber,
+          ),
+        ),
+      );
+      // When user returns from preview (e.g. Retake), reset camera so it shows again.
+      if (mounted && isFromScan && _selectedTab == 1) {
+        _cameraBloc.add(const ValidationReset());
+      }
+    } catch (e) {
+      debugPrint('[CarPhotoIntro] _navigateToPreview error: $e');
       if (mounted) {
         SnackBars.showErrorSnackBar(
-          blocContext,
-          e.toString().contains('location') || e.toString().contains('Location')
-              ? 'Please enable location and try again.'
-              : 'Failed to submit. Please try again.',
+          context,
+          'Unable to open preview. Please try again.',
         );
       }
     }
@@ -213,48 +211,23 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     }
   }
 
-  /// [blocContext] must be from a widget under BlocProvider<PreviewCarBloc> (e.g. the BlocBuilder's context).
-  void _onSubmitParkingLocation(BuildContext blocContext) {
+  /// Navigate to preview screen with parking location and vehicle number; API is called when user submits from preview.
+  void _onSubmitParkingLocation(BuildContext ctx) {
     debugPrint('[CarPhotoIntro] _onSubmitParkingLocation called');
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      debugPrint('[CarPhotoIntro] Form validation failed');
-      return;
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     final location = _parkingLocationController.text.trim();
     final vehicleNumber = _vehicleNumberController.text.trim();
     if (location.isEmpty) {
       SnackBars.showErrorSnackBar(
-        blocContext,
-        TextConstants.pleaseEnterParkingLocation,
-      );
+          ctx, TextConstants.pleaseEnterParkingLocation);
       return;
     }
     if (vehicleNumber.isEmpty) {
-      SnackBars.showErrorSnackBar(
-        blocContext,
-        TextConstants.pleaseEnterVehicleNumber,
-      );
+      SnackBars.showErrorSnackBar(ctx, TextConstants.pleaseEnterVehicleNumber);
       return;
     }
-    debugPrint(
-        '[CarPhotoIntro] Submitting parking location: $location, vehicleNumber: $vehicleNumber');
-    _lastSubmittedImagePath = null; // location-only submit
-    _submitParkApi(blocContext,
+    _navigateToPreview(ctx,
         parkingLocation: location, vehicleNumber: vehicleNumber);
-  }
-
-  void _navigateToCarSuccess(
-      {String? imagePath, bool isLocationBased = false}) {
-    if (!mounted) return;
-    widget.onReturnFromCamera?.call();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CarSuccessScreen(
-          imagePath: isLocationBased ? null : imagePath,
-          isLocationBasedParking: isLocationBased,
-        ),
-      ),
-    );
   }
 
   @override
@@ -273,80 +246,55 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     final w = MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
 
-    return BlocProvider<PreviewCarBloc>(
-      create: (_) => PreviewCarBloc(),
-      child: BlocProvider<CarCameraBloc>.value(
-        value: _cameraBloc,
-        child: BlocListener<PreviewCarBloc, PreviewCarState>(
-          listener: (context, state) {
-            debugPrint(
-                '[CarPhotoIntro] PreviewCarBloc state: ${state.runtimeType}');
-            if (state is PreviewCarSuccess) {
-              debugPrint(
-                  '[CarPhotoIntro] PreviewCarSuccess - navigating to CarSuccessScreen');
-              _navigateToCarSuccess(
-                imagePath: _lastSubmittedImagePath,
-                isLocationBased: _lastSubmittedImagePath == null,
-              );
-            } else if (state is PreviewCarError) {
-              debugPrint('[CarPhotoIntro] PreviewCarError: ${state.message}');
-              SnackBars.showErrorSnackBar(context, state.message);
-            }
-          },
-          child: BlocListener<CarCameraBloc, CarCameraState>(
-            listener: (context, state) {
-              if (state is CarCameraValidationSuccess) {
-                _lastSubmittedImagePath = state.imagePath;
-                _submitParkApi(context, imagePath: state.imagePath);
-              } else if (state is CarCameraValidationError) {
-                SnackBars.showErrorSnackBar(context, state.message);
-                context.read<CarCameraBloc>().add(const ValidationReset());
-              }
-            },
-            child: Builder(
-              builder: (bodyContext) {
-                return PopScope(
-                  canPop: false,
-                  onPopInvokedWithResult: (didPop, result) {
-                    if (!didPop && mounted) {
-                      SnackBars.showErrorSnackBar(
-                        context,
-                        TextConstants.pleaseCompleteParkingProcess,
-                      );
-                    }
-                  },
-                  child: Scaffold(
-                    backgroundColor: AppColors.lightBeigeBackground,
-                    appBar: const CustomAppBar(),
-                    body: SafeArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(height: h * 0.016),
-                          _buildHeaderAboveTabs(w, h),
-                          SizedBox(height: h * 0.016),
-                          _buildTabs(w),
-                          Expanded(
-                            child: _selectedTab == 0
-                                ? _buildTypeParkingNumberContent(
-                                    w, h, bodyContext)
-                                : _buildScanTabContent(w, h),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+    return BlocProvider<CarCameraBloc>.value(
+      value: _cameraBloc,
+      child: BlocListener<CarCameraBloc, CarCameraState>(
+        listener: (context, state) {
+          if (state is CarCameraValidationSuccess) {
+            _navigateToPreview(context, imagePath: state.imagePath);
+          } else if (state is CarCameraValidationError) {
+            SnackBars.showErrorSnackBar(context, state.message);
+            context.read<CarCameraBloc>().add(const ValidationReset());
+          }
+        },
+        child: Builder(
+          builder: (bodyContext) {
+            return PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) {
+                if (!didPop && mounted) {
+                  SnackBars.showErrorSnackBar(
+                    context,
+                    TextConstants.pleaseCompleteParkingProcess,
+                  );
+                }
               },
-            ),
-          ),
+              child: Scaffold(
+                backgroundColor: AppColors.lightBeigeBackground,
+                appBar: const CustomAppBar(),
+                body: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: h * 0.016),
+                      _buildHeaderAboveTabs(w, h),
+                      SizedBox(height: h * 0.016),
+                      _buildTabs(w),
+                      Expanded(
+                        child: _selectedTab == 0
+                            ? _buildTypeParkingNumberContent(w, h, bodyContext)
+                            : _buildScanTabContent(w, h),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
-
-  /// Tracks last submitted image path so we can pass to CarSuccessScreen (null = location-only).
-  String? _lastSubmittedImagePath;
 
   /// Same style as driver_qr_scanner_content: title + "what to do" hint above the tabs.
   Widget _buildHeaderAboveTabs(double w, double h) {
@@ -639,55 +587,37 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             ),
           ),
           SizedBox(height: h * 0.025),
-          BlocBuilder<PreviewCarBloc, PreviewCarState>(
-            builder: (context, state) {
-              final isLoading = state is PreviewCarSubmitting;
-              return SizedBox(
-                width: double.infinity,
-                height: h * 0.062,
-                child: ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () => _onSubmitParkingLocation(blocContext),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.actionButtonYellow,
-                    foregroundColor: AppColors.white,
-                    disabledBackgroundColor: AppColors.greyLight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(w * 0.025),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextComponent(
-                              labelText: TextConstants.submitButton,
-                              fontSize: w * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.white,
-                            ),
-                            SizedBox(width: w * 0.02),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: AppColors.white,
-                              size: w * 0.05,
-                            ),
-                          ],
-                        ),
+          SizedBox(
+            width: double.infinity,
+            height: h * 0.062,
+            child: ElevatedButton(
+              onPressed: () => _onSubmitParkingLocation(blocContext),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.actionButtonYellow,
+                foregroundColor: AppColors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(w * 0.025),
                 ),
-              );
-            },
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextComponent(
+                    labelText: TextConstants.submitButton,
+                    fontSize: w * 0.045,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
+                  SizedBox(width: w * 0.02),
+                  Icon(
+                    Icons.arrow_forward,
+                    color: AppColors.white,
+                    size: w * 0.05,
+                  ),
+                ],
+              ),
+            ),
           ),
           SizedBox(height: h * 0.02),
         ],

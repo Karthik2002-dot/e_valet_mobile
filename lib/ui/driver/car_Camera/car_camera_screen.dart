@@ -18,6 +18,7 @@ class CarCameraScreen extends StatefulWidget {
   final String? sessionId;
   final bool isReparking;
   final bool preventBackNavigation;
+
   /// Pre-fill parking location (e.g. from third screen tag flow).
   final String? initialParkingLocation;
 

@@ -26,6 +26,17 @@ class _AssignedSessionSheetLoaderState
   Widget build(BuildContext context) {
     return BlocBuilder<AssignedSessionsBackgroundBloc,
         AssignedSessionsBackgroundState>(
+      buildWhen: (previous, current) {
+        // Rebuild only when the displayed session (id + photo) changes, so the bottom sheet image does not flicker every 5s
+        if (current is! AssignedSessionsBackgroundData) return true;
+        if (!current.hasSessions) return true;
+        if (previous is! AssignedSessionsBackgroundData ||
+            !previous.hasSessions) return true;
+        return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
+                previous.sessions) !=
+            AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
+                current.sessions);
+      },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
           // Never show empty sheet content — when no sessions, parent closes sheet

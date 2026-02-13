@@ -6,6 +6,7 @@ class CameraBottomOverlay extends StatefulWidget {
   final Function(BuildContext) onCapture;
   final Future<void> Function(BuildContext, String)? onSubmit;
   final bool positionAtTop;
+
   /// Pre-fill parking location (e.g. from third screen when user entered via tag number).
   final String? initialParkingLocation;
 

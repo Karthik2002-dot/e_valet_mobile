@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -16,17 +17,20 @@ import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
 class PreviewCarScreen extends StatefulWidget {
-  final String imagePath;
+  /// Photo path when coming from Scan; null when coming from Type Parking Number only.
+  final String? imagePath;
   final String? sessionId;
   final bool isReparking;
   final String? parkingLocation;
+  final String? vehicleNumber;
 
   const PreviewCarScreen({
     super.key,
-    required this.imagePath,
+    this.imagePath,
     this.sessionId,
     this.isReparking = false,
     this.parkingLocation,
+    this.vehicleNumber,
   });
 
   @override
@@ -35,6 +39,7 @@ class PreviewCarScreen extends StatefulWidget {
 
 class _PreviewCarScreenState extends State<PreviewCarScreen> {
   String? _currentParkingLocation;
+  String? _currentVehicleNumber;
 
   /// Prevents multiple rapid taps from triggering duplicate submissions
   bool _isProcessing = false;
@@ -43,6 +48,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
   void initState() {
     super.initState();
     _currentParkingLocation = widget.parkingLocation;
+    _currentVehicleNumber = widget.vehicleNumber;
   }
 
   @override
@@ -74,6 +80,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
               parkingLocation: _currentParkingLocation,
+              vehicleNumber: _currentVehicleNumber,
             ),
           );
     } on ApiException catch (e) {
@@ -90,10 +97,13 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     }
   }
 
-  void _showEditParkingLocationDialog() {
+  void _showEditDetailsDialog() {
     final screenWidth = MediaQuery.of(context).size.width;
-    final TextEditingController editController = TextEditingController(
+    final locationController = TextEditingController(
       text: _currentParkingLocation ?? '',
+    );
+    final vehicleController = TextEditingController(
+      text: _currentVehicleNumber ?? '',
     );
 
     showDialog(
@@ -101,40 +111,94 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            'Edit Parking Location',
+            'Edit details',
             style: TextStyle(
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.w600,
             ),
           ),
-          content: TextField(
-            controller: editController,
-            autofocus: true,
-            style: TextStyle(
-              fontSize: screenWidth * 0.04,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Enter parking location...',
-              hintStyle: TextStyle(
-                color: AppColors.grey.withOpacity(0.6),
-                fontSize: screenWidth * 0.04,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: AppColors.primary,
-                  width: 1,
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Parking Location',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.035,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
                 ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: AppColors.primary,
-                  width: 2,
+                SizedBox(height: 6),
+                TextField(
+                  controller: locationController,
+                  autofocus: true,
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                  decoration: InputDecoration(
+                    hintText: 'Enter parking location...',
+                    hintStyle: TextStyle(
+                      color: AppColors.grey.withOpacity(0.6),
+                      fontSize: screenWidth * 0.04,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  maxLines: 2,
                 ),
-              ),
+                SizedBox(height: 16),
+                Text(
+                  'Vehicle Number',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.035,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                ),
+                SizedBox(height: 6),
+                TextField(
+                  controller: vehicleController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                  decoration: InputDecoration(
+                    hintText: 'Enter vehicle number...',
+                    hintStyle: TextStyle(
+                      color: AppColors.grey.withOpacity(0.6),
+                      fontSize: screenWidth * 0.04,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            maxLines: 2,
           ),
           actions: [
             TextButton(
@@ -149,10 +213,13 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                final newLocation = editController.text.trim();
+                final newLocation = locationController.text.trim();
+                final newVehicle = vehicleController.text.trim();
                 if (newLocation.isNotEmpty) {
                   setState(() {
                     _currentParkingLocation = newLocation;
+                    _currentVehicleNumber =
+                        newVehicle.isEmpty ? null : newVehicle;
                   });
                   Navigator.of(context).pop();
                 } else {
@@ -170,9 +237,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               ),
               child: Text(
                 'Save',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.038,
-                ),
+                style: TextStyle(fontSize: screenWidth * 0.038),
               ),
             ),
           ],
@@ -272,7 +337,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     ),
                                     // Edit Icon Button
                                     InkWell(
-                                      onTap: _showEditParkingLocationDialog,
+                                      onTap: _showEditDetailsDialog,
                                       borderRadius: BorderRadius.circular(20),
                                       child: Container(
                                         padding:
@@ -301,15 +366,47 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     color: AppColors.black,
                                   ),
                                 ),
+                                if (_currentVehicleNumber != null &&
+                                    _currentVehicleNumber!.isNotEmpty) ...[
+                                  SizedBox(height: screenHeight * 0.012),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.directions_car,
+                                        color: AppColors.primary,
+                                        size: screenWidth * 0.045,
+                                      ),
+                                      SizedBox(width: screenWidth * 0.02),
+                                      Text(
+                                        'Vehicle Number',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: screenHeight * 0.004),
+                                  Text(
+                                    _currentVehicleNumber!,
+                                    style: TextStyle(
+                                      fontSize: screenWidth * 0.038,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
 
                         // Image Card with Retake Button - Only show if parking location is NOT provided (normal photo flow)
-                        if (widget.parkingLocation == null ||
-                            widget.parkingLocation!.isEmpty)
+                        if ((widget.parkingLocation == null ||
+                                widget.parkingLocation!.isEmpty) &&
+                            widget.imagePath != null &&
+                            widget.imagePath!.isNotEmpty)
                           PreviewImageCard(
-                            imagePath: widget.imagePath,
+                            imagePath: widget.imagePath!,
                             onRetake: () => Navigator.pop(context),
                           ),
 
