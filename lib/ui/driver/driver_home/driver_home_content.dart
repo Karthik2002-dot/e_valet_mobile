@@ -12,6 +12,7 @@ class DriverHomeContent extends StatefulWidget {
   final bool isOnBreak;
   final bool isOnline;
   final VoidCallback? onBreakEnd;
+
   /// When this notifier's value changes, we reset so home (two cards) is shown.
   final ValueNotifier<int>? homeResetNotifier;
 
@@ -32,6 +33,7 @@ class _DriverHomeContentState extends State<DriverHomeContent>
     with WidgetsBindingObserver {
   /// When this key changes, DriverOnlineContent is recreated so reopen always shows home (two cards).
   Key _onlineContentKey = UniqueKey();
+
   /// True when Park Vehicle was tapped and we're on the vehicle details (QR) screen.
   bool _showParkFlow = false;
 
@@ -50,10 +52,11 @@ class _DriverHomeContentState extends State<DriverHomeContent>
   }
 
   void _onHomeReset() {
-    if (mounted) setState(() {
-      _onlineContentKey = UniqueKey();
-      _showParkFlow = false;
-    });
+    if (mounted)
+      setState(() {
+        _onlineContentKey = UniqueKey();
+        _showParkFlow = false;
+      });
   }
 
   @override
@@ -62,10 +65,11 @@ class _DriverHomeContentState extends State<DriverHomeContent>
     // When app is reopened (resumed), force home (two cards) by recreating DriverOnlineContent.
     if (state == AppLifecycleState.resumed && mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() {
-          _onlineContentKey = UniqueKey();
-          _showParkFlow = false;
-        });
+        if (mounted)
+          setState(() {
+            _onlineContentKey = UniqueKey();
+            _showParkFlow = false;
+          });
       });
     }
   }
@@ -112,49 +116,57 @@ class _DriverHomeContentState extends State<DriverHomeContent>
                 : null,
           ),
           // Main Content Section with SafeArea
+          // Show break content when on break (whether online or offline); else online content or offline content.
           Expanded(
             child: SafeArea(
               top: false,
               child: Container(
                 color: AppColors.lightBeigeBackground,
-                child: widget.isOnline
-                    ? Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.04,
-                        ),
-                        child: DriverOnlineContent(
-                          key: _onlineContentKey,
-                          driverName: widget.driverName,
-                          screenWidth: screenWidth,
-                          screenHeight: screenHeight,
-                          isTablet: isTablet,
-                          isDesktop: isDesktop,
-                          showParkFlow: _showParkFlow,
-                          onParkFlowChanged: (value) =>
-                              setState(() => _showParkFlow = value),
-                        ),
-                      )
-                    : SingleChildScrollView(
+                child: widget.isOnBreak
+                    ? SingleChildScrollView(
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: screenWidth * 0.04,
                           ),
-                          child: widget.isOnBreak
-                              ? DriverBreakContent(
-                                  screenWidth: screenWidth,
-                                  screenHeight: screenHeight,
-                                  isTablet: isTablet,
-                                  isDesktop: isDesktop,
-                                  onBreakEnd: widget.onBreakEnd,
-                                )
-                              : DriverOfflineContent(
-                                  screenWidth: screenWidth,
-                                  screenHeight: screenHeight,
-                                  isTablet: isTablet,
-                                  isDesktop: isDesktop,
-                                ),
+                          child: DriverBreakContent(
+                            screenWidth: screenWidth,
+                            screenHeight: screenHeight,
+                            isTablet: isTablet,
+                            isDesktop: isDesktop,
+                            onBreakEnd: widget.onBreakEnd,
+                          ),
                         ),
-                      ),
+                      )
+                    : widget.isOnline
+                        ? Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.04,
+                            ),
+                            child: DriverOnlineContent(
+                              key: _onlineContentKey,
+                              driverName: widget.driverName,
+                              screenWidth: screenWidth,
+                              screenHeight: screenHeight,
+                              isTablet: isTablet,
+                              isDesktop: isDesktop,
+                              showParkFlow: _showParkFlow,
+                              onParkFlowChanged: (value) =>
+                                  setState(() => _showParkFlow = value),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.04,
+                              ),
+                              child: DriverOfflineContent(
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                isTablet: isTablet,
+                                isDesktop: isDesktop,
+                              ),
+                            ),
+                          ),
               ),
             ),
           ),
