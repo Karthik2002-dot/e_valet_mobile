@@ -74,9 +74,9 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
               const crossAxisCount = 4;
               final spacing = screenWidth * 0.02;
               final runSpacing = screenHeight * 0.02;
-              final itemWidth = (constraints.maxWidth -
-                      (spacing * (crossAxisCount - 1))) /
-                  crossAxisCount;
+              final itemWidth =
+                  (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
+                      crossAxisCount;
               return Wrap(
                 spacing: spacing,
                 runSpacing: runSpacing,

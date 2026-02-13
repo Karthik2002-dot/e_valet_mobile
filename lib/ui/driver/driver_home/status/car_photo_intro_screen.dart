@@ -29,14 +29,23 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart
 /// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area. Capture → validate → Park API → Car Success.
 /// - Scan tab: Carphoto.json 2 sec → camera. Capture → validate → Park API → Car Success.
 /// - Parking Number tab: enter parking location + vehicle number → Submit → Park API → Car Success.
+/// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
+
+  /// When opening from a pending session (e.g. CHECKED_IN card), pass sessionId so the screen can submit without scanning first.
+  final String? sessionId;
+
+  /// True when continuing a reparking flow (pending REPARKING).
+  final bool isReparking;
 
   const CarPhotoIntroScreen({
     super.key,
     required this.cameViaTagNumber,
     this.onReturnFromCamera,
+    this.sessionId,
+    this.isReparking = false,
   });
 
   @override
@@ -72,6 +81,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       _selectedTab = 1; // QR flow: go straight to Scan (Lottie then camera)
       _scanPhase = 0;
       _startLottieTimer();
+    }
+    if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
+      TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
+        debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
+      });
     }
   }
 
@@ -137,7 +151,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             SubmitPhotoRequested(
               imagePath: imagePath,
               sessionId: sessionId,
-              isReparking: false,
+              isReparking: widget.isReparking,
               latitude: coordinates['latitude']!,
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
