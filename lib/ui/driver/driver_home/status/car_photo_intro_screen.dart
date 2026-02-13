@@ -27,7 +27,7 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart
 /// Third screen: Vehicle details + Location/Vehicle Number | Car Photo tabs.
 /// - [cameViaTagNumber] true (tag flow): default tab is Parking Number (location + vehicle number form).
 /// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area. Capture → validate → Park API → Car Success.
-/// - Scan tab: Carphoto.json 2 sec → camera. Capture → validate → Park API → Car Success.
+/// - Scan tab: Carphoto.json 2 sec → camera in same area (no separate screen). Capture → validate → Park API → Car Success.
 /// - Parking Number tab: enter parking location + vehicle number → Submit → Park API → Car Success.
 /// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
 class CarPhotoIntroScreen extends StatefulWidget {
