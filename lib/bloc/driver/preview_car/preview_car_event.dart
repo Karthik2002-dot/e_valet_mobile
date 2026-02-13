@@ -15,6 +15,7 @@ class SubmitPhotoRequested extends PreviewCarEvent {
   final double longitude;
   final double? accuracy;
   final String? parkingLocation;
+  final String? vehicleNumber;
 
   const SubmitPhotoRequested({
     this.imagePath,
@@ -24,6 +25,7 @@ class SubmitPhotoRequested extends PreviewCarEvent {
     required this.longitude,
     this.accuracy,
     this.parkingLocation,
+    this.vehicleNumber,
   }) : assert(
           imagePath != null || parkingLocation != null,
           'Either imagePath or parkingLocation must be provided',
@@ -38,6 +40,7 @@ class SubmitPhotoRequested extends PreviewCarEvent {
         longitude,
         accuracy,
         parkingLocation,
+        vehicleNumber,
       ];
 }
 

@@ -18,8 +18,12 @@ class AppColors {
   // Surfaces
   static const Color background = Color(0xFFF7F7F9);
   static const Color lightBeigeBackground =
-      Color(0xFFF5F5F0); // Light beige background
+      Color(0xFFF5F5EC); // Light beige (home screen)
   static const Color surface = Colors.white;
+  static const Color cardBackground =
+      Color(0xFFFCFCFC); // Home screen cards
+  static const Color actionButtonYellow =
+      Color(0xFFFBBF24); // Park/Retrieve buttons
   static const Color surfaceBorder = Color(0xFFEAEAEA);
   static const Color divider = Color(0xFFE5E7EB);
   static const Color shadow10 = Color(0x1A000000); // 10% black

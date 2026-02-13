@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
@@ -10,6 +11,7 @@ class TextFieldComponent extends StatefulWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final FocusNode? focusNode;
@@ -31,6 +33,7 @@ class TextFieldComponent extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.keyboardType,
+    this.inputFormatters,
     this.validator,
     this.onChanged,
     this.focusNode,
@@ -73,6 +76,7 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
           controller: widget.controller,
           obscureText: widget.obscureText,
           keyboardType: widget.keyboardType,
+          inputFormatters: widget.inputFormatters,
           validator: widget.validator,
           onChanged: widget.onChanged,
           focusNode: widget.focusNode,

@@ -62,6 +62,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     with WidgetsBindingObserver, RouteAware {
   Timer? _dismissTimer;
   final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
+  /// When this changes, DriverHomeContent resets so home (two cards) is shown on reopen/return.
+  final ValueNotifier<int> _homeResetNotifier = ValueNotifier(0);
   final DriverHomeRouteObserver _routeObserver = DriverHomeRouteObserver();
   Timer? _webSocketCheckTimer;
   StreamSubscription<void>? _retrievalNotificationTapSubscription;
@@ -245,7 +247,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      // App came back to foreground - check WebSocket
+      // App came back to foreground - reset so home (two cards) is shown, not Vehicle details.
+      _homeResetNotifier.value++;
       _checkWebSocketOnResume();
       _hasNavigatedForStatus = false;
       _refreshPendingSessions();
@@ -295,7 +298,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPopNext() {
     super.didPopNext();
-    // Builder widget in build() will handle refresh
+    // When user returns to driver home (e.g. from Car Camera), reset so home (two cards) is shown, not Vehicle details.
+    _homeResetNotifier.value++;
   }
 
   @override
@@ -656,7 +660,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   print('Manual WebSocket refresh failed: $e');
                 }
               },
-              child: const DriverHomeView(),
+              child: DriverHomeView(homeResetNotifier: _homeResetNotifier),
             ),
           );
         },

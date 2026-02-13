@@ -5,6 +5,7 @@ class ParkRequest {
   final double longitude;
   final double? accuracy;
   final String? parkingLocation;
+  final String? vehicleNumber;
 
   const ParkRequest({
     this.imagePath,
@@ -12,6 +13,7 @@ class ParkRequest {
     required this.longitude,
     this.accuracy,
     this.parkingLocation,
+    this.vehicleNumber,
   }) : assert(
           imagePath != null || parkingLocation != null,
           'Either imagePath or parkingLocation must be provided',
@@ -29,6 +31,6 @@ class ParkRequest {
 
   @override
   String toString() {
-    return 'ParkRequest(imagePath: $imagePath, latitude: $latitude, longitude: $longitude, accuracy: $accuracy, parkingLocation: $parkingLocation)';
+    return 'ParkRequest(imagePath: $imagePath, latitude: $latitude, longitude: $longitude, accuracy: $accuracy, parkingLocation: $parkingLocation, vehicleNumber: $vehicleNumber)';
   }
 }

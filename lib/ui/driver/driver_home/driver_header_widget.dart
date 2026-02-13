@@ -11,6 +11,9 @@ class DriverHeaderWidget extends StatelessWidget {
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
+  /// When true, show back button on the left (same line as break toggle, other side).
+  final bool showBackButton;
+  final VoidCallback? onBackPressed;
 
   const DriverHeaderWidget({
     super.key,
@@ -19,6 +22,8 @@ class DriverHeaderWidget extends StatelessWidget {
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    this.showBackButton = false,
+    this.onBackPressed,
   });
 
   @override
@@ -47,6 +52,18 @@ class DriverHeaderWidget extends StatelessWidget {
 
           return Stack(
             children: [
+              // Back button on the left (same line as break toggle, other side)
+              if (showBackButton && onBackPressed != null)
+                Positioned(
+                  top: 4,
+                  left: padding * 0.5,
+                  child: IconButton(
+                    onPressed: onBackPressed,
+                    icon: const Icon(Icons.arrow_back, color: AppColors.white),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
               // On Break toggle positioned at very top-right, just below logo
               if (isCurrentlyOnline)
                 Positioned(

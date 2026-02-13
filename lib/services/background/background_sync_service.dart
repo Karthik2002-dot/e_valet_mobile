@@ -44,10 +44,7 @@ void callbackDispatcher() {
 
 class BackgroundSyncService {
   static Future<void> init() async {
-    await Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: kDebugMode, // Set to false in production
-    );
+    await Workmanager().initialize(callbackDispatcher);
 
     // Register periodic task (every 15 mins)
     if (Platform.isAndroid) {
@@ -58,7 +55,6 @@ class BackgroundSyncService {
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
-        existingWorkPolicy: ExistingWorkPolicy.keep,
       );
     }
   }

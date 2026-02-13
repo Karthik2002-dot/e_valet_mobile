@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -22,6 +23,34 @@ class CarSuccessScreen extends StatefulWidget {
 
 class _CarSuccessScreenState extends State<CarSuccessScreen> {
   bool _isReturningHome = false;
+  Timer? _autoReturnTimer;
+
+  static const Duration _autoReturnDuration = Duration(seconds: 5);
+
+  @override
+  void initState() {
+    super.initState();
+    _autoReturnTimer = Timer(_autoReturnDuration, _navigateToHome);
+  }
+
+  void _navigateToHome() {
+    _autoReturnTimer?.cancel();
+    _autoReturnTimer = null;
+    if (!mounted) return;
+    setState(() => _isReturningHome = true);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const DriverHomeScreen(),
+      ),
+      (route) => false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoReturnTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,16 +140,9 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                   onPressed: _isReturningHome
                       ? null
                       : () {
-                          setState(() {
-                            _isReturningHome = true;
-                          });
-                          // Navigate back to the driver home and show the retrieval sheet
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const DriverHomeScreen(),
-                            ),
-                            (route) => false,
-                          );
+                          _autoReturnTimer?.cancel();
+                          _autoReturnTimer = null;
+                          _navigateToHome();
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,
