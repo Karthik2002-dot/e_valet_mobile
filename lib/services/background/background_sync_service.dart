@@ -55,7 +55,6 @@ class BackgroundSyncService {
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
-        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
       );
     }
   }
