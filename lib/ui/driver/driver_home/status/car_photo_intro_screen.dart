@@ -134,7 +134,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         return;
       }
       if (!mounted) return;
-      Navigator.of(context).push(
+      final isFromScan = imagePath != null && imagePath.isNotEmpty;
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PreviewCarScreen(
             imagePath: imagePath,
@@ -145,6 +146,10 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           ),
         ),
       );
+      // When user returns from preview (e.g. Retake), reset camera so it shows again.
+      if (mounted && isFromScan && _selectedTab == 1) {
+        _cameraBloc.add(const ValidationReset());
+      }
     } catch (e) {
       debugPrint('[CarPhotoIntro] _navigateToPreview error: $e');
       if (mounted) {
