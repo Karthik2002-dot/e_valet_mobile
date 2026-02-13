@@ -31,37 +31,38 @@ class SessionCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Details Section (above image)
+              // Details Section (above image) — small text, compact for sheet
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenWidth * 0.028),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.directions_car,
-                          size: 20,
+                          size: screenWidth * 0.045,
                           color: AppColors.secondary,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: screenWidth * 0.02),
                         TextComponent(
                           labelText: TextConstants.badgeNumber,
-                          fontSize: screenWidth * 0.035,
+                          fontSize: screenWidth * 0.028,
                           color: AppColors.grey,
                         ),
                         Spacer(),
                         TextComponent(
                           labelText: session.cardNumber.toString(),
-                          fontSize: screenWidth * 0.05,
+                          fontSize: screenWidth * 0.038,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: screenWidth * 0.02),
                     Divider(
                       color: AppColors.greyLight,
                       thickness: 1,
@@ -69,20 +70,20 @@ class SessionCard extends StatelessWidget {
                     ),
                     // Show location if available
                     if (session.parkingLocation.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: screenWidth * 0.018),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.location_on,
-                            size: 20,
+                            size: screenWidth * 0.04,
                             color: AppColors.secondary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: screenWidth * 0.02),
                           Expanded(
                             child: TextComponent(
                               labelText: session.parkingLocation,
-                              fontSize: screenWidth * 0.04,
+                              fontSize: screenWidth * 0.032,
                               color: AppColors.black,
                               maxLines: 2,
                               fontWeight: FontWeight.w500,
@@ -90,31 +91,31 @@ class SessionCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: screenWidth * 0.025),
                       Divider(
                         color: AppColors.greyLight,
                         thickness: 1,
                         height: 1,
                       ),
                     ],
-                    const SizedBox(height: 12),
+                    SizedBox(height: screenWidth * 0.02),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.badge,
-                              size: 20,
+                              size: screenWidth * 0.045,
                               color: AppColors.secondary,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: screenWidth * 0.02),
                             Expanded(
                               child: TextComponent(
                                 labelText:
                                     '${TextConstants.parkedBy} ${session.parkedBy?.name ?? TextConstants.unknown}',
-                                fontSize: screenWidth * 0.04,
+                                fontSize: screenWidth * 0.032,
                                 color: AppColors.black,
                                 maxLines: 2,
                                 fontWeight: FontWeight.w500,
@@ -125,15 +126,15 @@ class SessionCard extends StatelessWidget {
                                   _makePhoneCall(session.parkedBy?.phone ?? ''),
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(screenWidth * 0.02),
                                 decoration: BoxDecoration(
                                   color: AppColors.secondary.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.phone,
                                   color: AppColors.secondary,
-                                  size: 20,
+                                  size: screenWidth * 0.045,
                                 ),
                               ),
                             ),
@@ -144,7 +145,7 @@ class SessionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Car Image (below details)
+              // Car Image (below details) — medium size so image is visible
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(
@@ -165,12 +166,12 @@ class SessionCard extends StatelessWidget {
                           key: ValueKey<String>(session.photoUrl!),
                           gaplessPlayback: true,
                           width: double.infinity,
-                          height: screenWidth * 0.35,
+                          height: screenWidth * 0.42,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               width: double.infinity,
-                              height: screenWidth * 0.35,
+                              height: screenWidth * 0.42,
                               color: AppColors.white,
                               child: Center(
                                 child: ColorFiltered(
@@ -193,7 +194,7 @@ class SessionCard extends StatelessWidget {
                         )
                       : Container(
                           width: double.infinity,
-                          height: screenWidth * 0.35,
+                          height: screenWidth * 0.42,
                           color: AppColors.white,
                           child: Center(
                             child: ColorFiltered(

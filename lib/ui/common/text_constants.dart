@@ -245,13 +245,12 @@ class TextConstants {
 
   // Instruction text above action buttons
   static const String pressBelowToConfirmArrival =
-      'Press the button below to confirm arrival.';
+      "Please click the button below once you've entered the lobby.";
   static const String pressBelowToConfirmHandover =
-      'Press the button below to confirm handover.';
+      'Press the button below when the customer has arrived.';
   static const String pressBelowToReportCustomerMissing =
-      'Press the button below to report customer missing.';
-  static const String pressBelowToAcceptRequest =
-      'Press the button below to accept the retrieval request.';
+      'If the customer has not arrived within 2 minutes, please press the button below.';
+
   static const String pressBelowToProceedRepark =
       'Press the button below to proceed to re-park the car.';
   static const String pressBelowToCancel = 'Press below to cancel.';
