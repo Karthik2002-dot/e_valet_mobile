@@ -6,6 +6,7 @@ class OfflineParkingPhoto {
   final double longitude;
   final double? accuracy;
   final String? parkingLocation;
+  final String? vehicleNumber;
   final String? sessionId;
   final bool isReparking;
   final String timestamp;
@@ -16,6 +17,7 @@ class OfflineParkingPhoto {
     required this.longitude,
     this.accuracy,
     this.parkingLocation,
+    this.vehicleNumber,
     this.sessionId,
     required this.isReparking,
     required this.timestamp,
@@ -38,6 +40,7 @@ class OfflineParkingPhotoAdapter extends TypeAdapter<OfflineParkingPhoto> {
       longitude: fields[2] as double,
       accuracy: fields[3] as double?,
       parkingLocation: fields[4] as String?,
+      vehicleNumber: fields[8] as String?,
       sessionId: fields[5] as String?,
       isReparking: fields[6] as bool,
       timestamp: fields[7] as String,
@@ -47,7 +50,7 @@ class OfflineParkingPhotoAdapter extends TypeAdapter<OfflineParkingPhoto> {
   @override
   void write(BinaryWriter writer, OfflineParkingPhoto obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.imagePath)
       ..writeByte(1)
@@ -63,6 +66,8 @@ class OfflineParkingPhotoAdapter extends TypeAdapter<OfflineParkingPhoto> {
       ..writeByte(6)
       ..write(obj.isReparking)
       ..writeByte(7)
-      ..write(obj.timestamp);
+      ..write(obj.timestamp)
+      ..writeByte(8)
+      ..write(obj.vehicleNumber);
   }
 }

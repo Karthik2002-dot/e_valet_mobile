@@ -168,6 +168,10 @@ class TextConstants {
   static const String parkingLocationHint = 'Enter Badge Number';
   static const String pleaseEnterParkingLocation =
       'Please enter parking location';
+  static const String vehicleNumberLabel = 'Vehicle Number';
+  static const String vehicleNumberHint = 'Enter vehicle number (digits only)';
+  static const String pleaseEnterVehicleNumber =
+      'Please enter vehicle number';
 
   // QR Status Messages
   static const String scannedSuccess = 'Scanned Success';

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
@@ -43,12 +44,17 @@ class CarPhotoIntroScreen extends StatefulWidget {
 class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   final TextEditingController _parkingLocationController =
       TextEditingController();
+  final TextEditingController _vehicleNumberController =
+      TextEditingController();
+  final FocusNode _parkingLocationFocusNode = FocusNode();
+  final FocusNode _vehicleNumberFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
 
+  /// 0 = Parking Number (default, no camera), 1 = Scan (Lottie then camera)
   int _selectedTab = 0;
-  /// 0 = Lottie (2 sec), 1 = camera in same area
+
+  /// 0 = Lottie (2 sec), 1 = camera in same area (only when on Scan tab)
   int _scanPhase = 0;
-  bool _showLottieThenCamera = false;
   Timer? _lottieTimer;
   late CarCameraBloc _cameraBloc;
   bool _isCapturing = false;
@@ -57,9 +63,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   void initState() {
     super.initState();
     _cameraBloc = CarCameraBloc();
-    _selectedTab = 0;
-    _showLottieThenCamera = true;
-    _startLottieTimer();
+    _selectedTab =
+        0; // Parking Number first; camera not opened until user switches to Scan
   }
 
   void _startLottieTimer() {
@@ -76,19 +81,15 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     });
   }
 
-  void _onSelectTypeParkingNumberTab() {
+  void _onSelectParkingNumberTab() {
     _lottieTimer?.cancel();
-    setState(() {
-      _showLottieThenCamera = false;
-      _selectedTab = 1;
-    });
+    setState(() => _selectedTab = 0);
   }
 
   void _onSelectScanTab() {
-    if (_showLottieThenCamera) return;
+    if (_selectedTab == 1) return;
     setState(() {
-      _selectedTab = 0;
-      _showLottieThenCamera = true;
+      _selectedTab = 1;
       _scanPhase = 0;
     });
     _startLottieTimer();
@@ -99,8 +100,10 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     BuildContext blocContext, {
     String? imagePath,
     String? parkingLocation,
+    String? vehicleNumber,
   }) async {
-    debugPrint('[CarPhotoIntro] _submitParkApi called: imagePath=$imagePath, parkingLocation=$parkingLocation');
+    debugPrint(
+        '[CarPhotoIntro] _submitParkApi called: imagePath=$imagePath, parkingLocation=$parkingLocation, vehicleNumber=$vehicleNumber');
     if (!mounted) return;
     try {
       debugPrint('[CarPhotoIntro] Getting sessionId...');
@@ -119,7 +122,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       final coordinates = await LocationService.getCurrentCoordinates();
       debugPrint('[CarPhotoIntro] coordinates=$coordinates');
       if (!mounted) return;
-      debugPrint('[CarPhotoIntro] Dispatching SubmitPhotoRequested to PreviewCarBloc');
+      debugPrint(
+          '[CarPhotoIntro] Dispatching SubmitPhotoRequested to PreviewCarBloc');
       blocContext.read<PreviewCarBloc>().add(
             SubmitPhotoRequested(
               imagePath: imagePath,
@@ -129,6 +133,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
               parkingLocation: parkingLocation,
+              vehicleNumber: vehicleNumber,
             ),
           );
       debugPrint('[CarPhotoIntro] SubmitPhotoRequested dispatched');
@@ -201,20 +206,30 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       return;
     }
     final location = _parkingLocationController.text.trim();
+    final vehicleNumber = _vehicleNumberController.text.trim();
     if (location.isEmpty) {
-      debugPrint('[CarPhotoIntro] Parking location empty');
       SnackBars.showErrorSnackBar(
         blocContext,
         TextConstants.pleaseEnterParkingLocation,
       );
       return;
     }
-    debugPrint('[CarPhotoIntro] Submitting parking location: $location');
+    if (vehicleNumber.isEmpty) {
+      SnackBars.showErrorSnackBar(
+        blocContext,
+        TextConstants.pleaseEnterVehicleNumber,
+      );
+      return;
+    }
+    debugPrint(
+        '[CarPhotoIntro] Submitting parking location: $location, vehicleNumber: $vehicleNumber');
     _lastSubmittedImagePath = null; // location-only submit
-    _submitParkApi(blocContext, parkingLocation: location);
+    _submitParkApi(blocContext,
+        parkingLocation: location, vehicleNumber: vehicleNumber);
   }
 
-  void _navigateToCarSuccess({String? imagePath, bool isLocationBased = false}) {
+  void _navigateToCarSuccess(
+      {String? imagePath, bool isLocationBased = false}) {
     if (!mounted) return;
     widget.onReturnFromCamera?.call();
     Navigator.of(context).pushReplacement(
@@ -231,6 +246,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   void dispose() {
     _lottieTimer?.cancel();
     _parkingLocationController.dispose();
+    _vehicleNumberController.dispose();
+    _parkingLocationFocusNode.dispose();
+    _vehicleNumberFocusNode.dispose();
     _cameraBloc.close();
     super.dispose();
   }
@@ -246,9 +264,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         value: _cameraBloc,
         child: BlocListener<PreviewCarBloc, PreviewCarState>(
           listener: (context, state) {
-            debugPrint('[CarPhotoIntro] PreviewCarBloc state: ${state.runtimeType}');
+            debugPrint(
+                '[CarPhotoIntro] PreviewCarBloc state: ${state.runtimeType}');
             if (state is PreviewCarSuccess) {
-              debugPrint('[CarPhotoIntro] PreviewCarSuccess - navigating to CarSuccessScreen');
+              debugPrint(
+                  '[CarPhotoIntro] PreviewCarSuccess - navigating to CarSuccessScreen');
               _navigateToCarSuccess(
                 imagePath: _lastSubmittedImagePath,
                 isLocationBased: _lastSubmittedImagePath == null,
@@ -272,18 +292,37 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               builder: (bodyContext) {
                 return Scaffold(
                   backgroundColor: AppColors.lightBeigeBackground,
+                  appBar: AppBar(
+                    title: Text(
+                      TextConstants.vehicleDetailsTitle,
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        widget.onReturnFromCamera?.call();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
                   body: SafeArea(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildHeader(h, w),
                         SizedBox(height: h * 0.016),
                         _buildTabs(w),
                         SizedBox(height: h * 0.018),
                         Expanded(
                           child: _selectedTab == 0
-                              ? _buildScanTabContent(w, h)
-                              : _buildTypeParkingNumberContent(w, h, bodyContext),
+                              ? _buildTypeParkingNumberContent(
+                                  w, h, bodyContext)
+                              : _buildScanTabContent(w, h),
                         ),
                       ],
                     ),
@@ -300,45 +339,28 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   /// Tracks last submitted image path so we can pass to CarSuccessScreen (null = location-only).
   String? _lastSubmittedImagePath;
 
-  Widget _buildHeader(double h, double w) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: h * 0.01),
-      color: AppColors.white,
-      child: Center(
-        child: TextComponent(
-          labelText: TextConstants.vehicleDetailsTitle,
-          fontSize: MediaQuery.of(context).size.width * 0.045,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-        ),
-      ),
-    );
-  }
-
   Widget _buildTabs(double w) {
-    final isScan = _selectedTab == 0;
+    final isParkingNumber = _selectedTab == 0;
+    final isScan = _selectedTab == 1;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: w * 0.02),
       child: Row(
         children: [
           Expanded(
             child: TabChip(
-              icon: Icons.qr_code_scanner,
-              label: TextConstants.scanTabLabel,
-              isActive: isScan,
-              onTap: _showLottieThenCamera ? null : _onSelectScanTab,
+              icon: Icons.dialpad,
+              label: TextConstants.typeParkingNumberTabLabel,
+              isActive: isParkingNumber,
+              onTap: isParkingNumber ? null : _onSelectParkingNumberTab,
             ),
           ),
           SizedBox(width: w * 0.025),
           Expanded(
             child: TabChip(
-              icon: Icons.dialpad,
-              label: TextConstants.typeParkingNumberTabLabel,
-              isActive: !isScan,
-              onTap: _showLottieThenCamera
-                  ? _onSelectTypeParkingNumberTab
-                  : () => setState(() => _selectedTab = 1),
+              icon: Icons.qr_code_scanner,
+              label: TextConstants.scanTabLabel,
+              isActive: isScan,
+              onTap: isScan ? null : _onSelectScanTab,
             ),
           ),
         ],
@@ -449,8 +471,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                   right: 0,
                   child: CameraTopOverlay(
                     isFlashOn: isFlashOn,
-                    onFlashToggle: () =>
-                        context.read<CarCameraBloc>().add(const ToggleFlashRequested()),
+                    onFlashToggle: () => context
+                        .read<CarCameraBloc>()
+                        .add(const ToggleFlashRequested()),
                     topOffset: 0,
                   ),
                 ),
@@ -489,7 +512,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     );
   }
 
-  Widget _buildTypeParkingNumberContent(double w, double h, BuildContext blocContext) {
+  Widget _buildTypeParkingNumberContent(
+      double w, double h, BuildContext blocContext) {
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: w * 0.04),
       child: Column(
@@ -528,17 +552,47 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     fontWeight: FontWeight.w500,
                     color: AppColors.black,
                   ),
-                  SizedBox(height: h * 0.012),
                   TextFieldComponent(
                     labelText: TextConstants.emptyText,
                     hintText: TextConstants.parkingLocationHint,
                     controller: _parkingLocationController,
+                    focusNode: _parkingLocationFocusNode,
                     keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.done,
-                    onSubmitEditing: () => _onSubmitParkingLocation(blocContext),
+                    textInputAction: TextInputAction.next,
+                    onSubmitEditing: () {
+                      FocusScope.of(blocContext)
+                          .requestFocus(_vehicleNumberFocusNode);
+                    },
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return TextConstants.pleaseEnterParkingLocation;
+                      }
+                      return null;
+                    },
+                    borderRadius: w * 0.03,
+                  ),
+                  SizedBox(height: h * 0.04),
+                  TextComponent(
+                    labelText: TextConstants.vehicleNumberLabel,
+                    fontSize: w * 0.035,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black,
+                  ),
+                  TextFieldComponent(
+                    labelText: TextConstants.emptyText,
+                    hintText: TextConstants.vehicleNumberHint,
+                    controller: _vehicleNumberController,
+                    focusNode: _vehicleNumberFocusNode,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    textInputAction: TextInputAction.done,
+                    onSubmitEditing: () =>
+                        _onSubmitParkingLocation(blocContext),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return TextConstants.pleaseEnterVehicleNumber;
                       }
                       return null;
                     },
@@ -556,7 +610,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                 width: double.infinity,
                 height: h * 0.062,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : () => _onSubmitParkingLocation(blocContext),
+                  onPressed: isLoading
+                      ? null
+                      : () => _onSubmitParkingLocation(blocContext),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.actionButtonYellow,
                     foregroundColor: AppColors.white,
@@ -572,7 +628,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColors.white),
                           ),
                         )
                       : Row(
@@ -602,4 +659,3 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     );
   }
 }
-

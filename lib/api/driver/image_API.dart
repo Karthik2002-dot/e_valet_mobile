@@ -71,6 +71,11 @@ class ImageApiService {
         formDataMap['parkingLocation'] = request.parkingLocation;
       }
 
+      if (request.vehicleNumber != null &&
+          request.vehicleNumber!.trim().isNotEmpty) {
+        formDataMap['vehicleNumber'] = request.vehicleNumber!.trim();
+      }
+
       final formData = FormData.fromMap(formDataMap);
 
       // Make the API call

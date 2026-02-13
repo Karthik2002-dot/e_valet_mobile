@@ -61,6 +61,7 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
           longitude: event.longitude,
           accuracy: event.accuracy,
           parkingLocation: event.parkingLocation,
+          vehicleNumber: event.vehicleNumber,
         );
         await ImageApiService.uploadParkingPhoto(
           request: request,
@@ -90,6 +91,7 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
           longitude: event.longitude,
           accuracy: event.accuracy,
           parkingLocation: event.parkingLocation,
+          vehicleNumber: event.vehicleNumber,
           sessionId: event.sessionId,
           isReparking: event.isReparking,
           timestamp: DateTime.now().toIso8601String(),
