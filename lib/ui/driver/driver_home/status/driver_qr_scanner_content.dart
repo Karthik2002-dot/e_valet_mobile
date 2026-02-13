@@ -67,13 +67,15 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     });
   }
 
-  void _onSelectScanTab() {
+  void _onSelectScanTab(BuildContext? blocContext) {
     if (_selectedTab == 0) return;
+    blocContext?.read<QrBloc>().add(const QrCameraActivateRequested());
     setState(() => _selectedTab = 0);
     _startScanIntroTimer();
   }
 
-  void _onSelectTypeIdTab() {
+  void _onSelectTypeIdTab(BuildContext? blocContext) {
+    blocContext?.read<QrBloc>().add(const QrResetRequested());
     _introTimer?.cancel();
     setState(() {
       _selectedTab = 1;
@@ -156,55 +158,59 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
             },
           ),
         ],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // White header with title and short hint
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                vertical: widget.screenHeight * 0.012,
-                horizontal: widget.screenWidth * 0.04,
-              ),
-              color: AppColors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextComponent(
-                    labelText: TextConstants.vehicleDetailsTitle,
-                    fontSize: MediaQuery.of(context).size.width * 0.045,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
+        child: Builder(
+          builder: (blocContext) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // White header with title and short hint
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    vertical: widget.screenHeight * 0.012,
+                    horizontal: widget.screenWidth * 0.04,
                   ),
-                  SizedBox(height: widget.screenHeight * 0.006),
-                  Text(
-                    TextConstants.vehicleDetailsHint,
-                    style: TextStyle(
-                      fontSize: widget.screenWidth * 0.032,
-                      color: AppColors.black,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    textAlign: TextAlign.center,
+                  color: AppColors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextComponent(
+                        labelText: TextConstants.vehicleDetailsTitle,
+                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
+                      ),
+                      SizedBox(height: widget.screenHeight * 0.006),
+                      Text(
+                        TextConstants.vehicleDetailsHint,
+                        style: TextStyle(
+                          fontSize: widget.screenWidth * 0.032,
+                          color: AppColors.black,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            SizedBox(height: widget.screenHeight * 0.016),
-            // Tabs: Type ID Number first (no camera init), Scan second (camera when opened)
-            _buildTabs(),
-            SizedBox(height: widget.screenHeight * 0.018),
-            Expanded(
-              child: _selectedTab == 0
-                  ? _buildScanContent()
-                  : _buildTypeIdContent(),
-            ),
-          ],
+                ),
+                SizedBox(height: widget.screenHeight * 0.016),
+                // Tabs: Type ID Number first (no camera init), Scan second (camera when opened)
+                _buildTabs(blocContext),
+                SizedBox(height: widget.screenHeight * 0.018),
+                Expanded(
+                  child: _selectedTab == 0
+                      ? _buildScanContent()
+                      : _buildTypeIdContent(),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildTabs(BuildContext blocContext) {
     final w = widget.screenWidth;
     final isTypeId = _selectedTab == 1;
     final isScan = _selectedTab == 0;
@@ -218,7 +224,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
               icon: Icons.dialpad,
               label: TextConstants.typeParkingNumberTabLabel,
               isActive: isTypeId,
-              onTap: _onSelectTypeIdTab,
+              onTap: () => _onSelectTypeIdTab(blocContext),
             ),
           ),
           SizedBox(width: w * 0.025),
@@ -228,7 +234,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
               icon: Icons.qr_code_scanner,
               label: TextConstants.scanTabLabel,
               isActive: isScan,
-              onTap: _onSelectScanTab,
+              onTap: () => _onSelectScanTab(blocContext),
             ),
           ),
         ],

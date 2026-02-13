@@ -24,10 +24,11 @@ import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart';
 
-/// Third screen: Vehicle details + Scan | Type Parking Number.
-/// - Scan tab: Carphoto.json 2 sec → camera in same area (no separate screen). Capture → validate → Park API → Car Success.
-/// - Type Parking Number tab: enter parking location → Submit → Park API → Car Success.
-/// Old camera/preview screens are not used in this flow.
+/// Third screen: Vehicle details + Location/Vehicle Number | Car Photo tabs.
+/// - [cameViaTagNumber] true (tag flow): default tab is Parking Number (location + vehicle number form).
+/// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area. Capture → validate → Park API → Car Success.
+/// - Scan tab: Carphoto.json 2 sec → camera. Capture → validate → Park API → Car Success.
+/// - Parking Number tab: enter parking location + vehicle number → Submit → Park API → Car Success.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
@@ -64,8 +65,14 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   void initState() {
     super.initState();
     _cameraBloc = CarCameraBloc();
-    _selectedTab =
-        0; // Parking Number first; camera not opened until user switches to Scan
+    if (widget.cameViaTagNumber) {
+      _selectedTab =
+          0; // Tag flow: show Parking Number (location + vehicle) first
+    } else {
+      _selectedTab = 1; // QR flow: go straight to Scan (Lottie then camera)
+      _scanPhase = 0;
+      _startLottieTimer();
+    }
   }
 
   void _startLottieTimer() {
@@ -84,6 +91,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
 
   void _onSelectParkingNumberTab() {
     _lottieTimer?.cancel();
+    _cameraBloc.add(const DisposeCameraRequested());
     setState(() => _selectedTab = 0);
   }
 
@@ -157,7 +165,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
 
   void _onCapturePhoto(BuildContext ctx) async {
     final state = ctx.read<CarCameraBloc>().state;
-    if (state is! CarCameraInitialized && state is! CarCameraFlashToggled) {
+    if (state is! CarCameraInitialized &&
+        state is! CarCameraFlashToggled &&
+        state is! CarCameraValidationError) {
       SnackBars.showErrorSnackBar(ctx, TextConstants.cameraNotReady);
       return;
     }
@@ -166,10 +176,14 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       _isCapturing = true;
       final cameraController = state is CarCameraInitialized
           ? state.cameraController
-          : (state as CarCameraFlashToggled).cameraController;
+          : state is CarCameraFlashToggled
+              ? state.cameraController
+              : (state as CarCameraValidationError).cameraController;
       final isFlashOn = state is CarCameraInitialized
           ? state.isFlashOn
-          : (state as CarCameraFlashToggled).isFlashOn;
+          : state is CarCameraFlashToggled
+              ? state.isFlashOn
+              : (state as CarCameraValidationError).isFlashOn;
       if (!cameraController.value.isInitialized) {
         SnackBars.showErrorSnackBar(ctx, TextConstants.cameraNotReady);
         return;

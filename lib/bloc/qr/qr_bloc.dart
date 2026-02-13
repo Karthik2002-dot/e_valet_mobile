@@ -10,6 +10,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
   QrBloc() : super(const QrState()) {
     on<QrCodeDetected>(_onQrCodeDetected);
     on<QrResetRequested>(_onResetRequested);
+    on<QrCameraActivateRequested>(_onCameraActivateRequested);
   }
 
   Future<void> _onQrCodeDetected(
@@ -66,8 +67,16 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     QrResetRequested event,
     Emitter<QrState> emit,
   ) {
+    // Clear state and stop camera so resources are released when leaving Scan tab
     emit(const QrState(
-      cameraShouldBeActive: true, // Camera should be active when reset
+      cameraShouldBeActive: false,
     ));
+  }
+
+  void _onCameraActivateRequested(
+    QrCameraActivateRequested event,
+    Emitter<QrState> emit,
+  ) {
+    emit(state.copyWith(cameraShouldBeActive: true));
   }
 }

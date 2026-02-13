@@ -31,3 +31,8 @@ class ForceReinitializeCameraRequested extends CarCameraEvent {
 class ToggleFlashRequested extends CarCameraEvent {
   const ToggleFlashRequested();
 }
+
+/// Disposes the camera and resets to initial state (e.g. when leaving Scan tab).
+class DisposeCameraRequested extends CarCameraEvent {
+  const DisposeCameraRequested();
+}

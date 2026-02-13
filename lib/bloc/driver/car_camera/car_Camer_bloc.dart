@@ -19,6 +19,18 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     on<InitializeCameraRequested>(_onInitializeCameraRequested);
     on<ForceReinitializeCameraRequested>(_onForceReinitializeCameraRequested);
     on<ToggleFlashRequested>(_onToggleFlashRequested);
+    on<DisposeCameraRequested>(_onDisposeCameraRequested);
+  }
+
+  Future<void> _onDisposeCameraRequested(
+    DisposeCameraRequested event,
+    Emitter<CarCameraState> emit,
+  ) async {
+    if (_isInitializing) return;
+    await _cameraController?.dispose();
+    _cameraController = null;
+    _isFlashOn = false;
+    emit(const CarCameraInitial());
   }
 
   Future<void> _onInitializeCameraRequested(
