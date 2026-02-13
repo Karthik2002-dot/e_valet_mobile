@@ -243,6 +243,19 @@ class TextConstants {
   static const String slideToCustomerMissing = 'Customer Missing';
   static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';
 
+  // Instruction text above action buttons
+  static const String pressBelowToConfirmArrival =
+      'Press the button below to confirm arrival.';
+  static const String pressBelowToConfirmHandover =
+      'Press the button below to confirm handover.';
+  static const String pressBelowToReportCustomerMissing =
+      'Press the button below to report customer missing.';
+  static const String pressBelowToAcceptRequest =
+      'Press the button below to accept the retrieval request.';
+  static const String pressBelowToProceedRepark =
+      'Press the button below to proceed to re-park the car.';
+  static const String pressBelowToCancel = 'Press below to cancel.';
+
   // Permission Messages
   static const String locationPermissionRequiredHandover =
       'Location permission is required to confirm handover';

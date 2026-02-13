@@ -8,11 +8,15 @@ class PreviewSubmitButton extends StatelessWidget {
   final bool isReparking;
   final bool isLoading;
 
+  /// When set, shown instead of Submit / Submit Re-Park (e.g. 'OK').
+  final String? overrideLabel;
+
   const PreviewSubmitButton({
     super.key,
     required this.onSubmit,
     this.isReparking = false,
     this.isLoading = false,
+    this.overrideLabel,
   });
 
   @override
@@ -43,20 +47,24 @@ class PreviewSubmitButton extends StatelessWidget {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   TextComponent(
-                    labelText: isReparking
-                        ? TextConstants.submitRePark
-                        : TextConstants.submitButton,
+                    labelText: overrideLabel ??
+                        (isReparking
+                            ? TextConstants.submitRePark
+                            : TextConstants.submitButton),
                     fontSize: screenWidth * 0.06,
                     color: AppColors.white,
                   ),
-                  SizedBox(width: screenWidth * 0.02),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.white,
-                    size: screenWidth * 0.06,
-                  ),
+                  if (overrideLabel == null) ...[
+                    SizedBox(width: screenWidth * 0.02),
+                    Icon(
+                      Icons.arrow_forward,
+                      color: AppColors.white,
+                      size: screenWidth * 0.06,
+                    ),
+                  ],
                 ],
               ),
       ),

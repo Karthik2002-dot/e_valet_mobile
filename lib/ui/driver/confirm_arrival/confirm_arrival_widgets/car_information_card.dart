@@ -8,9 +8,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class CarInformationCard extends StatelessWidget {
   final AssignedSession session;
 
+  /// When true, uses smaller image (e.g. when showing handover buttons).
+  final bool compact;
+
   const CarInformationCard({
     super.key,
     required this.session,
+    this.compact = false,
   });
 
   @override
@@ -32,77 +36,7 @@ class CarInformationCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Car Image
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.black,
-                width: 2,
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
-              color: AppColors.white,
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
-              child: session.photoUrl != null
-                  ? Image.network(
-                      session.photoUrl!,
-                      width: double.infinity,
-                      height: screenWidth * 0.6,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          height: screenWidth * 0.6,
-                          color: AppColors.white,
-                          child: Center(
-                            child: ColorFiltered(
-                              colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 255, // Red channel inverted
-                                0, -1, 0, 0, 255, // Green channel inverted
-                                0, 0, -1, 0, 255, // Blue channel inverted
-                                0, 0, 0, 1, 0, // Alpha channel unchanged
-                              ]),
-                              child: Image.asset(
-                                'assets/images/cars.png',
-                                fit: BoxFit.contain,
-                                width: screenWidth * 0.4,
-                                height: screenHeight * 0.4,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: screenWidth * 0.6,
-                      color: AppColors.white,
-                      child: Center(
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.matrix([
-                            -1, 0, 0, 0, 255, // Red channel inverted
-                            0, -1, 0, 0, 255, // Green channel inverted
-                            0, 0, -1, 0, 255, // Blue channel inverted
-                            0, 0, 0, 1, 0, // Alpha channel unchanged
-                          ]),
-                          child: Image.asset(
-                            'assets/images/cars.png',
-                            fit: BoxFit.contain,
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ),
-
-          // Details Section
+          // Details Section (above image)
           Padding(
             padding: EdgeInsets.all(screenWidth * 0.04),
             child: Column(
@@ -140,8 +74,7 @@ class CarInformationCard extends StatelessWidget {
                   thickness: 1,
                   height: 1,
                 ),
-                if (session.parkingLocation != null &&
-                    session.parkingLocation!.isNotEmpty) ...[
+                if (session.parkingLocation.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -210,6 +143,77 @@ class CarInformationCard extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
+          ),
+
+          // Car Image (below details)
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.black,
+                width: 2,
+              ),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(18),
+              ),
+              color: AppColors.white,
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(18),
+              ),
+              child: session.photoUrl != null
+                  ? Image.network(
+                      session.photoUrl!,
+                      width: double.infinity,
+                      height: compact ? screenWidth * 0.35 : screenWidth * 0.6,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: double.infinity,
+                          height:
+                              compact ? screenWidth * 0.35 : screenWidth * 0.6,
+                          color: AppColors.white,
+                          child: Center(
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.matrix([
+                                -1, 0, 0, 0, 255, // Red channel inverted
+                                0, -1, 0, 0, 255, // Green channel inverted
+                                0, 0, -1, 0, 255, // Blue channel inverted
+                                0, 0, 0, 1, 0, // Alpha channel unchanged
+                              ]),
+                              child: Image.asset(
+                                'assets/images/cars.png',
+                                fit: BoxFit.contain,
+                                width: screenWidth * 0.4,
+                                height: screenHeight * 0.4,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: double.infinity,
+                      height: compact ? screenWidth * 0.35 : screenWidth * 0.6,
+                      color: AppColors.white,
+                      child: Center(
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.matrix([
+                            -1, 0, 0, 0, 255, // Red channel inverted
+                            0, -1, 0, 0, 255, // Green channel inverted
+                            0, 0, -1, 0, 255, // Blue channel inverted
+                            0, 0, 0, 1, 0, // Alpha channel unchanged
+                          ]),
+                          child: Image.asset(
+                            'assets/images/cars.png',
+                            fit: BoxFit.contain,
+                            width: screenWidth * 0.4,
+                            height: screenHeight * 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
             ),
           ),
         ],

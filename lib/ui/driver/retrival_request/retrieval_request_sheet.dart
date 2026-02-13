@@ -89,53 +89,60 @@ class RetrievalRequestSheet extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 8),
-                if (session != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: SizedBox(
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: isAcceptLoading
-                            ? null
-                            : (onAccept ?? () => Navigator.of(context).pop()),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                if (session != null) ...[
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                  TextComponent(
+                    labelText: TextConstants.pressBelowToAcceptRequest,
+                    fontSize: screenWidth * 0.04,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.12,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isAcceptLoading
+                          ? null
+                          : (onAccept ?? () => Navigator.of(context).pop()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: isAcceptLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.black),
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TextComponent(
-                                    labelText: TextConstants.acceptRequest,
-                                    fontSize: screenWidth * 0.05,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: screenWidth * 0.06,
-                                    color: AppColors.black,
-                                  ),
-                                ],
-                              ),
                       ),
+                      child: isAcceptLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.black),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextComponent(
+                                  labelText: TextConstants.acceptRequest,
+                                  fontSize: screenWidth * 0.055,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.black,
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  size: screenWidth * 0.07,
+                                  color: AppColors.black,
+                                ),
+                              ],
+                            ),
                     ),
                   ),
+                ],
               ],
             ),
           ),

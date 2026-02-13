@@ -103,52 +103,74 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                             ),
                             SizedBox(height: screenHeight * 0.02),
 
-                            // Car Information Card
-                            CarInformationCard(session: widget.session),
+                            // Car Information Card (compact when showing handover)
+                            CarInformationCard(
+                              session: widget.session,
+                              compact: _showHandoverButtons,
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
 
-                  // Show either slide button or handover buttons based on state
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.04,
-                      vertical: screenHeight * 0.02,
+                  // Big button area: instruction text + very big button(s)
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.02,
+                      ),
+                      child: _showHandoverButtons
+                          ? HandoverButtonsSection(
+                              key: _handoverButtonsKey,
+                              isLoading: isLoading,
+                              onConfirmHandover: () {
+                                context.read<ConfirmArrivalBloc>().add(
+                                      ConfirmHandoverRequested(
+                                          sessionId: widget.session.id),
+                                    );
+                              },
+                              onCustomerMissing: () {
+                                return CustomerMissingDialog.show(
+                                  context,
+                                  sessionId: widget.session.id,
+                                  onCancel: () {
+                                    _handoverButtonsKey.currentState
+                                        ?.resetCustomerMissingButton();
+                                  },
+                                );
+                              },
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextComponent(
+                                  labelText:
+                                      TextConstants.pressBelowToConfirmArrival,
+                                  fontSize: screenWidth * 0.045,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.black,
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: screenHeight * 0.02),
+                                Expanded(
+                                  child: SlideToConfirmButton(
+                                    sessionId: widget.session.id,
+                                    isLoading: isLoading,
+                                    onConfirm: () {
+                                      context.read<ConfirmArrivalBloc>().add(
+                                            ConfirmArrivalRequested(
+                                                sessionId: widget.session.id),
+                                          );
+                                    },
+                                    useBigStyle: true,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
-                    child: _showHandoverButtons
-                        ? HandoverButtonsSection(
-                            key: _handoverButtonsKey,
-                            isLoading: isLoading,
-                            onConfirmHandover: () {
-                              context.read<ConfirmArrivalBloc>().add(
-                                    ConfirmHandoverRequested(
-                                        sessionId: widget.session.id),
-                                  );
-                            },
-                            onCustomerMissing: () {
-                              return CustomerMissingDialog.show(
-                                context,
-                                sessionId: widget.session.id,
-                                onCancel: () {
-                                  // Reset the customer missing button after cancel
-                                  _handoverButtonsKey.currentState
-                                      ?.resetCustomerMissingButton();
-                                },
-                              );
-                            },
-                          )
-                        : SlideToConfirmButton(
-                            sessionId: widget.session.id,
-                            isLoading: isLoading,
-                            onConfirm: () {
-                              context.read<ConfirmArrivalBloc>().add(
-                                    ConfirmArrivalRequested(
-                                        sessionId: widget.session.id),
-                                  );
-                            },
-                          ),
                   ),
 
                   // Footer at Bottom
