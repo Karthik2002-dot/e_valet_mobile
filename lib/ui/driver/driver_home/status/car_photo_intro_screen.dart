@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -290,41 +291,35 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             },
             child: Builder(
               builder: (bodyContext) {
-                return Scaffold(
-                  backgroundColor: AppColors.lightBeigeBackground,
-                  appBar: AppBar(
-                    title: Text(
-                      TextConstants.vehicleDetailsTitle,
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (!didPop && mounted) {
+                      SnackBars.showErrorSnackBar(
+                        context,
+                        TextConstants.pleaseCompleteParkingProcess,
+                      );
+                    }
+                  },
+                  child: Scaffold(
+                    backgroundColor: AppColors.lightBeigeBackground,
+                    appBar: const CustomAppBar(),
+                    body: SafeArea(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(height: h * 0.016),
+                          _buildHeaderAboveTabs(w, h),
+                          SizedBox(height: h * 0.016),
+                          _buildTabs(w),
+                          Expanded(
+                            child: _selectedTab == 0
+                                ? _buildTypeParkingNumberContent(
+                                    w, h, bodyContext)
+                                : _buildScanTabContent(w, h),
+                          ),
+                        ],
                       ),
-                    ),
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        widget.onReturnFromCamera?.call();
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  body: SafeArea(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: h * 0.016),
-                        _buildTabs(w),
-                        SizedBox(height: h * 0.018),
-                        Expanded(
-                          child: _selectedTab == 0
-                              ? _buildTypeParkingNumberContent(
-                                  w, h, bodyContext)
-                              : _buildScanTabContent(w, h),
-                        ),
-                      ],
                     ),
                   ),
                 );
@@ -339,6 +334,39 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   /// Tracks last submitted image path so we can pass to CarSuccessScreen (null = location-only).
   String? _lastSubmittedImagePath;
 
+  /// Same style as driver_qr_scanner_content: title + "what to do" hint above the tabs.
+  Widget _buildHeaderAboveTabs(double w, double h) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        vertical: h * 0.012,
+        horizontal: w * 0.04,
+      ),
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextComponent(
+            labelText: TextConstants.vehicleDetailsTitle,
+            fontSize: w * 0.045,
+            fontWeight: FontWeight.w600,
+            color: AppColors.black,
+          ),
+          SizedBox(height: h * 0.006),
+          Text(
+            TextConstants.vehicleDetailsParkingPhotoHint,
+            style: TextStyle(
+              fontSize: w * 0.032,
+              color: AppColors.black,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabs(double w) {
     final isParkingNumber = _selectedTab == 0;
     final isScan = _selectedTab == 1;
@@ -349,7 +377,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           Expanded(
             child: TabChip(
               icon: Icons.dialpad,
-              label: TextConstants.typeParkingNumberTabLabel,
+              label: TextConstants.locationVehicleNumber,
               isActive: isParkingNumber,
               onTap: isParkingNumber ? null : _onSelectParkingNumberTab,
             ),
@@ -358,7 +386,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           Expanded(
             child: TabChip(
               icon: Icons.qr_code_scanner,
-              label: TextConstants.scanTabLabel,
+              label: TextConstants.carPhoto,
               isActive: isScan,
               onTap: isScan ? null : _onSelectScanTab,
             ),
@@ -519,12 +547,6 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextComponent(
-            labelText: TextConstants.enterParkingLocationToProceed,
-            fontSize: w * 0.045,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
-          ),
           SizedBox(height: h * 0.02),
           Container(
             width: double.infinity,

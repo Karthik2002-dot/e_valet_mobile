@@ -25,6 +25,7 @@ class TabChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
+          height: 56,
           padding: const EdgeInsets.symmetric(
             vertical: 8,
             horizontal: 8,
@@ -59,8 +60,8 @@ class TabChip extends StatelessWidget {
                   labelText: label,
                   color: AppColors.black,
                   fontWeight: FontWeight.w500,
-                  fontSize: 18,
-                  maxLines: 1,
+                  fontSize: 14,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

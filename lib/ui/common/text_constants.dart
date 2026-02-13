@@ -103,9 +103,15 @@ class TextConstants {
   static const String vehicleDetailsTitle = 'Vehicle details';
   static const String vehicleDetailsHint =
       'Enter tag number or scan the QR in the card below.';
+
+  /// Hint for the parking/photo screen (after tag/QR submit): parking number tab + scan tab.
+  static const String vehicleDetailsParkingPhotoHint =
+      'Enter parking location and vehicle number below, or use Scan to capture a photo of the car.';
   static const String scanTabLabel = 'Scan';
   static const String typeIdNumberTabLabel = 'ID Number';
   static const String typeParkingNumberTabLabel = 'Parking Number';
+  static const String locationVehicleNumber = 'Location and Vehicle Number';
+  static const String carPhoto = 'Car Photo';
   static const String enterTagNumberLink = 'Or enter the tag number';
   static const String pleaseTurnOnlineToPark =
       'Please Turn Online To Park a Car';
@@ -165,13 +171,15 @@ class TextConstants {
   static const String enterParkingLocationToProceed =
       'Enter the Parking Location to Proceed';
   static const String parkingLocationLabel = 'Parking Location';
-  static const String parkingLocationHint = 'Enter Badge Number';
+  static const String parkingLocationHint =
+      'Enter parking spot or location (e.g. A-12)';
   static const String pleaseEnterParkingLocation =
       'Please enter parking location';
   static const String vehicleNumberLabel = 'Vehicle Number';
   static const String vehicleNumberHint = 'Enter vehicle number (digits only)';
-  static const String pleaseEnterVehicleNumber =
-      'Please enter vehicle number';
+  static const String pleaseEnterVehicleNumber = 'Please enter vehicle number';
+  static const String pleaseCompleteParkingProcess =
+      'Please complete the parking process.';
 
   // QR Status Messages
   static const String scannedSuccess = 'Scanned Success';
