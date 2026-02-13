@@ -150,7 +150,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var i = 0; i < freeDrivers.length; i++) ...[
-              if (i > 0) SizedBox(width: MediaQuery.of(context).size.width * 0.015),
+              if (i > 0)
+                SizedBox(width: MediaQuery.of(context).size.width * 0.015),
               IntrinsicWidth(
                 child: AvailableDriversCard(
                   driver: freeDrivers[i],

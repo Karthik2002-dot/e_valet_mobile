@@ -22,10 +22,12 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
     SubmitPhotoRequested event,
     Emitter<PreviewCarState> emit,
   ) async {
-    debugPrint('[PreviewCarBloc] SubmitPhotoRequested received: imagePath=${event.imagePath}, parkingLocation=${event.parkingLocation}, sessionId=${event.sessionId}');
+    debugPrint(
+        '[PreviewCarBloc] SubmitPhotoRequested received: imagePath=${event.imagePath}, parkingLocation=${event.parkingLocation}, sessionId=${event.sessionId}');
     // Guard: ignore duplicate submissions when already submitting or succeeded
     if (state is PreviewCarSubmitting || state is PreviewCarSuccess) {
-      debugPrint('[PreviewCarBloc] Ignoring duplicate: state=${state.runtimeType}');
+      debugPrint(
+          '[PreviewCarBloc] Ignoring duplicate: state=${state.runtimeType}');
       return;
     }
     emit(const PreviewCarSubmitting());
@@ -41,7 +43,8 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
       }
 
       // Try online upload first
-      debugPrint('[PreviewCarBloc] Calling Park API (isReparking=${event.isReparking})...');
+      debugPrint(
+          '[PreviewCarBloc] Calling Park API (isReparking=${event.isReparking})...');
       if (event.isReparking) {
         final request = ReparkPhotoRequest(
           imagePath: imagePathToUse,
@@ -68,7 +71,8 @@ class PreviewCarBloc extends Bloc<PreviewCarEvent, PreviewCarState> {
           sessionId: event.sessionId,
         );
       }
-      debugPrint('[PreviewCarBloc] Park API success, emitting PreviewCarSuccess');
+      debugPrint(
+          '[PreviewCarBloc] Park API success, emitting PreviewCarSuccess');
       emit(const PreviewCarSuccess());
     } catch (e) {
       debugPrint('[PreviewCarBloc] Park API error: $e');

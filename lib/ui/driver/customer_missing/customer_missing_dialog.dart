@@ -9,7 +9,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 
 class CustomerMissingDialog extends StatefulWidget {
   final String sessionId;
@@ -129,14 +129,14 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                       context, state.response.message);
                   final navigator = Navigator.of(context);
                   navigator.pop();
-                  // Navigate to camera screen for reparking (navigator stays valid after pop)
+                  // Navigate to latest vehicle details screen (Scan / Type Parking Number) for reparking
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     navigator.pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => CarCameraScreen(
+                        builder: (context) => CarPhotoIntroScreen(
+                          cameViaTagNumber: false,
                           sessionId: widget.sessionId,
                           isReparking: true,
-                          preventBackNavigation: true,
                         ),
                       ),
                     );

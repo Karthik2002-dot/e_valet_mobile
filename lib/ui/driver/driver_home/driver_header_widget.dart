@@ -11,6 +11,7 @@ class DriverHeaderWidget extends StatelessWidget {
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
+
   /// When true, show back button on the left (same line as break toggle, other side).
   final bool showBackButton;
   final VoidCallback? onBackPressed;

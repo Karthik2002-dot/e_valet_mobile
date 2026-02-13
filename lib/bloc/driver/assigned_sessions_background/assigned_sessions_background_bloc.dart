@@ -22,6 +22,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     on<RefreshAssignedSessions>(_onRefreshAssignedSessions);
     on<ReinitializeWebSocket>(_onReinitializeWebSocket);
     on<_PollAssignedSessions>(_onPollSessions);
+    on<SetSessionsFromPending>(_onSetSessionsFromPending);
 
     // Setup WebSocket listeners and connection monitoring
     _setupWebSocketConnectionMonitoring();
@@ -191,6 +192,14 @@ class AssignedSessionsBackgroundBloc extends Bloc<
       print('Failed to fetch assigned sessions: $e');
       // Intentionally no emit on error — background refresh stays silent
     }
+  }
+
+  void _onSetSessionsFromPending(
+    SetSessionsFromPending event,
+    Emitter<AssignedSessionsBackgroundState> emit,
+  ) {
+    if (event.sessions.isEmpty) return;
+    emit(AssignedSessionsBackgroundData(event.sessions));
   }
 
   /// Emit sessions from WebSocket payload without hitting the REST API

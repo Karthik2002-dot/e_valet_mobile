@@ -28,14 +28,23 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart
 /// - Scan tab: Carphoto.json 2 sec → camera in same area (no separate screen). Capture → validate → Park API → Car Success.
 /// - Type Parking Number tab: enter parking location → Submit → Park API → Car Success.
 /// Old camera/preview screens are not used in this flow.
+/// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
+
+  /// When opening from a pending session (e.g. CHECKED_IN card), pass sessionId so the screen can submit without scanning first.
+  final String? sessionId;
+
+  /// True when continuing a reparking flow (pending REPARKING).
+  final bool isReparking;
 
   const CarPhotoIntroScreen({
     super.key,
     required this.cameViaTagNumber,
     this.onReturnFromCamera,
+    this.sessionId,
+    this.isReparking = false,
   });
 
   @override
@@ -66,6 +75,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     _cameraBloc = CarCameraBloc();
     _selectedTab =
         0; // Parking Number first; camera not opened until user switches to Scan
+    if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
+      TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
+        debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
+      });
+    }
   }
 
   void _startLottieTimer() {
@@ -129,7 +143,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             SubmitPhotoRequested(
               imagePath: imagePath,
               sessionId: sessionId,
-              isReparking: false,
+              isReparking: widget.isReparking,
               latitude: coordinates['latitude']!,
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
