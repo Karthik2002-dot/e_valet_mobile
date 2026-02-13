@@ -20,6 +20,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart';
 
 /// Third screen: Vehicle details + Scan | Type Parking Number.
 /// - Scan tab: Carphoto.json 2 sec → camera in same area (no separate screen). Capture → validate → Park API → Car Success.
@@ -302,12 +303,12 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   Widget _buildHeader(double h, double w) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: h * 0.018),
+      padding: EdgeInsets.symmetric(vertical: h * 0.01),
       color: AppColors.white,
       child: Center(
         child: TextComponent(
           labelText: TextConstants.vehicleDetailsTitle,
-          fontSize: w * 0.055,
+          fontSize: MediaQuery.of(context).size.width * 0.045,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
         ),
@@ -322,7 +323,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _TabChip(
+            child: TabChip(
               icon: Icons.qr_code_scanner,
               label: TextConstants.scanTabLabel,
               isActive: isScan,
@@ -331,7 +332,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           ),
           SizedBox(width: w * 0.025),
           Expanded(
-            child: _TabChip(
+            child: TabChip(
               icon: Icons.dialpad,
               label: TextConstants.typeParkingNumberTabLabel,
               isActive: !isScan,
@@ -602,64 +603,3 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   }
 }
 
-class _TabChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback? onTap;
-
-  const _TabChip({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.actionButtonYellow : AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? AppColors.primary : AppColors.divider,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.grey,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.white, width: 1),
-                ),
-                child: Icon(icon, color: AppColors.white, size: 20),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    color: AppColors.black,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

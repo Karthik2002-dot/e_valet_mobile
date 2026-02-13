@@ -102,9 +102,11 @@ class TextConstants {
   static const String parkVehicle = 'Park Vehicle';
   static const String retrieveVehicle = 'Retrieve Vehicle';
   static const String vehicleDetailsTitle = 'Vehicle details';
+  static const String vehicleDetailsHint =
+      'Enter tag number or scan the QR in the card below.';
   static const String scanTabLabel = 'Scan';
-  static const String typeIdNumberTabLabel = 'Type ID Number';
-  static const String typeParkingNumberTabLabel = 'Type Parking Number';
+  static const String typeIdNumberTabLabel = 'ID Number';
+  static const String typeParkingNumberTabLabel = 'Parking Number';
   static const String enterTagNumberLink = 'Or enter the tag number';
   static const String pleaseTurnOnlineToPark =
       'Please Turn Online To Park a Car';
