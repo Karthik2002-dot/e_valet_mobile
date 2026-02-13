@@ -16,17 +16,20 @@ import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 
 class PreviewCarScreen extends StatefulWidget {
-  final String imagePath;
+  /// Photo path when coming from Scan; null when coming from Type Parking Number only.
+  final String? imagePath;
   final String? sessionId;
   final bool isReparking;
   final String? parkingLocation;
+  final String? vehicleNumber;
 
   const PreviewCarScreen({
     super.key,
-    required this.imagePath,
+    this.imagePath,
     this.sessionId,
     this.isReparking = false,
     this.parkingLocation,
+    this.vehicleNumber,
   });
 
   @override
@@ -74,6 +77,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
               parkingLocation: _currentParkingLocation,
+              vehicleNumber: widget.vehicleNumber,
             ),
           );
     } on ApiException catch (e) {
@@ -301,15 +305,47 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     color: AppColors.black,
                                   ),
                                 ),
+                                if (widget.vehicleNumber != null &&
+                                    widget.vehicleNumber!.isNotEmpty) ...[
+                                  SizedBox(height: screenHeight * 0.012),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.directions_car,
+                                        color: AppColors.primary,
+                                        size: screenWidth * 0.045,
+                                      ),
+                                      SizedBox(width: screenWidth * 0.02),
+                                      Text(
+                                        'Vehicle Number',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: screenHeight * 0.004),
+                                  Text(
+                                    widget.vehicleNumber!,
+                                    style: TextStyle(
+                                      fontSize: screenWidth * 0.038,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
 
                         // Image Card with Retake Button - Only show if parking location is NOT provided (normal photo flow)
-                        if (widget.parkingLocation == null ||
-                            widget.parkingLocation!.isEmpty)
+                        if ((widget.parkingLocation == null ||
+                                widget.parkingLocation!.isEmpty) &&
+                            widget.imagePath != null &&
+                            widget.imagePath!.isNotEmpty)
                           PreviewImageCard(
-                            imagePath: widget.imagePath,
+                            imagePath: widget.imagePath!,
                             onRetake: () => Navigator.pop(context),
                           ),
 
