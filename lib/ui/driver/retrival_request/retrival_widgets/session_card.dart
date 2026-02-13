@@ -48,6 +48,8 @@ class SessionCard extends StatelessWidget {
                   child: session.photoUrl != null
                       ? Image.network(
                           session.photoUrl!,
+                          key: ValueKey<String>(session.photoUrl!),
+                          gaplessPlayback: true,
                           width: double.infinity,
                           height: screenWidth * 0.35,
                           fit: BoxFit.cover,
