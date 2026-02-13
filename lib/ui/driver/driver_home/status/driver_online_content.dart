@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_qr_scanner_content.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_action_card.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_vehicle_details_screen.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
@@ -65,18 +66,36 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: w * 0.04),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: h * 0.03),
-                  _buildActionCard(
+                  SizedBox(height: h * 0.02),
+                  TextComponent(
+                    labelText:
+                        TextConstants.readyToParkMessage(widget.driverName),
+                    fontSize: w * 0.048,
+                    textAlign: TextAlign.center,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                  SizedBox(height: h * 0.025),
+                  DriverActionCard(
                     imagePath: 'assets/images/park.png',
                     buttonLabel: TextConstants.parkVehicle,
                     onTap: () => widget.onParkFlowChanged(true),
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
                   ),
                   SizedBox(height: h * 0.04),
-                  _buildActionCard(
+                  DriverActionCard(
                     imagePath: 'assets/images/retrive.png',
                     buttonLabel: TextConstants.retrieveVehicle,
                     onTap: null,
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
                   ),
                   SizedBox(height: h * 0.025),
                 ],
@@ -88,89 +107,13 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
     );
   }
 
-  Widget _buildActionCard({
-    required String imagePath,
-    required String buttonLabel,
-    VoidCallback? onTap,
-  }) {
-    final w = widget.screenWidth;
-    final h = widget.screenHeight;
-    final isTappable = onTap != null;
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(w * 0.045),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow10,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isTappable ? onTap : null,
-          borderRadius: BorderRadius.circular(w * 0.045),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: w * 0.045,
-              vertical: h * 0.014,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  imagePath,
-                  width: double.infinity,
-                  height: h * 0.22,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(height: h * 0.024),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: h * 0.018),
-                  decoration: BoxDecoration(
-                    color: AppColors.actionButtonYellow,
-                    borderRadius: BorderRadius.circular(w * 0.025),
-                  ),
-                  child: Center(
-                    child: TextComponent(
-                      labelText: buttonLabel,
-                      fontSize: widget.isDesktop
-                          ? w * 0.018
-                          : widget.isTablet
-                              ? w * 0.028
-                              : w * 0.048,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildVehicleDetailsScreen() {
-    return Column(
-      children: [
-        Expanded(
-          child: DriverQrScannerContent(
-            key: ValueKey('vehicle_details'),
-            screenWidth: widget.screenWidth,
-            screenHeight: widget.screenHeight,
-            isTablet: widget.isTablet,
-            isDesktop: widget.isDesktop,
-            onReturnFromCarCamera: () => widget.onParkFlowChanged(false),
-          ),
-        ),
-      ],
+    return DriverVehicleDetailsScreen(
+      screenWidth: widget.screenWidth,
+      screenHeight: widget.screenHeight,
+      isTablet: widget.isTablet,
+      isDesktop: widget.isDesktop,
+      onReturnFromCarCamera: () => widget.onParkFlowChanged(false),
     );
   }
 
@@ -200,7 +143,9 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
             );
           }
         },
-        child: widget.showParkFlow ? _buildVehicleDetailsScreen() : _buildFirstScreen(),
+        child: widget.showParkFlow
+            ? _buildVehicleDetailsScreen()
+            : _buildFirstScreen(),
       ),
     );
   }
