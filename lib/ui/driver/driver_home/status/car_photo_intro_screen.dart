@@ -82,6 +82,12 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
       });
     }
+    _parkingLocationController.addListener(_onParkingFormChanged);
+    _vehicleNumberController.addListener(_onParkingFormChanged);
+  }
+
+  void _onParkingFormChanged() {
+    if (mounted) setState(() {});
   }
 
   void _startLottieTimer() {
@@ -230,8 +236,15 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         parkingLocation: location, vehicleNumber: vehicleNumber);
   }
 
+  bool get _canSubmitParkingNumber {
+    return _parkingLocationController.text.trim().isNotEmpty &&
+        _vehicleNumberController.text.trim().isNotEmpty;
+  }
+
   @override
   void dispose() {
+    _parkingLocationController.removeListener(_onParkingFormChanged);
+    _vehicleNumberController.removeListener(_onParkingFormChanged);
     _lottieTimer?.cancel();
     _parkingLocationController.dispose();
     _vehicleNumberController.dispose();
@@ -504,6 +517,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
 
   Widget _buildTypeParkingNumberContent(
       double w, double h, BuildContext blocContext) {
+    final labelFontSize = w * 0.048;
+    final inputFontSize = w * 0.044;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: w * 0.04),
       child: Column(
@@ -512,7 +527,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           SizedBox(height: h * 0.02),
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(w * 0.025),
+            padding: EdgeInsets.all(w * 0.04),
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(w * 0.03),
@@ -532,8 +547,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                 children: [
                   TextComponent(
                     labelText: TextConstants.parkingLocationLabel,
-                    fontSize: w * 0.035,
-                    fontWeight: FontWeight.w500,
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.black,
                   ),
                   TextFieldComponent(
@@ -543,6 +558,10 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     focusNode: _parkingLocationFocusNode,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
+                    fontSize: inputFontSize,
+                    labelFontSize: labelFontSize,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: w * 0.04, vertical: h * 0.022),
                     onSubmitEditing: () {
                       FocusScope.of(blocContext)
                           .requestFocus(_vehicleNumberFocusNode);
@@ -555,11 +574,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     },
                     borderRadius: w * 0.03,
                   ),
-                  SizedBox(height: h * 0.04),
+                  SizedBox(height: h * 0.022),
                   TextComponent(
                     labelText: TextConstants.vehicleNumberLabel,
-                    fontSize: w * 0.035,
-                    fontWeight: FontWeight.w500,
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.black,
                   ),
                   TextFieldComponent(
@@ -568,8 +587,13 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     controller: _vehicleNumberController,
                     focusNode: _vehicleNumberFocusNode,
                     keyboardType: TextInputType.number,
+                    fontSize: inputFontSize,
+                    labelFontSize: labelFontSize,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: w * 0.04, vertical: h * 0.022),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4),
                     ],
                     textInputAction: TextInputAction.done,
                     onSubmitEditing: () =>
@@ -586,40 +610,56 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               ),
             ),
           ),
-          SizedBox(height: h * 0.025),
+          SizedBox(height: h * 0.028),
+          Text(
+            'Please click the button below after entering the parking location and vehicle number.',
+            style: TextStyle(
+              fontSize: w * 0.045,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+              height: 1.35,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: h * 0.028),
           SizedBox(
             width: double.infinity,
-            height: h * 0.062,
+            height: h * 0.14,
             child: ElevatedButton(
-              onPressed: () => _onSubmitParkingLocation(blocContext),
+              onPressed: _canSubmitParkingNumber
+                  ? () => _onSubmitParkingLocation(blocContext)
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.actionButtonYellow,
+                disabledBackgroundColor: AppColors.grey.withOpacity(0.5),
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(w * 0.025),
+                  borderRadius: BorderRadius.circular(w * 0.028),
                 ),
                 elevation: 0,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextComponent(
-                    labelText: TextConstants.submitButton,
-                    fontSize: w * 0.045,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
+                  Text(
+                    TextConstants.submitButton,
+                    style: TextStyle(
+                      fontSize: w * 0.09,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.white,
+                    ),
                   ),
-                  SizedBox(width: w * 0.02),
+                  SizedBox(width: w * 0.03),
                   Icon(
                     Icons.arrow_forward,
                     color: AppColors.white,
-                    size: w * 0.05,
+                    size: w * 0.09,
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: h * 0.02),
+          SizedBox(height: h * 0.025),
         ],
       ),
     );

@@ -243,6 +243,18 @@ class TextConstants {
   static const String slideToCustomerMissing = 'Customer Missing';
   static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';
 
+  // Instruction text above action buttons
+  static const String pressBelowToConfirmArrival =
+      "Please click the button below once you've entered the lobby.";
+  static const String pressBelowToConfirmHandover =
+      'Press the button below when the customer has arrived.';
+  static const String pressBelowToReportCustomerMissing =
+      'If the customer has not arrived within 2 minutes, please press the button below.';
+
+  static const String pressBelowToProceedRepark =
+      'Press the button below to proceed to re-park the car.';
+  static const String pressBelowToCancel = 'Press below to cancel.';
+
   // Permission Messages
   static const String locationPermissionRequiredHandover =
       'Location permission is required to confirm handover';

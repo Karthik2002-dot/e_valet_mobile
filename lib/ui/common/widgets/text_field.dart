@@ -23,6 +23,8 @@ class TextFieldComponent extends StatefulWidget {
   final EdgeInsets? contentPadding;
   final VoidCallback? onSubmitEditing;
   final TextInputAction? textInputAction;
+  final double? fontSize;
+  final double? labelFontSize;
 
   const TextFieldComponent({
     super.key,
@@ -45,6 +47,8 @@ class TextFieldComponent extends StatefulWidget {
     this.contentPadding,
     this.onSubmitEditing,
     this.textInputAction,
+    this.fontSize,
+    this.labelFontSize,
   });
 
   @override
@@ -65,7 +69,7 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
             ],
             TextComponent(
               labelText: widget.labelText,
-              fontSize: 14,
+              fontSize: widget.labelFontSize ?? 14,
               color: AppColors.black,
               fontWeight: FontWeight.w500,
             ),
@@ -86,14 +90,14 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
           onFieldSubmitted: widget.onSubmitEditing != null
               ? (_) => widget.onSubmitEditing!()
               : null,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: widget.fontSize ?? 14,
             color: AppColors.black,
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: TextStyle(
-              fontSize: 14,
+              fontSize: widget.fontSize ?? 14,
               color: AppColors.grey.withOpacity(0.6),
             ),
             filled: true,

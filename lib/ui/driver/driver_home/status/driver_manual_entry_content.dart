@@ -39,8 +39,21 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
   final TextEditingController _tagNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool get _canSubmitTagNumber => _tagNumberController.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _tagNumberController.addListener(_onTagFormChanged);
+  }
+
+  void _onTagFormChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    _tagNumberController.removeListener(_onTagFormChanged);
     _tagNumberController.dispose();
     super.dispose();
   }
@@ -98,165 +111,150 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
           );
         }
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Card with icon + title + input
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(w * 0.06),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(w * 0.04),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow10,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    'assets/svg/key_handover.svg',
-                    width: w * 0.2,
-                    height: w * 0.2,
-                  ),
-                  SizedBox(height: h * 0.02),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextComponent(
-                      labelText: TextConstants.tagNumberLabel,
-                      fontSize: w * 0.035,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  TextFieldComponent(
-                    labelText: TextConstants.emptyText,
-                    hintText: TextConstants.tagNumberHint,
-                    controller: _tagNumberController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSubmitEditing: _handleSubmit,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return TextConstants.validationEnterTagNumber;
-                      }
-                      final cardNumber = int.tryParse(value.trim());
-                      if (cardNumber == null) {
-                        return TextConstants.validationEnterValidNumber;
-                      }
-                      return null;
-                    },
-                    borderRadius: w * 0.03,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Card with icon + title + input
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(w * 0.04),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(w * 0.04),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadow10,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-            ),
-          ),
-
-          SizedBox(height: h * 0.025),
-
-          // Submit button (outside card)
-          BlocBuilder<TagSubmissionBloc, TagSubmissionState>(
-            builder: (context, state) {
-              final isLoading = state is TagSubmissionLoading;
-
-              return SizedBox(
-                width: double.infinity,
-                height: widget.isDesktop
-                    ? h * 0.06
-                    : widget.isTablet
-                        ? h * 0.07
-                        : h * 0.062,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.greyLight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(w * 0.02),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/svg/key_handover.svg',
+                      width: w * 0.2,
+                      height: w * 0.2,
                     ),
-                    elevation: 0,
-                  ),
-                  child: isLoading
-                      ? SizedBox(
-                          width: widget.isDesktop
-                              ? w * 0.015
-                              : widget.isTablet
-                                  ? w * 0.025
-                                  : w * 0.045,
-                          height: widget.isDesktop
-                              ? w * 0.015
-                              : widget.isTablet
-                                  ? w * 0.025
-                                  : w * 0.045,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextComponent(
-                              labelText: TextConstants.submitButton,
-                              fontSize: widget.isDesktop
-                                  ? w * 0.014
-                                  : widget.isTablet
-                                      ? w * 0.022
-                                      : w * 0.04,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.white,
-                            ),
-                            SizedBox(width: w * 0.02),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: AppColors.white,
-                              size: widget.isDesktop
-                                  ? w * 0.015
-                                  : widget.isTablet
-                                      ? w * 0.025
-                                      : w * 0.045,
-                            ),
-                          ],
-                        ),
-                ),
-              );
-            },
-          ),
-
-          SizedBox(height: h * 0.015),
-
-          // "Or scan the tag number" link (also outside card)
-          if (widget.onSwitchToQrScanner != null)
-            GestureDetector(
-              onTap: widget.onSwitchToQrScanner,
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: TextComponent(
-                  labelText: TextConstants.scanTagNumberLink,
-                  // e.g. "Or scan the tag number"
-                  fontSize: widget.isDesktop
-                      ? w * 0.012
-                      : widget.isTablet
-                          ? w * 0.02
-                          : w * 0.035,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.mutedText,
-                  textAlign: TextAlign.center,
-                  textDecoration: TextDecoration.underline,
+                    SizedBox(height: h * 0.022),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextComponent(
+                        labelText: TextConstants.tagNumberLabel,
+                        fontSize: w * 0.048,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    TextFieldComponent(
+                      labelText: TextConstants.emptyText,
+                      hintText: TextConstants.tagNumberHint,
+                      controller: _tagNumberController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      fontSize: w * 0.044,
+                      labelFontSize: w * 0.048,
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: w * 0.04, vertical: h * 0.022),
+                      onSubmitEditing: _handleSubmit,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return TextConstants.validationEnterTagNumber;
+                        }
+                        final cardNumber = int.tryParse(value.trim());
+                        if (cardNumber == null) {
+                          return TextConstants.validationEnterValidNumber;
+                        }
+                        return null;
+                      },
+                      borderRadius: w * 0.03,
+                    ),
+                  ],
                 ),
               ),
             ),
-        ],
+            SizedBox(height: h * 0.028),
+            // "Or scan the tag number" link (also outside card)
+            if (widget.onSwitchToQrScanner != null)
+              GestureDetector(
+                onTap: widget.onSwitchToQrScanner,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: h * 0.015),
+                  child: TextComponent(
+                    labelText: TextConstants.scanTagNumberLink,
+                    fontSize: w * 0.042,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.mutedText,
+                    textAlign: TextAlign.center,
+                    textDecoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            SizedBox(height: h * 0.02),
+            // Submit button – scrollable so user can reach it when keyboard is open
+            BlocBuilder<TagSubmissionBloc, TagSubmissionState>(
+              builder: (context, state) {
+                final isLoading = state is TagSubmissionLoading;
+                final canSubmit = _canSubmitTagNumber && !isLoading;
+
+                return SizedBox(
+                  width: double.infinity,
+                  height: h * 0.22,
+                  child: ElevatedButton(
+                    onPressed: canSubmit ? _handleSubmit : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.grey.withOpacity(0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(w * 0.028),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? SizedBox(
+                            width: w * 0.08,
+                            height: w * 0.08,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white),
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                TextConstants.submitButton,
+                                style: TextStyle(
+                                  fontSize: w * 0.09,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                              SizedBox(width: w * 0.03),
+                              Icon(
+                                Icons.arrow_forward,
+                                color: AppColors.white,
+                                size: w * 0.09,
+                              ),
+                            ],
+                          ),
+                  ),
+                );
+              },
+            ),
+            // Extra bottom space so user can scroll submit button above keyboard
+            SizedBox(height: h * 0.12),
+          ],
+        ),
       ),
     );
   }
