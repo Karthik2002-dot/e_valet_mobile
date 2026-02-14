@@ -92,7 +92,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (session != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    padding: const EdgeInsets.only(top: 8, bottom: 20),
                     child: SizedBox(
                       height: 55,
                       child: ElevatedButton(
