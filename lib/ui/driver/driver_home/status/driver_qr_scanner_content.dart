@@ -135,18 +135,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
       create: (_) => QrBloc(),
       child: MultiBlocListener(
         listeners: [
-          // Auto-submit when QR is scanned on Scan tab (no need to tap Submit)
-          BlocListener<QrBloc, QrState>(
-            listenWhen: (QrState previous, QrState current) =>
-                current.qrData != null && previous.qrData != current.qrData,
-            listener: (BuildContext context, QrState qrState) {
-              if (_selectedTab != 0) return;
-              final qrData = qrState.qrData;
-              if (qrData == null) return;
-              _lastSubmissionWasTagNumber = false;
-              context.read<TagSubmissionBloc>().add(QrCodeSubmitted(qrData));
-            },
-          ),
+          // No auto-submit: when QR is scanned, Submit button is enabled; user taps it manually
           BlocListener<TagSubmissionBloc, TagSubmissionState>(
             listener: (context, submissionState) {
               if (submissionState is TagSubmissionSuccess) {
@@ -238,23 +227,23 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
       padding: EdgeInsets.symmetric(horizontal: w * 0.02),
       child: Row(
         children: [
-          // First tab: Type ID Number (default; no camera)
-          Expanded(
-            child: TabChip(
-              icon: Icons.dialpad,
-              label: TextConstants.typeParkingNumberTabLabel,
-              isActive: isTypeId,
-              onTap: () => _onSelectTypeIdTab(blocContext),
-            ),
-          ),
-          SizedBox(width: w * 0.025),
-          // Second tab: Scan (camera initializes only when selected)
+          // First tab: Scan (camera initializes only when selected)
           Expanded(
             child: TabChip(
               icon: Icons.qr_code_scanner,
               label: TextConstants.scanTabLabel,
               isActive: isScan,
               onTap: () => _onSelectScanTab(blocContext),
+            ),
+          ),
+          SizedBox(width: w * 0.025),
+          // Second tab: Type ID Number (default; no camera)
+          Expanded(
+            child: TabChip(
+              icon: Icons.dialpad,
+              label: TextConstants.typeParkingNumberTabLabel,
+              isActive: isTypeId,
+              onTap: () => _onSelectTypeIdTab(blocContext),
             ),
           ),
         ],

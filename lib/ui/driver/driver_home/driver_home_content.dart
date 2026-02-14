@@ -62,16 +62,8 @@ class _DriverHomeContentState extends State<DriverHomeContent>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // When app is reopened (resumed), force home (two cards) by recreating DriverOnlineContent.
-    if (state == AppLifecycleState.resumed && mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted)
-          setState(() {
-            _onlineContentKey = UniqueKey();
-            _showParkFlow = false;
-          });
-      });
-    }
+    // When app is reopened (resumed), preserve current screen - user stays on QR/park flow
+    // unless they press back or navigate back.
   }
 
   @override

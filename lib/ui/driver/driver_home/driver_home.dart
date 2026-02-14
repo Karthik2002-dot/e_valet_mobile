@@ -248,8 +248,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      // App came back to foreground - reset so home (two cards) is shown, not Vehicle details.
-      _homeResetNotifier.value++;
+      // App came back to foreground - preserve current screen (do not reset to home).
+      // User stays on QR/park flow unless they press back.
       _checkWebSocketOnResume();
       _hasNavigatedForStatus = false;
       _refreshPendingSessions();
