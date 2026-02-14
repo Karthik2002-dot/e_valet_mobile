@@ -116,22 +116,26 @@ class RetrievalRequestSheet extends StatelessWidget {
                                       AppColors.black),
                                 ),
                               )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TextComponent(
-                                    labelText: TextConstants.acceptRequest,
-                                    fontSize: screenWidth * 0.05,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: screenWidth * 0.06,
-                                    color: AppColors.black,
-                                  ),
-                                ],
+                            : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextComponent(
+                                      labelText: TextConstants.acceptRequest,
+                                      fontSize: screenWidth * 0.05,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.black,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      size: screenWidth * 0.06,
+                                      color: AppColors.black,
+                                    ),
+                                  ],
+                                ),
                               ),
                       ),
                     ),

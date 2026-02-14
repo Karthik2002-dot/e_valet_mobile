@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_bloc.dart';
@@ -20,11 +22,20 @@ class ConfirmArrivalScreen extends StatefulWidget {
   final bool preventBackNavigation;
   final bool showHandoverOnLoad;
 
+  /// When set, the 30s disable is counted from this moment (when accept API was triggered).
+  /// Passed from Collect Keys flow so the button enables 30s after tap, not after screen open.
+  final DateTime? acceptTriggeredAt;
+
+  /// Total seconds the button stays disabled after acceptTriggeredAt (e.g. 30).
+  final int? disableConfirmArrivalForSeconds;
+
   const ConfirmArrivalScreen({
     super.key,
     required this.session,
     this.preventBackNavigation = false,
     this.showHandoverOnLoad = false,
+    this.acceptTriggeredAt,
+    this.disableConfirmArrivalForSeconds,
   });
 
   @override
@@ -33,6 +44,11 @@ class ConfirmArrivalScreen extends StatefulWidget {
 
 class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   bool _showHandoverButtons = false;
+  bool _confirmArrivalButtonEnabled = true;
+  Timer? _enableConfirmArrivalTimer;
+
+  /// After Confirm Arrival API success, Customer Missing button is disabled until this time (60s).
+  DateTime? _customerMissingDisabledUntil;
   final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
       GlobalKey<HandoverButtonsSectionState>();
 
@@ -40,6 +56,29 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   void initState() {
     super.initState();
     _showHandoverButtons = widget.showHandoverOnLoad;
+    final triggeredAt = widget.acceptTriggeredAt;
+    final totalSeconds = widget.disableConfirmArrivalForSeconds ?? 30;
+    if (triggeredAt != null && totalSeconds > 0) {
+      final elapsed = DateTime.now().difference(triggeredAt).inSeconds;
+      final remaining = totalSeconds - elapsed;
+      if (remaining > 0) {
+        _confirmArrivalButtonEnabled = false;
+        _enableConfirmArrivalTimer = Timer(
+          Duration(seconds: remaining),
+          () {
+            if (mounted) {
+              setState(() => _confirmArrivalButtonEnabled = true);
+            }
+          },
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _enableConfirmArrivalTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -50,16 +89,19 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
         listener: (context, state) {
           if (state is ConfirmArrivalSuccess) {
             SnackBars.showSuccessSnackBar(context, state.message);
-            // Show handover buttons instead of navigating
+            // Show handover buttons; disable Customer Missing for 60s from now
             setState(() {
               _showHandoverButtons = true;
+              _customerMissingDisabledUntil =
+                  DateTime.now().add(const Duration(seconds: 60));
             });
           } else if (state is ConfirmArrivalError) {
             if (state.shouldNavigateToHandover) {
               SnackBars.showSuccessSnackBar(context, state.message);
-              // Show handover buttons instead of navigating
               setState(() {
                 _showHandoverButtons = true;
+                _customerMissingDisabledUntil =
+                    DateTime.now().add(const Duration(seconds: 60));
               });
             } else {
               SnackBars.showErrorSnackBar(context, state.message);
@@ -78,51 +120,48 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
             final screenHeight = MediaQuery.of(context).size.height;
             final isLoading = state is ConfirmArrivalLoading;
 
-            // Layout: 40% image+details (20% image top, 20% data below), 60% buttons
+            // Layout: 40% image, 30% data, 30% button (flex 4 : 3 : 3)
             final scaffoldContent = Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
               appBar: const CustomAppBar(),
               body: Column(
                 children: [
-                  // Top 40%: 20% image, 20% details
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        SizedBox(height: screenHeight * 0.01),
-                        Center(
-                          child: TextComponent(
-                            labelText: TextConstants.retrievalRequest,
-                            fontSize: screenWidth * 0.045,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        SizedBox(height: screenHeight * 0.008),
-                        Expanded(
-                          child: CarImageSection(session: widget.session),
-                        ),
-                        SizedBox(height: screenHeight * 0.008),
-                        Expanded(
-                          child: CarDetailsSection(session: widget.session),
-                        ),
-                        SizedBox(height: screenHeight * 0.01),
-                      ],
+                  SizedBox(height: screenHeight * 0.01),
+                  Center(
+                    child: TextComponent(
+                      labelText: TextConstants.retrievalRequest,
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
                     ),
                   ),
-
-                  // Bottom 60%: instruction + button(s)
+                  SizedBox(height: screenHeight * 0.008),
+                  // 40% – image
+                  Expanded(
+                    flex: 4,
+                    child: CarImageSection(session: widget.session),
+                  ),
+                  SizedBox(height: screenHeight * 0.008),
+                  // 30% – data
+                  Expanded(
+                    flex: 3,
+                    child: CarDetailsSection(session: widget.session),
+                  ),
+                  SizedBox(height: screenHeight * 0.008),
+                  // 30% – instruction + button(s)
                   Expanded(
                     flex: 3,
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: screenWidth * 0.04,
-                        vertical: screenHeight * 0.015,
+                        vertical: screenHeight * 0.01,
                       ),
                       child: _showHandoverButtons
                           ? HandoverButtonsSection(
                               key: _handoverButtonsKey,
                               isLoading: isLoading,
+                              customerMissingDisabledUntil:
+                                  _customerMissingDisabledUntil,
                               onConfirmHandover: () {
                                 context.read<ConfirmArrivalBloc>().add(
                                       ConfirmHandoverRequested(
@@ -151,11 +190,12 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                   color: AppColors.black,
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(height: screenHeight * 0.015),
+                                SizedBox(height: screenHeight * 0.01),
                                 Expanded(
                                   child: SlideToConfirmButton(
                                     sessionId: widget.session.id,
                                     isLoading: isLoading,
+                                    enabled: _confirmArrivalButtonEnabled,
                                     onConfirm: () {
                                       context.read<ConfirmArrivalBloc>().add(
                                             ConfirmArrivalRequested(

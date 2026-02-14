@@ -8,6 +8,9 @@ class SlideToConfirmButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onConfirm;
 
+  /// When false, button is disabled (e.g. for 30s after Collect Keys). No UI change.
+  final bool enabled;
+
   /// When true, button expands to fill parent and uses large label (like review OK).
   final bool useBigStyle;
 
@@ -16,6 +19,7 @@ class SlideToConfirmButton extends StatelessWidget {
     required this.sessionId,
     required this.isLoading,
     required this.onConfirm,
+    this.enabled = true,
     this.useBigStyle = false,
   });
 
@@ -25,7 +29,7 @@ class SlideToConfirmButton extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final button = ElevatedButton(
-      onPressed: isLoading ? null : onConfirm,
+      onPressed: (isLoading || !enabled) ? null : onConfirm,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.black,

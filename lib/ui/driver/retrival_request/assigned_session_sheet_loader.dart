@@ -22,6 +22,9 @@ class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
   bool _isAcceptLoading = false;
 
+  /// When user taps Collect Keys (accept API triggered). Used to start 30s disable from that moment.
+  DateTime? _acceptTriggeredAt;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AssignedSessionsBackgroundBloc,
@@ -160,7 +163,10 @@ class _AssignedSessionSheetLoaderState
                           ? () {
                               if (_isAcceptLoading) return;
                               final id = effectiveSessionId;
-                              setState(() => _isAcceptLoading = true);
+                              setState(() {
+                                _isAcceptLoading = true;
+                                _acceptTriggeredAt = DateTime.now();
+                              });
                               if (blocContext.mounted) {
                                 blocContext.read<RetrivalRequestBloc>().add(
                                       AcceptRetrivalRequest(id),
@@ -208,6 +214,8 @@ class _AssignedSessionSheetLoaderState
             builder: (context) => ConfirmArrivalScreen(
               session: session,
               preventBackNavigation: true,
+              acceptTriggeredAt: _acceptTriggeredAt,
+              disableConfirmArrivalForSeconds: 30,
             ),
           ),
         );
