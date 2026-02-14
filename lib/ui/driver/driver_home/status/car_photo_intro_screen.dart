@@ -7,7 +7,6 @@ import 'package:lottie/lottie.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_preview_widget.dart';
@@ -17,13 +16,8 @@ import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart';
 
-/// Third screen: Vehicle details + Location/Vehicle Number | Car Photo tabs.
-/// - [cameViaTagNumber] true (tag flow): default tab is Parking Number (location + vehicle number form).
-/// - [cameViaTagNumber] false (QR flow): default tab is Scan — Lottie (Carphoto.json) 2 sec then camera in same area.
-/// - Scan tab: Carphoto.json 2 sec → camera → Capture → validate → Preview screen → user taps Submit → Park/Repark API → Car Success.
-/// - Parking Number tab: enter parking location + vehicle number → Submit → Preview screen → user taps Submit → Park/Repark API → Car Success.
+/// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
 /// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
@@ -48,16 +42,8 @@ class CarPhotoIntroScreen extends StatefulWidget {
 }
 
 class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
-  final TextEditingController _parkingLocationController =
-      TextEditingController();
-  final TextEditingController _vehicleNumberController =
-      TextEditingController();
-  final FocusNode _parkingLocationFocusNode = FocusNode();
-  final FocusNode _vehicleNumberFocusNode = FocusNode();
-  final _formKey = GlobalKey<FormState>();
-
-  /// 0 = Parking Number (default, no camera), 1 = Scan (Lottie then camera)
-  int _selectedTab = 0;
+  /// 0 = Lottie, 1 = camera (only Car Photo flow now)
+  int _selectedTab = 1;
 
   /// 0 = Lottie (2 sec), 1 = camera in same area (only when on Scan tab)
   int _scanPhase = 0;
@@ -69,25 +55,15 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   void initState() {
     super.initState();
     _cameraBloc = CarCameraBloc();
-    if (widget.cameViaTagNumber) {
-      _selectedTab =
-          0; // Tag flow: show Parking Number (location + vehicle) first
-    } else {
-      _selectedTab = 1; // QR flow: go straight to Scan (Lottie then camera)
-      _scanPhase = 0;
-      _startLottieTimer();
-    }
+    // Third screen shows only Car Photo (camera); both QR and tag flows go to Scan.
+    _selectedTab = 1;
+    _scanPhase = 0;
+    _startLottieTimer();
     if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
       TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
         debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
       });
     }
-    _parkingLocationController.addListener(_onParkingFormChanged);
-    _vehicleNumberController.addListener(_onParkingFormChanged);
-  }
-
-  void _onParkingFormChanged() {
-    if (mounted) setState(() {});
   }
 
   void _startLottieTimer() {
@@ -102,21 +78,6 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         if (mounted) _cameraBloc.add(const InitializeCameraRequested());
       });
     });
-  }
-
-  void _onSelectParkingNumberTab() {
-    _lottieTimer?.cancel();
-    _cameraBloc.add(const DisposeCameraRequested());
-    setState(() => _selectedTab = 0);
-  }
-
-  void _onSelectScanTab() {
-    if (_selectedTab == 1) return;
-    setState(() {
-      _selectedTab = 1;
-      _scanPhase = 0;
-    });
-    _startLottieTimer();
   }
 
   /// Navigate to preview screen so user can confirm and submit from there (Park/Repark API runs on preview submit).
@@ -217,39 +178,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     }
   }
 
-  /// Navigate to preview screen with parking location and vehicle number; API is called when user submits from preview.
-  void _onSubmitParkingLocation(BuildContext ctx) {
-    debugPrint('[CarPhotoIntro] _onSubmitParkingLocation called');
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    final location = _parkingLocationController.text.trim();
-    final vehicleNumber = _vehicleNumberController.text.trim();
-    if (location.isEmpty) {
-      SnackBars.showErrorSnackBar(
-          ctx, TextConstants.pleaseEnterParkingLocation);
-      return;
-    }
-    if (vehicleNumber.isEmpty) {
-      SnackBars.showErrorSnackBar(ctx, TextConstants.pleaseEnterVehicleNumber);
-      return;
-    }
-    _navigateToPreview(ctx,
-        parkingLocation: location, vehicleNumber: vehicleNumber);
-  }
-
-  bool get _canSubmitParkingNumber {
-    return _parkingLocationController.text.trim().isNotEmpty &&
-        _vehicleNumberController.text.trim().isNotEmpty;
-  }
-
   @override
   void dispose() {
-    _parkingLocationController.removeListener(_onParkingFormChanged);
-    _vehicleNumberController.removeListener(_onParkingFormChanged);
     _lottieTimer?.cancel();
-    _parkingLocationController.dispose();
-    _vehicleNumberController.dispose();
-    _parkingLocationFocusNode.dispose();
-    _vehicleNumberFocusNode.dispose();
     _cameraBloc.close();
     super.dispose();
   }
@@ -292,11 +223,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                       SizedBox(height: h * 0.016),
                       _buildHeaderAboveTabs(w, h),
                       SizedBox(height: h * 0.016),
-                      _buildTabs(w),
                       Expanded(
-                        child: _selectedTab == 0
-                            ? _buildTypeParkingNumberContent(w, h, bodyContext)
-                            : _buildScanTabContent(w, h),
+                        child: _buildScanTabContent(w, h),
                       ),
                     ],
                   ),
@@ -336,35 +264,6 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
               fontWeight: FontWeight.w400,
             ),
             textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabs(double w) {
-    final isParkingNumber = _selectedTab == 0;
-    final isScan = _selectedTab == 1;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.02),
-      child: Row(
-        children: [
-          Expanded(
-            child: TabChip(
-              icon: Icons.dialpad,
-              label: TextConstants.locationVehicleNumber,
-              isActive: isParkingNumber,
-              onTap: isParkingNumber ? null : _onSelectParkingNumberTab,
-            ),
-          ),
-          SizedBox(width: w * 0.025),
-          Expanded(
-            child: TabChip(
-              icon: Icons.qr_code_scanner,
-              label: TextConstants.carPhoto,
-              isActive: isScan,
-              onTap: isScan ? null : _onSelectScanTab,
-            ),
           ),
         ],
       ),
@@ -511,156 +410,6 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildTypeParkingNumberContent(
-      double w, double h, BuildContext blocContext) {
-    final labelFontSize = w * 0.048;
-    final inputFontSize = w * 0.044;
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: h * 0.02),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(w * 0.04),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(w * 0.03),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow10,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextComponent(
-                    labelText: TextConstants.parkingLocationLabel,
-                    fontSize: labelFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                  TextFieldComponent(
-                    labelText: TextConstants.emptyText,
-                    hintText: TextConstants.parkingLocationHint,
-                    controller: _parkingLocationController,
-                    focusNode: _parkingLocationFocusNode,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    fontSize: inputFontSize,
-                    labelFontSize: labelFontSize,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: w * 0.04, vertical: h * 0.022),
-                    onSubmitEditing: () {
-                      FocusScope.of(blocContext)
-                          .requestFocus(_vehicleNumberFocusNode);
-                    },
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return TextConstants.pleaseEnterParkingLocation;
-                      }
-                      return null;
-                    },
-                    borderRadius: w * 0.03,
-                  ),
-                  SizedBox(height: h * 0.022),
-                  TextComponent(
-                    labelText: TextConstants.vehicleNumberLabel,
-                    fontSize: labelFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                  TextFieldComponent(
-                    labelText: TextConstants.emptyText,
-                    hintText: TextConstants.vehicleNumberHint,
-                    controller: _vehicleNumberController,
-                    focusNode: _vehicleNumberFocusNode,
-                    keyboardType: TextInputType.number,
-                    fontSize: inputFontSize,
-                    labelFontSize: labelFontSize,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: w * 0.04, vertical: h * 0.022),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(4),
-                    ],
-                    textInputAction: TextInputAction.done,
-                    onSubmitEditing: () =>
-                        _onSubmitParkingLocation(blocContext),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return TextConstants.pleaseEnterVehicleNumber;
-                      }
-                      return null;
-                    },
-                    borderRadius: w * 0.03,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: h * 0.028),
-          Text(
-            'Please click the button below after entering the parking location and vehicle number.',
-            style: TextStyle(
-              fontSize: w * 0.045,
-              fontWeight: FontWeight.w500,
-              color: AppColors.black,
-              height: 1.35,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: h * 0.028),
-          SizedBox(
-            width: double.infinity,
-            height: h * 0.14,
-            child: ElevatedButton(
-              onPressed: _canSubmitParkingNumber
-                  ? () => _onSubmitParkingLocation(blocContext)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.actionButtonYellow,
-                disabledBackgroundColor: AppColors.grey.withOpacity(0.5),
-                foregroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(w * 0.028),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    TextConstants.submitButton,
-                    style: TextStyle(
-                      fontSize: w * 0.09,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
-                  SizedBox(width: w * 0.03),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.white,
-                    size: w * 0.09,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: h * 0.025),
-        ],
       ),
     );
   }

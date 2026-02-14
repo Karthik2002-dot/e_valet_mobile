@@ -48,10 +48,14 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
   bool get _canSubmitTagNumber => _tagNumberController.text.trim().isNotEmpty;
 
-  /// 0 = Scan (camera), 1 = Type ID Number (form). Default 1 so camera is not initialized until user opens Scan.
-  int _selectedTab = 1;
-  bool _showCamera = false; // true after 2 sec Lottie intro when on Scan tab
+  /// 0 = Scan (camera), 1 = Type ID Number (form). Default 0 so QR Scan is pre-selected.
+  int _selectedTab = 0;
+  bool _showCamera =
+      false; // true after 2 sec Lottie intro when on Scan tab (or immediately if intro already shown)
   Timer? _introTimer;
+
+  /// True after the 2s QR Lottie has been shown once; then we skip it when switching back from Type ID to Scan.
+  bool _hasShownScanIntroOnce = false;
 
   /// Set when submitting so third screen knows whether to show parking location form (tag) or go straight to Lottie (QR).
   bool _lastSubmissionWasTagNumber = false;
@@ -60,6 +64,12 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   void initState() {
     super.initState();
     _tagNumberController.addListener(_onTagFormChanged);
+    // Start Scan intro (Lottie → camera) when defaulting to Scan tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _selectedTab == 0) {
+        _startScanIntroTimer();
+      }
+    });
   }
 
   void _onTagFormChanged() {
@@ -68,6 +78,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
   void _startScanIntroTimer() {
     _introTimer?.cancel();
+    _hasShownScanIntroOnce =
+        true; // so switching back from Type ID to Scan skips intro
     setState(() => _showCamera = false);
     _introTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _showCamera = true);
@@ -77,8 +89,15 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   void _onSelectScanTab(BuildContext? blocContext) {
     if (_selectedTab == 0) return;
     blocContext?.read<QrBloc>().add(const QrCameraActivateRequested());
-    setState(() => _selectedTab = 0);
-    _startScanIntroTimer();
+    setState(() {
+      _selectedTab = 0;
+      if (_hasShownScanIntroOnce) {
+        _introTimer?.cancel();
+        _showCamera = true;
+      } else {
+        _startScanIntroTimer();
+      }
+    });
   }
 
   void _onSelectTypeIdTab(BuildContext? blocContext) {
@@ -150,18 +169,22 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         widget.onReturnFromCarCamera?.call();
                         if (mounted) {
                           _introTimer?.cancel();
-                          setState(() => _showCamera = false);
+                          setState(() => _showCamera = true);
                         }
+                        context
+                            .read<QrBloc>()
+                            .add(const QrCameraActivateRequested());
                       },
                     ),
                   ),
                 ).then((_) {
-                  // When user returns from third screen (e.g. back before camera): reset and show home
+                  // When user returns from third screen: show camera again (intro already shown)
                   widget.onReturnFromCarCamera?.call();
                   if (mounted) {
                     _introTimer?.cancel();
-                    setState(() => _showCamera = false);
+                    setState(() => _showCamera = true);
                   }
+                  context.read<QrBloc>().add(const QrCameraActivateRequested());
                 });
               }
             },
@@ -203,7 +226,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                   ),
                 ),
                 SizedBox(height: widget.screenHeight * 0.016),
-                // Tabs: Type ID Number first (no camera init), Scan second (camera when opened)
+                // Tabs: Scan (default) | Type ID Number
                 _buildTabs(blocContext),
                 SizedBox(height: widget.screenHeight * 0.018),
                 Expanded(
@@ -237,7 +260,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
             ),
           ),
           SizedBox(width: w * 0.025),
-          // Second tab: Type ID Number (default; no camera)
+          // Second tab: Type ID Number (manual entry)
           Expanded(
             child: TabChip(
               icon: Icons.dialpad,
@@ -316,45 +339,51 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     builder: (context, submissionState) {
                       final isLoading = submissionState is TagSubmissionLoading;
                       final canSubmit = hasScannedQr && !isLoading;
-                      return ElevatedButton(
-                        onPressed:
-                            canSubmit ? () => _handleSubmit(context) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          disabledBackgroundColor:
-                              AppColors.grey.withOpacity(0.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(w * 0.02),
+                      final buttonHeight = h * 0.085;
+                      final textSize = w * 0.072;
+                      return SizedBox(
+                        width: double.infinity,
+                        height: buttonHeight,
+                        child: ElevatedButton(
+                          onPressed:
+                              canSubmit ? () => _handleSubmit(context) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            disabledBackgroundColor:
+                                AppColors.grey.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(w * 0.025),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.white),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.white),
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextComponent(
+                                      labelText: TextConstants.submitButton,
+                                      fontSize: textSize,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.white,
+                                    ),
+                                    SizedBox(width: w * 0.02),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      color: AppColors.white,
+                                      size: textSize,
+                                    ),
+                                  ],
                                 ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TextComponent(
-                                    labelText: TextConstants.submitButton,
-                                    fontSize: w * 0.045,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.white,
-                                  ),
-                                  SizedBox(width: w * 0.02),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: AppColors.white,
-                                    size: w * 0.05,
-                                  ),
-                                ],
-                              ),
+                        ),
                       );
                     },
                   );
@@ -435,29 +464,31 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
           ),
           SizedBox(height: h * 0.028),
           SizedBox(height: h * 0.02),
-          // Submit button – scrollable so user can reach it when keyboard is open
+          // Submit button – same styling as preview Done button for consistency
           BlocBuilder<TagSubmissionBloc, TagSubmissionState>(
             builder: (context, submissionState) {
               final isLoading = submissionState is TagSubmissionLoading;
               final canSubmit = _canSubmitTagNumber && !isLoading;
+              final buttonHeight = h * 0.085;
+              final textSize = w * 0.072;
               return SizedBox(
                 width: double.infinity,
-                height: h * 0.22,
+                height: buttonHeight,
                 child: ElevatedButton(
                   onPressed: canSubmit ? () => _handleSubmit(context) : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     disabledBackgroundColor: AppColors.grey.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(w * 0.028),
+                      borderRadius: BorderRadius.circular(w * 0.025),
                     ),
                     elevation: 0,
                   ),
                   child: isLoading
-                      ? SizedBox(
-                          width: w * 0.08,
-                          height: w * 0.08,
-                          child: const CircularProgressIndicator(
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(AppColors.white),
@@ -469,16 +500,16 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                             Text(
                               TextConstants.submitButton,
                               style: TextStyle(
-                                fontSize: w * 0.09,
+                                fontSize: textSize,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.white,
                               ),
                             ),
-                            SizedBox(width: w * 0.03),
+                            SizedBox(width: w * 0.02),
                             Icon(
                               Icons.arrow_forward,
                               color: AppColors.white,
-                              size: w * 0.09,
+                              size: textSize,
                             ),
                           ],
                         ),

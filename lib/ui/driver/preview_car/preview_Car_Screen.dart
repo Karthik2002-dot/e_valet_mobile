@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_header.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
@@ -41,6 +43,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
   String? _currentParkingLocation;
   String? _currentVehicleNumber;
 
+  /// Parking location input when in photo flow (captured image); required before Done.
+  late final TextEditingController _parkingLocationController;
+
   /// Prevents multiple rapid taps from triggering duplicate submissions
   bool _isProcessing = false;
 
@@ -49,10 +54,17 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     super.initState();
     _currentParkingLocation = widget.parkingLocation;
     _currentVehicleNumber = widget.vehicleNumber;
+    _parkingLocationController = TextEditingController(
+      text: widget.parkingLocation ?? '',
+    );
+    _parkingLocationController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _parkingLocationController.dispose();
     super.dispose();
   }
 
@@ -67,7 +79,11 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
 
       if (!context.mounted) return;
 
-      // Submit with GPS data
+      // Use controller text for parking location when in photo flow
+      final parkingLocation = _parkingLocationController.text.trim().isNotEmpty
+          ? _parkingLocationController.text.trim()
+          : _currentParkingLocation;
+
       context.read<PreviewCarBloc>().add(
             SubmitPhotoRequested(
               imagePath: (widget.parkingLocation == null ||
@@ -79,7 +95,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               latitude: coordinates['latitude']!,
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
-              parkingLocation: _currentParkingLocation,
+              parkingLocation: parkingLocation,
               vehicleNumber: _currentVehicleNumber,
             ),
           );
@@ -284,215 +300,288 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             final horizontalPadding = screenWidth * 0.04;
             final isReviewEntry = widget.parkingLocation != null &&
                 widget.parkingLocation!.isNotEmpty;
+            final isPhotoFlow = (widget.parkingLocation == null ||
+                    widget.parkingLocation!.isEmpty) &&
+                widget.imagePath != null &&
+                widget.imagePath!.isNotEmpty;
+            final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
             return Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
               appBar: const CustomAppBar(),
-              body: Stack(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: horizontalPadding,
-                      right: horizontalPadding,
-                      top: horizontalPadding,
-                      bottom: isReviewEntry ? 0.0 : horizontalPadding,
-                    ),
-                    child: Column(
+              resizeToAvoidBottomInset: true,
+              body: isPhotoFlow
+                  ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Review Entry Header
-                        PreviewHeader(isReparking: widget.isReparking),
-                        SizedBox(height: screenHeight * 0.02),
-
-                        // Parking Location Display (if provided) - container expands till bottom of screen, OK button inside at bottom
-                        if (widget.parkingLocation != null &&
-                            widget.parkingLocation!.isNotEmpty)
-                          Expanded(
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(screenWidth * 0.04),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.primary,
-                                  width: 1.5,
+                        Expanded(
+                          child: SingleChildScrollView(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            padding: EdgeInsets.only(
+                              left: horizontalPadding,
+                              right: horizontalPadding,
+                              top: horizontalPadding,
+                              bottom: horizontalPadding + bottomInset + 24,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PreviewHeader(isReparking: widget.isReparking),
+                                SizedBox(height: screenHeight * 0.02),
+                                PreviewImageCard(
+                                  imagePath: widget.imagePath!,
+                                  onRetake: () => Navigator.pop(context),
                                 ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.location_on,
-                                            color: AppColors.primary,
-                                            size: screenWidth * 0.05,
+                                SizedBox(height: screenHeight * 0.02),
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(screenWidth * 0.04),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.primary,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: TextFieldComponent(
+                                    labelText:
+                                        TextConstants.parkingLocationLabel,
+                                    hintText: TextConstants.parkingLocationHint,
+                                    controller: _parkingLocationController,
+                                    keyboardType: TextInputType.text,
+                                    textInputAction: TextInputAction.done,
+                                    fontSize: screenWidth * 0.04,
+                                    labelFontSize: screenWidth * 0.04,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.04,
+                                      vertical: screenHeight * 0.018,
+                                    ),
+                                    borderRadius: 8,
+                                  ),
+                                ),
+                                SizedBox(height: screenHeight * 0.02),
+                                PreviewSubmitButton(
+                                  onSubmit: () => _handleSubmit(context),
+                                  isReparking: widget.isReparking,
+                                  isLoading: isSubmitting,
+                                  isEnabled: _parkingLocationController.text
+                                      .trim()
+                                      .isNotEmpty,
+                                  overrideLabel:
+                                      TextConstants.previewDoneButton,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SafeArea(
+                          top: false,
+                          child: const Footer(),
+                        ),
+                      ],
+                    )
+                  : Stack(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: horizontalPadding,
+                            right: horizontalPadding,
+                            top: horizontalPadding,
+                            bottom: isReviewEntry ? 0.0 : horizontalPadding,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              PreviewHeader(isReparking: widget.isReparking),
+                              SizedBox(height: screenHeight * 0.02),
+
+                              // Parking Location Display (if provided) - container expands till bottom of screen, OK button inside at bottom
+                              if (widget.parkingLocation != null &&
+                                  widget.parkingLocation!.isNotEmpty)
+                                Expanded(
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.all(screenWidth * 0.04),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppColors.primary,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.location_on,
+                                                  color: AppColors.primary,
+                                                  size: screenWidth * 0.05,
+                                                ),
+                                                SizedBox(
+                                                    width: screenWidth * 0.02),
+                                                Text(
+                                                  'Parking Location',
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        screenWidth * 0.04,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            // Edit Icon Button
+                                            InkWell(
+                                              onTap: _showEditDetailsDialog,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              child: Container(
+                                                padding: EdgeInsets.all(
+                                                    screenWidth * 0.02),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primary
+                                                      .withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.edit,
+                                                  color: AppColors.primary,
+                                                  size: screenWidth * 0.045,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: screenHeight * 0.01),
+                                        Text(
+                                          _currentParkingLocation ??
+                                              widget.parkingLocation ??
+                                              '',
+                                          style: TextStyle(
+                                            fontSize: screenWidth * 0.038,
+                                            color: AppColors.black,
                                           ),
-                                          SizedBox(width: screenWidth * 0.02),
+                                        ),
+                                        if (_currentVehicleNumber != null &&
+                                            _currentVehicleNumber!
+                                                .isNotEmpty) ...[
+                                          SizedBox(
+                                              height: screenHeight * 0.012),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.directions_car,
+                                                color: AppColors.primary,
+                                                size: screenWidth * 0.045,
+                                              ),
+                                              SizedBox(
+                                                  width: screenWidth * 0.02),
+                                              Text(
+                                                'Vehicle Number',
+                                                style: TextStyle(
+                                                  fontSize: screenWidth * 0.035,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                              height: screenHeight * 0.004),
                                           Text(
-                                            'Parking Location',
+                                            _currentVehicleNumber!,
                                             style: TextStyle(
-                                              fontSize: screenWidth * 0.04,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: screenWidth * 0.038,
                                               color: AppColors.black,
                                             ),
                                           ),
                                         ],
-                                      ),
-                                      // Edit Icon Button
-                                      InkWell(
-                                        onTap: _showEditDetailsDialog,
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Container(
-                                          padding: EdgeInsets.all(
-                                              screenWidth * 0.02),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary
-                                                .withOpacity(0.1),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            Icons.edit,
-                                            color: AppColors.primary,
-                                            size: screenWidth * 0.045,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: screenHeight * 0.01),
-                                  Text(
-                                    _currentParkingLocation ??
-                                        widget.parkingLocation ??
-                                        '',
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.038,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                  if (_currentVehicleNumber != null &&
-                                      _currentVehicleNumber!.isNotEmpty) ...[
-                                    SizedBox(height: screenHeight * 0.012),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.directions_car,
-                                          color: AppColors.primary,
-                                          size: screenWidth * 0.045,
-                                        ),
-                                        SizedBox(width: screenWidth * 0.02),
+                                        // Instruction text below vehicle number (with gap)
+                                        SizedBox(height: screenHeight * 0.025),
                                         Text(
-                                          'Vehicle Number',
+                                          'After the vehicle is successfully parked, please press the button below to confirm.',
                                           style: TextStyle(
-                                            fontSize: screenWidth * 0.035,
-                                            fontWeight: FontWeight.w600,
+                                            fontSize: screenWidth * 0.045,
                                             color: AppColors.black,
+                                            height: 1.35,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: screenHeight * 0.02),
+                                        // OK button expands from here to the bottom of the screen
+                                        Expanded(
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton(
+                                              onPressed: isSubmitting
+                                                  ? null
+                                                  : () =>
+                                                      _handleSubmit(context),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppColors.primary,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          screenWidth * 0.028),
+                                                ),
+                                                elevation: 0,
+                                              ),
+                                              child: isSubmitting
+                                                  ? SizedBox(
+                                                      width: 32,
+                                                      height: 32,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                AppColors
+                                                                    .white),
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      'OK',
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            screenWidth * 0.16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: AppColors.white,
+                                                      ),
+                                                    ),
+                                            ),
                                           ),
                                         ),
+                                        SizedBox(height: screenHeight * 0.02),
                                       ],
                                     ),
-                                    SizedBox(height: screenHeight * 0.004),
-                                    Text(
-                                      _currentVehicleNumber!,
-                                      style: TextStyle(
-                                        fontSize: screenWidth * 0.038,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                  ],
-                                  // Instruction text below vehicle number (with gap)
-                                  SizedBox(height: screenHeight * 0.025),
-                                  Text(
-                                    'After the vehicle is successfully parked, please press the button below to confirm.',
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.045,
-                                      color: AppColors.black,
-                                      height: 1.35,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                  // OK button expands from here to the bottom of the screen
-                                  Expanded(
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: isSubmitting
-                                            ? null
-                                            : () => _handleSubmit(context),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                screenWidth * 0.028),
-                                          ),
-                                          elevation: 0,
-                                        ),
-                                        child: isSubmitting
-                                            ? SizedBox(
-                                                width: 32,
-                                                height: 32,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                              Color>(
-                                                          AppColors.white),
-                                                ),
-                                              )
-                                            : Text(
-                                                'OK',
-                                                style: TextStyle(
-                                                  fontSize: screenWidth * 0.16,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.white,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                ],
-                              ),
-                            ),
+                                ),
+
+                              // When review entry: container expands to screen bottom only (no footer below)
+                              if (!isReviewEntry) const Spacer(),
+
+                              // Footer only when NOT review entry (so container can expand till screen bottom)
+                              if (!isReviewEntry) const Footer(),
+                            ],
                           ),
-
-                        // Image Card with Retake Button - Only show if parking location is NOT provided (normal photo flow)
-                        if ((widget.parkingLocation == null ||
-                                widget.parkingLocation!.isEmpty) &&
-                            widget.imagePath != null &&
-                            widget.imagePath!.isNotEmpty)
-                          PreviewImageCard(
-                            imagePath: widget.imagePath!,
-                            onRetake: () => Navigator.pop(context),
-                          ),
-
-                        // When review entry: container expands to screen bottom only (no footer below)
-                        if (!isReviewEntry) const Spacer(),
-
-                        // Bottom OK only when container is not shown (photo flow); container has its own OK
-                        if (widget.parkingLocation == null ||
-                            widget.parkingLocation!.isEmpty)
-                          PreviewSubmitButton(
-                            onSubmit: () => _handleSubmit(context),
-                            isReparking: widget.isReparking,
-                            isLoading: isSubmitting,
-                            overrideLabel: 'OK',
-                          ),
-
-                        // Footer only when NOT review entry (so container can expand till screen bottom)
-                        if (!isReviewEntry) const Footer(),
+                        ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             );
           },
         ),

@@ -199,30 +199,32 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                 ),
               ),
             SizedBox(height: h * 0.02),
-            // Submit button – scrollable so user can reach it when keyboard is open
+            // Submit button – same styling as preview Done button for consistency
             BlocBuilder<TagSubmissionBloc, TagSubmissionState>(
               builder: (context, state) {
                 final isLoading = state is TagSubmissionLoading;
                 final canSubmit = _canSubmitTagNumber && !isLoading;
+                final buttonHeight = h * 0.085;
+                final textSize = w * 0.072;
 
                 return SizedBox(
                   width: double.infinity,
-                  height: h * 0.22,
+                  height: buttonHeight,
                   child: ElevatedButton(
                     onPressed: canSubmit ? _handleSubmit : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: AppColors.grey.withOpacity(0.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(w * 0.028),
+                        borderRadius: BorderRadius.circular(w * 0.025),
                       ),
                       elevation: 0,
                     ),
                     child: isLoading
-                        ? SizedBox(
-                            width: w * 0.08,
-                            height: w * 0.08,
-                            child: const CircularProgressIndicator(
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   AppColors.white),
@@ -234,16 +236,16 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                               Text(
                                 TextConstants.submitButton,
                                 style: TextStyle(
-                                  fontSize: w * 0.09,
+                                  fontSize: textSize,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.white,
                                 ),
                               ),
-                              SizedBox(width: w * 0.03),
+                              SizedBox(width: w * 0.02),
                               Icon(
                                 Icons.arrow_forward,
                                 color: AppColors.white,
-                                size: w * 0.09,
+                                size: textSize,
                               ),
                             ],
                           ),
