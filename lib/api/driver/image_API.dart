@@ -59,15 +59,15 @@ class ImageApiService {
         formDataMap['accuracy'] = request.accuracy;
       }
 
-      // Scenario 1: With photo - send photo + GPS data (no parkingLocation)
+      // Add photo when provided
       if (request.hasPhoto) {
         formDataMap['photo'] = await MultipartFile.fromFile(
           request.imagePath!,
           filename: request.filename,
         );
       }
-      // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
-      else if (request.hasParkingLocation) {
+      // Add parking location when provided (can be sent with or without photo)
+      if (request.hasParkingLocation) {
         formDataMap['parkingLocation'] = request.parkingLocation;
       }
 

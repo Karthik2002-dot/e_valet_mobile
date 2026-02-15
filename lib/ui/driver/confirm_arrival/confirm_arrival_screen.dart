@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/car_details_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
@@ -45,6 +46,7 @@ class ConfirmArrivalScreen extends StatefulWidget {
 class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   bool _showHandoverButtons = false;
   bool _confirmArrivalButtonEnabled = true;
+  int _confirmArrivalRemainingSeconds = 0;
   Timer? _enableConfirmArrivalTimer;
 
   /// After Confirm Arrival API success, Customer Missing button is disabled until this time (60s).
@@ -63,12 +65,20 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       final remaining = totalSeconds - elapsed;
       if (remaining > 0) {
         _confirmArrivalButtonEnabled = false;
-        _enableConfirmArrivalTimer = Timer(
-          Duration(seconds: remaining),
-          () {
-            if (mounted) {
-              setState(() => _confirmArrivalButtonEnabled = true);
-            }
+        _confirmArrivalRemainingSeconds = remaining;
+        _enableConfirmArrivalTimer = Timer.periodic(
+          const Duration(seconds: 1),
+          (_) {
+            if (!mounted) return;
+            setState(() {
+              _confirmArrivalRemainingSeconds =
+                  (_confirmArrivalRemainingSeconds - 1).clamp(0, totalSeconds);
+              if (_confirmArrivalRemainingSeconds <= 0) {
+                _enableConfirmArrivalTimer?.cancel();
+                _enableConfirmArrivalTimer = null;
+                _confirmArrivalButtonEnabled = true;
+              }
+            });
           },
         );
       }
@@ -196,6 +206,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                     sessionId: widget.session.id,
                                     isLoading: isLoading,
                                     enabled: _confirmArrivalButtonEnabled,
+                                    disabledRemainingSeconds:
+                                        _confirmArrivalRemainingSeconds,
                                     onConfirm: () {
                                       context.read<ConfirmArrivalBloc>().add(
                                             ConfirmArrivalRequested(

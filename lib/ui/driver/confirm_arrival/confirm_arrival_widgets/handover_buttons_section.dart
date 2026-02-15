@@ -91,6 +91,32 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
     super.dispose();
   }
 
+  static Widget _roundCountdown(
+    int seconds, {
+    required Color foregroundColor,
+    required bool bigStyle,
+  }) {
+    final size = bigStyle ? 44.0 : 36.0;
+    final fontSize = bigStyle ? 20.0 : 16.0;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: foregroundColor.withOpacity(0.2),
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$seconds',
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          color: foregroundColor.withOpacity(0.9),
+        ),
+      ),
+    );
+  }
+
   Widget _buildActionButton({
     Key? key,
     required String label,
@@ -111,13 +137,10 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
         (isLoading || isDisabledByCountdown) ? null : onPressed;
 
     final leadingWidget = isDisabledByCountdown
-        ? Text(
-            '$countdownSeconds',
-            style: TextStyle(
-              fontSize: bigStyle ? screenWidth * 0.08 : screenHeight * 0.03,
-              fontWeight: FontWeight.w700,
-              color: foregroundColor.withOpacity(0.7),
-            ),
+        ? _roundCountdown(
+            countdownSeconds,
+            foregroundColor: foregroundColor,
+            bigStyle: bigStyle,
           )
         : Icon(
             icon,
