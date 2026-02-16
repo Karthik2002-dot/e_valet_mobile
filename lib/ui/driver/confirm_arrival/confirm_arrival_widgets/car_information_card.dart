@@ -54,7 +54,7 @@ class CarInformationCard extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     TextComponent(
-                      labelText: TextConstants.badgeNumber,
+                      labelText: TextConstants.cardNumber,
                       fontSize:
                           compact ? screenWidth * 0.028 : screenWidth * 0.035,
                       color: AppColors.grey,

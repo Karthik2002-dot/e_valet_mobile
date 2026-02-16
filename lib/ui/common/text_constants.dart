@@ -215,6 +215,7 @@ class TextConstants {
 
   // Session/Retrieval Related
   static const String badgeNumber = 'Badge Number';
+  static const String cardNumber = 'Card Number';
   static const String parkedBy = 'Parked By';
   static const String unknown = 'Unknown';
   static const String retrievalRequest = 'Retrieval Request';

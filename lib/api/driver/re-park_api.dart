@@ -66,7 +66,7 @@ class ReparkApiService {
         );
       }
       // Scenario 2: Without photo - send parkingLocation + GPS data (no photo)
-      else if (request.hasParkingLocation) {
+      if (request.hasParkingLocation) {
         formDataMap['parkingLocation'] = request.parkingLocation;
       }
 
