@@ -32,7 +32,7 @@ class ValetKpiCard extends StatelessWidget {
               : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? AppColors.primary : AppColors.transparent,
             width: 2,
           ),
           boxShadow: isSelected

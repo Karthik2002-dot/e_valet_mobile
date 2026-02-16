@@ -10,6 +10,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
@@ -103,10 +104,10 @@ class MyApp extends StatelessWidget {
                   messenger.clearMaterialBanners();
                   messenger.showMaterialBanner(
                     MaterialBanner(
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.error,
                       content: TextComponent(
                         labelText: TextConstants.noInternetConnection,
-                        color: Colors.white,
+                        color: AppColors.white,
                         textAlign: TextAlign.center,
                       ),
                       actions: [

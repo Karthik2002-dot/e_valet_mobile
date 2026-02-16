@@ -128,7 +128,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
   void _showOpenSettingsDialog() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
@@ -172,7 +172,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                       },
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.qrSuccessColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const TextComponent(
@@ -324,7 +324,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.qrSuccessColor,
                       disabledBackgroundColor: AppColors.greyLight,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

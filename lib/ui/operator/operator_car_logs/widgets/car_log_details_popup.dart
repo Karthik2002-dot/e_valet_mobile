@@ -121,7 +121,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
     final screenSize = MediaQuery.of(context).size;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       child: Container(
         width: screenSize.width * 0.8,
         constraints: BoxConstraints(
@@ -129,11 +129,11 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
           maxHeight: screenSize.height * 0.8,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: AppColors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -156,14 +156,17 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                 children: [
                   TextComponent(
                     labelText: TextConstants.carLogDetailsTitle,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => widget.onClose(),
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppColors.white,
+                    ),
                   ),
                 ],
               ),
@@ -237,13 +240,13 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white),
                             ),
                           )
                         : TextComponent(
                             labelText: TextConstants.submitButton,
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontWeight: FontWeight.w600,
                           ),
                   ),

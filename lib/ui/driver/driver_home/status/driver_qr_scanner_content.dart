@@ -281,7 +281,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF3A3A3A),
+        color: AppColors.grey,
         borderRadius: BorderRadius.circular(w * 0.04),
       ),
       child: Column(
@@ -300,7 +300,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      color: AppColors.transparent,
                       borderRadius: BorderRadius.circular(w * 0.04),
                       border: Border.all(color: AppColors.white, width: 2.5),
                     ),
