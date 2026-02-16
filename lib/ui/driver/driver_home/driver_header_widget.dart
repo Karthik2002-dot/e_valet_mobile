@@ -12,6 +12,10 @@ class DriverHeaderWidget extends StatelessWidget {
   final bool isTablet;
   final bool isDesktop;
 
+  /// When true, show back button on the left (same line as break toggle, other side).
+  final bool showBackButton;
+  final VoidCallback? onBackPressed;
+
   const DriverHeaderWidget({
     super.key,
     required this.isOnline,
@@ -19,6 +23,8 @@ class DriverHeaderWidget extends StatelessWidget {
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    this.showBackButton = false,
+    this.onBackPressed,
   });
 
   @override
@@ -47,8 +53,20 @@ class DriverHeaderWidget extends StatelessWidget {
 
           return Stack(
             children: [
-              // On Break toggle positioned at very top-right, just below logo
-              if (isCurrentlyOnline)
+              // Back button on the left (same line as break toggle, other side)
+              if (showBackButton && onBackPressed != null)
+                Positioned(
+                  top: 4,
+                  left: padding * 0.5,
+                  child: IconButton(
+                    onPressed: onBackPressed,
+                    icon: const Icon(Icons.arrow_back, color: AppColors.white),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+              // On Break toggle only on first screen (home with Park Vehicle). Hide on QR scan / vehicle details / any screen with back button.
+              if (isCurrentlyOnline && !showBackButton)
                 Positioned(
                   top: 4, // Minimal offset from top (4 pixels)
                   right: padding, // Gap from right edge

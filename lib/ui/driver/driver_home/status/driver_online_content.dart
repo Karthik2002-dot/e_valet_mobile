@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_qr_scanner_content.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_action_card.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_vehicle_details_screen.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
@@ -16,6 +17,8 @@ class DriverOnlineContent extends StatefulWidget {
   final double screenHeight;
   final bool isTablet;
   final bool isDesktop;
+  final bool showParkFlow;
+  final ValueChanged<bool> onParkFlowChanged;
 
   const DriverOnlineContent({
     super.key,
@@ -24,13 +27,96 @@ class DriverOnlineContent extends StatefulWidget {
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    required this.showParkFlow,
+    required this.onParkFlowChanged,
   });
 
   @override
   State<DriverOnlineContent> createState() => _DriverOnlineContentState();
 }
 
-class _DriverOnlineContentState extends State<DriverOnlineContent> {
+class _DriverOnlineContentState extends State<DriverOnlineContent>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // When user reopens the app (brings to foreground), parent resets showParkFlow via key reset.
+  }
+
+  /// First screen: two cards (Park Vehicle | Retrieve Vehicle). Park tappable → Vehicle details.
+  Widget _buildFirstScreen() {
+    final w = widget.screenWidth;
+    final h = widget.screenHeight;
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: h * 0.02),
+                  TextComponent(
+                    labelText:
+                        TextConstants.readyToParkMessage(widget.driverName),
+                    fontSize: w * 0.048,
+                    textAlign: TextAlign.center,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                  SizedBox(height: h * 0.025),
+                  DriverActionCard(
+                    imagePath: 'assets/images/park.png',
+                    buttonLabel: TextConstants.parkVehicle,
+                    onTap: () => widget.onParkFlowChanged(true),
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
+                  ),
+                  SizedBox(height: h * 0.04),
+                  DriverActionCard(
+                    imagePath: 'assets/images/retrive.png',
+                    buttonLabel: TextConstants.retrieveVehicle,
+                    onTap: null,
+                    screenWidth: widget.screenWidth,
+                    screenHeight: widget.screenHeight,
+                    isTablet: widget.isTablet,
+                    isDesktop: widget.isDesktop,
+                  ),
+                  SizedBox(height: h * 0.025),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleDetailsScreen() {
+    return DriverVehicleDetailsScreen(
+      screenWidth: widget.screenWidth,
+      screenHeight: widget.screenHeight,
+      isTablet: widget.isTablet,
+      isDesktop: widget.isDesktop,
+      onReturnFromCarCamera: () => widget.onParkFlowChanged(false),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -38,13 +124,11 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
       child: BlocListener<TagSubmissionBloc, TagSubmissionState>(
         listener: (context, state) {
           if (state is TagSubmissionSuccess) {
-            // TODO: Handle success (e.g., show snackbar, navigate, etc.)
             SnackBars.showSuccessSnackBar(
               context,
               state.message,
             );
           } else if (state is TagSubmissionSessionExpired) {
-            // Clear tokens and navigate to login
             TokenStorage.clearAll();
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -53,50 +137,15 @@ class _DriverOnlineContentState extends State<DriverOnlineContent> {
               (route) => false,
             );
           } else if (state is TagSubmissionError) {
-            // Show custom error message for invalid or already used QR/tag
             SnackBars.showErrorSnackBar(
               context,
               TextConstants.tagSubmissionError,
             );
           }
         },
-        child: Column(
-          children: [
-            SizedBox(height: widget.screenHeight * 0.03),
-            // Welcome message
-            TextComponent(
-              labelText: TextConstants.readyToParkMessage(widget.driverName),
-              fontSize: widget.isDesktop
-                  ? widget.screenWidth * 0.018
-                  : widget.isTablet
-                      ? widget.screenWidth * 0.028
-                      : widget.screenWidth * 0.05,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: widget.screenHeight * 0.01),
-            TextComponent(
-              labelText: TextConstants.scanKeyTagInstruction,
-              fontSize: widget.isDesktop
-                  ? widget.screenWidth * 0.012
-                  : widget.isTablet
-                      ? widget.screenWidth * 0.02
-                      : widget.screenWidth * 0.035,
-              fontWeight: FontWeight.w400,
-              color: AppColors.black,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: widget.screenHeight * 0.03),
-            // QR Scanner with integrated manual entry
-            DriverQrScannerContent(
-              screenWidth: widget.screenWidth,
-              screenHeight: widget.screenHeight,
-              isTablet: widget.isTablet,
-              isDesktop: widget.isDesktop,
-            ),
-          ],
-        ),
+        child: widget.showParkFlow
+            ? _buildVehicleDetailsScreen()
+            : _buildFirstScreen(),
       ),
     );
   }

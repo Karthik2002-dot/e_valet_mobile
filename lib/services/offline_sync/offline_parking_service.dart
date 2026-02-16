@@ -76,6 +76,7 @@ class OfflineParkingService {
               longitude: photo.longitude,
               accuracy: photo.accuracy,
               parkingLocation: photo.parkingLocation,
+              vehicleNumber: photo.vehicleNumber,
             );
             await ImageApiService.uploadParkingPhoto(
               request: parkRequest,

@@ -9,7 +9,10 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_st
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_content.dart';
 
 class DriverHomeView extends StatelessWidget {
-  const DriverHomeView({super.key});
+  const DriverHomeView({super.key, this.homeResetNotifier});
+
+  /// When this notifier's value changes, driver home content resets to show home (two cards).
+  final ValueNotifier<int>? homeResetNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +49,7 @@ class DriverHomeView extends StatelessWidget {
                     .read<DriverStatusBloc>()
                     .add(const DriverBreakToggled(false));
               },
+              homeResetNotifier: homeResetNotifier,
             );
           },
         );

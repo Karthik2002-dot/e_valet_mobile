@@ -161,7 +161,7 @@ class QrStatusOverlayWidget extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                context.read<QrBloc>().add(const QrResetRequested());
+                context.read<QrBloc>().add(const QrClearForRescan());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: isSuccess ? successColor : errorColor,

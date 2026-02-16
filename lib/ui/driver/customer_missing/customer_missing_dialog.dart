@@ -9,7 +9,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 
 class CustomerMissingDialog extends StatefulWidget {
   final String sessionId;
@@ -118,9 +118,20 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: screenHeight * 0.03),
+            SizedBox(height: screenHeight * 0.02),
 
-            // Proceed Button
+            // Instruction text above proceed button
+            TextComponent(
+              labelText: TextConstants.pressBelowToProceedRepark,
+              fontSize: screenWidth * 0.038,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: screenHeight * 0.02),
+
+            // Proceed Button (large)
             BlocConsumer<InitiateReparkBloc, InitiateReparkState>(
               listener: (context, state) {
                 if (state is InitiateReparkSuccess) {
@@ -129,14 +140,14 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                       context, state.response.message);
                   final navigator = Navigator.of(context);
                   navigator.pop();
-                  // Navigate to camera screen for reparking (navigator stays valid after pop)
+                  // Navigate to latest vehicle details screen (Scan / Type Parking Number) for reparking
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     navigator.pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => CarCameraScreen(
+                        builder: (context) => CarPhotoIntroScreen(
+                          cameViaTagNumber: false,
                           sessionId: widget.sessionId,
                           isReparking: true,
-                          preventBackNavigation: true,
                         ),
                       ),
                     );
@@ -153,7 +164,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                     state is InitiateReparkLoading || _isProcessing;
                 return SizedBox(
                   width: double.infinity,
-                  height: screenHeight * 0.055,
+                  height: screenHeight * 0.08,
                   child: ElevatedButton(
                     onPressed: isLoading
                         ? null
@@ -230,7 +241,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                             children: [
                               TextComponent(
                                 labelText: TextConstants.proceedToRepark,
-                                fontSize: screenWidth * 0.04,
+                                fontSize: screenWidth * 0.05,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.black,
                               ),
@@ -238,7 +249,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                               Icon(
                                 Icons.arrow_forward,
                                 color: AppColors.black,
-                                size: screenWidth * 0.05,
+                                size: screenWidth * 0.06,
                               ),
                             ],
                           ),
@@ -247,9 +258,17 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
               },
             ),
 
-            SizedBox(height: screenHeight * 0.015),
+            SizedBox(height: screenHeight * 0.02),
 
-            // Cancel Button
+            // Instruction and Cancel Button
+            TextComponent(
+              labelText: TextConstants.pressBelowToCancel,
+              fontSize: screenWidth * 0.035,
+              fontWeight: FontWeight.w500,
+              color: AppColors.grey,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: screenHeight * 0.008),
             BlocBuilder<InitiateReparkBloc, InitiateReparkState>(
               builder: (context, state) {
                 final isLoading =
@@ -263,7 +282,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                         },
                   child: TextComponent(
                     labelText: TextConstants.cancel,
-                    fontSize: screenWidth * 0.035,
+                    fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w500,
                     color: isLoading ? AppColors.greyLight : AppColors.grey,
                   ),

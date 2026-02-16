@@ -8,9 +8,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class CarInformationCard extends StatelessWidget {
   final AssignedSession session;
 
+  /// When true, uses smaller image (e.g. when showing handover buttons).
+  final bool compact;
+
   const CarInformationCard({
     super.key,
     required this.session,
+    this.compact = false,
   });
 
   @override
@@ -32,7 +36,133 @@ class CarInformationCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Car Image
+          // Details Section (above image) — smaller text when compact
+          Padding(
+            padding: EdgeInsets.all(
+                compact ? screenWidth * 0.03 : screenWidth * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Badge Number
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.directions_car,
+                      size: compact ? screenWidth * 0.045 : screenWidth * 0.06,
+                      color: AppColors.secondary,
+                    ),
+                    SizedBox(width: screenWidth * 0.03),
+                    TextComponent(
+                      labelText: TextConstants.badgeNumber,
+                      fontSize:
+                          compact ? screenWidth * 0.028 : screenWidth * 0.035,
+                      color: AppColors.grey,
+                    ),
+                    Spacer(),
+                    TextComponent(
+                      labelText: session.cardNumber.toString(),
+                      fontSize:
+                          compact ? screenWidth * 0.038 : screenWidth * 0.05,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                    ),
+                  ],
+                ),
+
+                SizedBox(
+                    height:
+                        compact ? screenHeight * 0.01 : screenHeight * 0.02),
+
+                Divider(
+                  color: AppColors.greyLight,
+                  thickness: 1,
+                  height: 1,
+                ),
+                if (session.parkingLocation.isNotEmpty) ...[
+                  SizedBox(height: compact ? 4 : 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: compact ? 16 : 20,
+                        color: AppColors.secondary,
+                      ),
+                      SizedBox(width: compact ? 6 : 8),
+                      Expanded(
+                        child: TextComponent(
+                          labelText: session.parkingLocation.toString(),
+                          fontSize: compact
+                              ? screenWidth * 0.032
+                              : screenWidth * 0.04,
+                          color: AppColors.black,
+                          maxLines: 2,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: compact ? 8 : 12),
+                  Divider(
+                    color: AppColors.greyLight,
+                    thickness: 1,
+                    height: 1,
+                  ),
+                ],
+
+                SizedBox(
+                    height:
+                        compact ? screenHeight * 0.01 : screenHeight * 0.02),
+
+                // Parked By
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.badge,
+                      size: compact ? screenWidth * 0.045 : screenWidth * 0.06,
+                      color: AppColors.secondary,
+                    ),
+                    SizedBox(width: screenWidth * 0.03),
+                    TextComponent(
+                      labelText: TextConstants.parkedByLabel,
+                      fontSize:
+                          compact ? screenWidth * 0.028 : screenWidth * 0.035,
+                      color: AppColors.grey,
+                    ),
+                    if (!compact) SizedBox(height: screenHeight * 0.01),
+                    TextComponent(
+                      labelText:
+                          session.parkedBy?.name ?? TextConstants.unknown,
+                      fontSize:
+                          compact ? screenWidth * 0.032 : screenWidth * 0.04,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.black,
+                    ),
+                    Spacer(),
+                    // Phone Icon
+                    IconButton(
+                      padding: compact ? const EdgeInsets.all(4) : null,
+                      constraints: compact
+                          ? const BoxConstraints(minWidth: 32, minHeight: 32)
+                          : null,
+                      onPressed: () =>
+                          _makePhoneCall(session.parkedBy?.phone ?? ''),
+                      icon: Icon(
+                        Icons.phone,
+                        color: AppColors.secondary,
+                        size:
+                            compact ? screenWidth * 0.045 : screenWidth * 0.06,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Car Image (below details) — always visible; medium when compact, large otherwise
           Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -40,24 +170,25 @@ class CarInformationCard extends StatelessWidget {
                 width: 2,
               ),
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
+                bottom: Radius.circular(18),
               ),
               color: AppColors.white,
             ),
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
+                bottom: Radius.circular(18),
               ),
               child: session.photoUrl != null
                   ? Image.network(
                       session.photoUrl!,
                       width: double.infinity,
-                      height: screenWidth * 0.6,
+                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           width: double.infinity,
-                          height: screenWidth * 0.6,
+                          height:
+                              compact ? screenWidth * 0.45 : screenWidth * 0.6,
                           color: AppColors.white,
                           child: Center(
                             child: ColorFiltered(
@@ -80,7 +211,7 @@ class CarInformationCard extends StatelessWidget {
                     )
                   : Container(
                       width: double.infinity,
-                      height: screenWidth * 0.6,
+                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
                       color: AppColors.white,
                       child: Center(
                         child: ColorFiltered(
@@ -101,117 +232,6 @@ class CarInformationCard extends StatelessWidget {
                     ),
             ),
           ),
-
-          // Details Section
-          Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Badge Number
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.directions_car,
-                      size: screenWidth * 0.06,
-                      color: AppColors.secondary,
-                    ),
-                    SizedBox(width: screenWidth * 0.03),
-                    TextComponent(
-                      labelText: TextConstants.badgeNumber,
-                      fontSize: screenWidth * 0.035,
-                      color: AppColors.grey,
-                    ),
-                    Spacer(),
-                    TextComponent(
-                      labelText: session.cardNumber.toString(),
-                      fontSize: screenWidth * 0.05,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: screenHeight * 0.02),
-
-                Divider(
-                  color: AppColors.greyLight,
-                  thickness: 1,
-                  height: 1,
-                ),
-                if (session.parkingLocation != null &&
-                    session.parkingLocation!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 20,
-                        color: AppColors.secondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextComponent(
-                          labelText: session.parkingLocation.toString(),
-                          fontSize: screenWidth * 0.04,
-                          color: AppColors.black,
-                          maxLines: 2,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Divider(
-                    color: AppColors.greyLight,
-                    thickness: 1,
-                    height: 1,
-                  ),
-                ],
-
-                SizedBox(height: screenHeight * 0.02),
-
-                // Parked By
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.badge,
-                      size: screenWidth * 0.06,
-                      color: AppColors.secondary,
-                    ),
-                    SizedBox(width: screenWidth * 0.03),
-                    TextComponent(
-                      labelText: TextConstants.parkedByLabel,
-                      fontSize: screenWidth * 0.035,
-                      color: AppColors.grey,
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    TextComponent(
-                      labelText:
-                          session.parkedBy?.name ?? TextConstants.unknown,
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
-                    Spacer(),
-                    // Phone Icon
-                    IconButton(
-                      onPressed: () =>
-                          _makePhoneCall(session.parkedBy?.phone ?? ''),
-                      icon: Icon(
-                        Icons.phone,
-                        color: AppColors.secondary,
-                        size: screenWidth * 0.06,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -219,5 +239,92 @@ class CarInformationCard extends StatelessWidget {
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+  }
+}
+
+/// Image section sized by parent (e.g. 40% of screen). Image fills area; placeholder scales up.
+class CarImageSection extends StatelessWidget {
+  final AssignedSession session;
+
+  const CarImageSection({super.key, required this.session});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.black, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow10,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: session.photoUrl != null
+            ? Image.network(
+                session.photoUrl!,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _placeholder(context),
+              )
+            : _placeholder(context),
+      ),
+    );
+  }
+
+  Widget _placeholder(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: AppColors.white,
+          child: Center(
+            child: ColorFiltered(
+              colorFilter: const ColorFilter.matrix([
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0,
+              ]),
+              child: Image.asset(
+                'assets/images/cars.png',
+                fit: BoxFit.contain,
+                width: w > 0 ? w : 200,
+                height: h > 0 ? h : 200,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

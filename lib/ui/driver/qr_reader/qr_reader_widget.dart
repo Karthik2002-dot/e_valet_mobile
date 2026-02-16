@@ -15,12 +15,18 @@ class QrReaderWidget extends StatefulWidget {
   final bool isTablet;
   final bool isDesktop;
 
+  /// When set, the scanner container fills this width/height (e.g. full container in park flow).
+  final double? fillWidth;
+  final double? fillHeight;
+
   const QrReaderWidget({
     super.key,
     required this.screenWidth,
     required this.screenHeight,
     required this.isTablet,
     required this.isDesktop,
+    this.fillWidth,
+    this.fillHeight,
   });
 
   @override
@@ -291,130 +297,134 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
       _checkAndStartCameraForInitialState();
     }
 
-    final scannerHeight = widget.isDesktop
-        ? widget.screenHeight * 0.25
-        : widget.isTablet
-            ? widget.screenHeight * 0.28
-            : widget.screenHeight * 0.25;
+    final useFillSize = widget.fillWidth != null && widget.fillHeight != null;
+    final scannerContainerWidth =
+        useFillSize ? widget.fillWidth! : (widget.screenWidth * 0.85);
+    final scannerHeight = useFillSize
+        ? widget.fillHeight!
+        : (widget.isDesktop
+            ? widget.screenHeight * 0.25
+            : widget.isTablet
+                ? widget.screenHeight * 0.28
+                : widget.screenHeight * 0.25);
 
     final borderWidth = widget.screenWidth * 0.005;
     final borderRadius = widget.screenWidth * 0.03;
-    final scannerContainerWidth = widget.screenWidth * 0.85;
 
-    return Center(
-      child: Container(
-        width: scannerContainerWidth,
-        height: scannerHeight,
-        decoration: BoxDecoration(
-          color: AppColors.lightBeigeBackground,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(
-            color: AppColors.primary.withOpacity(0.3),
-            width: borderWidth,
-          ),
+    final container = Container(
+      width: scannerContainerWidth,
+      height: scannerHeight,
+      decoration: BoxDecoration(
+        color: AppColors.lightBeigeBackground,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.3),
+          width: borderWidth,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: BlocListener<QrBloc, QrState>(
-            listener: _handleStateChange,
-            child: BlocBuilder<QrBloc, QrState>(
-              builder: (context, state) {
-                final isProcessing = state.isProcessing;
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BlocListener<QrBloc, QrState>(
+          listener: _handleStateChange,
+          child: BlocBuilder<QrBloc, QrState>(
+            builder: (context, state) {
+              final isProcessing = state.isProcessing;
 
-                // Show loading if controller is not initialized
-                if (controller == null) {
-                  return Container(
-                    color: AppColors.black,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.white,
-                      ),
+              // Show loading if controller is not initialized
+              if (controller == null) {
+                return Container(
+                  color: AppColors.black,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.white,
                     ),
-                  );
-                }
-
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    MobileScanner(
-                      controller: controller!,
-                      errorBuilder: (context, error, child) {
-                        // If there's an error, ensure camera is ready
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          if (mounted) {
-                            _ensureCameraReady();
-                          }
-                        });
-                        return Container(
-                          color: AppColors.black,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: AppColors.white,
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 16),
-                                TextComponent(
-                                  labelText:
-                                      TextConstants.cameraErrorReinitializing,
-                                  color: AppColors.white,
-                                  fontSize: widget.screenWidth * 0.04,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                      onDetect: (capture) {
-                        if (isProcessing || state.shouldStopScanner) return;
-                        final List<Barcode> barcodes = capture.barcodes;
-                        if (barcodes.isNotEmpty) {
-                          final barcode = barcodes.first;
-                          final value = barcode.rawValue;
-                          if (value != null && value.isNotEmpty) {
-                            context.read<QrBloc>().add(QrCodeDetected(value));
-                          }
-                        }
-                      },
-                    ),
-                    if (isProcessing)
-                      Container(
-                        color: AppColors.qrProcessingOverlay,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    // Success/Error overlay card on scanner
-                    if (state.shouldStopScanner &&
-                        (state.qrData != null || state.errorMessage != null))
-                      Positioned(
-                        top: 0, // No top margin - full height from top
-                        left: 0, // No left margin - full width
-                        right: 0, // No right margin - full width
-                        bottom: 0, // Extend to bottom - full height
-                        child: QrStatusOverlayWidget(
-                          state: state,
-                          screenWidth: widget.screenWidth,
-                          screenHeight: widget.screenHeight,
-                          isTablet: widget.isTablet,
-                          isDesktop: widget.isDesktop,
-                        ),
-                      ),
-                  ],
+                  ),
                 );
-              },
-            ),
+              }
+
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  MobileScanner(
+                    controller: controller!,
+                    errorBuilder: (context, error, child) {
+                      // If there's an error, ensure camera is ready
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (mounted) {
+                          _ensureCameraReady();
+                        }
+                      });
+                      return Container(
+                        color: AppColors.black,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                color: AppColors.white,
+                                size: 48,
+                              ),
+                              const SizedBox(height: 16),
+                              TextComponent(
+                                labelText:
+                                    TextConstants.cameraErrorReinitializing,
+                                color: AppColors.white,
+                                fontSize: widget.screenWidth * 0.04,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    onDetect: (capture) {
+                      if (isProcessing || state.shouldStopScanner) return;
+                      final List<Barcode> barcodes = capture.barcodes;
+                      if (barcodes.isNotEmpty) {
+                        final barcode = barcodes.first;
+                        final value = barcode.rawValue;
+                        if (value != null && value.isNotEmpty) {
+                          context.read<QrBloc>().add(QrCodeDetected(value));
+                        }
+                      }
+                    },
+                  ),
+                  if (isProcessing)
+                    Container(
+                      color: AppColors.qrProcessingOverlay,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Success/Error overlay card on scanner
+                  if (state.shouldStopScanner &&
+                      (state.qrData != null || state.errorMessage != null))
+                    Positioned(
+                      top: 0, // No top margin - full height from top
+                      left: 0, // No left margin - full width
+                      right: 0, // No right margin - full width
+                      bottom: 0, // Extend to bottom - full height
+                      child: QrStatusOverlayWidget(
+                        state: state,
+                        screenWidth: widget.screenWidth,
+                        screenHeight: widget.screenHeight,
+                        isTablet: widget.isTablet,
+                        isDesktop: widget.isDesktop,
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
+
+    return useFillSize ? container : Center(child: container);
   }
 }

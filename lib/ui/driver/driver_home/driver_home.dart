@@ -15,8 +15,8 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_camera_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
@@ -62,6 +62,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     with WidgetsBindingObserver, RouteAware {
   Timer? _dismissTimer;
   final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
+
+  /// When this changes, DriverHomeContent resets so home (two cards) is shown on reopen/return.
+  final ValueNotifier<int> _homeResetNotifier = ValueNotifier(0);
   final DriverHomeRouteObserver _routeObserver = DriverHomeRouteObserver();
   Timer? _webSocketCheckTimer;
   StreamSubscription<void>? _retrievalNotificationTapSubscription;
@@ -245,7 +248,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      // App came back to foreground - check WebSocket
+      // App came back to foreground - preserve current screen (do not reset to home).
+      // User stays on QR/park flow unless they press back.
       _checkWebSocketOnResume();
       _hasNavigatedForStatus = false;
       _refreshPendingSessions();
@@ -295,7 +299,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPopNext() {
     super.didPopNext();
-    // Builder widget in build() will handle refresh
+    // When user returns to driver home (e.g. from Car Camera), reset so home (two cards) is shown, not Vehicle details.
+    _homeResetNotifier.value++;
   }
 
   @override
@@ -352,6 +357,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return;
     }
 
+    // Block sheet when we handle any of these via direct navigation (Confirm Arrival or vehicle details).
     final pendingSessions = driverMenuState.pendingSessions;
     final hasBlockingStatus = pendingSessions != null &&
         (pendingSessions.hasArrivedSession ||
@@ -510,12 +516,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     // Only show once per screen load
 
                     // Priority order: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN
-                    // Check for ARRIVED status first (highest priority)
+                    // ARRIVED/ACCEPTED: go directly to Confirm Arrival so app reopen after accept triggers correctly (session/pending API).
                     if (!_hasNavigatedForStatus &&
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasArrivedSession) {
                       _hasNavigatedForStatus = true;
-                      // Close bottom sheet if open before navigating
                       _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
@@ -523,11 +528,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           final arrivedSession =
                               state.pendingSessions!.arrivedSession;
                           if (arrivedSession != null) {
-                            // Convert PendingSession to AssignedSession
                             final assignedSession =
                                 SessionConverter.pendingToAssigned(
                                     arrivedSession);
-                            // Navigate to arrived screen with handover UI directly
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => ConfirmArrivalScreen(
@@ -540,14 +543,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           }
                         }
                       });
-                    }
-                    // Check for ACCEPT status
-                    // If status is ACCEPT, navigate to arrived screen
-                    else if (!_hasNavigatedForStatus &&
+                    } else if (!_hasNavigatedForStatus &&
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasAcceptedSession) {
                       _hasNavigatedForStatus = true;
-                      // Close bottom sheet if open before navigating
                       _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
@@ -555,11 +554,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           final acceptedSession =
                               state.pendingSessions!.acceptedSession;
                           if (acceptedSession != null) {
-                            // Convert PendingSession to AssignedSession
                             final assignedSession =
                                 SessionConverter.pendingToAssigned(
                                     acceptedSession);
-                            // Navigate to arrived screen with back navigation prevented
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => ConfirmArrivalScreen(
@@ -572,13 +569,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         }
                       });
                     }
-                    // Check for REPARKING status
-                    // If status is REPARKING, navigate to camera screen for reparking
+                    // Check for REPARKING status — open latest vehicle details screen (Scan / Type Parking Number)
                     else if (!_hasNavigatedForStatus &&
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasReparkingSession) {
                       _hasNavigatedForStatus = true;
-                      // Close bottom sheet if open before navigating
                       _closeAssignedSessionSheetIfOpen(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted &&
@@ -586,13 +581,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           final reparkingSession =
                               state.pendingSessions!.reparkingSession;
                           if (reparkingSession != null) {
-                            // Navigate directly to camera screen for reparking
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => CarCameraScreen(
+                                builder: (_) => CarPhotoIntroScreen(
+                                  cameViaTagNumber: false,
                                   sessionId: reparkingSession.sessionId,
                                   isReparking: true,
-                                  preventBackNavigation: true,
                                 ),
                               ),
                             );
@@ -600,7 +594,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         }
                       });
                     }
-                    // Check for CHECKED_IN session and show dialog
+                    // Check for CHECKED_IN session and show dialog — on Continue open latest vehicle details screen (Scan / Type Parking Number)
                     else if (!_hasShownSessionDialog &&
                         state.pendingSessions != null &&
                         state.pendingSessions!.hasCheckedInSession) {
@@ -616,12 +610,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                               cardNumber:
                                   checkedInSession.cardNumber.toString(),
                               onContinue: () {
-                                // Navigate to camera screen with back navigation prevented
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) => CarCameraScreen(
+                                    builder: (_) => CarPhotoIntroScreen(
+                                      cameViaTagNumber: false,
                                       sessionId: checkedInSession.sessionId,
-                                      preventBackNavigation: true,
                                     ),
                                   ),
                                 );
@@ -656,7 +649,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   print('Manual WebSocket refresh failed: $e');
                 }
               },
-              child: const DriverHomeView(),
+              child: DriverHomeView(homeResetNotifier: _homeResetNotifier),
             ),
           );
         },

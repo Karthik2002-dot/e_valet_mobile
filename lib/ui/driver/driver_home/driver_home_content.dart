@@ -7,11 +7,14 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_online
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_offline_content.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_break_content.dart';
 
-class DriverHomeContent extends StatelessWidget {
+class DriverHomeContent extends StatefulWidget {
   final String driverName;
   final bool isOnBreak;
   final bool isOnline;
   final VoidCallback? onBreakEnd;
+
+  /// When this notifier's value changes, we reset so home (two cards) is shown.
+  final ValueNotifier<int>? homeResetNotifier;
 
   const DriverHomeContent({
     super.key,
@@ -19,7 +22,49 @@ class DriverHomeContent extends StatelessWidget {
     required this.isOnBreak,
     required this.isOnline,
     this.onBreakEnd,
+    this.homeResetNotifier,
   });
+
+  @override
+  State<DriverHomeContent> createState() => _DriverHomeContentState();
+}
+
+class _DriverHomeContentState extends State<DriverHomeContent>
+    with WidgetsBindingObserver {
+  /// When this key changes, DriverOnlineContent is recreated so reopen always shows home (two cards).
+  Key _onlineContentKey = UniqueKey();
+
+  /// True when Park Vehicle was tapped and we're on the vehicle details (QR) screen.
+  bool _showParkFlow = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.homeResetNotifier?.addListener(_onHomeReset);
+  }
+
+  @override
+  void dispose() {
+    widget.homeResetNotifier?.removeListener(_onHomeReset);
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void _onHomeReset() {
+    if (mounted)
+      setState(() {
+        _onlineContentKey = UniqueKey();
+        _showParkFlow = false;
+      });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // When app is reopened (resumed), preserve current screen - user stays on QR/park flow
+    // unless they press back or navigate back.
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,49 +95,70 @@ class DriverHomeContent extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Header Content Section (status card)
+          // Header Content Section (status card) — back button on left when in park flow, break toggle on right
           DriverHeaderWidget(
-            isOnline: isOnline,
+            isOnline: widget.isOnline,
             screenWidth: screenWidth,
             screenHeight: screenHeight,
             isTablet: isTablet,
             isDesktop: isDesktop,
+            showBackButton: _showParkFlow,
+            onBackPressed: _showParkFlow
+                ? () => setState(() => _showParkFlow = false)
+                : null,
           ),
           // Main Content Section with SafeArea
+          // Show break content when on break (whether online or offline); else online content or offline content.
           Expanded(
             child: SafeArea(
               top: false,
               child: Container(
                 color: AppColors.lightBeigeBackground,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.04,
-                    ),
-                    child: isOnBreak
-                        ? DriverBreakContent(
+                child: widget.isOnBreak
+                    ? SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.04,
+                          ),
+                          child: DriverBreakContent(
                             screenWidth: screenWidth,
                             screenHeight: screenHeight,
                             isTablet: isTablet,
                             isDesktop: isDesktop,
-                            onBreakEnd: onBreakEnd,
+                            onBreakEnd: widget.onBreakEnd,
+                          ),
+                        ),
+                      )
+                    : widget.isOnline
+                        ? Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.04,
+                            ),
+                            child: DriverOnlineContent(
+                              key: _onlineContentKey,
+                              driverName: widget.driverName,
+                              screenWidth: screenWidth,
+                              screenHeight: screenHeight,
+                              isTablet: isTablet,
+                              isDesktop: isDesktop,
+                              showParkFlow: _showParkFlow,
+                              onParkFlowChanged: (value) =>
+                                  setState(() => _showParkFlow = value),
+                            ),
                           )
-                        : isOnline
-                            ? DriverOnlineContent(
-                                driverName: driverName,
-                                screenWidth: screenWidth,
-                                screenHeight: screenHeight,
-                                isTablet: isTablet,
-                                isDesktop: isDesktop,
-                              )
-                            : DriverOfflineContent(
+                        : SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.04,
+                              ),
+                              child: DriverOfflineContent(
                                 screenWidth: screenWidth,
                                 screenHeight: screenHeight,
                                 isTablet: isTablet,
                                 isDesktop: isDesktop,
                               ),
-                  ),
-                ),
+                            ),
+                          ),
               ),
             ),
           ),

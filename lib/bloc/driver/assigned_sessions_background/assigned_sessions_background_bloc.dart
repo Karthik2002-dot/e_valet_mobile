@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 
 part 'assigned_sessions_background_event.dart';
 part 'assigned_sessions_background_state.dart';
@@ -22,6 +23,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     on<RefreshAssignedSessions>(_onRefreshAssignedSessions);
     on<ReinitializeWebSocket>(_onReinitializeWebSocket);
     on<_PollAssignedSessions>(_onPollSessions);
+    on<SetSessionsFromPending>(_onSetSessionsFromPending);
 
     // Setup WebSocket listeners and connection monitoring
     _setupWebSocketConnectionMonitoring();
@@ -185,12 +187,68 @@ class AssignedSessionsBackgroundBloc extends Bloc<
   ) async {
     try {
       final sessions = await AssignedSessionsApiService.fetchAssignedSessions();
-      // Background refresh: emit new data only; no loading/error state so UI is not disturbed
+      // Skip emit when display content is unchanged so bottom sheet image does not reload/flicker every 5s
+      final current = state;
+      if (current is AssignedSessionsBackgroundData &&
+          _isSameDisplayContent(current.sessions, sessions)) {
+        return;
+      }
       emit(AssignedSessionsBackgroundData(sessions));
     } catch (e) {
       print('Failed to fetch assigned sessions: $e');
       // Intentionally no emit on error — background refresh stays silent
     }
+  }
+
+  /// Normalize photo URL to path (strip query) so signed/cache-busting URLs compare equal.
+  static String _normalizePhotoUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final q = url.indexOf('?');
+    return q < 0 ? url : url.substring(0, q);
+  }
+
+  /// Stable key for the session shown in the retrieval bottom sheet (id + normalized photoUrl).
+  static String _sessionDisplayKey(dynamic s) {
+    if (s == null) return '';
+    if (s is AssignedSession) {
+      return '${s.id}|${_normalizePhotoUrl(s.photoUrl)}';
+    }
+    if (s is Map<String, dynamic>) {
+      final id = (s['sessionId'] ?? s['id'])?.toString() ?? '';
+      final photos = s['photos'];
+      String? photoUrl;
+      if (photos is List && photos.isNotEmpty) {
+        final first = photos.first;
+        if (first is Map<String, dynamic>) {
+          photoUrl = first['url']?.toString();
+        }
+      }
+      return '$id|${_normalizePhotoUrl(photoUrl)}';
+    }
+    return '';
+  }
+
+  /// True if the list has the same display content so we avoid reloading the bottom sheet image.
+  static bool _isSameDisplayContent(
+      List<dynamic> current, List<dynamic> incoming) {
+    if (current.length != incoming.length) return false;
+    if (current.isEmpty) return true;
+    return _sessionDisplayKey(current.first) ==
+        _sessionDisplayKey(incoming.first);
+  }
+
+  /// Public so UI can use buildWhen: only rebuild when this changes (stops bottom sheet flicker).
+  static String displayKeyOfFirstSession(List<dynamic> sessions) {
+    if (sessions.isEmpty) return '';
+    return _sessionDisplayKey(sessions.first);
+  }
+
+  void _onSetSessionsFromPending(
+    SetSessionsFromPending event,
+    Emitter<AssignedSessionsBackgroundState> emit,
+  ) {
+    if (event.sessions.isEmpty) return;
+    emit(AssignedSessionsBackgroundData(event.sessions));
   }
 
   /// Emit sessions from WebSocket payload without hitting the REST API

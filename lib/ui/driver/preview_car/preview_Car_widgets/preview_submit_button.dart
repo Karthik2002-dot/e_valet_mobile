@@ -8,11 +8,19 @@ class PreviewSubmitButton extends StatelessWidget {
   final bool isReparking;
   final bool isLoading;
 
+  /// When false, button is disabled (e.g. until parking location is entered).
+  final bool isEnabled;
+
+  /// When set, shown instead of Submit / Submit Re-Park (e.g. 'Done').
+  final String? overrideLabel;
+
   const PreviewSubmitButton({
     super.key,
     required this.onSubmit,
     this.isReparking = false,
     this.isLoading = false,
+    this.isEnabled = true,
+    this.overrideLabel,
   });
 
   @override
@@ -20,15 +28,18 @@ class PreviewSubmitButton extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final buttonHeight = screenHeight * 0.085;
+    final textSize = screenWidth * 0.072;
+
     return SizedBox(
       width: double.infinity,
-      height: screenHeight * 0.07,
+      height: buttonHeight,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onSubmit,
+        onPressed: (isLoading || !isEnabled) ? null : onSubmit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(screenWidth * 0.02),
+            borderRadius: BorderRadius.circular(screenWidth * 0.025),
           ),
           elevation: 0,
         ),
@@ -43,20 +54,24 @@ class PreviewSubmitButton extends StatelessWidget {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   TextComponent(
-                    labelText: isReparking
-                        ? TextConstants.submitRePark
-                        : TextConstants.submitButton,
-                    fontSize: screenWidth * 0.06,
+                    labelText: overrideLabel ??
+                        (isReparking
+                            ? TextConstants.submitRePark
+                            : TextConstants.submitButton),
+                    fontSize: textSize,
                     color: AppColors.white,
                   ),
-                  SizedBox(width: screenWidth * 0.02),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.white,
-                    size: screenWidth * 0.06,
-                  ),
+                  if (overrideLabel == null) ...[
+                    SizedBox(width: screenWidth * 0.02),
+                    Icon(
+                      Icons.arrow_forward,
+                      color: AppColors.white,
+                      size: textSize,
+                    ),
+                  ],
                 ],
               ),
       ),

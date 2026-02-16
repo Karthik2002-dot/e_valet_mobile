@@ -22,10 +22,26 @@ class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
   bool _isAcceptLoading = false;
 
+  /// When user taps Collect Keys (accept API triggered). Used to start 30s disable from that moment.
+  DateTime? _acceptTriggeredAt;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AssignedSessionsBackgroundBloc,
         AssignedSessionsBackgroundState>(
+      buildWhen: (previous, current) {
+        // Rebuild only when the displayed session (id + photo) changes, so the bottom sheet image does not flicker every 5s
+        if (current is! AssignedSessionsBackgroundData) return true;
+        if (!current.hasSessions) return true;
+        if (previous is! AssignedSessionsBackgroundData ||
+            !previous.hasSessions) {
+          return true;
+        }
+        return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
+                previous.sessions) !=
+            AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
+                current.sessions);
+      },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
           // Never show empty sheet content — when no sessions, parent closes sheet
@@ -44,12 +60,18 @@ class _AssignedSessionSheetLoaderState
               sessionId = rawSession.id;
               sessionJson = rawSession.toJson();
             } else if (rawSession is Map<String, dynamic>) {
-              // Defensive: map from backend - try to parse to typed session
-              sessionId = rawSession['id']?.toString();
+              // API/WebSocket may use 'sessionId' or 'id' - check both (same as AssignedSession.fromJson)
+              final rawId =
+                  (rawSession['sessionId'] ?? rawSession['id'])?.toString();
+              sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
               sessionJson = rawSession;
               // Try to parse the session to get typed object with all fields
               try {
                 typedSession = AssignedSession.fromJson(rawSession);
+                // Fallback: use typed id if raw extraction missed it
+                if (sessionId == null && typedSession.id.isNotEmpty) {
+                  sessionId = typedSession.id;
+                }
               } catch (e) {
                 // If parsing fails, keep sessionJson as raw map
                 // This ensures we still have the data even if model parsing fails
@@ -89,6 +111,11 @@ class _AssignedSessionSheetLoaderState
               }
             }
           }
+
+          // Use typed session id as fallback when we have a session to display
+          final effectiveSessionId = sessionId ?? typedSession?.id;
+          final canAccept =
+              effectiveSessionId != null && effectiveSessionId.isNotEmpty;
 
           return Align(
             alignment: Alignment.bottomCenter,
@@ -132,35 +159,30 @@ class _AssignedSessionSheetLoaderState
                           : null,
                       isLoading: false,
                       isAcceptLoading: _isAcceptLoading,
-                      onAccept: sessionId != null
+                      onAccept: canAccept
                           ? () {
-                              if (_isAcceptLoading) {
-                                return;
-                              }
+                              if (_isAcceptLoading) return;
+                              final id = effectiveSessionId;
                               setState(() {
                                 _isAcceptLoading = true;
+                                _acceptTriggeredAt = DateTime.now();
                               });
-                              TokenStorage.getSessionIdFromGetApi()
-                                  .then((storedSessionId) {
-                                if (storedSessionId != null &&
-                                    storedSessionId.isNotEmpty) {
-                                  if (blocContext.mounted) {
-                                    blocContext.read<RetrivalRequestBloc>().add(
-                                          AcceptRetrivalRequest(
-                                              storedSessionId),
-                                        );
-                                  }
-                                } else {
-                                  if (mounted) {
-                                    setState(() {
-                                      _isAcceptLoading = false;
-                                    });
-                                  }
-                                  // log if needed
-                                }
-                              });
+                              if (blocContext.mounted) {
+                                blocContext.read<RetrivalRequestBloc>().add(
+                                      AcceptRetrivalRequest(id),
+                                    );
+                              } else if (mounted) {
+                                setState(() => _isAcceptLoading = false);
+                              }
                             }
-                          : null,
+                          : (typedSession != null
+                              ? () {
+                                  SnackBars.showErrorSnackBar(
+                                    context,
+                                    'Unable to accept: session info is missing.',
+                                  );
+                                }
+                              : null),
                     ),
                   );
                 },
@@ -182,15 +204,18 @@ class _AssignedSessionSheetLoaderState
   }
 
   void _navigateToConfirmArrival(BuildContext context) async {
+    final navigator = Navigator.of(context);
     final sessionData = await TokenStorage.getAssignedSessionData();
     if (sessionData != null) {
       try {
         final session = AssignedSession.fromJson(sessionData);
-        Navigator.of(context).push(
+        navigator.push(
           MaterialPageRoute(
             builder: (context) => ConfirmArrivalScreen(
               session: session,
               preventBackNavigation: true,
+              acceptTriggeredAt: _acceptTriggeredAt,
+              disableConfirmArrivalForSeconds: 30,
             ),
           ),
         );
