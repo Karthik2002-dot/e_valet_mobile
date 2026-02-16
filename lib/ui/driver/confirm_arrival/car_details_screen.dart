@@ -208,13 +208,11 @@ class _CallButton extends StatelessWidget {
             children: [
               Icon(Icons.phone_outlined, size: 18, color: AppColors.black),
               const SizedBox(width: 4),
-              Text(
-                'Call',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
+              TextComponent(
+                labelText: 'Call',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
               ),
             ],
           ),

@@ -43,7 +43,10 @@ class StatusDetailRow extends StatelessWidget {
             items: statusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(status, style: const TextStyle(fontSize: 14)),
+                child: TextComponent(
+                  labelText: status,
+                  fontSize: 14,
+                ),
               );
             }).toList(),
             onChanged: (value) {

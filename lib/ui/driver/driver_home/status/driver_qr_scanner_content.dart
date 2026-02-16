@@ -213,13 +213,11 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         color: AppColors.black,
                       ),
                       SizedBox(height: widget.screenHeight * 0.006),
-                      Text(
-                        TextConstants.vehicleDetailsHint,
-                        style: TextStyle(
-                          fontSize: widget.screenWidth * 0.032,
-                          color: AppColors.black,
-                          fontWeight: FontWeight.w400,
-                        ),
+                      TextComponent(
+                        labelText: TextConstants.vehicleDetailsHint,
+                        fontSize: widget.screenWidth * 0.032,
+                        color: AppColors.black,
+                        fontWeight: FontWeight.w400,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -497,13 +495,11 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              TextConstants.submitButton,
-                              style: TextStyle(
-                                fontSize: textSize,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.white,
-                              ),
+                            TextComponent(
+                              labelText: TextConstants.submitButton,
+                              fontSize: textSize,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
                             ),
                             SizedBox(width: w * 0.02),
                             Icon(
