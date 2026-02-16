@@ -65,8 +65,8 @@ class DriverHeaderWidget extends StatelessWidget {
                     constraints: const BoxConstraints(),
                   ),
                 ),
-              // On Break toggle positioned at very top-right, just below logo
-              if (isCurrentlyOnline)
+              // On Break toggle only on first screen (home with Park Vehicle). Hide on QR scan / vehicle details / any screen with back button.
+              if (isCurrentlyOnline && !showBackButton)
                 Positioned(
                   top: 4, // Minimal offset from top (4 pixels)
                   right: padding, // Gap from right edge

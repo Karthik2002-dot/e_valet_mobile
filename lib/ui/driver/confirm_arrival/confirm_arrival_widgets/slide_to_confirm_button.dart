@@ -8,6 +8,12 @@ class SlideToConfirmButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onConfirm;
 
+  /// When false, button is disabled (e.g. for 30s after Collect Keys).
+  final bool enabled;
+
+  /// When > 0, button is disabled and this countdown is shown inside a round circle.
+  final int disabledRemainingSeconds;
+
   /// When true, button expands to fill parent and uses large label (like review OK).
   final bool useBigStyle;
 
@@ -16,8 +22,40 @@ class SlideToConfirmButton extends StatelessWidget {
     required this.sessionId,
     required this.isLoading,
     required this.onConfirm,
+    this.enabled = true,
+    this.disabledRemainingSeconds = 0,
     this.useBigStyle = false,
   });
+
+  Widget _leadingWidget(double screenHeight, double screenWidth) {
+    final showCountdown = !enabled && disabledRemainingSeconds > 0;
+    if (showCountdown) {
+      final size = useBigStyle ? 44.0 : 36.0;
+      final fontSize = useBigStyle ? 20.0 : 16.0;
+      return Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: AppColors.greyLight,
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          '$disabledRemainingSeconds',
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            color: AppColors.black.withOpacity(0.85),
+          ),
+        ),
+      );
+    }
+    return Icon(
+      Icons.my_location,
+      size: useBigStyle ? screenWidth * 0.08 : screenHeight * 0.04,
+      color: AppColors.black,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +63,7 @@ class SlideToConfirmButton extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final button = ElevatedButton(
-      onPressed: isLoading ? null : onConfirm,
+      onPressed: (isLoading || !enabled) ? null : onConfirm,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.black,
@@ -50,11 +88,7 @@ class SlideToConfirmButton extends StatelessWidget {
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.my_location,
-                  size: useBigStyle ? screenWidth * 0.08 : screenHeight * 0.04,
-                  color: AppColors.black,
-                ),
+                _leadingWidget(screenHeight, screenWidth),
                 SizedBox(width: useBigStyle ? 16 : 10),
                 TextComponent(
                   labelText: TextConstants.slideToConfirmArrival,

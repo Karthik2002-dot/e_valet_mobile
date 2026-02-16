@@ -11,6 +11,8 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     on<QrCodeDetected>(_onQrCodeDetected);
     on<QrResetRequested>(_onResetRequested);
     on<QrCameraActivateRequested>(_onCameraActivateRequested);
+    // Rescan button: clear data and turn camera back on
+    on<QrClearForRescan>(_onClearForRescan);
   }
 
   Future<void> _onQrCodeDetected(
@@ -78,5 +80,15 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     Emitter<QrState> emit,
   ) {
     emit(state.copyWith(cameraShouldBeActive: true));
+  }
+
+  void _onClearForRescan(
+    QrClearForRescan event,
+    Emitter<QrState> emit,
+  ) {
+    // Clear scanned data and turn camera back on so user can scan again
+    emit(const QrState(
+      cameraShouldBeActive: true,
+    ));
   }
 }

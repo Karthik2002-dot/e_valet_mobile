@@ -8,7 +8,10 @@ class PreviewSubmitButton extends StatelessWidget {
   final bool isReparking;
   final bool isLoading;
 
-  /// When set, shown instead of Submit / Submit Re-Park (e.g. 'OK').
+  /// When false, button is disabled (e.g. until parking location is entered).
+  final bool isEnabled;
+
+  /// When set, shown instead of Submit / Submit Re-Park (e.g. 'Done').
   final String? overrideLabel;
 
   const PreviewSubmitButton({
@@ -16,6 +19,7 @@ class PreviewSubmitButton extends StatelessWidget {
     required this.onSubmit,
     this.isReparking = false,
     this.isLoading = false,
+    this.isEnabled = true,
     this.overrideLabel,
   });
 
@@ -24,15 +28,18 @@ class PreviewSubmitButton extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final buttonHeight = screenHeight * 0.085;
+    final textSize = screenWidth * 0.072;
+
     return SizedBox(
       width: double.infinity,
-      height: screenHeight * 0.07,
+      height: buttonHeight,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onSubmit,
+        onPressed: (isLoading || !isEnabled) ? null : onSubmit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(screenWidth * 0.02),
+            borderRadius: BorderRadius.circular(screenWidth * 0.025),
           ),
           elevation: 0,
         ),
@@ -54,7 +61,7 @@ class PreviewSubmitButton extends StatelessWidget {
                         (isReparking
                             ? TextConstants.submitRePark
                             : TextConstants.submitButton),
-                    fontSize: screenWidth * 0.06,
+                    fontSize: textSize,
                     color: AppColors.white,
                   ),
                   if (overrideLabel == null) ...[
@@ -62,7 +69,7 @@ class PreviewSubmitButton extends StatelessWidget {
                     Icon(
                       Icons.arrow_forward,
                       color: AppColors.white,
-                      size: screenWidth * 0.06,
+                      size: textSize,
                     ),
                   ],
                 ],

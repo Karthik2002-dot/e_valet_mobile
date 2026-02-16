@@ -102,14 +102,15 @@ class TextConstants {
   static const String retrieveVehicle = 'Retrieve Vehicle';
   static const String vehicleDetailsTitle = 'Vehicle details';
   static const String vehicleDetailsHint =
-      'Enter tag number or scan the QR in the card below.';
+      'Enter card number or scan the QR in the card below.';
 
-  /// Hint for the parking/photo screen (after tag/QR submit): parking number tab + scan tab.
+  /// Hint for the parking/photo screen (after tag/QR submit): car photo only.
   static const String vehicleDetailsParkingPhotoHint =
-      'Enter parking location and vehicle number below, or use Scan to capture a photo of the car.';
+      'Capture a photo of the car.';
+  static const String previewDoneButton = 'Done';
   static const String scanTabLabel = 'Scan';
   static const String typeIdNumberTabLabel = 'ID Number';
-  static const String typeParkingNumberTabLabel = 'Parking Number';
+  static const String typeParkingNumberTabLabel = 'Card Number';
   static const String locationVehicleNumber = 'Location and Vehicle Number';
   static const String carPhoto = 'Car Photo';
   static const String enterTagNumberLink = 'Or enter the tag number';
@@ -161,10 +162,10 @@ class TextConstants {
   static const String relaxAndRestart = 'Relax and Restart!';
   static const String endBreak = 'End Break';
 
-  // Manual Tag Entry
+  // Manual Tag Entry (shown as Card Number on Vehicle details screen)
   static const String enterTagNumberTitle = 'Enter the Tag Number to Proceed';
-  static const String tagNumberLabel = 'Tag Number';
-  static const String tagNumberHint = 'Enter Badge Number';
+  static const String tagNumberLabel = 'Card Number';
+  static const String tagNumberHint = 'Enter card number';
   static const String scanTagNumberLink = 'Or scan the tag number';
 
   // Third screen (after QR/tag submit) - Parking location for tag flow
@@ -219,7 +220,7 @@ class TextConstants {
   static const String retrievalRequest = 'Retrieval Request';
   static const String noActiveRetrievalRequests =
       'No active retrieval requests';
-  static const String acceptRequest = 'Accept Request';
+  static const String acceptRequest = 'Collect Keys';
 
   // Handover Related
   static const String confirmHandover = 'Confirm Handover';

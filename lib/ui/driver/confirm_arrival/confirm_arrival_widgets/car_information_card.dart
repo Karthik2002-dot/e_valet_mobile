@@ -242,7 +242,7 @@ class CarInformationCard extends StatelessWidget {
   }
 }
 
-/// Small image section for 20% proportional layout (image on top).
+/// Image section sized by parent (e.g. 40% of screen). Image fills area; placeholder scales up.
 class CarImageSection extends StatelessWidget {
   final AssignedSession session;
 
@@ -283,148 +283,48 @@ class CarImageSection extends StatelessWidget {
   }
 
   Widget _placeholder(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      width: double.infinity,
-      color: AppColors.white,
-      child: Center(
-        child: ColorFiltered(
-          colorFilter: const ColorFilter.matrix([
-            -1,
-            0,
-            0,
-            0,
-            255,
-            0,
-            -1,
-            0,
-            0,
-            255,
-            0,
-            0,
-            -1,
-            0,
-            255,
-            0,
-            0,
-            0,
-            1,
-            0,
-          ]),
-          child: Image.asset(
-            'assets/images/cars.png',
-            fit: BoxFit.contain,
-            width: screenWidth * 0.25,
-            height: screenHeight * 0.1,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Details-only section for 20% proportional layout (data below image).
-class CarDetailsSection extends StatelessWidget {
-  final AssignedSession session;
-
-  const CarDetailsSection({super.key, required this.session});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.03,
-        vertical: screenWidth * 0.02,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow10,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.directions_car,
-                    size: screenWidth * 0.04, color: AppColors.secondary),
-                SizedBox(width: screenWidth * 0.02),
-                TextComponent(
-                  labelText: TextConstants.badgeNumber,
-                  fontSize: screenWidth * 0.028,
-                  color: AppColors.grey,
-                ),
-                const Spacer(),
-                TextComponent(
-                  labelText: session.cardNumber.toString(),
-                  fontSize: screenWidth * 0.032,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-              ],
-            ),
-            if (session.parkingLocation.isNotEmpty) ...[
-              SizedBox(height: screenWidth * 0.015),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.location_on,
-                      size: screenWidth * 0.035, color: AppColors.secondary),
-                  SizedBox(width: screenWidth * 0.02),
-                  Expanded(
-                    child: TextComponent(
-                      labelText: session.parkingLocation,
-                      fontSize: screenWidth * 0.028,
-                      color: AppColors.black,
-                      maxLines: 2,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: AppColors.white,
+          child: Center(
+            child: ColorFiltered(
+              colorFilter: const ColorFilter.matrix([
+                -1,
+                0,
+                0,
+                0,
+                255,
+                0,
+                -1,
+                0,
+                0,
+                255,
+                0,
+                0,
+                -1,
+                0,
+                255,
+                0,
+                0,
+                0,
+                1,
+                0,
+              ]),
+              child: Image.asset(
+                'assets/images/cars.png',
+                fit: BoxFit.contain,
+                width: w > 0 ? w : 200,
+                height: h > 0 ? h : 200,
               ),
-            ],
-            SizedBox(height: screenWidth * 0.015),
-            Row(
-              children: [
-                Icon(Icons.badge,
-                    size: screenWidth * 0.04, color: AppColors.secondary),
-                SizedBox(width: screenWidth * 0.02),
-                Expanded(
-                  child: TextComponent(
-                    labelText:
-                        '${TextConstants.parkedByLabel} ${session.parkedBy?.name ?? TextConstants.unknown}',
-                    fontSize: screenWidth * 0.028,
-                    color: AppColors.black,
-                    maxLines: 1,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                IconButton(
-                  padding: const EdgeInsets.all(4),
-                  constraints:
-                      const BoxConstraints(minWidth: 28, minHeight: 28),
-                  onPressed: () => FlutterPhoneDirectCaller.callNumber(
-                      session.parkedBy?.phone ?? ''),
-                  icon: Icon(Icons.phone,
-                      color: AppColors.secondary, size: screenWidth * 0.04),
-                ),
-              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

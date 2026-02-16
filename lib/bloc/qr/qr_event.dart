@@ -24,3 +24,8 @@ class QrResetRequested extends QrEvent {
 class QrCameraActivateRequested extends QrEvent {
   const QrCameraActivateRequested();
 }
+
+/// Clear scanned data and turn camera back on so the user can scan again (stays on Scan tab).
+class QrClearForRescan extends QrEvent {
+  const QrClearForRescan();
+}

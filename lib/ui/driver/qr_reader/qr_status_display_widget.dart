@@ -132,7 +132,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      context.read<QrBloc>().add(const QrResetRequested());
+                      context.read<QrBloc>().add(const QrClearForRescan());
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: AppColors.primary),
@@ -207,7 +207,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      context.read<QrBloc>().add(const QrResetRequested());
+                      context.read<QrBloc>().add(const QrClearForRescan());
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: AppColors.error),

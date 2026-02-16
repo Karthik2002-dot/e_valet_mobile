@@ -92,7 +92,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (session != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    padding: const EdgeInsets.only(top: 8, bottom: 20),
                     child: SizedBox(
                       height: 55,
                       child: ElevatedButton(
@@ -116,22 +116,26 @@ class RetrievalRequestSheet extends StatelessWidget {
                                       AppColors.black),
                                 ),
                               )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TextComponent(
-                                    labelText: TextConstants.acceptRequest,
-                                    fontSize: screenWidth * 0.05,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: screenWidth * 0.06,
-                                    color: AppColors.black,
-                                  ),
-                                ],
+                            : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextComponent(
+                                      labelText: TextConstants.acceptRequest,
+                                      fontSize: screenWidth * 0.05,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.black,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      size: screenWidth * 0.06,
+                                      color: AppColors.black,
+                                    ),
+                                  ],
+                                ),
                               ),
                       ),
                     ),
