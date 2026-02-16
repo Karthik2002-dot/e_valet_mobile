@@ -49,7 +49,7 @@ class SessionCard extends StatelessWidget {
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         TextComponent(
-                          labelText: TextConstants.badgeNumber,
+                          labelText: TextConstants.cardNumber,
                           fontSize: screenWidth * 0.028,
                           color: AppColors.grey,
                         ),

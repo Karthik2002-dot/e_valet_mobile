@@ -106,13 +106,11 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
         color: foregroundColor.withOpacity(0.2),
         shape: BoxShape.circle,
       ),
-      child: Text(
-        '$seconds',
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          color: foregroundColor.withOpacity(0.9),
-        ),
+      child: TextComponent(
+        labelText: '$seconds',
+        fontSize: fontSize,
+        fontWeight: FontWeight.w700,
+        color: foregroundColor.withOpacity(0.9),
       ),
     );
   }

@@ -476,7 +476,9 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     _searchQuery.isEmpty ? null : _searchQuery,
                               ));
                             },
-                            child: const Text('Retry'),
+                            child: const TextComponent(
+                              labelText: 'Retry',
+                            ),
                           ),
                         ],
                       ),
@@ -621,13 +623,12 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
               onPageSizeChanged: _changePageSize,
             ),
             const Spacer(),
-            Text(
-              '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: AppColors.grey,
-              ),
+            TextComponent(
+              labelText:
+                  '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.grey,
             ),
           ],
         ),
@@ -651,8 +652,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           // First page button (<<) - only show if not on first page
           if (_currentPage > 1)
             IconButton(
-              icon: const Text('<<',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              icon: const TextComponent(
+                labelText: '<<',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
               onPressed: _goToFirstPage,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -661,8 +665,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           // Previous page button (<) - only show if not on first page
           if (_currentPage > 1)
             IconButton(
-              icon: const Text('<',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              icon: const TextComponent(
+                labelText: '<',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
               onPressed: _goToPreviousPage,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -680,8 +687,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           // Next page button (>) - only show if not on last page
           if (_currentPage < totalPages)
             IconButton(
-              icon: const Text('>',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              icon: const TextComponent(
+                labelText: '>',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
               onPressed: _goToNextPage,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -690,8 +700,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           // Last page button (>>) - only show if not on last page
           if (_currentPage < totalPages)
             IconButton(
-              icon: const Text('>>',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              icon: const TextComponent(
+                labelText: '>>',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
               onPressed: _goToLastPage,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -700,13 +713,12 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           const Spacer(),
 
           // Page info
-          Text(
-            '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey,
-            ),
+          TextComponent(
+            labelText:
+                '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: AppColors.grey,
           ),
         ],
       ),

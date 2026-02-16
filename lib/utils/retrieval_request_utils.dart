@@ -46,11 +46,11 @@ class RetrievalRequestUtils {
   }) {
     switch (status.toUpperCase()) {
       case 'ASSIGNED':
-        return Colors.orange;
+        return AppColors.orange;
       case 'ACCEPTED':
-        return Colors.blue;
+        return AppColors.blue;
       case 'ARRIVED':
-        return Colors.green;
+        return AppColors.success;
       case 'RETRIEVAL_REQUESTED':
         return AppColors.primary;
       default:

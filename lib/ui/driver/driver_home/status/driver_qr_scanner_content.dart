@@ -213,13 +213,11 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                         color: AppColors.black,
                       ),
                       SizedBox(height: widget.screenHeight * 0.006),
-                      Text(
-                        TextConstants.vehicleDetailsHint,
-                        style: TextStyle(
-                          fontSize: widget.screenWidth * 0.032,
-                          color: AppColors.black,
-                          fontWeight: FontWeight.w400,
-                        ),
+                      TextComponent(
+                        labelText: TextConstants.vehicleDetailsHint,
+                        fontSize: widget.screenWidth * 0.032,
+                        color: AppColors.black,
+                        fontWeight: FontWeight.w400,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -283,7 +281,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF3A3A3A),
+        color: AppColors.grey,
         borderRadius: BorderRadius.circular(w * 0.04),
       ),
       child: Column(
@@ -302,7 +300,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      color: AppColors.transparent,
                       borderRadius: BorderRadius.circular(w * 0.04),
                       border: Border.all(color: AppColors.white, width: 2.5),
                     ),
@@ -497,13 +495,11 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              TextConstants.submitButton,
-                              style: TextStyle(
-                                fontSize: textSize,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.white,
-                              ),
+                            TextComponent(
+                              labelText: TextConstants.submitButton,
+                              fontSize: textSize,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
                             ),
                             SizedBox(width: w * 0.02),
                             Icon(

@@ -70,7 +70,7 @@ class CarDetailsSection extends StatelessWidget {
                   children: [
                     _DetailRow(
                       icon: Icons.confirmation_number_outlined,
-                      label: TextConstants.badgeNumber,
+                      label: TextConstants.cardNumber,
                       value: session.cardNumber.toString(),
                       valueBold: true,
                       screenWidth: screenWidth,
@@ -150,8 +150,14 @@ class _DetailRow extends StatelessWidget {
       crossAxisAlignment:
           maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 18, color: AppColors.black),
-        const SizedBox(width: 10),
+        Icon(
+          icon,
+          size: 25,
+          color: AppColors.black,
+        ),
+        const SizedBox(
+          width: 10,
+        ),
         Expanded(
           child: label != null
               ? Row(
@@ -197,7 +203,7 @@ class _CallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(10),
@@ -208,13 +214,11 @@ class _CallButton extends StatelessWidget {
             children: [
               Icon(Icons.phone_outlined, size: 18, color: AppColors.black),
               const SizedBox(width: 4),
-              Text(
-                'Call',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
+              TextComponent(
+                labelText: 'Call',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
               ),
             ],
           ),

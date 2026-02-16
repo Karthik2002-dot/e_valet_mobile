@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class PageSizeDropdownWidget extends StatelessWidget {
   final int itemsPerPage;
@@ -18,13 +19,11 @@ class PageSizeDropdownWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          TextConstants.paginationShowLabel,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: AppColors.grey,
-          ),
+        TextComponent(
+          labelText: TextConstants.paginationShowLabel,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.grey,
         ),
         const SizedBox(width: 12),
         Container(
@@ -43,10 +42,10 @@ class PageSizeDropdownWidget extends StatelessWidget {
             items: pageSizeOptions.map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
                 value: value,
-                child: Text(
-                  value.toString(),
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w500),
+                child: TextComponent(
+                  labelText: value.toString(),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               );
             }).toList(),

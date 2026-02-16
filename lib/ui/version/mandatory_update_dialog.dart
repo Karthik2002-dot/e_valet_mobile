@@ -18,7 +18,7 @@ class MandatoryUpdateDialog extends StatelessWidget {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black54,
+      barrierColor: AppColors.black,
       builder: (ctx) => PopScope(
         canPop: false,
         child: const MandatoryUpdateDialog(),

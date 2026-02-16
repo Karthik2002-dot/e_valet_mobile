@@ -256,13 +256,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             color: AppColors.black,
           ),
           SizedBox(height: h * 0.006),
-          Text(
-            TextConstants.vehicleDetailsParkingPhotoHint,
-            style: TextStyle(
-              fontSize: w * 0.032,
-              color: AppColors.black,
-              fontWeight: FontWeight.w400,
-            ),
+          TextComponent(
+            labelText: TextConstants.vehicleDetailsParkingPhotoHint,
+            fontSize: w * 0.032,
+            fontWeight: FontWeight.w400,
+            color: AppColors.black,
             textAlign: TextAlign.center,
           ),
         ],
@@ -278,7 +276,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF3A3A3A),
+            color: AppColors.grey,
             borderRadius: BorderRadius.circular(w * 0.04),
           ),
           child: Stack(
@@ -292,7 +290,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      color: AppColors.transparent,
                       borderRadius: BorderRadius.circular(w * 0.04),
                       border: Border.all(color: AppColors.white, width: 2.5),
                     ),
@@ -329,7 +327,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFF3A3A3A),
+          color: AppColors.grey,
           borderRadius: BorderRadius.circular(w * 0.04),
         ),
         clipBehavior: Clip.antiAlias,
@@ -382,7 +380,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                 Positioned(
                   bottom: h * 0.018,
                   child: Material(
-                    color: Colors.transparent,
+                    color: AppColors.transparent,
                     child: InkWell(
                       onTap: () {
                         if (_isCapturing) return;
