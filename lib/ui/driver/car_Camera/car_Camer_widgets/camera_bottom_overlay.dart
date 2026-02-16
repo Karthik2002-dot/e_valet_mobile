@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CameraBottomOverlay extends StatefulWidget {
@@ -153,14 +154,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         final parkingLocation =
                             _parkingLocationController.text.trim();
                         if (parkingLocation.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const TextComponent(
-                                labelText: 'Please enter parking location',
-                              ),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
+                          SnackBars.showErrorSnackBar(
+                              context, 'Please enter parking location');
                           return;
                         }
                         if (widget.onSubmit != null) {

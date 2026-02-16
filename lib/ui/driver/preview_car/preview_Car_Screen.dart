@@ -233,12 +233,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   });
                   Navigator.of(context).pop();
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: TextComponent(
-                          labelText: 'Please enter parking location'),
-                      backgroundColor: AppColors.error,
-                    ),
+                  SnackBars.showErrorSnackBar(
+                    context,
+                    'Parking location cannot be empty',
                   );
                 }
               },
