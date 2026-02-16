@@ -70,7 +70,7 @@ class CarDetailsSection extends StatelessWidget {
                   children: [
                     _DetailRow(
                       icon: Icons.confirmation_number_outlined,
-                      label: TextConstants.badgeNumber,
+                      label: TextConstants.cardNumber,
                       value: session.cardNumber.toString(),
                       valueBold: true,
                       screenWidth: screenWidth,
@@ -150,8 +150,14 @@ class _DetailRow extends StatelessWidget {
       crossAxisAlignment:
           maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 18, color: AppColors.black),
-        const SizedBox(width: 10),
+        Icon(
+          icon,
+          size: 25,
+          color: AppColors.black,
+        ),
+        const SizedBox(
+          width: 10,
+        ),
         Expanded(
           child: label != null
               ? Row(
