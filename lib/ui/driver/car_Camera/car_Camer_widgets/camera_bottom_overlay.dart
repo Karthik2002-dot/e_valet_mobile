@@ -155,8 +155,9 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         if (parkingLocation.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content:
-                                  const Text('Please enter parking location'),
+                              content: const TextComponent(
+                                labelText: 'Please enter parking location',
+                              ),
                               backgroundColor: AppColors.error,
                             ),
                           );
@@ -187,12 +188,10 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                               AlwaysStoppedAnimation<Color>(AppColors.white),
                         ),
                       )
-                    : Text(
-                        'Submit',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.04,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    : TextComponent(
+                        labelText: 'Submit',
+                        fontSize: screenWidth * 0.04,
+                        fontWeight: FontWeight.w600,
                       ),
               ),
             ),

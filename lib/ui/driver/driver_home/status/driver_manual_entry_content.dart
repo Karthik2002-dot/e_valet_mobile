@@ -233,13 +233,11 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                TextConstants.submitButton,
-                                style: TextStyle(
-                                  fontSize: textSize,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.white,
-                                ),
+                              TextComponent(
+                                labelText: TextConstants.submitButton,
+                                fontSize: textSize,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.white,
                               ),
                               SizedBox(width: w * 0.02),
                               Icon(

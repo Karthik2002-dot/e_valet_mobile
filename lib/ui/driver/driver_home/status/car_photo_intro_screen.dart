@@ -256,13 +256,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
             color: AppColors.black,
           ),
           SizedBox(height: h * 0.006),
-          Text(
-            TextConstants.vehicleDetailsParkingPhotoHint,
-            style: TextStyle(
-              fontSize: w * 0.032,
-              color: AppColors.black,
-              fontWeight: FontWeight.w400,
-            ),
+          TextComponent(
+            labelText: TextConstants.vehicleDetailsParkingPhotoHint,
+            fontSize: w * 0.032,
+            fontWeight: FontWeight.w400,
+            color: AppColors.black,
             textAlign: TextAlign.center,
           ),
         ],

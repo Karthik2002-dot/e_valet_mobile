@@ -40,13 +40,11 @@ class SlideToConfirmButton extends StatelessWidget {
           color: AppColors.greyLight,
           shape: BoxShape.circle,
         ),
-        child: Text(
-          '$disabledRemainingSeconds',
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w700,
-            color: AppColors.black.withOpacity(0.85),
-          ),
+        child: TextComponent(
+          labelText: '$disabledRemainingSeconds',
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          color: AppColors.black.withOpacity(0.85),
         ),
       );
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class PageButtonWidget extends StatelessWidget {
   final int page;
@@ -29,12 +30,10 @@ class PageButtonWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        child: Text(
-          page.toString(),
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+        child: TextComponent(
+          labelText: page.toString(),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

@@ -106,7 +106,12 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
       // Show error if needed
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(TextConstants.failedToUpdateStatus(e.toString()))),
+          content: TextComponent(
+            labelText: TextConstants.failedToUpdateStatus(
+              e.toString(),
+            ),
+          ),
+        ),
       );
     } finally {
       setState(() {

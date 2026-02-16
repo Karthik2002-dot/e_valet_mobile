@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 /// A dialog that displays a full-size image when the user taps on a car image.
 /// Use [FullImageViewerDialog.show] to display an image URL in a popup.
@@ -74,12 +76,10 @@ class FullImageViewerDialog extends StatelessWidget {
                           color: AppColors.grey,
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Failed to load image',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 16,
-                          ),
+                        TextComponent(
+                          labelText: 'Failed to load image',
+                          color: AppColors.white,
+                          fontSize: 16,
                         ),
                       ],
                     ),
