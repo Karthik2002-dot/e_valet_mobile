@@ -42,7 +42,7 @@ class DriverActionCard extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           onTap: isTappable ? onTap : null,
           borderRadius: BorderRadius.circular(w * 0.045),

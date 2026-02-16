@@ -137,7 +137,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         _cleanupTimer();
                       },
                       child: Container(
-                        color: Colors.black.withOpacity(0.001),
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -157,7 +157,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                                 _cleanupTimer();
                               },
                               child: Container(
-                                color: Colors.transparent,
+                                color: AppColors.transparent,
                               ),
                             ),
                           ),

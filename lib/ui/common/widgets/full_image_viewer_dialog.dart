@@ -18,7 +18,7 @@ class FullImageViewerDialog extends StatelessWidget {
     if (imageUrl.isEmpty) return;
     showDialog(
       context: context,
-      barrierColor: Colors.black87,
+      barrierColor: AppColors.black,
       barrierDismissible: true,
       builder: (context) => FullImageViewerDialog(imageUrl: imageUrl),
     );
@@ -27,7 +27,7 @@ class FullImageViewerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       insetPadding: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.05,
         vertical: MediaQuery.of(context).size.height * 0.1,

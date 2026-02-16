@@ -54,7 +54,7 @@ class CarLogsTableSkeleton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: i % 2 == 0
-                      ? Colors.white
+                      ? AppColors.white
                       : AppColors.grey.withOpacity(0.05),
                   border: Border(
                     bottom: BorderSide(color: AppColors.grey.withOpacity(0.3)),

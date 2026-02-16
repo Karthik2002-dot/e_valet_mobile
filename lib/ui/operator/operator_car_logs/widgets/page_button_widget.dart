@@ -22,8 +22,9 @@ class PageButtonWidget extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          backgroundColor: isSelected ? AppColors.primary : Colors.transparent,
-          foregroundColor: isSelected ? Colors.white : AppColors.primary,
+          backgroundColor:
+              isSelected ? AppColors.primary : AppColors.transparent,
+          foregroundColor: isSelected ? AppColors.white : AppColors.primary,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           minimumSize: const Size(44, 44),
           shape: RoundedRectangleBorder(
