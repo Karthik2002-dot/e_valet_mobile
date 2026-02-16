@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/car_logs/car_logs_bloc.dart';
@@ -104,14 +105,9 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
       widget.onClose();
     } catch (e) {
       // Show error if needed
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: TextComponent(
-            labelText: TextConstants.failedToUpdateStatus(
-              e.toString(),
-            ),
-          ),
-        ),
+      SnackBars.showErrorSnackBar(
+        context,
+        TextConstants.failedToUpdateStatus(e.toString()),
       );
     } finally {
       setState(() {
