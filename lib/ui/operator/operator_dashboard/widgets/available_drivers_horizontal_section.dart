@@ -116,7 +116,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
     if (recommendedDriverId != null && recommendedDriverId.isNotEmpty) {
       return driver.userId == recommendedDriverId;
     }
-    return recommendedDriverName != null && driver.name == recommendedDriverName;
+    return recommendedDriverName != null &&
+        driver.name == recommendedDriverName;
   }
 
   Widget _buildContent(BuildContext context) {
@@ -197,7 +198,11 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.015),
               IntrinsicWidth(
                 child: AvailableDriversCard(
-                  key: ValueKey(freeDrivers[i].userId),
+                  key: ValueKey(
+                    (freeDrivers[i].userId.isNotEmpty)
+                        ? freeDrivers[i].userId
+                        : 'driver_$i',
+                  ),
                   driver: freeDrivers[i],
                   isRecommended: _isRecommendedDriver(
                     freeDrivers[i],

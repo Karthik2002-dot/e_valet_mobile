@@ -44,6 +44,7 @@ class _DashboardContentState extends State<DashboardContent> {
   final Duration _highlightDuration = const Duration(seconds: 30);
   bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
+
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
 
@@ -269,7 +270,8 @@ class _DashboardContentState extends State<DashboardContent> {
                           ),
                         ],
                       );
-                    } else if (isLoaded || (isAssignmentState && _lastLoadedState != null)) {
+                    } else if (isLoaded ||
+                        (isAssignmentState && _lastLoadedState != null)) {
                       final data = isLoaded ? state : _lastLoadedState!;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
