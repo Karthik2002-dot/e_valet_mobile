@@ -13,23 +13,18 @@ class LogoutApiService {
   static String get _apiKey => ApiConfig.authApiKey;
 
   static Future<LogoutResponse> logout() async {
-    final accessToken = await TokenStorage.getAccessToken();
     final refreshToken = await TokenStorage.getRefreshToken();
 
-    final cookieParts = <String>[];
-    if (refreshToken != null && refreshToken.isNotEmpty) {
-      cookieParts.add('refreshToken=$refreshToken');
-    }
-    if (accessToken != null && accessToken.isNotEmpty) {
-      cookieParts.add('accessToken=$accessToken');
-    }
+    final headers = <String, String>{
+      'Accept': '*/*',
+      'X-API-Key': _apiKey,
+      if (refreshToken != null && refreshToken.isNotEmpty)
+        'Authorization': 'Bearer $refreshToken',
+    };
 
     final http = BaseHttpService(
       baseUrl: _baseUrl,
-      defaultHeaders: {
-        ...ApiConfig.apiKeyHeaders(_apiKey),
-        if (cookieParts.isNotEmpty) 'Cookie': cookieParts.join('; '),
-      },
+      defaultHeaders: headers,
     );
 
     LogoutResponse response;
@@ -41,11 +36,11 @@ class LogoutApiService {
 
       final json = jsonDecode(httpResponse.body) as Map<String, dynamic>;
       response = LogoutResponse.fromJson(json);
-    } on ApiException catch (e) {
+    } on ApiException catch (_) {
       // even if API fails, local logout should continue
       // Return a default response
       response = LogoutResponse(message: 'Logged out locally');
-    } catch (e) {
+    } catch (_) {
       response = LogoutResponse(message: 'Logged out locally');
     }
 
