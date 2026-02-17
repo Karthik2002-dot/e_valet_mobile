@@ -3,6 +3,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class SessionCard extends StatelessWidget {
@@ -31,11 +32,10 @@ class SessionCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Details Section (above image) — small text, compact for sheet
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
-                    vertical: screenWidth * 0.028),
+              // Details Section (above image) — spacing OUTSIDE via margin
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                padding: EdgeInsets.symmetric(vertical: screenWidth * 0.028),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -145,74 +145,81 @@ class SessionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Car Image (below details) — medium size so image is visible
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColors.black,
-                    width: 2,
+              // Car Image (below details) — tappable to view full size
+              GestureDetector(
+                onTap: session.photoUrl != null && session.photoUrl!.isNotEmpty
+                    ? () =>
+                        FullImageViewerDialog.show(context, session.photoUrl!)
+                    : null,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.black,
+                      width: 2,
+                    ),
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(18),
+                    ),
+                    color: AppColors.white,
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(18),
-                  ),
-                  color: AppColors.white,
-                ),
-                child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(18)),
-                  child: session.photoUrl != null
-                      ? Image.network(
-                          session.photoUrl!,
-                          key: ValueKey<String>(session.photoUrl!),
-                          gaplessPlayback: true,
-                          width: double.infinity,
-                          height: screenWidth * 0.42,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: double.infinity,
-                              height: screenWidth * 0.42,
-                              color: AppColors.white,
-                              child: Center(
-                                child: ColorFiltered(
-                                  colorFilter: const ColorFilter.matrix([
-                                    -1, 0, 0, 0, 255, // Red channel inverted
-                                    0, -1, 0, 0, 255, // Green channel inverted
-                                    0, 0, -1, 0, 255, // Blue channel inverted
-                                    0, 0, 0, 1, 0, // Alpha channel unchanged
-                                  ]),
-                                  child: Image.asset(
-                                    'assets/images/cars.png',
-                                    fit: BoxFit.contain,
-                                    width: screenWidth * 0.3,
-                                    height: screenWidth * 0.3,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(18)),
+                    child: session.photoUrl != null
+                        ? Image.network(
+                            session.photoUrl!,
+                            key: ValueKey<String>(session.photoUrl!),
+                            gaplessPlayback: true,
+                            width: double.infinity,
+                            height: screenWidth * 0.42,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: double.infinity,
+                                height: screenWidth * 0.42,
+                                color: AppColors.white,
+                                child: Center(
+                                  child: ColorFiltered(
+                                    colorFilter: const ColorFilter.matrix([
+                                      -1, 0, 0, 0, 255, // Red channel inverted
+                                      0, -1, 0, 0,
+                                      255, // Green channel inverted
+                                      0, 0, -1, 0, 255, // Blue channel inverted
+                                      0, 0, 0, 1, 0, // Alpha channel unchanged
+                                    ]),
+                                    child: Image.asset(
+                                      'assets/images/cars.png',
+                                      fit: BoxFit.contain,
+                                      width: screenWidth * 0.3,
+                                      height: screenWidth * 0.3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        )
-                      : Container(
-                          width: double.infinity,
-                          height: screenWidth * 0.42,
-                          color: AppColors.white,
-                          child: Center(
-                            child: ColorFiltered(
-                              colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 255, // Red channel inverted
-                                0, -1, 0, 0, 255, // Green channel inverted
-                                0, 0, -1, 0, 255, // Blue channel inverted
-                                0, 0, 0, 1, 0, // Alpha channel unchanged
-                              ]),
-                              child: Image.asset(
-                                'assets/images/cars.png',
-                                fit: BoxFit.contain,
-                                width: screenWidth * 0.3,
-                                height: screenWidth * 0.3,
+                              );
+                            },
+                          )
+                        : Container(
+                            width: double.infinity,
+                            height: screenWidth * 0.42,
+                            color: AppColors.white,
+                            child: Center(
+                              child: ColorFiltered(
+                                colorFilter: const ColorFilter.matrix([
+                                  -1, 0, 0, 0, 255, // Red channel inverted
+                                  0, -1, 0, 0, 255, // Green channel inverted
+                                  0, 0, -1, 0, 255, // Blue channel inverted
+                                  0, 0, 0, 1, 0, // Alpha channel unchanged
+                                ]),
+                                child: Image.asset(
+                                  'assets/images/cars.png',
+                                  fit: BoxFit.contain,
+                                  width: screenWidth * 0.3,
+                                  height: screenWidth * 0.3,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ],
