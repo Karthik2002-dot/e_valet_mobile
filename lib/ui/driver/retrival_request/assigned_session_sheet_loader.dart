@@ -215,7 +215,7 @@ class _AssignedSessionSheetLoaderState
               session: session,
               preventBackNavigation: true,
               acceptTriggeredAt: _acceptTriggeredAt,
-              disableConfirmArrivalForSeconds: 30,
+              disableConfirmArrivalForSeconds: null,
             ),
           ),
         );
