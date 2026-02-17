@@ -8,7 +8,7 @@ class SlideToConfirmButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onConfirm;
 
-  /// When false, button is disabled (e.g. for 30s after Collect Keys).
+  /// When false, button is disabled (e.g. for CONFIRM_ARRIVAL_DISABLE_SECONDS after Collect Keys).
   final bool enabled;
 
   /// When > 0, button is disabled and this countdown is shown inside a round circle.

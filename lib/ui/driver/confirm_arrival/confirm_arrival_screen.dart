@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_state.dart';
@@ -23,11 +24,11 @@ class ConfirmArrivalScreen extends StatefulWidget {
   final bool preventBackNavigation;
   final bool showHandoverOnLoad;
 
-  /// When set, the 30s disable is counted from this moment (when accept API was triggered).
-  /// Passed from Collect Keys flow so the button enables 30s after tap, not after screen open.
+  /// When set, the disable countdown is counted from this moment (when accept API was triggered).
+  /// Passed from Collect Keys flow so the button enables after CONFIRM_ARRIVAL_DISABLE_SECONDS, not after screen open.
   final DateTime? acceptTriggeredAt;
 
-  /// Total seconds the button stays disabled after acceptTriggeredAt (e.g. 30).
+  /// Total seconds the button stays disabled after acceptTriggeredAt. If null, uses CONFIRM_ARRIVAL_DISABLE_SECONDS from .env (default 10).
   final int? disableConfirmArrivalForSeconds;
 
   const ConfirmArrivalScreen({
@@ -49,17 +50,30 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   int _confirmArrivalRemainingSeconds = 0;
   Timer? _enableConfirmArrivalTimer;
 
-  /// After Confirm Arrival API success, Customer Missing button is disabled until this time (60s).
+  /// After Confirm Arrival API success, Customer Missing button is disabled until this time (duration from CUSTOMER_MISSING_DISABLE_SECONDS in .env).
   DateTime? _customerMissingDisabledUntil;
   final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
       GlobalKey<HandoverButtonsSectionState>();
+
+  static int _confirmArrivalDisableSecondsFromEnv() {
+    final v = dotenv.env['CONFIRM_ARRIVAL_DISABLE_SECONDS'];
+    if (v == null || v.isEmpty) return 10;
+    return int.tryParse(v.trim()) ?? 10;
+  }
+
+  static int _customerMissingDisableSecondsFromEnv() {
+    final v = dotenv.env['CUSTOMER_MISSING_DISABLE_SECONDS'];
+    if (v == null || v.isEmpty) return 60;
+    return int.tryParse(v.trim()) ?? 60;
+  }
 
   @override
   void initState() {
     super.initState();
     _showHandoverButtons = widget.showHandoverOnLoad;
     final triggeredAt = widget.acceptTriggeredAt;
-    final totalSeconds = widget.disableConfirmArrivalForSeconds ?? 30;
+    final totalSeconds = widget.disableConfirmArrivalForSeconds ??
+        _confirmArrivalDisableSecondsFromEnv();
     if (triggeredAt != null && totalSeconds > 0) {
       final elapsed = DateTime.now().difference(triggeredAt).inSeconds;
       final remaining = totalSeconds - elapsed;
@@ -99,19 +113,20 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
         listener: (context, state) {
           if (state is ConfirmArrivalSuccess) {
             SnackBars.showSuccessSnackBar(context, state.message);
-            // Show handover buttons; disable Customer Missing for 60s from now
+            final customerMissingSecs = _customerMissingDisableSecondsFromEnv();
             setState(() {
               _showHandoverButtons = true;
               _customerMissingDisabledUntil =
-                  DateTime.now().add(const Duration(seconds: 60));
+                  DateTime.now().add(Duration(seconds: customerMissingSecs));
             });
           } else if (state is ConfirmArrivalError) {
             if (state.shouldNavigateToHandover) {
               SnackBars.showSuccessSnackBar(context, state.message);
+              final customerMissingSecs = _customerMissingDisableSecondsFromEnv();
               setState(() {
                 _showHandoverButtons = true;
                 _customerMissingDisabledUntil =
-                    DateTime.now().add(const Duration(seconds: 60));
+                    DateTime.now().add(Duration(seconds: customerMissingSecs));
               });
             } else {
               SnackBars.showErrorSnackBar(context, state.message);
