@@ -423,4 +423,60 @@ class TextConstants {
   static const String language = 'Language';
   static const String failedToChangeLanguage =
       'Failed to change language. Please try again.';
+  static const String failedToLoadImageText = 'Failed to load image';
+
+  // Permissions Screen
+  static const String exitButton = 'Exit';
+  static const String openSettings = 'Open settings';
+  static const String permissionsRequiredToContinue =
+      'Permissions required to continue';
+  static const String permissionsDescription =
+      'We need the following permissions to verify your device and provide valet services.';
+  static const String permissionLocationTitle = 'Location';
+  static const String permissionCameraTitle = 'Camera';
+  static const String permissionNotificationsTitle = 'Notifications';
+  static const String permissionLocationDescription =
+      'Permission to use your location for valet pickup and drop-off.';
+  static const String permissionCameraDescription =
+      'Permission to scan QR codes and capture vehicle photos.';
+  static const String permissionNotificationsDescription =
+      'Permission to send push notifications for retrieval requests.';
+  static const String accountNoPermissionsMessage =
+      'Your account does not have the required permissions to access this app.';
+  static const String permissionDeniedTapSettings =
+      'Denied multiple times. Tap to open Settings.';
+
+  // Version Check
+  static const String checkingForUpdates = 'Checking for updates...';
+
+  // Preview / Edit Details
+  static const String editDetails = 'Edit details';
+  static const String enterParkingLocationHint = 'Enter parking location...';
+  static const String enterVehicleNumberHint = 'Enter vehicle number...';
+  static const String saveButton = 'Save';
+  static const String parkingLocationCannotBeEmpty =
+      'Parking location cannot be empty';
+  static const String afterVehicleParkedConfirmInstruction =
+      'After the vehicle is successfully parked, please press the button below to confirm.';
+  static const String okButton = 'OK';
+
+  // Parked Car / Search
+  static const String searchByCardNumberHint = 'Search by card number...';
+  static String showingResultsFor(String query) =>
+      'Showing results for "$query"';
+  static String cardNumberWithHash(int cardNumber) => 'Card #$cardNumber';
+  static String parkedByWithName(String name) => 'Parked by $name';
+  static const String manualRequestButtonLabel = 'Manual Request';
+  static const String failedToLoadSlotsData = 'Failed to load slots data';
+  static const String creatingManualRetrievalRequest =
+      'Creating manual retrieval request...';
+
+  // Call / Contact
+  static const String callButton = 'Call';
+
+  // Pagination
+  static const String paginationFirst = '<<';
+  static const String paginationPrev = '<';
+  static const String paginationNext = '>';
+  static const String paginationLast = '>>';
 }

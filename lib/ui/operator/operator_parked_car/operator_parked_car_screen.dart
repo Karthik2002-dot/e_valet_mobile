@@ -198,7 +198,8 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                       });
                                     },
                                     decoration: InputDecoration(
-                                      hintText: 'Search by card number...',
+                                      hintText:
+                                          TextConstants.searchByCardNumberHint,
                                       hintStyle: TextStyle(
                                         color: AppColors.grey,
                                         fontSize:
@@ -292,7 +293,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.02),
                       TextComponent(
-                        labelText: 'Failed to load slots data',
+                        labelText: TextConstants.failedToLoadSlotsData,
                         fontSize: MediaQuery.of(context).size.width * 0.02,
                         color: AppColors.error,
                       ),
@@ -329,7 +330,8 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                         ),
                         const SizedBox(height: 16),
                         TextComponent(
-                          labelText: 'Creating manual retrieval request...',
+                          labelText:
+                              TextConstants.creatingManualRetrievalRequest,
                           fontSize: 14,
                           color: AppColors.black,
                         ),

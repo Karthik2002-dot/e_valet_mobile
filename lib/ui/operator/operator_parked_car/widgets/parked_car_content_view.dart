@@ -62,7 +62,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           // Show search results info if searching
           if (widget.searchQuery.isNotEmpty) ...[
             TextComponent(
-              labelText: 'Showing results for "${widget.searchQuery}"',
+              labelText: TextConstants.showingResultsFor(widget.searchQuery),
               color: AppColors.grey,
               fontSize: screenWidth * 0.013,
               fontWeight: FontWeight.w500,

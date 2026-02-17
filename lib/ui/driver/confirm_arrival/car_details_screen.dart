@@ -218,7 +218,7 @@ class _CallButton extends StatelessWidget {
               Icon(Icons.phone_outlined, size: 18, color: AppColors.black),
               const SizedBox(width: 4),
               TextComponent(
-                labelText: 'Call',
+                labelText: TextConstants.callButton,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,

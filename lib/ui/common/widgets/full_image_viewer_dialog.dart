@@ -77,7 +77,7 @@ class FullImageViewerDialog extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         TextComponent(
-                          labelText: 'Failed to load image',
+                          labelText: TextConstants.failedToLoadImageText,
                           color: AppColors.white,
                           fontSize: 16,
                         ),

@@ -87,7 +87,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                     ],
                     enabled: !isLoading,
                     decoration: InputDecoration(
-                      hintText: 'Enter Card Number',
+                      hintText: TextConstants.tagNumberHint,
                       hintStyle: const TextStyle(
                         color: AppColors.black,
                         fontSize: 14,

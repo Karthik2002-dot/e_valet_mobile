@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
@@ -67,7 +68,7 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
               const SizedBox(width: 20),
               Expanded(
                 child: TextComponent(
-                  labelText: 'Checking for updates...',
+                  labelText: TextConstants.checkingForUpdates,
                   fontSize: 16,
                   color: AppColors.black,
                 ),

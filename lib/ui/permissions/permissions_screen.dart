@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
@@ -159,7 +160,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const TextComponent(
-                        labelText: 'Exit',
+                        labelText: TextConstants.exitButton,
                       ),
                     ),
                   ),
@@ -176,7 +177,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const TextComponent(
-                        labelText: 'Open settings',
+                        labelText: TextConstants.openSettings,
                       ),
                     ),
                   ),
@@ -215,7 +216,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
       } else {
         SnackBars.showErrorSnackBar(
           context,
-          'Your account does not have the required permissions to access this app.',
+          TextConstants.accountNoPermissionsMessage,
         );
         Navigator.pushReplacement(
           context,
@@ -244,7 +245,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextComponent(
-                  labelText: 'Permissions required to continue',
+                  labelText: TextConstants.permissionsRequiredToContinue,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppColors.secondary,
@@ -254,8 +255,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextComponent(
-                  labelText:
-                      'We need the following permissions to verify your device and provide valet services.',
+                  labelText: TextConstants.permissionsDescription,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.mutedText,
@@ -274,9 +274,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                         children: [
                           _PermissionRow(
                             icon: Icons.location_on_outlined,
-                            title: 'Location',
+                            title: TextConstants.permissionLocationTitle,
                             description:
-                                'Permission to use your location for valet pickup and drop-off.',
+                                TextConstants.permissionLocationDescription,
                             status: _statuses[Permission.location] ??
                                 PermissionStatusType.denied,
                             onTap: () => _onPermissionTap(Permission.location),
@@ -284,9 +284,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           const SizedBox(height: 16),
                           _PermissionRow(
                             icon: Icons.camera_alt_outlined,
-                            title: 'Camera',
+                            title: TextConstants.permissionCameraTitle,
                             description:
-                                'Permission to scan QR codes and capture vehicle photos.',
+                                TextConstants.permissionCameraDescription,
                             status: _statuses[Permission.camera] ??
                                 PermissionStatusType.denied,
                             onTap: () => _onPermissionTap(Permission.camera),
@@ -294,9 +294,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           const SizedBox(height: 16),
                           _PermissionRow(
                             icon: Icons.notifications_outlined,
-                            title: 'Notifications',
-                            description:
-                                'Permission to send push notifications for retrieval requests.',
+                            title: TextConstants.permissionNotificationsTitle,
+                            description: TextConstants
+                                .permissionNotificationsDescription,
                             status: _statuses[Permission.notification] ??
                                 PermissionStatusType.denied,
                             onTap: () =>
@@ -331,10 +331,10 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                     ),
                     child: TextComponent(
                       labelText: _allGranted
-                          ? 'Continue'
+                          ? TextConstants.continueLabel
                           : (_firstMissingPermission != null
                               ? _permissionButtonLabel(_firstMissingPermission!)
-                              : 'Continue'),
+                              : TextConstants.continueLabel),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -415,8 +415,7 @@ class _PermissionRow extends StatelessWidget {
                     if (isPermanentlyDenied) ...[
                       const SizedBox(height: 6),
                       TextComponent(
-                        labelText:
-                            'Denied multiple times. Tap to open Settings.',
+                        labelText: TextConstants.permissionDeniedTapSettings,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.mutedText,

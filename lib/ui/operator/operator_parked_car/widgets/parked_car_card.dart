@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
@@ -98,7 +99,8 @@ class ParkedCarCard extends StatelessWidget {
                           ),
                           SizedBox(width: screenWidth * 0.004),
                           TextComponent(
-                            labelText: 'Card #${item.cardNumber}',
+                            labelText: TextConstants.cardNumberWithHash(
+                                item.cardNumber),
                             fontWeight: FontWeight.bold,
                             fontSize: screenWidth * 0.02,
                             color: AppColors.black,
@@ -165,7 +167,8 @@ class ParkedCarCard extends StatelessWidget {
                         SizedBox(width: screenWidth * 0.004),
                         Expanded(
                           child: TextComponent(
-                            labelText: 'Parked by ${item.parkedByName}',
+                            labelText: TextConstants.parkedByWithName(
+                                item.parkedByName!),
                             fontSize: screenWidth * 0.018,
                             color: AppColors.black,
                             maxLines: 2,
@@ -211,7 +214,7 @@ class ParkedCarCard extends StatelessWidget {
                           item.sessionId,
                         ),
                         label: TextComponent(
-                          labelText: 'Manual Request',
+                          labelText: TextConstants.manualRequestButtonLabel,
                           fontSize: screenWidth * 0.015,
                           color: AppColors.white,
                           fontWeight: FontWeight.w600,

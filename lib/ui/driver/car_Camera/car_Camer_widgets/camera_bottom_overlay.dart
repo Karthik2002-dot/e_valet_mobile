@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -97,7 +98,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
           children: [
             // Parking Location Input Header
             TextComponent(
-              labelText: 'Parking Location',
+              labelText: TextConstants.parkingLocationLabel,
               color: AppColors.black,
               fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.w600,
@@ -123,7 +124,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                   fontSize: screenWidth * 0.04,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Enter parking location...',
+                  hintText: TextConstants.enterParkingLocationHint,
                   hintStyle: TextStyle(
                     color: AppColors.grey.withOpacity(0.6),
                     fontSize: screenWidth * 0.04,
@@ -154,8 +155,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         final parkingLocation =
                             _parkingLocationController.text.trim();
                         if (parkingLocation.isEmpty) {
-                          SnackBars.showErrorSnackBar(
-                              context, 'Please enter parking location');
+                          SnackBars.showErrorSnackBar(context,
+                              TextConstants.pleaseEnterParkingLocation);
                           return;
                         }
                         if (widget.onSubmit != null) {
@@ -184,7 +185,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         ),
                       )
                     : TextComponent(
-                        labelText: 'Submit',
+                        labelText: TextConstants.submitButton,
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.w600,
                       ),

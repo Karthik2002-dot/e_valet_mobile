@@ -477,7 +477,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                               ));
                             },
                             child: const TextComponent(
-                              labelText: 'Retry',
+                              labelText: TextConstants.retryButton,
                             ),
                           ),
                         ],
@@ -515,31 +515,31 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
       dynamic bValue;
 
       switch (_sortColumn) {
-        case 'Tag Number':
+        case TextConstants.carLogsTagNumber:
           aValue = a.tagNumber;
           bValue = b.tagNumber;
           break;
-        case 'Car Status':
+        case TextConstants.carLogsCarStatus:
           aValue = a.displayStatus;
           bValue = b.displayStatus;
           break;
-        case 'Duration':
+        case TextConstants.carLogsDuration:
           aValue = a.duration;
           bValue = b.duration;
           break;
-        case 'Park Location':
+        case TextConstants.carLogsParkLocation:
           aValue = a.parkingLocation;
           bValue = b.parkingLocation;
           break;
-        case 'Parked At':
+        case TextConstants.carLogsParkedAt:
           aValue = DateTime.tryParse(a.parkedAt) ?? DateTime.now();
           bValue = DateTime.tryParse(b.parkedAt) ?? DateTime.now();
           break;
-        case 'Parked By':
+        case TextConstants.carLogsParkedBy:
           aValue = a.parkedBy.name;
           bValue = b.parkedBy.name;
           break;
-        case 'Handover At':
+        case TextConstants.carLogsHandoverAt:
           aValue = a.handoveredAt.isEmpty
               ? null
               : DateTime.tryParse(a.handoveredAt) ?? DateTime(0);
@@ -655,7 +655,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           if (_currentPage > 1)
             IconButton(
               icon: const TextComponent(
-                labelText: '<<',
+                labelText: TextConstants.paginationFirst,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -668,7 +668,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           if (_currentPage > 1)
             IconButton(
               icon: const TextComponent(
-                labelText: '<',
+                labelText: TextConstants.paginationPrev,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -690,7 +690,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           if (_currentPage < totalPages)
             IconButton(
               icon: const TextComponent(
-                labelText: '>',
+                labelText: TextConstants.paginationNext,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -703,7 +703,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           if (_currentPage < totalPages)
             IconButton(
               icon: const TextComponent(
-                labelText: '>>',
+                labelText: TextConstants.paginationLast,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),

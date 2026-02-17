@@ -128,7 +128,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: TextComponent(
-            labelText: 'Edit details',
+            labelText: TextConstants.editDetails,
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.w600,
           ),
@@ -138,7 +138,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextComponent(
-                  labelText: 'Parking Location',
+                  labelText: TextConstants.parkingLocationLabel,
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -149,7 +149,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   autofocus: true,
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: 'Enter parking location...',
+                    hintText: TextConstants.enterParkingLocationHint,
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -173,7 +173,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 ),
                 SizedBox(height: 16),
                 TextComponent(
-                  labelText: 'Vehicle Number',
+                  labelText: TextConstants.vehicleNumberLabel,
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -188,7 +188,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   ],
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: 'Enter vehicle number...',
+                    hintText: TextConstants.enterVehicleNumberHint,
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -216,7 +216,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: TextComponent(
-                labelText: 'Cancel',
+                labelText: TextConstants.cancel,
                 fontSize: screenWidth * 0.038,
                 color: AppColors.grey,
               ),
@@ -235,7 +235,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 } else {
                   SnackBars.showErrorSnackBar(
                     context,
-                    'Parking location cannot be empty',
+                    TextConstants.parkingLocationCannotBeEmpty,
                   );
                 }
               },
@@ -244,7 +244,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 foregroundColor: AppColors.white,
               ),
               child: TextComponent(
-                labelText: 'Save',
+                labelText: TextConstants.saveButton,
                 fontSize: screenWidth * 0.038,
                 color: AppColors.white,
               ),
@@ -484,7 +484,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 SizedBox(
                                                     width: screenWidth * 0.02),
                                                 TextComponent(
-                                                  labelText: 'Vehicle Number',
+                                                  labelText: TextConstants
+                                                      .vehicleNumberLabel,
                                                   fontSize: screenWidth * 0.035,
                                                   fontWeight: FontWeight.w600,
                                                   color: AppColors.black,
@@ -503,8 +504,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                           SizedBox(
                                               height: screenHeight * 0.025),
                                           TextComponent(
-                                            labelText:
-                                                'After the vehicle is successfully parked, please press the button below to confirm.',
+                                            labelText: TextConstants
+                                                .afterVehicleParkedConfirmInstruction,
                                             fontSize: screenWidth * 0.045,
                                             color: AppColors.black,
                                             height: 1.35,
@@ -547,7 +548,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                         ),
                                                       )
                                                     : TextComponent(
-                                                        labelText: 'OK',
+                                                        labelText: TextConstants
+                                                            .okButton,
                                                         fontSize:
                                                             screenWidth * 0.16,
                                                         fontWeight:

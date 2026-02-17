@@ -131,145 +131,146 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
             ),
           ),
           Center(
-          child: Dialog(
-            backgroundColor: AppColors.transparent,
-            insetPadding: EdgeInsets.zero,
-            child: Container(
-              width: screenSize.width * 0.8,
-              constraints: BoxConstraints(
-                maxWidth: 600,
-                maxHeight: screenSize.height * 0.8,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
+            child: Dialog(
+              backgroundColor: AppColors.transparent,
+              insetPadding: EdgeInsets.zero,
+              child: Container(
+                width: screenSize.width * 0.8,
+                constraints: BoxConstraints(
+                  maxWidth: 600,
+                  maxHeight: screenSize.height * 0.8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    child: Row(
-                      children: [
-                        TextComponent(
-                          labelText: TextConstants.carLogDetailsTitle,
-                          color: AppColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () => widget.onClose(),
-                          icon: const Icon(
-                            Icons.close,
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Content
-                  Flexible(
-                    child: SingleChildScrollView(
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Container(
                       padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
                         children: [
-                          SimpleDetailRow(
-                              label: TextConstants.tagNumberLabel,
-                              value: widget.carLog.tagNumber.toString()),
-                          const SizedBox(height: 16),
-                          SimpleDetailRow(
-                              label: TextConstants.parkedByLabel,
-                              value: widget.carLog.parkedBy.phone.isNotEmpty
-                                  ? '${widget.carLog.parkedBy.name} (${widget.carLog.parkedBy.phone})'
-                                  : widget.carLog.parkedBy.name),
-                          const SizedBox(height: 16),
-                          StatusDetailRow(
-                            label: TextConstants.carStatusLabel,
-                            selectedStatus: _selectedStatus,
-                            statusOptions: _statusOptions,
-                            onStatusChanged: (value) {
-                              setState(() {
-                                _selectedStatus = value;
-                              });
-                            },
+                          TextComponent(
+                            labelText: TextConstants.carLogDetailsTitle,
+                            color: AppColors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => widget.onClose(),
+                            icon: const Icon(
+                              Icons.close,
+                              color: AppColors.white,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  // Footer with buttons
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: AppColors.grey.withOpacity(0.3)),
+                    // Content
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SimpleDetailRow(
+                                label: TextConstants.tagNumberLabel,
+                                value: widget.carLog.tagNumber.toString()),
+                            const SizedBox(height: 16),
+                            SimpleDetailRow(
+                                label: TextConstants.parkedByLabel,
+                                value: widget.carLog.parkedBy.phone.isNotEmpty
+                                    ? '${widget.carLog.parkedBy.name} (${widget.carLog.parkedBy.phone})'
+                                    : widget.carLog.parkedBy.name),
+                            const SizedBox(height: 16),
+                            StatusDetailRow(
+                              label: TextConstants.carStatusLabel,
+                              selectedStatus: _selectedStatus,
+                              statusOptions: _statusOptions,
+                              onStatusChanged: (value) {
+                                setState(() {
+                                  _selectedStatus = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => widget.onClose(),
-                          child: TextComponent(
-                            labelText: TextConstants.cancelButton,
-                            color: AppColors.grey,
-                            fontWeight: FontWeight.w600,
-                          ),
+
+                    // Footer with buttons
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                              color: AppColors.grey.withOpacity(0.3)),
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: _isSubmitting ? null : _handleSubmit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => widget.onClose(),
+                            child: TextComponent(
+                              labelText: TextConstants.cancelButton,
+                              color: AppColors.grey,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          child: _isSubmitting
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.white),
+                          const SizedBox(width: 16),
+                          ElevatedButton(
+                            onPressed: _isSubmitting ? null : _handleSubmit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: _isSubmitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.white),
+                                    ),
+                                  )
+                                : TextComponent(
+                                    labelText: TextConstants.submitButton,
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                )
-                              : TextComponent(
-                                  labelText: TextConstants.submitButton,
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
         ],
       ),
     );
