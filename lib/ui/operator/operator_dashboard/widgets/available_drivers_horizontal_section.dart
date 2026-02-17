@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -103,20 +105,62 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
     );
   }
 
+  static const String _retrievalRequested = 'RETRIEVAL_REQUESTED';
+
+  /// Match by userId when available, otherwise by name (backward compatibility).
+  bool _isRecommendedDriver(
+    AvailableDriver driver,
+    String? recommendedDriverId,
+    String? recommendedDriverName,
+  ) {
+    if (recommendedDriverId != null && recommendedDriverId.isNotEmpty) {
+      return driver.userId == recommendedDriverId;
+    }
+    return recommendedDriverName != null &&
+        driver.name == recommendedDriverName;
+  }
+
   Widget _buildContent(BuildContext context) {
     var freeDrivers = availableDrivers.drivers
         .where((driver) => driver.status.toLowerCase() == 'free')
         .toList();
 
+    // Only show "recommended" when there is a request still in RETRIEVAL_REQUESTED
+    // whose parkedBy driver is actually in the free list. Use the first such request
+    // so that after assigning card 107, the next card (e.g. 108) gets its driver
+    // shown as recommended.
+    final retrievalRequestedList = retrievalRequests.requests
+        .where((r) => r.status.toUpperCase() == _retrievalRequested)
+        .toList();
+
+    RetrievalRequest? chosenRequest;
+    for (final r in retrievalRequestedList) {
+      final parkerInFreeList = freeDrivers.any((d) =>
+          (r.parkedBy.userId != null &&
+              r.parkedBy.userId!.isNotEmpty &&
+              d.userId == r.parkedBy.userId) ||
+          d.name == r.parkedBy.name);
+      if (parkerInFreeList) {
+        chosenRequest = r;
+        break;
+      }
+    }
+
+    String? recommendedDriverId;
     String? recommendedDriverName;
     int? recommendedCardNumber;
-    if (retrievalRequests.requests.isNotEmpty) {
-      final firstRequest = retrievalRequests.requests.first;
-      recommendedDriverName = firstRequest.parkedBy.name;
-      recommendedCardNumber = firstRequest.cardNumber;
+    if (chosenRequest != null) {
+      recommendedDriverId = chosenRequest.parkedBy.userId;
+      recommendedDriverName = chosenRequest.parkedBy.name;
+      recommendedCardNumber = chosenRequest.cardNumber;
+      // Show recommended driver at the start of the list.
       freeDrivers.sort((a, b) {
-        if (a.name == recommendedDriverName) return -1;
-        if (b.name == recommendedDriverName) return 1;
+        final aMatch =
+            _isRecommendedDriver(a, recommendedDriverId, recommendedDriverName);
+        final bMatch =
+            _isRecommendedDriver(b, recommendedDriverId, recommendedDriverName);
+        if (aMatch) return -1;
+        if (bMatch) return 1;
         return 0;
       });
     }
@@ -154,8 +198,17 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.015),
               IntrinsicWidth(
                 child: AvailableDriversCard(
+                  key: ValueKey(
+                    (freeDrivers[i].userId.isNotEmpty)
+                        ? freeDrivers[i].userId
+                        : 'driver_$i',
+                  ),
                   driver: freeDrivers[i],
-                  isRecommended: freeDrivers[i].name == recommendedDriverName,
+                  isRecommended: _isRecommendedDriver(
+                    freeDrivers[i],
+                    recommendedDriverId,
+                    recommendedDriverName,
+                  ),
                   recommendedCardNumber: recommendedCardNumber,
                   compact: true,
                 ),

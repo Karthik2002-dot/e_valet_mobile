@@ -283,6 +283,10 @@ class OperatorDashboardBloc
     AssignDriverToRetrieval event,
     Emitter<OperatorDashboardState> emit,
   ) async {
+    final previousLoaded = state is OperatorDashboardLoaded
+        ? state as OperatorDashboardLoaded
+        : null;
+
     emit(const AssignmentInProgress());
 
     try {
@@ -295,8 +299,15 @@ class OperatorDashboardBloc
       );
 
       emit(AssignmentSuccess(response));
+      // Restore loaded state so the UI does not show a blank screen; refresh will update data.
+      if (previousLoaded != null) {
+        emit(previousLoaded);
+      }
     } catch (e) {
       emit(AssignmentError(e.toString()));
+      if (previousLoaded != null) {
+        emit(previousLoaded);
+      }
     }
   }
 

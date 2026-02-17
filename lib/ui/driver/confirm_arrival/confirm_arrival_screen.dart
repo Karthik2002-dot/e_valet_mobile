@@ -122,7 +122,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
           } else if (state is ConfirmArrivalError) {
             if (state.shouldNavigateToHandover) {
               SnackBars.showSuccessSnackBar(context, state.message);
-              final customerMissingSecs = _customerMissingDisableSecondsFromEnv();
+              final customerMissingSecs =
+                  _customerMissingDisableSecondsFromEnv();
               setState(() {
                 _showHandoverButtons = true;
                 _customerMissingDisabledUntil =
