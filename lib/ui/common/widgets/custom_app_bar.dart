@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/language_dropdown_button.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
@@ -24,22 +25,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final defaultLogoSize = logoSize ?? 60;
     final defaultIconSize = iconSize ?? screenWidth * 0.06;
 
-    // Build default actions with language icon and menu if needed
-    List<Widget>? appBarActions = actions;
-    if (showLanguageIcon && actions == null) {
+    // Build actions: when showLanguageIcon is true, always show language first; then default or custom actions
+    List<Widget>? appBarActions;
+    if (showLanguageIcon) {
       appBarActions = [
-        SizedBox(
-          width: defaultIconSize,
-          height: defaultIconSize,
-          child: Image.asset(
-            'assets/images/language.png',
-            fit: BoxFit.contain,
-          ),
-        ),
+        LanguageDropdownButton(iconSize: defaultIconSize),
         SizedBox(width: screenWidth * 0.04),
-        OverflowMenu(),
-        SizedBox(width: screenWidth * 0.04),
+        ...(actions ?? [
+          OverflowMenu(),
+          SizedBox(width: screenWidth * 0.04),
+        ]),
       ];
+    } else {
+      appBarActions = actions;
     }
 
     return AppBar(

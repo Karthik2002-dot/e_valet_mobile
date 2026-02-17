@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_serv
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
 import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
@@ -84,6 +85,10 @@ class MyApp extends StatelessWidget {
         // Provide FirebaseMessagingService to the entire app
         Provider<FirebaseMessagingService>.value(
           value: firebaseMessagingService,
+        ),
+        // In-memory translations; load() runs on create and when user changes language
+        ChangeNotifierProvider(
+          create: (_) => AppTranslationsNotifier()..load(),
         ),
       ],
       child: MultiBlocProvider(
