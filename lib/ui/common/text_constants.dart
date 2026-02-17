@@ -45,6 +45,10 @@ class TextConstants {
   static const String loginAccessDenied =
       'Access denied. Only ADMIN or PILOT users can access this application.';
 
+  /// Shown when user is logged out because the account was used on another device.
+  static const String loggedOutAnotherDevice =
+      'You have been logged out because your account was used on another device. Please sign in again.';
+
   // Default Hint Texts
   static const String defaultEmailHint = 'Enter your email';
   static const String defaultPasswordHint = 'Enter your password';
