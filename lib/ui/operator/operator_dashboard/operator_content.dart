@@ -44,6 +44,8 @@ class _DashboardContentState extends State<DashboardContent> {
   final Duration _highlightDuration = const Duration(seconds: 30);
   bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
+  /// Cache of last loaded state so assignment states don't show a blank screen.
+  OperatorDashboardLoaded? _lastLoadedState;
 
   @override
   void initState() {
@@ -227,6 +229,13 @@ class _DashboardContentState extends State<DashboardContent> {
                   builder: (context, state) {
                     final isLoading = state is OperatorDashboardLoading;
                     final isLoaded = state is OperatorDashboardLoaded;
+                    final isAssignmentState = state is AssignmentInProgress ||
+                        state is AssignmentSuccess ||
+                        state is AssignmentError;
+
+                    if (isLoaded) {
+                      _lastLoadedState = state;
+                    }
 
                     if (isLoading) {
                       // Show skeleton loaders matching KPI card pattern (Row of 4 cards)
@@ -260,18 +269,17 @@ class _DashboardContentState extends State<DashboardContent> {
                           ),
                         ],
                       );
-                    } else if (isLoaded) {
+                    } else if (isLoaded || (isAssignmentState && _lastLoadedState != null)) {
+                      final data = isLoaded ? state : _lastLoadedState!;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           DashboardKpiGrid(
-                            kpis: state.kpis,
+                            kpis: data.kpis,
                             onAvailableValetsTap: () {
-                              // change index to whatever your Valets screen index is
                               widget.onNavigateToTab?.call(2);
                             },
                             onTotalVehiclesParkedTap: () {
-                              // change index to whatever your Parking screen index is
                               widget.onNavigateToTab?.call(1);
                             },
                           ),
@@ -280,13 +288,15 @@ class _DashboardContentState extends State<DashboardContent> {
                           ),
                           Expanded(
                             child: DashboardThreeColumnLayout(
-                              retrievalRequests: state.retrievalRequests,
-                              availableDrivers: state.availableDrivers,
+                              retrievalRequests: data.retrievalRequests,
+                              availableDrivers: data.availableDrivers,
                               onAssignmentComplete: () {
-                                // Refresh the dashboard
                                 _dashboardBloc.add(
-                                  FetchDashboardKpis(
+                                  RefreshDashboardKpisSilently(
                                     outletId: _outletId,
+                                    refreshKpis: true,
+                                    refreshDrivers: true,
+                                    refreshRequests: true,
                                   ),
                                 );
                               },
