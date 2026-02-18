@@ -28,7 +28,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // Ensure translations are loaded/refreshed for current language (on open or install)
     try {
       await TranslationsCache().ensureTranslationsLoaded();
-    } catch (_) {}
+    } catch (e, st) {
+      // Log translation loading failures instead of silently swallowing them
+      print('SplashBloc: Failed to ensure translations are loaded: $e');
+      print(st);
+    }
 
     // Simulate loading time or any initialization
     await Future.delayed(const Duration(milliseconds: 500));
