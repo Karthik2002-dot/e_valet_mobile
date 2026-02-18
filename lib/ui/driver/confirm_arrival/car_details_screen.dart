@@ -44,6 +44,9 @@ class CarDetailsSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.symmetric(
+        horizontal: (screenWidth * 0.05).clamp(16.0, 24.0),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
         color: AppColors.white,

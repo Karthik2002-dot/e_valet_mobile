@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+// import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
@@ -324,21 +324,18 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         );
       }
 
-      // Step 2: Check if image contains text (number plate) using Text Recognition
-      final textResult = await _detectNumberPlate(inputImage);
+      // Step 2: Number plate (text) check disabled – proceed if vehicle is detected.
+      // final textResult = await _detectNumberPlate(inputImage);
+      // if (!textResult.hasText) {
+      //   return ImageValidationResult.failure(
+      //     hasVehicle: true,
+      //     hasNumberPlate: false,
+      //     errorMessage: TextConstants.numberPlateNotFound,
+      //   );
+      // }
+      // return ImageValidationResult.success(detectedText: textResult.text);
 
-      if (!textResult.hasText) {
-        return ImageValidationResult.failure(
-          hasVehicle: true,
-          hasNumberPlate: false,
-          errorMessage: TextConstants.numberPlateNotFound,
-        );
-      }
-
-      // Both vehicle and number plate detected
-      return ImageValidationResult.success(
-        detectedText: textResult.text,
-      );
+      return ImageValidationResult.success(detectedText: null);
     } catch (e) {
       return ImageValidationResult.failure(
         hasVehicle: false,
@@ -389,38 +386,31 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     }
   }
 
-  Future<({bool hasText, String? text})> _detectNumberPlate(
-      InputImage inputImage) async {
-    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-
-    try {
-      final RecognizedText recognizedText =
-          await textRecognizer.processImage(inputImage);
-
-      // Check if any text is detected
-      if (recognizedText.text.isEmpty) {
-        await textRecognizer.close();
-        return (hasText: false, text: null);
-      }
-
-      // Look for patterns that resemble number plates
-      // Number plates usually contain alphanumeric characters
-      final hasAlphanumeric = RegExp(r'[A-Z0-9]{2,}').hasMatch(
-        recognizedText.text.toUpperCase(),
-      );
-
-      await textRecognizer.close();
-
-      if (hasAlphanumeric) {
-        return (hasText: true, text: recognizedText.text);
-      } else {
-        return (hasText: false, text: null);
-      }
-    } catch (e) {
-      await textRecognizer.close();
-      return (hasText: false, text: null);
-    }
-  }
+  // Number plate (text) recognition disabled – validation passes on vehicle detection only.
+  // Future<({bool hasText, String? text})> _detectNumberPlate(
+  //     InputImage inputImage) async {
+  //   final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  //   try {
+  //     final RecognizedText recognizedText =
+  //         await textRecognizer.processImage(inputImage);
+  //     if (recognizedText.text.isEmpty) {
+  //       await textRecognizer.close();
+  //       return (hasText: false, text: null);
+  //     }
+  //     final hasAlphanumeric = RegExp(r'[A-Z0-9]{2,}').hasMatch(
+  //       recognizedText.text.toUpperCase(),
+  //     );
+  //     await textRecognizer.close();
+  //     if (hasAlphanumeric) {
+  //       return (hasText: true, text: recognizedText.text);
+  //     } else {
+  //       return (hasText: false, text: null);
+  //     }
+  //   } catch (e) {
+  //     await textRecognizer.close();
+  //     return (hasText: false, text: null);
+  //   }
+  // }
 
   void dispose() {
     _cameraController?.dispose();

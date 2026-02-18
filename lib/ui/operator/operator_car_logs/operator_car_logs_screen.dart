@@ -492,9 +492,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             ),
           ),
           if (_showPopup && _selectedCarLog != null)
-            CarLogDetailsPopup(
-              carLog: _selectedCarLog!,
-              onClose: _closePopup,
+            Positioned.fill(
+              child: CarLogDetailsPopup(
+                carLog: _selectedCarLog!,
+                onClose: _closePopup,
+              ),
             ),
         ],
       ),

@@ -21,7 +21,10 @@ import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.d
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 
 void main() async {
@@ -53,6 +56,18 @@ void main() async {
   // Initialize Firebase Messaging Service
   final firebaseMessagingService = FirebaseMessagingService();
   await firebaseMessagingService.initialize();
+
+  // When refresh returns 401 (e.g. logged in on another device), clear is done in RefreshApiService; show message and go to login.
+  RefreshApiService.onSessionEnded = (message) {
+    final ctx = FirebaseMessagingService.navigatorKey.currentContext;
+    if (ctx != null) {
+      SnackBars.showErrorSnackBar(ctx, message);
+      Navigator.of(ctx).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  };
 
   runApp(MyApp(firebaseMessagingService: firebaseMessagingService));
 }

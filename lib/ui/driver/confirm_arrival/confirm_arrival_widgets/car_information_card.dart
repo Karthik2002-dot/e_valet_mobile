@@ -3,6 +3,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class CarInformationCard extends StatelessWidget {
@@ -36,10 +37,12 @@ class CarInformationCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Details Section (above image) — smaller text when compact
-          Padding(
-            padding: EdgeInsets.all(
-                compact ? screenWidth * 0.03 : screenWidth * 0.04),
+          // Details Section (above image) — spacing OUTSIDE via margin
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            padding: EdgeInsets.symmetric(
+              vertical: compact ? screenWidth * 0.03 : screenWidth * 0.04,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -162,24 +165,28 @@ class CarInformationCard extends StatelessWidget {
             ),
           ),
 
-          // Car Image (below details) — always visible; medium when compact, large otherwise
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.black,
-                width: 2,
+          // Car Image (below details) — tappable to view full size
+          GestureDetector(
+            onTap: session.photoUrl != null && session.photoUrl!.isNotEmpty
+                ? () => FullImageViewerDialog.show(context, session.photoUrl!)
+                : null,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.black,
+                  width: 2,
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(18),
+                ),
+                color: AppColors.white,
               ),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(18),
-              ),
-              color: AppColors.white,
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(18),
-              ),
-              child: session.photoUrl != null
-                  ? Image.network(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(18),
+                ),
+                child: session.photoUrl != null
+                    ? Image.network(
                       session.photoUrl!,
                       width: double.infinity,
                       height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
@@ -230,6 +237,7 @@ class CarInformationCard extends StatelessWidget {
                         ),
                       ),
                     ),
+              ),
             ),
           ),
         ],
@@ -252,24 +260,28 @@ class CarImageSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.black, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow10,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: session.photoUrl != null
-            ? Image.network(
+    return GestureDetector(
+      onTap: session.photoUrl != null && session.photoUrl!.isNotEmpty
+          ? () => FullImageViewerDialog.show(context, session.photoUrl!)
+          : null,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.black, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow10,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: session.photoUrl != null
+              ? Image.network(
                 session.photoUrl!,
                 width: double.infinity,
                 height: double.infinity,
@@ -277,7 +289,8 @@ class CarImageSection extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) =>
                     _placeholder(context),
               )
-            : _placeholder(context),
+              : _placeholder(context),
+        ),
       ),
     );
   }
