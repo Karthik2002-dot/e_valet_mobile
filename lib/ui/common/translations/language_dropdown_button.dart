@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/language_cache.dart';
 import 'package:niloufer_valet_mobile/services/translations/translations_cache.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:pull_down_button/pull_down_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/translations/language_popup_dialog.dart';
 
 class LanguageDropdownButton extends StatefulWidget {
   final double iconSize;
@@ -20,6 +20,9 @@ class LanguageDropdownButton extends StatefulWidget {
 }
 
 class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
+  /// Fixed size for loading and empty-state icon (same as refresh/loading indicator).
+  static const double _staticIconSize = 24.0;
+
   List<Language> _languages = [];
   Language? _selectedLanguage;
   bool _loading = false;
@@ -58,12 +61,45 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
     }
   }
 
+  void _openLanguagePopup() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => LanguagePopupDialog(
+        languages: _languages,
+        selectedLanguage: _selectedLanguage,
+        onLanguageSelected: (lang) async {
+          if (_selectedLanguage == lang) return;
+          final previousLanguage = _selectedLanguage;
+          setState(() => _selectedLanguage = lang);
+          try {
+            await TranslationsCache().setSelectedLanguageAndFetch(lang.code);
+            if (mounted) {
+              context.read<AppTranslationsNotifier>().load();
+            }
+          } catch (_) {
+            if (!mounted) return;
+            setState(() => _selectedLanguage = previousLanguage);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Failed to change language. Please try again.',
+                ),
+              ),
+            );
+          }
+        },
+        onClose: () => Navigator.of(dialogContext).pop(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
       return SizedBox(
-        width: widget.iconSize,
-        height: widget.iconSize,
+        width: _staticIconSize,
+        height: _staticIconSize,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
@@ -73,8 +109,8 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
 
     if (_languages.isEmpty) {
       return SizedBox(
-        width: widget.iconSize,
-        height: widget.iconSize,
+        width: _staticIconSize,
+        height: _staticIconSize,
         child: Image.asset(
           'assets/images/language.png',
           fit: BoxFit.contain,
@@ -83,61 +119,17 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
       );
     }
 
-    return PullDownButton(
-      useRootNavigator: true,
-      itemBuilder: (context) {
-        final items = <PullDownMenuEntry>[];
-        var isFirst = true;
-        for (final lang in _languages) {
-          if (!isFirst) {
-            items.add(const PullDownMenuDivider());
-          } else {
-            isFirst = false;
-          }
-          items.add(
-            PullDownMenuItem.selectable(
-              title: lang.nativeName,
-              selected: _selectedLanguage == lang,
-              onTap: () async {
-                if (_selectedLanguage == lang) return;
-                final previousLanguage = _selectedLanguage;
-                setState(() => _selectedLanguage = lang);
-                try {
-                  await TranslationsCache()
-                      .setSelectedLanguageAndFetch(lang.code);
-                  if (mounted) {
-                    context.read<AppTranslationsNotifier>().load();
-                  }
-                } catch (_) {
-                  if (!mounted) return;
-                  setState(() => _selectedLanguage = previousLanguage);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('Failed to change language. Please try again.'),
-                    ),
-                  );
-                }
-              },
-            ),
-          );
-        }
-        return items;
-      },
-      buttonBuilder: (context, showMenu) {
-        return IconButton(
-          onPressed: showMenu,
-          icon: SizedBox(
-            width: widget.iconSize,
-            height: widget.iconSize,
-            child: Image.asset(
-              'assets/images/language.png',
-              fit: BoxFit.contain,
-              color: AppColors.white,
-            ),
-          ),
-        );
-      },
+    return IconButton(
+      onPressed: _openLanguagePopup,
+      icon: SizedBox(
+        width: widget.iconSize,
+        height: widget.iconSize,
+        child: Image.asset(
+          'assets/images/language.png',
+          fit: BoxFit.contain,
+          color: AppColors.white,
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/language_dropdown_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/translations/language_dropdown_button.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;

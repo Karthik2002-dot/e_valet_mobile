@@ -420,4 +420,5 @@ class TextConstants {
   static const String mandatoryUpdateDialogSubtitle =
       'Please update to continue using the app.';
   static const String mandatoryUpdateDialogUpdateNow = 'Update Now';
+  static const String language = 'Language';
 }
