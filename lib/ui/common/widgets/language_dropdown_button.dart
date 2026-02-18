@@ -85,26 +85,45 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
 
     return PullDownButton(
       useRootNavigator: true,
-      itemBuilder: (context) => [
-        for (final lang in _languages) ...[
-          if (_languages.indexOf(lang) > 0) const PullDownMenuDivider(),
-          PullDownMenuItem.selectable(
-            title: lang.nativeName,
-            selected: _selectedLanguage == lang,
-            onTap: () async {
-              if (_selectedLanguage == lang) return;
-              setState(() => _selectedLanguage = lang);
-              try {
-                await TranslationsCache().setSelectedLanguageAndFetch(lang.code);
-                if (mounted) {
-                  setState(() {});
-                  context.read<AppTranslationsNotifier>().load();
+      itemBuilder: (context) {
+        final items = <PullDownMenuEntry>[];
+        var isFirst = true;
+        for (final lang in _languages) {
+          if (!isFirst) {
+            items.add(const PullDownMenuDivider());
+          } else {
+            isFirst = false;
+          }
+          items.add(
+            PullDownMenuItem.selectable(
+              title: lang.nativeName,
+              selected: _selectedLanguage == lang,
+              onTap: () async {
+                if (_selectedLanguage == lang) return;
+                final previousLanguage = _selectedLanguage;
+                setState(() => _selectedLanguage = lang);
+                try {
+                  await TranslationsCache()
+                      .setSelectedLanguageAndFetch(lang.code);
+                  if (mounted) {
+                    context.read<AppTranslationsNotifier>().load();
+                  }
+                } catch (_) {
+                  if (!mounted) return;
+                  setState(() => _selectedLanguage = previousLanguage);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Failed to change language. Please try again.'),
+                    ),
+                  );
                 }
-              } catch (_) {}
-            },
-          ),
-        ],
-      ],
+              },
+            ),
+          );
+        }
+        return items;
+      },
       buttonBuilder: (context, showMenu) {
         return IconButton(
           onPressed: showMenu,
