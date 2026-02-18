@@ -24,13 +24,26 @@ class RetrievalRequestSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    // Sheet fixed to bottom with padding; max height so it never overflows on small screens
+    const horizontalPadding = 16.0;
+    const verticalPadding = 12.0;
+    final maxSheetHeight = screenHeight * 0.88;
 
     return SafeArea(
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.only(
+            left: horizontalPadding,
+            right: horizontalPadding,
+            top: verticalPadding,
+            bottom: verticalPadding + bottomPadding,
+          ),
           child: Container(
+            constraints: BoxConstraints(maxHeight: maxSheetHeight),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.surface,
@@ -44,51 +57,64 @@ class RetrievalRequestSheet extends StatelessWidget {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  width: screenWidth * 0.16,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                TextComponent(
-                  labelText: TextConstants.retrievalRequest,
-                  fontSize: screenWidth * 0.045,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-                const SizedBox(height: 12),
-                if (isLoading) ...[
-                  const Center(child: CircularProgressIndicator()),
-                  const SizedBox(height: 16),
-                ] else if (message != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: TextComponent(
-                      labelText: message!,
-                      textAlign: TextAlign.center,
-                      fontSize: screenWidth * 0.04,
-                      color: AppColors.mutedText,
+                // Scrollable content so button always stays inside the sheet
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          width: screenWidth * 0.16,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.greyLight,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        TextComponent(
+                          labelText: TextConstants.retrievalRequest,
+                          fontSize: screenWidth * 0.045,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                        const SizedBox(height: 12),
+                        if (isLoading) ...[
+                          const Center(child: CircularProgressIndicator()),
+                          const SizedBox(height: 16),
+                        ] else if (message != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: TextComponent(
+                              labelText: message!,
+                              textAlign: TextAlign.center,
+                              fontSize: screenWidth * 0.04,
+                              color: AppColors.mutedText,
+                            ),
+                          ),
+                        ] else if (session != null) ...[
+                          SessionCard(session: session!, onAccept: onAccept),
+                        ] else ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: TextComponent(
+                              labelText:
+                                  TextConstants.noActiveRetrievalRequests,
+                              textAlign: TextAlign.center,
+                              fontSize: screenWidth * 0.04,
+                              color: AppColors.mutedText,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                ] else if (session != null) ...[
-                  SessionCard(session: session!, onAccept: onAccept),
-                ] else ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: TextComponent(
-                      labelText: TextConstants.noActiveRetrievalRequests,
-                      textAlign: TextAlign.center,
-                      fontSize: screenWidth * 0.04,
-                      color: AppColors.mutedText,
-                    ),
-                  ),
-                ],
+                ),
                 const SizedBox(height: 8),
                 if (session != null)
                   Padding(
