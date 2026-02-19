@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_dashboard_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_available_drivers_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_retrieval_requests_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/parked_car/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
