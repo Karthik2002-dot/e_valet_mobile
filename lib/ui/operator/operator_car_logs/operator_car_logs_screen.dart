@@ -317,7 +317,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText: TextConstants.carLogsDescription,
+                                      labelText:
+                                          TextConstants.carLogsDescription,
                                       color: AppColors.grey,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
@@ -772,7 +773,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                     ),
                     onPressed: _goToFirstPage,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                    constraints:
+                        const BoxConstraints(minWidth: 50, minHeight: 50),
                   ),
                 if (_currentPage > 1)
                   IconButton(
@@ -783,7 +785,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                     ),
                     onPressed: _goToPreviousPage,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                    constraints:
+                        const BoxConstraints(minWidth: 50, minHeight: 50),
                   ),
                 if (_currentPage > 1) const SizedBox(width: 20),
                 ..._buildPageNumbers(totalPages),
@@ -797,7 +800,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                     ),
                     onPressed: _goToNextPage,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                    constraints:
+                        const BoxConstraints(minWidth: 50, minHeight: 50),
                   ),
                 if (_currentPage < totalPages)
                   IconButton(
@@ -808,7 +812,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                     ),
                     onPressed: _goToLastPage,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                    constraints:
+                        const BoxConstraints(minWidth: 50, minHeight: 50),
                   ),
                 const Spacer(),
                 TextComponent(
