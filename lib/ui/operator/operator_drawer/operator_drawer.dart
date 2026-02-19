@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'operator_drawer_item.dart';
@@ -14,6 +16,7 @@ class OperatorDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Drawer(
       child: Container(
         color: AppColors.primary,
@@ -31,7 +34,7 @@ class OperatorDrawer extends StatelessWidget {
               const SizedBox(height: 24),
               OperatorDrawerItem(
                 asset: 'assets/images/dashboard.png',
-                title: TextConstants.dashboard,
+                title: t.get(TextConstants.dashboard),
                 isSelected: selectedIndex == 0,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -40,7 +43,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/slots.png',
-                title: TextConstants.parkedCar,
+                title: t.get(TextConstants.parkedCar),
                 isSelected: selectedIndex == 1,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -49,7 +52,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/drivers.png',
-                title: TextConstants.valets,
+                title: t.get(TextConstants.valets),
                 isSelected: selectedIndex == 2,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -58,14 +61,14 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/cars.png',
-                title: TextConstants.carLogs,
+                title: t.get(TextConstants.carLogs),
                 isSelected: selectedIndex == 3,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(3);
                 },
               ),
-              Spacer(),
+              const Spacer(),
               Divider(
                 color: AppColors.black,
                 thickness: 2,
@@ -74,7 +77,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/profile.png',
-                title: TextConstants.profile,
+                title: t.get(TextConstants.profile),
                 isSelected: selectedIndex == 4,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -83,7 +86,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 asset: 'assets/images/logout.png',
-                title: TextConstants.logout,
+                title: t.get(TextConstants.logout),
                 isSelected: selectedIndex == 5,
                 onTap: () {
                   Navigator.of(context).pop();

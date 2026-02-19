@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/translations/translations_cache.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
@@ -23,6 +24,15 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     Emitter<SplashState> emit,
   ) async {
     emit(const SplashLoading());
+
+    // Ensure translations are loaded/refreshed for current language (on open or install)
+    try {
+      await TranslationsCache().ensureTranslationsLoaded();
+    } catch (e, st) {
+      // Log translation loading failures instead of silently swallowing them
+      print('SplashBloc: Failed to ensure translations are loaded: $e');
+      print(st);
+    }
 
     // Simulate loading time or any initialization
     await Future.delayed(const Duration(milliseconds: 500));
