@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -21,11 +23,18 @@ class ValetKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Platform.isIOS;
+    final padding = isIOS ? 8.0 : 8.0;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return InkWell(
       onTap: isLoading ? null : onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(padding),
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withOpacity(0.001)
@@ -47,39 +56,46 @@ class ValetKpiCard extends StatelessWidget {
         ),
         child: isLoading
             ? Column(
+                mainAxisSize: isIOS ? MainAxisSize.max : MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SkeletonLoader(
-                    height: MediaQuery.of(context).size.height * 0.015,
-                    width: MediaQuery.of(context).size.width * 0.12,
+                    height: screenHeight * (isIOS ? 0.014 : 0.015),
+                    width: screenWidth * (isIOS ? 0.14 : 0.12),
                     borderRadius: 4,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: isIOS ? 6 : 8),
                   SkeletonLoader(
-                    height: MediaQuery.of(context).size.height * 0.03,
-                    width: MediaQuery.of(context).size.width * 0.08,
+                    height: screenHeight * (isIOS ? 0.028 : 0.03),
+                    width: screenWidth * (isIOS ? 0.1 : 0.08),
                     borderRadius: 4,
                   ),
                 ],
               )
             : Column(
+                mainAxisSize: isIOS ? MainAxisSize.max : MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextComponent(
                     labelText: label,
                     color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.02,
+                    fontSize: screenWidth * (isIOS ? 0.022 : 0.02),
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.normal,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: isIOS ? 4 : 4),
                   TextComponent(
                     labelText: value,
                     color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.025,
+                    fontSize: screenWidth * (isIOS ? 0.028 : 0.025),
                     fontWeight: FontWeight.bold,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

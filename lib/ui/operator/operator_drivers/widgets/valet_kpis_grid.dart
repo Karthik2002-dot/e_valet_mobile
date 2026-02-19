@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_kpis_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -20,13 +22,18 @@ class ValetKpisGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // iOS only: 2 columns, medium aspect ratio so KPI cards are balanced and content fills space
+    final isIOS = Platform.isIOS;
+    final crossAxisCount = isIOS ? 2 : 4;
+    final childAspectRatio = isIOS ? 2.4 : 2.5;
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
+      crossAxisCount: crossAxisCount,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 2.5,
+      childAspectRatio: childAspectRatio,
       children: [
         ValetKpiCard(
           value: kpis != null ? '${kpis!.totalValets}' : '0',
