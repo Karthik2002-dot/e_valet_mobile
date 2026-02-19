@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -296,32 +298,40 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                   widget.onNavigateToTab?.call(0);
                                 },
                               ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextComponent(
-                                    labelText:
-                                        '${TextConstants.carLogsTitle} (${state.carLogsResponse.total})',
-                                    color: AppColors.black,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.03,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  TextComponent(
-                                    labelText: TextConstants.carLogsDescription,
-                                    color: AppColors.grey,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.02,
-                                  ),
-                                ],
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextComponent(
+                                      labelText:
+                                          '${TextConstants.carLogsTitle} (${state.carLogsResponse.total})',
+                                      color: AppColors.black,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              (Platform.isIOS ? 0.026 : 0.03),
+                                      fontWeight: FontWeight.bold,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TextComponent(
+                                      labelText: TextConstants.carLogsDescription,
+                                      color: AppColors.grey,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              (Platform.isIOS ? 0.018 : 0.02),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const Spacer(),
+                              const SizedBox(width: 8),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.4,
+                                width: MediaQuery.of(context).size.width *
+                                    (Platform.isIOS ? 0.32 : 0.4),
                                 child: TextField(
                                   controller: _searchController,
                                   focusNode: _searchFocusNode,
@@ -611,6 +621,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
 
   Widget _buildPaginationControls(List<CarLog> logs) {
     final totalPages = _getTotalPages();
+    // Use scrollable pagination on iOS only to prevent overflow; Android/tab unchanged
+    final useScrollablePagination = Platform.isIOS;
+    final isIOS = Platform.isIOS;
+    final pageInfoText =
+        '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems';
 
     // Simplified bar when only one page (total from API reflects search)
     if (totalPages <= 1) {
@@ -625,105 +640,185 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
               onPageSizeChanged: _changePageSize,
             ),
             const Spacer(),
-            TextComponent(
-              labelText:
-                  '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey,
-            ),
+            if (isIOS)
+              Flexible(
+                child: TextComponent(
+                  labelText: pageInfoText,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.grey,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+            else
+              TextComponent(
+                labelText: pageInfoText,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.grey,
+              ),
           ],
         ),
       );
     }
 
+    final paginationRow = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Page size dropdown
+        PageSizeDropdownWidget(
+          itemsPerPage: _itemsPerPage,
+          pageSizeOptions: _pageSizeOptions,
+          onPageSizeChanged: _changePageSize,
+        ),
+        const SizedBox(width: 8),
+        // First page button (<<) - only show if not on first page
+        if (_currentPage > 1)
+          IconButton(
+            icon: const TextComponent(
+              labelText: '<<',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToFirstPage,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(
+              minWidth: isIOS ? 40 : 50,
+              minHeight: isIOS ? 40 : 50,
+            ),
+          ),
+        // Previous page button (<) - only show if not on first page
+        if (_currentPage > 1)
+          IconButton(
+            icon: const TextComponent(
+              labelText: '<',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToPreviousPage,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(
+              minWidth: isIOS ? 40 : 50,
+              minHeight: isIOS ? 40 : 50,
+            ),
+          ),
+        if (_currentPage > 1) SizedBox(width: isIOS ? 8 : 20),
+        ..._buildPageNumbers(totalPages),
+        if (_currentPage < totalPages) SizedBox(width: isIOS ? 8 : 20),
+        if (_currentPage < totalPages)
+          IconButton(
+            icon: const TextComponent(
+              labelText: '>',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToNextPage,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(
+              minWidth: isIOS ? 40 : 50,
+              minHeight: isIOS ? 40 : 50,
+            ),
+          ),
+        if (_currentPage < totalPages)
+          IconButton(
+            icon: const TextComponent(
+              labelText: '>>',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToLastPage,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(
+              minWidth: isIOS ? 40 : 50,
+              minHeight: isIOS ? 40 : 50,
+            ),
+          ),
+        SizedBox(width: isIOS ? 8 : 16),
+        TextComponent(
+          labelText: pageInfoText,
+          fontSize: isIOS ? 14 : 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.grey,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Page size dropdown
-          PageSizeDropdownWidget(
-            itemsPerPage: _itemsPerPage,
-            pageSizeOptions: _pageSizeOptions,
-            onPageSizeChanged: _changePageSize,
-          ),
-
-          const Spacer(),
-
-          // First page button (<<) - only show if not on first page
-          if (_currentPage > 1)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '<<',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToFirstPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+      child: useScrollablePagination
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: paginationRow,
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                PageSizeDropdownWidget(
+                  itemsPerPage: _itemsPerPage,
+                  pageSizeOptions: _pageSizeOptions,
+                  onPageSizeChanged: _changePageSize,
+                ),
+                const Spacer(),
+                if (_currentPage > 1)
+                  IconButton(
+                    icon: const TextComponent(
+                      labelText: '<<',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onPressed: _goToFirstPage,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  ),
+                if (_currentPage > 1)
+                  IconButton(
+                    icon: const TextComponent(
+                      labelText: '<',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onPressed: _goToPreviousPage,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  ),
+                if (_currentPage > 1) const SizedBox(width: 20),
+                ..._buildPageNumbers(totalPages),
+                if (_currentPage < totalPages) const SizedBox(width: 20),
+                if (_currentPage < totalPages)
+                  IconButton(
+                    icon: const TextComponent(
+                      labelText: '>',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onPressed: _goToNextPage,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  ),
+                if (_currentPage < totalPages)
+                  IconButton(
+                    icon: const TextComponent(
+                      labelText: '>>',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onPressed: _goToLastPage,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  ),
+                const Spacer(),
+                TextComponent(
+                  labelText: pageInfoText,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.grey,
+                ),
+              ],
             ),
-
-          // Previous page button (<) - only show if not on first page
-          if (_currentPage > 1)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '<',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToPreviousPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          // Add spacing between navigation buttons and page numbers
-          if (_currentPage > 1) const SizedBox(width: 20),
-
-          // Page numbers
-          ..._buildPageNumbers(totalPages),
-
-          // Add spacing between page numbers and navigation buttons
-          if (_currentPage < totalPages) const SizedBox(width: 20),
-
-          // Next page button (>) - only show if not on last page
-          if (_currentPage < totalPages)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '>',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToNextPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          // Last page button (>>) - only show if not on last page
-          if (_currentPage < totalPages)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '>>',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToLastPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          const Spacer(),
-
-          // Page info
-          TextComponent(
-            labelText:
-                '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: AppColors.grey,
-          ),
-        ],
-      ),
     );
   }
 

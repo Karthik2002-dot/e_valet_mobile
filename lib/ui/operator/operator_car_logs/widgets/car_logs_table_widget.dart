@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/widgets/table_header_row_widget.dart';
@@ -30,18 +32,23 @@ class CarLogsTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
+        final viewportWidth = constraints.maxWidth;
+        // iOS only: use a minimum table width so data is fully visible via horizontal scroll; Android/tab unchanged
+        const minTableWidth = 820.0;
+        final tableWidth = Platform.isIOS && viewportWidth < minTableWidth
+            ? minTableWidth
+            : viewportWidth;
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: availableWidth),
+            constraints: BoxConstraints(minWidth: tableWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header row
                 TableHeaderRowWidget(
-                  availableWidth: availableWidth,
+                  availableWidth: tableWidth,
                   sortColumn: sortColumn,
                   sortDirection: sortDirection,
                   onHeaderTap: onHeaderTap,
@@ -54,7 +61,7 @@ class CarLogsTableWidget extends StatelessWidget {
                   return TableDataRowWidget(
                     log: log,
                     index: index,
-                    availableWidth: availableWidth,
+                    availableWidth: tableWidth,
                     onTap: onRowTap != null ? () => onRowTap!(log) : null,
                   );
                 }).toList(),
