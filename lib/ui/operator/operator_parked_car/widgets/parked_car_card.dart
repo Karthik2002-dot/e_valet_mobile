@@ -97,7 +97,8 @@ class ParkedCarCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.credit_card,
-                              size: screenWidth * (Platform.isIOS ? 0.016 : 0.018),
+                              size: screenWidth *
+                                  (Platform.isIOS ? 0.016 : 0.018),
                               color: AppColors.primary,
                             ),
                             SizedBox(width: screenWidth * 0.004),
@@ -105,7 +106,8 @@ class ParkedCarCard extends StatelessWidget {
                               child: TextComponent(
                                 labelText: 'Card #${item.cardNumber}',
                                 fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * (Platform.isIOS ? 0.018 : 0.02),
+                                fontSize: screenWidth *
+                                    (Platform.isIOS ? 0.018 : 0.02),
                                 color: AppColors.black,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -121,14 +123,16 @@ class ParkedCarCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.timer_outlined,
-                              size: screenWidth * (Platform.isIOS ? 0.016 : 0.018),
+                              size: screenWidth *
+                                  (Platform.isIOS ? 0.016 : 0.018),
                               color: AppColors.primary,
                             ),
                             SizedBox(width: screenWidth * 0.003),
                             Expanded(
                               child: TextComponent(
                                 labelText: item.duration,
-                                fontSize: screenWidth * (Platform.isIOS ? 0.018 : 0.02),
+                                fontSize: screenWidth *
+                                    (Platform.isIOS ? 0.018 : 0.02),
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                                 maxLines: 1,
