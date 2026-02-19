@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/translations/language.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/language_cache.dart';
 import 'package:niloufer_valet_mobile/services/translations/translations_cache.dart';
@@ -80,12 +82,9 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
           } catch (_) {
             if (!mounted) return;
             setState(() => _selectedLanguage = previousLanguage);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Failed to change language. Please try again.',
-                ),
-              ),
+            SnackBars.showErrorSnackBar(
+              context,
+              TextConstants.failedToChangeLanguage,
             );
           }
         },

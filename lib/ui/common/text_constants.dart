@@ -421,4 +421,6 @@ class TextConstants {
       'Please update to continue using the app.';
   static const String mandatoryUpdateDialogUpdateNow = 'Update Now';
   static const String language = 'Language';
+  static const String failedToChangeLanguage =
+      'Failed to change language. Please try again.';
 }
