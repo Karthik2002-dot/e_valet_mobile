@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -21,25 +19,23 @@ class ValetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isIOS = Platform.isIOS;
-    final padding = isIOS ? 12.0 : 16.0;
-
-    final fillSpace = isIOS;
+    // Use same layout as iOS on all platforms so Android has no overflow (full data visible)
+    const padding = 12.0;
     Widget content = isLoading
         ? Column(
-            mainAxisSize: fillSpace ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: fillSpace ? MainAxisAlignment.spaceEvenly : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SkeletonLoader(
-                    height: isIOS ? 40 : 50,
-                    width: isIOS ? 40 : 50,
-                    borderRadius: isIOS ? 20 : 25,
+                  const SkeletonLoader(
+                    height: 40,
+                    width: 40,
+                    borderRadius: 20,
                   ),
-                  SizedBox(width: isIOS ? 8 : 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,16 +55,16 @@ class ValetCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Flexible(
+                  const Flexible(
                     child: SkeletonLoader(
                       height: 24,
-                      width: isIOS ? 56 : 70,
+                      width: 56,
                       borderRadius: 12,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: isIOS ? 12 : 16),
+              const SizedBox(height: 12),
               SkeletonLoader(
                 height: 14,
                 width: screenWidth * 0.18,
@@ -89,27 +85,27 @@ class ValetCard extends StatelessWidget {
             ],
           )
         : Column(
-            mainAxisSize: fillSpace ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: fillSpace ? MainAxisAlignment.spaceEvenly : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: isIOS ? 40 : 50,
-                      height: isIOS ? 40 : 50,
-                    decoration: BoxDecoration(
-                      color: AppColors.grey.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.grey.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person_outline,
+                        size: 24,
+                        color: AppColors.grey,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.person_outline,
-                      size: isIOS ? 24 : 30,
-                      color: AppColors.grey,
-                    ),
-                  ),
-                  SizedBox(width: isIOS ? 8 : 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +114,7 @@ class ValetCard extends StatelessWidget {
                       children: [
                         TextComponent(
                           labelText: valet!.name,
-                          fontSize: screenWidth * (isIOS ? 0.024 : 0.025),
+                          fontSize: screenWidth * 0.024,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
                           maxLines: 1,
@@ -127,7 +123,7 @@ class ValetCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         TextComponent(
                           labelText: valet!.phone,
-                          fontSize: screenWidth * (isIOS ? 0.018 : 0.02),
+                          fontSize: screenWidth * 0.018,
                           color: AppColors.grey,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -137,9 +133,9 @@ class ValetCard extends StatelessWidget {
                   ),
                   Flexible(
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isIOS ? 8 : 12,
-                        vertical: isIOS ? 4 : 6,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: ValetUtils.getStatusColor(valet!.status)
@@ -148,7 +144,7 @@ class ValetCard extends StatelessWidget {
                       ),
                       child: TextComponent(
                         labelText: ValetUtils.getStatusLabel(valet!.status),
-                        fontSize: screenWidth * (isIOS ? 0.018 : 0.02),
+                        fontSize: screenWidth * 0.018,
                         color: ValetUtils.getStatusColor(valet!.status),
                         fontWeight: FontWeight.w500,
                         maxLines: 1,
@@ -158,11 +154,10 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (!fillSpace) SizedBox(height: isIOS ? 12 : 16),
               TextComponent(
                 labelText:
                     '${TextConstants.carsPickedUpLabel}${valet!.carsPickedUp}',
-                fontSize: screenWidth * (isIOS ? 0.02 : 0.02),
+                fontSize: screenWidth * 0.02,
                 color: AppColors.black,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -171,7 +166,7 @@ class ValetCard extends StatelessWidget {
               TextComponent(
                 labelText:
                     '${TextConstants.carsHandedOverLabel}${valet!.carsHandedOver}',
-                fontSize: screenWidth * (isIOS ? 0.02 : 0.02),
+                fontSize: screenWidth * 0.02,
                 color: AppColors.black,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -180,7 +175,7 @@ class ValetCard extends StatelessWidget {
               TextComponent(
                 labelText:
                     '${TextConstants.onBreakDurationLabel}${valet!.onBreakDurationMinutes}${TextConstants.minsLabel}',
-                fontSize: screenWidth * (isIOS ? 0.02 : 0.02),
+                fontSize: screenWidth * 0.02,
                 color: AppColors.black,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -189,7 +184,7 @@ class ValetCard extends StatelessWidget {
           );
 
     return Container(
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
