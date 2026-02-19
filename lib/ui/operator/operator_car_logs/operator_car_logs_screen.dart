@@ -622,9 +622,6 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
 
   Widget _buildPaginationControls(List<CarLog> logs) {
     final totalPages = _getTotalPages();
-    // Use scrollable pagination on iOS only to prevent overflow; Android/tab unchanged
-    final useScrollablePagination = Platform.isIOS;
-    final isIOS = Platform.isIOS;
     final pageInfoText =
         '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems';
 
@@ -641,24 +638,16 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
               onPageSizeChanged: _changePageSize,
             ),
             const Spacer(),
-            if (isIOS)
-              Flexible(
-                child: TextComponent(
-                  labelText: pageInfoText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.grey,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              )
-            else
-              TextComponent(
+            Flexible(
+              child: TextComponent(
                 labelText: pageInfoText,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: AppColors.grey,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
           ],
         ),
       );
@@ -685,9 +674,9 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             ),
             onPressed: _goToFirstPage,
             padding: EdgeInsets.zero,
-            constraints: BoxConstraints(
-              minWidth: isIOS ? 40 : 50,
-              minHeight: isIOS ? 40 : 50,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
             ),
           ),
         // Previous page button (<) - only show if not on first page
@@ -700,14 +689,14 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             ),
             onPressed: _goToPreviousPage,
             padding: EdgeInsets.zero,
-            constraints: BoxConstraints(
-              minWidth: isIOS ? 40 : 50,
-              minHeight: isIOS ? 40 : 50,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
             ),
           ),
-        if (_currentPage > 1) SizedBox(width: isIOS ? 8 : 20),
+        if (_currentPage > 1) const SizedBox(width: 8),
         ..._buildPageNumbers(totalPages),
-        if (_currentPage < totalPages) SizedBox(width: isIOS ? 8 : 20),
+        if (_currentPage < totalPages) const SizedBox(width: 8),
         if (_currentPage < totalPages)
           IconButton(
             icon: const TextComponent(
@@ -717,9 +706,9 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             ),
             onPressed: _goToNextPage,
             padding: EdgeInsets.zero,
-            constraints: BoxConstraints(
-              minWidth: isIOS ? 40 : 50,
-              minHeight: isIOS ? 40 : 50,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
             ),
           ),
         if (_currentPage < totalPages)
@@ -731,15 +720,15 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
             ),
             onPressed: _goToLastPage,
             padding: EdgeInsets.zero,
-            constraints: BoxConstraints(
-              minWidth: isIOS ? 40 : 50,
-              minHeight: isIOS ? 40 : 50,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
             ),
           ),
-        SizedBox(width: isIOS ? 8 : 16),
+        const SizedBox(width: 8),
         TextComponent(
           labelText: pageInfoText,
-          fontSize: isIOS ? 14 : 16,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.grey,
           maxLines: 1,
@@ -750,80 +739,10 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: useScrollablePagination
-          ? SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: paginationRow,
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PageSizeDropdownWidget(
-                  itemsPerPage: _itemsPerPage,
-                  pageSizeOptions: _pageSizeOptions,
-                  onPageSizeChanged: _changePageSize,
-                ),
-                const Spacer(),
-                if (_currentPage > 1)
-                  IconButton(
-                    icon: const TextComponent(
-                      labelText: TextConstants.paginationFirst,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onPressed: _goToFirstPage,
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 50, minHeight: 50),
-                  ),
-                if (_currentPage > 1)
-                  IconButton(
-                    icon: const TextComponent(
-                      labelText: TextConstants.paginationPrev,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onPressed: _goToPreviousPage,
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 50, minHeight: 50),
-                  ),
-                if (_currentPage > 1) const SizedBox(width: 20),
-                ..._buildPageNumbers(totalPages),
-                if (_currentPage < totalPages) const SizedBox(width: 20),
-                if (_currentPage < totalPages)
-                  IconButton(
-                    icon: const TextComponent(
-                      labelText: TextConstants.paginationNext,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onPressed: _goToNextPage,
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 50, minHeight: 50),
-                  ),
-                if (_currentPage < totalPages)
-                  IconButton(
-                    icon: const TextComponent(
-                      labelText: TextConstants.paginationLast,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onPressed: _goToLastPage,
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 50, minHeight: 50),
-                  ),
-                const Spacer(),
-                TextComponent(
-                  labelText: pageInfoText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.grey,
-                ),
-              ],
-            ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: paginationRow,
+      ),
     );
   }
 
