@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_bloc.dart';
@@ -28,15 +26,15 @@ class ValetListView extends StatelessWidget {
     return BlocBuilder<ValetListBloc, ValetListState>(
       builder: (context, state) {
         if (state is ValetListLoading) {
-          final isIOS = Platform.isIOS;
+          // Use same grid as iOS on all platforms so Android has no overflow (full data visible)
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isIOS ? 2 : 3,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: isIOS ? 1.25 : 1.8,
+              childAspectRatio: 1.25,
             ),
             itemCount: 6,
             itemBuilder: (context, index) {
@@ -125,15 +123,15 @@ class ValetListView extends StatelessWidget {
             );
           }
 
-          final isIOS = Platform.isIOS;
+          // Use same grid as iOS on all platforms so Android has no overflow (full data visible)
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: isIOS ? 1.25 : 2,
+              childAspectRatio: 1.25,
             ),
             itemCount: filteredValets.length,
             itemBuilder: (context, index) {
