@@ -74,7 +74,8 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           LayoutBuilder(
             builder: (context, constraints) {
               // iOS only: 2 columns on narrow screens so each card has more width (avoids overflow). Android/others: always 4.
-              final crossAxisCount = (Platform.isIOS && screenWidth < 600) ? 2 : 4;
+              final crossAxisCount =
+                  (Platform.isIOS && screenWidth < 600) ? 2 : 4;
               final spacing = screenWidth * 0.02;
               final runSpacing = screenHeight * 0.02;
               final itemWidth =

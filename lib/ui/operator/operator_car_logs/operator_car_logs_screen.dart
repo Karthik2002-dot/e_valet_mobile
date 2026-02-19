@@ -317,7 +317,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText: TextConstants.carLogsDescription,
+                                      labelText:
+                                          TextConstants.carLogsDescription,
                                       color: AppColors.grey,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
