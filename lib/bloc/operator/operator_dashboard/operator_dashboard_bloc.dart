@@ -10,6 +10,7 @@ import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_a
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_cancel_assignment_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assigned_to.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
@@ -334,7 +335,14 @@ class OperatorDashboardBloc
       if (previousLoaded != null) {
         final updatedRequests = previousLoaded.retrievalRequests.requests
             .map((r) => r.sessionId == response.sessionId
-                ? r.copyWith(status: response.status)
+                ? r.copyWith(
+                    status: response.status,
+                    assignedTo: AssignedTo(
+                      userId: '',
+                      name: '',
+                      phone: '',
+                    ),
+                  )
                 : r)
             .toList();
         emit(previousLoaded.copyWith(
@@ -343,12 +351,19 @@ class OperatorDashboardBloc
           ),
         ));
       }
-      add(RefreshDashboardKpisSilently(
-        outletId: outletId,
-        refreshKpis: false,
-        refreshDrivers: true,
-        refreshRequests: true,
-      ));
+      // Delay the background refresh so the UI can process the optimistic
+      // state first, avoiding a race where the refresh overwrites it and
+      // causes flicker (session briefly showing as assigned again).
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (!isClosed) {
+          add(RefreshDashboardKpisSilently(
+            outletId: outletId,
+            refreshKpis: false,
+            refreshDrivers: true,
+            refreshRequests: true,
+          ));
+        }
+      });
     } catch (e) {
       emit(CancelAssignmentError(
         sessionId: event.sessionId,

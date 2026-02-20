@@ -67,6 +67,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
 
   void _showCancelAssignmentDialog() {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(TextConstants.cancelAssignmentTitle),
@@ -390,11 +391,12 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                             MediaQuery.of(context).size.width *
                                                 0.05,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFFF5722),
+                                          color: AppColors.cancelAssignmentIcon,
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFFFF5722)
+                                              color: AppColors
+                                                  .cancelAssignmentIcon
                                                   .withOpacity(0.5),
                                               offset: const Offset(2, 2),
                                               blurRadius: 2,

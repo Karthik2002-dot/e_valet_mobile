@@ -10,24 +10,30 @@ class OperatorCancelAssignmentApiService {
   Future<CancelAssignmentResponse> cancelAssignment({
     required String sessionId,
   }) async {
-    final accessToken = await TokenStorage.getAccessToken();
-
-    if (accessToken == null || accessToken.isEmpty) {
+    try {
+      final accessToken = await TokenStorage.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        throw ApiException(
+          'Access token not found. Please login again.',
+          code: 'no_token',
+        );
+      }
+      final base = BaseDioService(
+        _baseUrl,
+        ApiConfig.authorizedHeaders(accessToken),
+      );
+      final response = await base.post(
+        '/operators/cancel-assignment',
+        data: {'sessionId': sessionId},
+      );
+      return CancelAssignmentResponse.fromJson(response.data);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
       throw ApiException(
-        'Access token not found. Please login again.',
-        code: 'no_token',
+        'Failed to cancel assignment. Please try again later.',
+        code: 'cancel_assignment_error',
       );
     }
-
-    final base = BaseDioService(
-      _baseUrl,
-      ApiConfig.authorizedHeaders(accessToken),
-    );
-    final response = await base.post(
-      '/operators/cancel-assignment',
-      data: {'sessionId': sessionId},
-    );
-
-    return CancelAssignmentResponse.fromJson(response.data);
   }
 }

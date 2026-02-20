@@ -27,7 +27,7 @@ class RetrievalRequest {
     required this.assignedTo,
   });
 
-  RetrievalRequest copyWith({String? status}) {
+  RetrievalRequest copyWith({String? status, AssignedTo? assignedTo}) {
     return RetrievalRequest(
       sessionId: sessionId,
       cardNumber: cardNumber,
@@ -38,7 +38,7 @@ class RetrievalRequest {
       vehicle: vehicle,
       parkedBy: parkedBy,
       status: status ?? this.status,
-      assignedTo: assignedTo,
+      assignedTo: assignedTo ?? this.assignedTo,
     );
   }
 
