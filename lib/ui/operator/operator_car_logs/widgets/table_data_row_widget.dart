@@ -48,6 +48,10 @@ class TableDataRowWidget extends StatelessWidget {
             ),
             Expanded(
               flex: 16,
+              child: DataCellWidget(text: log.handoveredBy.name),
+            ),
+            Expanded(
+              flex: 16,
               child: DataCellWidget(
                 text: log.handoveredAt.isEmpty
                     ? ''

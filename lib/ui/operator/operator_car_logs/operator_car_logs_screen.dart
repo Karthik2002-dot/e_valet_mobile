@@ -550,6 +550,10 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           aValue = a.parkedBy.name;
           bValue = b.parkedBy.name;
           break;
+        case TextConstants.carLogsHandoveredBy:
+          aValue = a.handoveredBy.name;
+          bValue = b.handoveredBy.name;
+          break;
         case TextConstants.carLogsHandoverAt:
           aValue = a.handoveredAt.isEmpty
               ? null
