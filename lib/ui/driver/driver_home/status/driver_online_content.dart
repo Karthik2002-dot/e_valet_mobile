@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_action_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_vehicle_details_screen.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
@@ -122,14 +123,16 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
     return BlocProvider(
       create: (_) => TagSubmissionBloc(),
       child: BlocListener<TagSubmissionBloc, TagSubmissionState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is TagSubmissionSuccess) {
             SnackBars.showSuccessSnackBar(
               context,
               state.message,
             );
           } else if (state is TagSubmissionSessionExpired) {
-            TokenStorage.clearAll();
+            await TokenStorage.clearAll();
+            await SessionManager.clearSessionFlags();
+            if (!context.mounted) return;
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => const LoginScreen(),

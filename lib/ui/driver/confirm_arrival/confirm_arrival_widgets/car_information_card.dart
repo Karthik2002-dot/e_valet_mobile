@@ -187,56 +187,59 @@ class CarInformationCard extends StatelessWidget {
                 ),
                 child: session.photoUrl != null
                     ? Image.network(
-                      session.photoUrl!,
-                      width: double.infinity,
-                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          height:
-                              compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                          color: AppColors.white,
-                          child: Center(
-                            child: ColorFiltered(
-                              colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 255, // Red channel inverted
-                                0, -1, 0, 0, 255, // Green channel inverted
-                                0, 0, -1, 0, 255, // Blue channel inverted
-                                0, 0, 0, 1, 0, // Alpha channel unchanged
-                              ]),
-                              child: Image.asset(
-                                'assets/images/cars.png',
-                                fit: BoxFit.contain,
-                                width: screenWidth * 0.4,
-                                height: screenHeight * 0.4,
+                        session.photoUrl!,
+                        width: double.infinity,
+                        height:
+                            compact ? screenWidth * 0.45 : screenWidth * 0.6,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: double.infinity,
+                            height: compact
+                                ? screenWidth * 0.45
+                                : screenWidth * 0.6,
+                            color: AppColors.white,
+                            child: Center(
+                              child: ColorFiltered(
+                                colorFilter: const ColorFilter.matrix([
+                                  -1, 0, 0, 0, 255, // Red channel inverted
+                                  0, -1, 0, 0, 255, // Green channel inverted
+                                  0, 0, -1, 0, 255, // Blue channel inverted
+                                  0, 0, 0, 1, 0, // Alpha channel unchanged
+                                ]),
+                                child: Image.asset(
+                                  'assets/images/cars.png',
+                                  fit: BoxFit.contain,
+                                  width: screenWidth * 0.4,
+                                  height: screenHeight * 0.4,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                      color: AppColors.white,
-                      child: Center(
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.matrix([
-                            -1, 0, 0, 0, 255, // Red channel inverted
-                            0, -1, 0, 0, 255, // Green channel inverted
-                            0, 0, -1, 0, 255, // Blue channel inverted
-                            0, 0, 0, 1, 0, // Alpha channel unchanged
-                          ]),
-                          child: Image.asset(
-                            'assets/images/cars.png',
-                            fit: BoxFit.contain,
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.4,
+                          );
+                        },
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height:
+                            compact ? screenWidth * 0.45 : screenWidth * 0.6,
+                        color: AppColors.white,
+                        child: Center(
+                          child: ColorFiltered(
+                            colorFilter: const ColorFilter.matrix([
+                              -1, 0, 0, 0, 255, // Red channel inverted
+                              0, -1, 0, 0, 255, // Green channel inverted
+                              0, 0, -1, 0, 255, // Blue channel inverted
+                              0, 0, 0, 1, 0, // Alpha channel unchanged
+                            ]),
+                            child: Image.asset(
+                              'assets/images/cars.png',
+                              fit: BoxFit.contain,
+                              width: screenWidth * 0.4,
+                              height: screenHeight * 0.4,
+                            ),
                           ),
                         ),
                       ),
-                    ),
               ),
             ),
           ),
@@ -282,13 +285,13 @@ class CarImageSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: session.photoUrl != null
               ? Image.network(
-                session.photoUrl!,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _placeholder(context),
-              )
+                  session.photoUrl!,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _placeholder(context),
+                )
               : _placeholder(context),
         ),
       ),

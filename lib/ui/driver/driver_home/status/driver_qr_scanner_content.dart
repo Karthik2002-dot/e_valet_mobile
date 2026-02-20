@@ -16,6 +16,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/ui/driver/qr_reader/qr_reader_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/tab_chip.dart';
@@ -54,6 +55,9 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
       false; // true after 2 sec Lottie intro when on Scan tab (or immediately if intro already shown)
   Timer? _introTimer;
 
+  /// Until true, we have not yet checked session — avoid showing Lottie before we know if we should skip it.
+  bool _scanIntroChecked = false;
+
   /// True after the 2s QR Lottie has been shown once; then we skip it when switching back from Type ID to Scan.
   bool _hasShownScanIntroOnce = false;
 
@@ -64,23 +68,43 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   void initState() {
     super.initState();
     _tagNumberController.addListener(_onTagFormChanged);
-    // Start Scan intro (Lottie → camera) when defaulting to Scan tab
+    // Show Scan intro (Lottie → camera) only once per login session; when user comes back
+    // (same session) we skip the animation and show the camera directly. Flags are cleared on logout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _selectedTab == 0) {
-        _startScanIntroTimer();
-      }
+      if (!mounted || _selectedTab != 0) return;
+      _initScanIntro();
     });
+  }
+
+  Future<void> _initScanIntro() async {
+    final alreadyShown = await SessionManager.hasShownScannerIntroThisSession();
+    if (!mounted) return;
+    setState(() => _scanIntroChecked = true);
+    if (!mounted) return;
+    if (alreadyShown) {
+      setState(() {
+        _hasShownScanIntroOnce = true;
+        _showCamera = true;
+      });
+      return;
+    }
+    await _startScanIntroTimer();
   }
 
   void _onTagFormChanged() {
     if (mounted) setState(() {});
   }
 
-  void _startScanIntroTimer() {
+  Future<void> _startScanIntroTimer() async {
     _introTimer?.cancel();
     _hasShownScanIntroOnce =
         true; // so switching back from Type ID to Scan skips intro
+    if (!mounted) return;
     setState(() => _showCamera = false);
+    // Mark intro as shown immediately so it is only visible once per login even if user leaves before 2s.
+    // Await so the flag is persisted before any navigation; otherwise the animation can show again on return.
+    await SessionManager.markScannerIntroShown();
+    if (!mounted) return;
     _introTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _showCamera = true);
     });
@@ -91,12 +115,14 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     blocContext?.read<QrBloc>().add(const QrCameraActivateRequested());
     setState(() {
       _selectedTab = 0;
-      if (_hasShownScanIntroOnce) {
+      if (_scanIntroChecked && _hasShownScanIntroOnce) {
         _introTimer?.cancel();
         _showCamera = true;
-      } else {
+      } else if (_scanIntroChecked) {
+        // Intro not shown yet this session (e.g. user switched to Type ID before intro finished).
         _startScanIntroTimer();
       }
+      // If !_scanIntroChecked, _initScanIntro will run and handle showCamera
     });
   }
 
@@ -305,20 +331,28 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                       border: Border.all(color: AppColors.white, width: 2.5),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: _showCamera
-                        ? QrReaderWidget(
-                            screenWidth: widget.screenWidth,
-                            screenHeight: widget.screenHeight,
-                            isTablet: widget.isTablet,
-                            isDesktop: widget.isDesktop,
-                            fillWidth: innerW,
-                            fillHeight: innerH,
+                    child: !_scanIntroChecked
+                        ? const Center(
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
                           )
-                        : Lottie.asset(
-                            'assets/jsons/QRScan.json',
-                            fit: BoxFit.contain,
-                            repeat: true,
-                          ),
+                        : _showCamera
+                            ? QrReaderWidget(
+                                screenWidth: widget.screenWidth,
+                                screenHeight: widget.screenHeight,
+                                isTablet: widget.isTablet,
+                                isDesktop: widget.isDesktop,
+                                fillWidth: innerW,
+                                fillHeight: innerH,
+                              )
+                            : Lottie.asset(
+                                'assets/jsons/QRScan.json',
+                                fit: BoxFit.contain,
+                                repeat: false,
+                              ),
                   ),
                 );
               },

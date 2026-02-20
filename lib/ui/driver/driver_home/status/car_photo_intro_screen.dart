@@ -15,6 +15,7 @@ import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_Screen.d
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 /// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
@@ -55,25 +56,43 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   void initState() {
     super.initState();
     _cameraBloc = CarCameraBloc();
-    // Third screen shows only Car Photo (camera); both QR and tag flows go to Scan.
     _selectedTab = 1;
     _scanPhase = 0;
-    _startLottieTimer();
     if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
       TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
         debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
       });
     }
+    // Show car photo intro (Lottie) only once per login session; when user comes back
+    // (e.g. another card in same session) skip animation and show camera. Flags cleared on logout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _initCarPhotoIntro();
+    });
+  }
+
+  Future<void> _initCarPhotoIntro() async {
+    final alreadyShown =
+        await SessionManager.hasShownCarPhotoIntroThisSession();
+    if (!mounted) return;
+    if (alreadyShown) {
+      setState(() => _scanPhase = 1);
+      _cameraBloc.add(const InitializeCameraRequested());
+      return;
+    }
+    _startLottieTimer();
   }
 
   void _startLottieTimer() {
     _lottieTimer?.cancel();
+    // Mark intro as shown immediately so it is only visible once per login even if user leaves before 2s
+    SessionManager.markCarPhotoIntroShown();
     _lottieTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       _lottieTimer = null;
       setState(() {
         _scanPhase = 1;
       });
+      if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _cameraBloc.add(const InitializeCameraRequested());
       });
@@ -298,7 +317,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     child: Lottie.asset(
                       'assets/jsons/Carphoto.json',
                       fit: BoxFit.contain,
-                      repeat: true,
+                      repeat: false,
                     ),
                   ),
                 ),
