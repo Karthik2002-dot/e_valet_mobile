@@ -45,8 +45,8 @@ class TranslationsCache {
     if (code == null || code.isEmpty) {
       final languages = await LanguageCache().getLanguages();
       if (languages.isEmpty) return;
-      final defaultLang =
-          languages.firstWhere((l) => l.isDefault, orElse: () => languages.first);
+      final defaultLang = languages.firstWhere((l) => l.isDefault,
+          orElse: () => languages.first);
       code = defaultLang.code;
       await setSelectedLanguageAndFetch(code);
       return;

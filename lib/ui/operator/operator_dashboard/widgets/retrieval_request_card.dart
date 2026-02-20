@@ -53,6 +53,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
   bool get _isAssignable =>
       RetrievalRequestUtils.isAssignable(widget.request.status);
 
+  bool get _isAssigned => widget.request.status.toUpperCase() == 'ASSIGNED';
+
   Color _statusColor() => RetrievalRequestUtils.getStatusColor(
         status: widget.request.status,
         waitingTime: widget.request.waitingTime,
@@ -62,6 +64,36 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
         status: widget.request.status,
         waitingTime: widget.request.waitingTime,
       );
+
+  void _showCancelAssignmentDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(TextConstants.cancelAssignmentTitle),
+        content: Text(TextConstants.cancelAssignmentMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(TextConstants.cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<OperatorDashboardBloc>().add(
+                    CancelRetrievalAssignment(
+                      sessionId: widget.request.sessionId,
+                    ),
+                  );
+            },
+            child: Text(
+              TextConstants.cancelAssignmentConfirm,
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showAssignmentDialog(AvailableDriver driver) {
     final dashboardBloc = context.read<OperatorDashboardBloc>();
@@ -175,255 +207,283 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
         });
       },
       builder: (context, candidateData, rejectedData) {
-        return AnimatedBuilder(
-          animation: _highlightAnimation,
-          builder: (context, child) {
-            final pulse =
-                widget.isHighlighted ? _highlightAnimation.value : 0.0;
-            final baseBorderColor =
-                _isDraggingOver ? AppColors.primary : _statusColor();
-            final baseBackgroundColor = _isDraggingOver
-                ? AppColors.primary.withOpacity(0.05)
-                : AppColors.white;
-            final highlightBorderColor =
-                Color.lerp(baseBorderColor, AppColors.accent, pulse) ??
-                    baseBorderColor;
-            final highlightBackgroundColor = Color.lerp(
-                  baseBackgroundColor,
-                  AppColors.accent.withOpacity(0.12),
-                  pulse,
-                ) ??
-                baseBackgroundColor;
-            final baseShadowColor = _isDraggingOver
-                ? AppColors.primary.withOpacity(0.3)
-                : AppColors.grey.withOpacity(0.1);
-            final highlightShadowColor = Color.lerp(
-                  baseShadowColor,
-                  AppColors.accent.withOpacity(0.35),
-                  pulse,
-                ) ??
-                baseShadowColor;
+        return BlocListener<OperatorDashboardBloc, OperatorDashboardState>(
+          listenWhen: (prev, curr) =>
+              curr is CancelAssignmentSuccess || curr is CancelAssignmentError,
+          listener: (context, state) {
+            if (state is CancelAssignmentSuccess &&
+                state.response.sessionId == widget.request.sessionId) {
+              SnackBars.showSuccessSnackBar(
+                context,
+                TextConstants.cancelAssignmentSuccess,
+              );
+              widget.onAssignmentComplete();
+            } else if (state is CancelAssignmentError &&
+                state.sessionId == widget.request.sessionId) {
+              SnackBars.showErrorSnackBar(context, state.message);
+            }
+          },
+          child: AnimatedBuilder(
+            animation: _highlightAnimation,
+            builder: (context, child) {
+              final pulse =
+                  widget.isHighlighted ? _highlightAnimation.value : 0.0;
+              final baseBorderColor =
+                  _isDraggingOver ? AppColors.primary : _statusColor();
+              final baseBackgroundColor = _isDraggingOver
+                  ? AppColors.primary.withOpacity(0.05)
+                  : AppColors.white;
+              final highlightBorderColor =
+                  Color.lerp(baseBorderColor, AppColors.accent, pulse) ??
+                      baseBorderColor;
+              final highlightBackgroundColor = Color.lerp(
+                    baseBackgroundColor,
+                    AppColors.accent.withOpacity(0.12),
+                    pulse,
+                  ) ??
+                  baseBackgroundColor;
+              final baseShadowColor = _isDraggingOver
+                  ? AppColors.primary.withOpacity(0.3)
+                  : AppColors.grey.withOpacity(0.1);
+              final highlightShadowColor = Color.lerp(
+                    baseShadowColor,
+                    AppColors.accent.withOpacity(0.35),
+                    pulse,
+                  ) ??
+                  baseShadowColor;
 
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.015,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width * 0.01,
-                vertical: MediaQuery.of(context).size.height * 0.01,
-              ),
-              decoration: BoxDecoration(
-                color: highlightBackgroundColor,
-                borderRadius: BorderRadius.circular(
-                  12,
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).size.height * 0.015,
                 ),
-                border: Border.all(
-                  color: _isDraggingOver
-                      ? AppColors.primary
-                      : highlightBorderColor,
-                  width: _isDraggingOver ? 3 : 2,
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  vertical: MediaQuery.of(context).size.height * 0.01,
                 ),
-                boxShadow: [
-                  BoxShadow(
+                decoration: BoxDecoration(
+                  color: highlightBackgroundColor,
+                  borderRadius: BorderRadius.circular(
+                    12,
+                  ),
+                  border: Border.all(
                     color: _isDraggingOver
-                        ? baseShadowColor
-                        : highlightShadowColor,
-                    spreadRadius: _isDraggingOver ? 2 : 1,
-                    blurRadius: _isDraggingOver ? 8 : 4,
-                    offset: const Offset(0, 2),
+                        ? AppColors.primary
+                        : highlightBorderColor,
+                    width: _isDraggingOver ? 3 : 2,
                   ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Vehicle Image - tap to view full size
-                  GestureDetector(
-                    onTap: widget.request.vehicle.photo.isNotEmpty
-                        ? () => FullImageViewerDialog.show(
-                              context,
-                              widget.request.vehicle.photo,
-                            )
-                        : null,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: widget.request.vehicle.photo.isNotEmpty
-                          ? Image.network(
-                              widget.request.vehicle.photo,
-                              width: MediaQuery.of(context).size.width * 0.1,
-                              height: MediaQuery.of(context).size.width * 0.1,
-                              fit: BoxFit.fill,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.1,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.1,
-                                  color: AppColors.grey.withOpacity(0.3),
-                                  child: Icon(
-                                    Icons.directions_car,
-                                    size: MediaQuery.of(context).size.width *
-                                        0.04,
-                                    color: AppColors.grey,
-                                  ),
-                                );
-                              },
-                            )
-                          : Container(
-                              width: MediaQuery.of(context).size.width * 0.1,
-                              height: MediaQuery.of(context).size.width * 0.1,
-                              color: AppColors.grey.withOpacity(0.3),
-                              child: Icon(
-                                Icons.directions_car,
-                                size: MediaQuery.of(context).size.width * 0.04,
-                                color: AppColors.grey,
-                              ),
-                            ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _isDraggingOver
+                          ? baseShadowColor
+                          : highlightShadowColor,
+                      spreadRadius: _isDraggingOver ? 2 : 1,
+                      blurRadius: _isDraggingOver ? 8 : 4,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.012,
-                  ),
-                  // Information Column
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row 1: Card number, Status, and Parking Location
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextComponent(
-                              labelText: '#${widget.request.cardNumber}',
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.022,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal:
-                                    MediaQuery.of(context).size.width * 0.015,
-                                vertical:
-                                    MediaQuery.of(context).size.height * 0.005,
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Vehicle Image - tap to view full size
+                    GestureDetector(
+                      onTap: widget.request.vehicle.photo.isNotEmpty
+                          ? () => FullImageViewerDialog.show(
+                                context,
+                                widget.request.vehicle.photo,
+                              )
+                          : null,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: widget.request.vehicle.photo.isNotEmpty
+                            ? Image.network(
+                                widget.request.vehicle.photo,
+                                width: MediaQuery.of(context).size.width * 0.1,
+                                height: MediaQuery.of(context).size.width * 0.1,
+                                fit: BoxFit.fill,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.1,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.1,
+                                    color: AppColors.grey.withOpacity(0.3),
+                                    child: Icon(
+                                      Icons.directions_car,
+                                      size: MediaQuery.of(context).size.width *
+                                          0.04,
+                                      color: AppColors.grey,
+                                    ),
+                                  );
+                                },
+                              )
+                            : Container(
+                                width: MediaQuery.of(context).size.width * 0.1,
+                                height: MediaQuery.of(context).size.width * 0.1,
+                                color: AppColors.grey.withOpacity(0.3),
+                                child: Icon(
+                                  Icons.directions_car,
+                                  size:
+                                      MediaQuery.of(context).size.width * 0.04,
+                                  color: AppColors.grey,
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: _statusColor(),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: TextComponent(
-                                labelText: _statusLabel(),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.012,
+                    ),
+                    // Information Column
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Row 1: Card number, Status, and Parking Location
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextComponent(
+                                labelText: '#${widget.request.cardNumber}',
                                 fontSize:
-                                    MediaQuery.of(context).size.width * 0.014,
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w600,
+                                    MediaQuery.of(context).size.width * 0.022,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.black,
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.015,
+                                      vertical:
+                                          MediaQuery.of(context).size.height *
+                                              0.005,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _statusColor(),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: TextComponent(
+                                      labelText: _statusLabel(),
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.014,
+                                      color: AppColors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (_isAssigned) ...[
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.01),
+                                    GestureDetector(
+                                      onTap: _showCancelAssignmentDialog,
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.05,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.05,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFF5722),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFFF5722)
+                                                  .withOpacity(0.5),
+                                              offset: const Offset(2, 2),
+                                              blurRadius: 2,
+                                              spreadRadius: 0,
+                                            ),
+                                          ],
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.close,
+                                          size: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.035,
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                          // Parking Location
+                          if (widget.request.vehicle.parkingLocation != null &&
+                              widget.request.vehicle.parkingLocation.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.height *
+                                      0.004),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.local_parking,
+                                      size: MediaQuery.of(context).size.width *
+                                          0.018,
+                                      color: AppColors.primary),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: TextComponent(
+                                      labelText: widget
+                                          .request.vehicle.parkingLocation,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.014,
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                        // Parking Location
-                        if (widget.request.vehicle.parkingLocation != null &&
-                            widget.request.vehicle.parkingLocation.isNotEmpty)
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top:
-                                    MediaQuery.of(context).size.height * 0.004),
-                            child: Row(
-                              children: [
-                                Icon(Icons.local_parking,
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.01),
+                          // Row 2: Time and Requested at
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
                                     size: MediaQuery.of(context).size.width *
-                                        0.018,
-                                    color: AppColors.primary),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: TextComponent(
-                                    labelText:
-                                        widget.request.vehicle.parkingLocation,
+                                        0.016,
+                                    color: AppColors.error,
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.008),
+                                  TextComponent(
+                                    labelText: widget.request.waitingTime,
                                     fontSize:
                                         MediaQuery.of(context).size.width *
-                                            0.014,
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w500,
+                                            0.016,
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01),
-                        // Row 2: Time and Requested at
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size:
-                                      MediaQuery.of(context).size.width * 0.016,
-                                  color: AppColors.error,
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.008),
-                                TextComponent(
-                                  labelText: widget.request.waitingTime,
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.016,
-                                  color: AppColors.error,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ],
-                            ),
-                            TextComponent(
-                              labelText:
-                                  'Requested at ${RetrievalRequestUtils.formatTime(widget.request.requestedAt)}',
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.014,
-                              color: AppColors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01),
-                        // Row 3: Requested by name and Phone number
-                        Row(
-                          children: [
-                            TextComponent(
-                              labelText: TextConstants.parkedByLabel,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.014,
-                              color: AppColors.grey,
-                            ),
-                            TextComponent(
-                              labelText: widget.request.parkedBy.name,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.016,
-                              color: AppColors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                final phone = widget.request.parkedBy.phone;
-                                if (phone != null && phone.isNotEmpty) {
-                                  _callPhoneNumber(phone);
-                                } else {
-                                  SnackBars.showErrorSnackBar(
-                                      context, 'No phone number available');
-                                }
-                              },
-                              child: Icon(
-                                Icons.phone_outlined,
-                                size: MediaQuery.of(context).size.width * 0.016,
-                                color: AppColors.grey,
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        if (widget.request.assignedTo.name.isNotEmpty) ...[
+                              TextComponent(
+                                labelText:
+                                    'Requested at ${RetrievalRequestUtils.formatTime(widget.request.requestedAt)}',
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.014,
+                                color: AppColors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ],
+                          ),
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.01),
@@ -431,13 +491,13 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                           Row(
                             children: [
                               TextComponent(
-                                labelText: TextConstants.assignedToLabel,
+                                labelText: TextConstants.parkedByLabel,
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.014,
                                 color: AppColors.grey,
                               ),
                               TextComponent(
-                                labelText: widget.request.assignedTo.name,
+                                labelText: widget.request.parkedBy.name,
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.016,
                                 color: AppColors.black,
@@ -446,7 +506,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                               const Spacer(),
                               GestureDetector(
                                 onTap: () {
-                                  final phone = widget.request.assignedTo.phone;
+                                  final phone = widget.request.parkedBy.phone;
                                   if (phone != null && phone.isNotEmpty) {
                                     _callPhoneNumber(phone);
                                   } else {
@@ -463,14 +523,56 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                               ),
                             ],
                           ),
-                        ]
-                      ],
+                          if (widget.request.assignedTo.name.isNotEmpty) ...[
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.01),
+                            // Row 3: Requested by name and Phone number
+                            Row(
+                              children: [
+                                TextComponent(
+                                  labelText: TextConstants.assignedToLabel,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.014,
+                                  color: AppColors.grey,
+                                ),
+                                TextComponent(
+                                  labelText: widget.request.assignedTo.name,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.016,
+                                  color: AppColors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: () {
+                                    final phone =
+                                        widget.request.assignedTo.phone;
+                                    if (phone != null && phone.isNotEmpty) {
+                                      _callPhoneNumber(phone);
+                                    } else {
+                                      SnackBars.showErrorSnackBar(
+                                          context, 'No phone number available');
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.phone_outlined,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.016,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ]
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );

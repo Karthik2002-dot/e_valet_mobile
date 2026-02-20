@@ -27,6 +27,21 @@ class RetrievalRequest {
     required this.assignedTo,
   });
 
+  RetrievalRequest copyWith({String? status}) {
+    return RetrievalRequest(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+      requestType: requestType,
+      isManualRequest: isManualRequest,
+      waitingTime: waitingTime,
+      requestedAt: requestedAt,
+      vehicle: vehicle,
+      parkedBy: parkedBy,
+      status: status ?? this.status,
+      assignedTo: assignedTo,
+    );
+  }
+
   factory RetrievalRequest.fromJson(Map<String, dynamic> json) {
     return RetrievalRequest(
       sessionId: json['sessionId'] ?? '',
