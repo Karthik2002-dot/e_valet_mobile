@@ -38,6 +38,12 @@ class AssignDriverToRetrieval extends OperatorDashboardEvent {
   });
 }
 
+class CancelRetrievalAssignment extends OperatorDashboardEvent {
+  final String sessionId;
+
+  const CancelRetrievalAssignment({required this.sessionId});
+}
+
 class CreateManualRetrievalRequest extends OperatorDashboardEvent {
   final int cardNumber;
   final String outletId;

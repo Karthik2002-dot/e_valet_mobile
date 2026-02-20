@@ -31,10 +31,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       appBarActions = [
         LanguageDropdownButton(iconSize: defaultIconSize),
         SizedBox(width: screenWidth * 0.04),
-        ...(actions ?? [
-          OverflowMenu(),
-          SizedBox(width: screenWidth * 0.04),
-        ]),
+        ...(actions ??
+            [
+              OverflowMenu(),
+              SizedBox(width: screenWidth * 0.04),
+            ]),
       ];
     } else {
       appBarActions = actions;

@@ -25,8 +25,7 @@ class LanguageCache {
 
     // Fetch from API and cache
     final languages = await LanguageApiService.fetchLanguages();
-    final jsonString =
-        json.encode(languages.map((e) => e.toJson()).toList());
+    final jsonString = json.encode(languages.map((e) => e.toJson()).toList());
     await box.put(_languagesKey, jsonString);
     await box.put(_lastFetchKey, now.toIso8601String());
     return languages;

@@ -397,6 +397,13 @@ class TextConstants {
   static const String confirm = 'Confirm';
   static const String parkedByLabel = 'Parked By ';
   static const String assignedToLabel = 'Assigned To ';
+  static const String cancelAssignmentTitle = 'Cancel assignment?';
+  static const String cancelAssignmentMessage =
+      'This session will go back to the retrieval queue.';
+  static const String cancelAssignmentConfirm = 'Yes, cancel assignment';
+  static const String cancelAssignmentSuccess =
+      'Assignment cancelled. Session is back in retrieval queue.';
+  static const String cancelAssignmentFailed = 'Failed to cancel assignment';
   static const String recommendedBy = 'Recommended - Parked this vehicle';
   static const String recommendedFor = 'Recommended for';
   static String recommendedForCard(int cardNumber) =>

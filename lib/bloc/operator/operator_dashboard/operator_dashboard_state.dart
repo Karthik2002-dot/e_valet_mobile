@@ -3,6 +3,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operato
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_response.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/cancel_assignment_response.dart';
 
 abstract class OperatorDashboardState {
   const OperatorDashboardState();
@@ -28,6 +29,17 @@ class OperatorDashboardLoaded extends OperatorDashboardState {
     required this.retrievalRequests,
     required this.digitalKeyRack,
   });
+
+  OperatorDashboardLoaded copyWith({
+    RetrievalRequestsResponse? retrievalRequests,
+  }) {
+    return OperatorDashboardLoaded(
+      kpis: kpis,
+      availableDrivers: availableDrivers,
+      retrievalRequests: retrievalRequests ?? this.retrievalRequests,
+      digitalKeyRack: digitalKeyRack,
+    );
+  }
 
   List<Object> get props =>
       [kpis, availableDrivers, retrievalRequests, digitalKeyRack];
@@ -59,6 +71,27 @@ class AssignmentError extends OperatorDashboardState {
   const AssignmentError(this.message);
 
   List<Object> get props => [message];
+}
+
+class CancelAssignmentInProgress extends OperatorDashboardState {
+  const CancelAssignmentInProgress();
+}
+
+class CancelAssignmentSuccess extends OperatorDashboardState {
+  final CancelAssignmentResponse response;
+
+  const CancelAssignmentSuccess(this.response);
+
+  List<Object> get props => [response];
+}
+
+class CancelAssignmentError extends OperatorDashboardState {
+  final String sessionId;
+  final String message;
+
+  const CancelAssignmentError({required this.sessionId, required this.message});
+
+  List<Object> get props => [sessionId, message];
 }
 
 class ManualRequestInProgress extends OperatorDashboardState {
