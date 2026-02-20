@@ -7,6 +7,7 @@ class ValetResponse {
   final int carsHandedOver;
   final int onBreakDurationMinutes;
   final String clockInAt;
+  final String clockOutAt;
   final String lastActivity;
 
   ValetResponse({
@@ -18,6 +19,7 @@ class ValetResponse {
     required this.carsHandedOver,
     required this.onBreakDurationMinutes,
     required this.clockInAt,
+    required this.clockOutAt,
     required this.lastActivity,
   });
 
@@ -31,6 +33,7 @@ class ValetResponse {
       carsHandedOver: json['carsHandedOver'] ?? 0,
       onBreakDurationMinutes: json['onBreakDurationMinutes'] ?? 0,
       clockInAt: json['clockInAt'] ?? '',
+      clockOutAt: json['clockOutAt'] ?? '',
       lastActivity: json['lastActivity'] ?? '',
     );
   }
@@ -45,6 +48,7 @@ class ValetResponse {
       'carsHandedOver': carsHandedOver,
       'onBreakDurationMinutes': onBreakDurationMinutes,
       'clockInAt': clockInAt,
+      'clockOutAt': clockOutAt,
       'lastActivity': lastActivity,
     };
   }

@@ -389,6 +389,9 @@ class TextConstants {
   static const String carsPickedUpLabel = 'Cars Picked Up : ';
   static const String carsHandedOverLabel = 'Cars Hand overed : ';
   static const String onBreakDurationLabel = 'On-Break Duration : ';
+  static const String clockInAtLabel = 'Clock In : ';
+  static const String clockOutAtLabel = 'Clock Out : ';
+  static const String lastActivityLabel = 'Last Activity : ';
   static const String minsLabel = ' mins';
   static const String noValetsFound = 'No valets found';
 
