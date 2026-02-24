@@ -34,4 +34,9 @@ class ValetUtils {
         return status;
     }
   }
+
+  /// Online if status is not OFFLINE (e.g. AVAILABLE, ON_DUTY, ON_BREAK).
+  static bool isOnline(String status) {
+    return status.toUpperCase() != 'OFFLINE';
+  }
 }

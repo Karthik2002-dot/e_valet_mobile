@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -22,11 +24,12 @@ class ValetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // Slightly smaller fonts so full data fits and wraps without ellipsis
-    final bodyFontSize = (screenWidth * 0.018).clamp(9.0, 12.0);
-    final smallFontSize = (screenWidth * 0.016).clamp(8.0, 11.0);
-    final titleFontSize = (screenWidth * 0.022).clamp(10.0, 13.0);
-    const padding = 14.0;
+    // Larger fonts for clearer visibility in valet details card
+    final bodyFontSize = (screenWidth * 0.022).clamp(11.0, 15.0);
+    final smallFontSize = (screenWidth * 0.024).clamp(12.0, 15.0);
+    final titleFontSize = (screenWidth * 0.032).clamp(14.0, 19.0); // name
+    final phoneFontSize = (screenWidth * 0.028).clamp(13.0, 17.0); // phone number larger
+    const padding = 26.0;
     Widget content = isLoading
         ? Column(
             mainAxisSize: MainAxisSize.min,
@@ -121,10 +124,10 @@ class ValetCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.visible,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           TextComponent(
                             labelText: valet!.phone,
-                            fontSize: smallFontSize,
+                            fontSize: phoneFontSize,
                             color: AppColors.grey,
                             maxLines: 2,
                             overflow: TextOverflow.visible,
@@ -132,36 +135,45 @@ class ValetCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // Status in container, top right - Flexible avoids overflow on narrow (e.g. half-width card)
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
+                  ],
+                ),
+              // On Android only: show Online/Offline below name row so it doesn't cover the name
+              if (Platform.isAndroid) ...[
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: ValetUtils.isOnline(valet!.status)
+                            ? AppColors.success.withOpacity(0.12)
+                            : AppColors.grey.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: ValetUtils.isOnline(valet!.status)
+                              ? AppColors.success.withOpacity(0.5)
+                              : AppColors.grey.withOpacity(0.5),
+                          width: 1,
                         ),
-                        decoration: BoxDecoration(
-                          color: ValetUtils.getStatusColor(valet!.status)
-                              .withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: ValetUtils.getStatusColor(valet!.status)
-                                .withOpacity(0.4),
-                            width: 1,
-                          ),
-                        ),
-                        child: TextComponent(
-                          labelText: ValetUtils.getStatusLabel(valet!.status),
-                          fontSize: smallFontSize,
-                          color: ValetUtils.getStatusColor(valet!.status),
-                          fontWeight: FontWeight.w600,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      ),
+                      child: TextComponent(
+                        labelText: ValetUtils.isOnline(valet!.status)
+                            ? TextConstants.statusOnline
+                            : TextConstants.statusOffline,
+                        fontSize: smallFontSize.clamp(9.0, 12.0),
+                        fontWeight: FontWeight.w600,
+                        color: ValetUtils.isOnline(valet!.status)
+                            ? AppColors.success
+                            : AppColors.grey,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
+              ],
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -176,7 +188,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -191,7 +203,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -206,7 +218,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -222,7 +234,7 @@ class ValetCard extends StatelessWidget {
                 ],
               ),
               if (valet!.clockOutAt.isNotEmpty) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -238,7 +250,7 @@ class ValetCard extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -263,7 +275,45 @@ class ValetCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.grey.withOpacity(0.3)),
       ),
-      child: content,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          content,
+          // Online/Offline at top-right on iOS only; on Android it is shown below name row
+          if (valet != null && !isLoading && !Platform.isAndroid)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: ValetUtils.isOnline(valet!.status)
+                      ? AppColors.success.withOpacity(0.12)
+                      : AppColors.grey.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: ValetUtils.isOnline(valet!.status)
+                        ? AppColors.success.withOpacity(0.5)
+                        : AppColors.grey.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: TextComponent(
+                  labelText: ValetUtils.isOnline(valet!.status)
+                      ? TextConstants.statusOnline
+                      : TextConstants.statusOffline,
+                  fontSize: smallFontSize.clamp(9.0, 12.0),
+                  fontWeight: FontWeight.w600,
+                  color: ValetUtils.isOnline(valet!.status)
+                      ? AppColors.success
+                      : AppColors.grey,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
 
     if (onTap != null && valet != null && !isLoading) {

@@ -20,45 +20,47 @@ class ValetKpisGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use same 2-column layout as iOS on all platforms so Android has no overflow (full data visible)
-    const crossAxisCount = 2;
-    const childAspectRatio = 2.4;
-
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: crossAxisCount,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: childAspectRatio,
+    // Same compact row layout as dashboard KPIs
+    return Row(
       children: [
-        ValetKpiCard(
-          value: kpis != null ? '${kpis!.totalValets}' : '0',
-          label: TextConstants.totalValets,
-          isLoading: isLoading,
-          isSelected: selectedFilter == ValetFilter.all,
-          onTap: () => onFilterChanged(ValetFilter.all),
+        Expanded(
+          child: ValetKpiCard(
+            value: kpis != null ? '${kpis!.totalValets}' : '0',
+            label: TextConstants.totalValets,
+            isLoading: isLoading,
+            isSelected: selectedFilter == ValetFilter.all,
+            onTap: () => onFilterChanged(ValetFilter.all),
+          ),
         ),
-        ValetKpiCard(
-          value: kpis != null ? '${kpis!.availableValets}' : '0',
-          label: TextConstants.onavailableValets,
-          isLoading: isLoading,
-          isSelected: selectedFilter == ValetFilter.available,
-          onTap: () => onFilterChanged(ValetFilter.available),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ValetKpiCard(
+            value: kpis != null ? '${kpis!.availableValets}' : '0',
+            label: TextConstants.onavailableValets,
+            isLoading: isLoading,
+            isSelected: selectedFilter == ValetFilter.available,
+            onTap: () => onFilterChanged(ValetFilter.available),
+          ),
         ),
-        ValetKpiCard(
-          value: kpis != null ? '${kpis!.onDutyValets}' : '0',
-          label: TextConstants.onDutyValets,
-          isLoading: isLoading,
-          isSelected: selectedFilter == ValetFilter.onDuty,
-          onTap: () => onFilterChanged(ValetFilter.onDuty),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ValetKpiCard(
+            value: kpis != null ? '${kpis!.onDutyValets}' : '0',
+            label: TextConstants.onDutyValets,
+            isLoading: isLoading,
+            isSelected: selectedFilter == ValetFilter.onDuty,
+            onTap: () => onFilterChanged(ValetFilter.onDuty),
+          ),
         ),
-        ValetKpiCard(
-          value: kpis != null ? '${kpis!.onBreakValets}' : '0',
-          label: TextConstants.onBreakValets,
-          isLoading: isLoading,
-          isSelected: selectedFilter == ValetFilter.onBreak,
-          onTap: () => onFilterChanged(ValetFilter.onBreak),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ValetKpiCard(
+            value: kpis != null ? '${kpis!.onBreakValets}' : '0',
+            label: TextConstants.onBreakValets,
+            isLoading: isLoading,
+            isSelected: selectedFilter == ValetFilter.onBreak,
+            onTap: () => onFilterChanged(ValetFilter.onBreak),
+          ),
         ),
       ],
     );
