@@ -33,6 +33,7 @@ class AppColors {
 
   static const Color success = Colors.green;
   static const Color error = Colors.red;
+
   /// Vibrant red-orange for cancel/dismiss actions (e.g. cancel assignment icon)
   static const Color cancelAssignmentIcon = Color(0xFFFF5722);
   static const Color black = Colors.black;

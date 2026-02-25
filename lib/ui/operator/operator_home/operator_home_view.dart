@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
+import 'package:niloufer_valet_mobile/ui/common/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 
@@ -23,6 +27,16 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
           builder: (_) => const ProfileScreen(),
         ),
       );
+    } else if (index == 5) {
+      // Guidelines – navigate to shared guidelines screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const GuidelinesScreen(),
+        ),
+      );
+    } else if (index == 6) {
+      // Logout
+      context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
     } else {
       setState(() => _selectedIndex = index);
     }

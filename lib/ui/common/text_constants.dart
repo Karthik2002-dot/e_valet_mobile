@@ -7,6 +7,7 @@ class TextConstants {
   static const valets = 'Valets';
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
+  static const guidelines = 'Guidelines';
   static const logout = 'Logout';
 
   static const emptyText = '';
@@ -134,6 +135,7 @@ class TextConstants {
   static const String joinedLabel = 'Joined';
   static const String resetPassword = 'Reset Password';
   static const String profileMenuTitle = 'Profile';
+  static const String guidelinesMenuTitle = 'Guidelines';
   static const String logoutMenuTitle = 'Logout';
 
   // Change Password Dialog

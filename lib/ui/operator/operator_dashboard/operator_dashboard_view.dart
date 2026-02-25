@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
@@ -51,7 +52,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _onMenuItemSelected(int index) {
-    if (index == 5) {
+    if (index == 6) {
       // Logout
       context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
     } else if (index == 4) {
@@ -59,6 +60,13 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const ProfileScreen(),
+        ),
+      );
+    } else if (index == 5) {
+      // Guidelines – navigate to shared guidelines screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const GuidelinesScreen(),
         ),
       );
     } else {

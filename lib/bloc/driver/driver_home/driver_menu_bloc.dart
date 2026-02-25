@@ -17,6 +17,9 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
     on<DriverProfilePressed>((event, emit) {
       emit(const DriverMenuAction(DriverMenuActionType.profile));
     });
+    on<DriverGuidelinesPressed>((event, emit) {
+      emit(const DriverMenuAction(DriverMenuActionType.guidelines));
+    });
     on<DriverMenuReset>((event, emit) {
       emit(const DriverMenuInitial());
     });

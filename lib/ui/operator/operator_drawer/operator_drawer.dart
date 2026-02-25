@@ -85,12 +85,21 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
-                asset: 'assets/images/logout.png',
-                title: t.get(TextConstants.logout),
+                iconData: Icons.menu_book_outlined,
+                title: t.get(TextConstants.guidelines),
                 isSelected: selectedIndex == 5,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(5);
+                },
+              ),
+              OperatorDrawerItem(
+                asset: 'assets/images/logout.png',
+                title: t.get(TextConstants.logout),
+                isSelected: selectedIndex == 6,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(6);
                 },
               ),
             ],
