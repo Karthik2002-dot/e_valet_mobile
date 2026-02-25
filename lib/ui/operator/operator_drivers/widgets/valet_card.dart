@@ -242,7 +242,7 @@ class ValetCard extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           content,
-          // Online/Offline at top-right (Android and iOS)
+          // Status from API at top-right (Available, On Duty, On Break, Offline)
           if (valet != null && !isLoading)
             Positioned(
               top: 0,
@@ -250,26 +250,20 @@ class ValetCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
-                  color: ValetUtils.isOnline(valet!.status)
-                      ? AppColors.success.withOpacity(0.12)
-                      : AppColors.grey.withOpacity(0.2),
+                  color: ValetUtils.getStatusColor(valet!.status)
+                      .withOpacity(0.12),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: ValetUtils.isOnline(valet!.status)
-                        ? AppColors.success.withOpacity(0.5)
-                        : AppColors.grey.withOpacity(0.5),
+                    color: ValetUtils.getStatusColor(valet!.status)
+                        .withOpacity(0.5),
                     width: 1,
                   ),
                 ),
                 child: TextComponent(
-                  labelText: ValetUtils.isOnline(valet!.status)
-                      ? TextConstants.statusOnline
-                      : TextConstants.statusOffline,
+                  labelText: ValetUtils.getStatusLabel(valet!.status),
                   fontSize: smallFontSize.clamp(9.0, 12.0),
                   fontWeight: FontWeight.w600,
-                  color: ValetUtils.isOnline(valet!.status)
-                      ? AppColors.success
-                      : AppColors.grey,
+                  color: ValetUtils.getStatusColor(valet!.status),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
