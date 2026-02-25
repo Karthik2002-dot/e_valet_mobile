@@ -8,7 +8,8 @@ class TranslationsApiService {
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static Future<TranslationsResponse> fetchTranslations(String languageCode) async {
+  static Future<TranslationsResponse> fetchTranslations(
+      String languageCode) async {
     final base = BaseDioService(
       _baseUrl,
       ApiConfig.defaultJsonHeaders,

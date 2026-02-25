@@ -43,7 +43,8 @@ class StatusDetailRow extends StatelessWidget {
             child: DropdownButtonFormField<String>(
               value: selectedStatus,
               decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 border: InputBorder.none,
               ),
               items: statusOptions.map((status) {

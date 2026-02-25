@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_bloc.dart';
@@ -29,7 +31,10 @@ class ValetListView extends StatelessWidget {
         if (state is ValetListLoading) {
           const mainAxisSpacing = 12.0;
           final width = MediaQuery.sizeOf(context).width;
-          final useTwoColumns = width >= 360;
+          // Phones: single column on narrow screens.
+          // Tablets: allow two columns when very wide, even on Android.
+          final useTwoColumns =
+              width >= 360 && (!Platform.isAndroid || width >= 600);
           if (!useTwoColumns) {
             return ListView.builder(
               shrinkWrap: true,
@@ -142,11 +147,14 @@ class ValetListView extends StatelessWidget {
             );
           }
 
-          // Responsive: single column on narrow (e.g. small iPhone), two columns on wider
+          // Responsive: single column on narrow (e.g. small phones), two columns on wider.
           const crossAxisSpacing = 12.0;
           const mainAxisSpacing = 12.0;
           final width = MediaQuery.sizeOf(context).width;
-          final useTwoColumns = width >= 360; // Single column below 360px to avoid overflow
+          // Phones: single column on narrow screens.
+          // Tablets: allow two columns when very wide, even on Android.
+          final useTwoColumns =
+              width >= 360 && (!Platform.isAndroid || width >= 600);
 
           if (!useTwoColumns) {
             return ListView.builder(
@@ -175,14 +183,12 @@ class ValetListView extends StatelessWidget {
             itemBuilder: (context, rowIndex) {
               final leftIndex = rowIndex * 2;
               final rightIndex = rowIndex * 2 + 1;
-              final leftValet =
-                  leftIndex < filteredValets.length
-                      ? filteredValets[leftIndex]
-                      : null;
-              final rightValet =
-                  rightIndex < filteredValets.length
-                      ? filteredValets[rightIndex]
-                      : null;
+              final leftValet = leftIndex < filteredValets.length
+                  ? filteredValets[leftIndex]
+                  : null;
+              final rightValet = rightIndex < filteredValets.length
+                  ? filteredValets[rightIndex]
+                  : null;
               return Padding(
                 padding: EdgeInsets.only(bottom: mainAxisSpacing),
                 child: IntrinsicHeight(

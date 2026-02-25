@@ -109,20 +109,23 @@ class ValetDetailsDialog extends StatelessWidget {
                     const SizedBox(height: 12),
                     _DetailRow(
                       label: TextConstants.onBreakDurationLabel,
-                      value: '${valet.onBreakDurationMinutes}${TextConstants.minsLabel}',
+                      value:
+                          '${valet.onBreakDurationMinutes}${TextConstants.minsLabel}',
                     ),
                     const SizedBox(height: 12),
                     if (valet.clockInAt.isNotEmpty) ...[
                       _DetailRow(
                         label: TextConstants.clockInAtLabel,
-                        value: TimeUtils.formatUtcToIstFullDateTime(valet.clockInAt),
+                        value: TimeUtils.formatUtcToIstFullDateTime(
+                            valet.clockInAt),
                       ),
                       const SizedBox(height: 12),
                     ],
                     if (valet.clockOutAt.isNotEmpty) ...[
                       _DetailRow(
                         label: TextConstants.clockOutAtLabel,
-                        value: TimeUtils.formatUtcToIstFullDateTime(valet.clockOutAt),
+                        value: TimeUtils.formatUtcToIstFullDateTime(
+                            valet.clockOutAt),
                       ),
                       const SizedBox(height: 12),
                     ],

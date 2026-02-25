@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -28,7 +26,8 @@ class ValetCard extends StatelessWidget {
     final bodyFontSize = (screenWidth * 0.022).clamp(11.0, 15.0);
     final smallFontSize = (screenWidth * 0.024).clamp(12.0, 15.0);
     final titleFontSize = (screenWidth * 0.032).clamp(14.0, 19.0); // name
-    final phoneFontSize = (screenWidth * 0.028).clamp(13.0, 17.0); // phone number larger
+    final phoneFontSize =
+        (screenWidth * 0.028).clamp(13.0, 17.0); // phone number larger
     const padding = 26.0;
     Widget content = isLoading
         ? Column(
@@ -107,73 +106,37 @@ class ValetCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextComponent(
-                            labelText: valet!.name,
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                            maxLines: 2,
-                            overflow: TextOverflow.visible,
-                          ),
-                          const SizedBox(height: 6),
-                          TextComponent(
-                            labelText: valet!.phone,
-                            fontSize: phoneFontSize,
-                            color: AppColors.grey,
-                            maxLines: 2,
-                            overflow: TextOverflow.visible,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              // On Android only: show Online/Offline below name row so it doesn't cover the name
-              if (Platform.isAndroid) ...[
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: ValetUtils.isOnline(valet!.status)
-                            ? AppColors.success.withOpacity(0.12)
-                            : AppColors.grey.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: ValetUtils.isOnline(valet!.status)
-                              ? AppColors.success.withOpacity(0.5)
-                              : AppColors.grey.withOpacity(0.5),
-                          width: 1,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextComponent(
+                          labelText: valet!.name,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                          maxLines: 2,
+                          overflow: TextOverflow.visible,
                         ),
-                      ),
-                      child: TextComponent(
-                        labelText: ValetUtils.isOnline(valet!.status)
-                            ? TextConstants.statusOnline
-                            : TextConstants.statusOffline,
-                        fontSize: smallFontSize.clamp(9.0, 12.0),
-                        fontWeight: FontWeight.w600,
-                        color: ValetUtils.isOnline(valet!.status)
-                            ? AppColors.success
-                            : AppColors.grey,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                        const SizedBox(height: 2),
+                        TextComponent(
+                          labelText: valet!.phone,
+                          fontSize: phoneFontSize,
+                          color: AppColors.grey,
+                          maxLines: 2,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 8),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Expanded(
@@ -188,7 +151,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Expanded(
@@ -203,7 +166,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Expanded(
@@ -218,7 +181,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Expanded(
@@ -234,7 +197,7 @@ class ValetCard extends StatelessWidget {
                 ],
               ),
               if (valet!.clockOutAt.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Expanded(
@@ -250,7 +213,7 @@ class ValetCard extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Expanded(
@@ -279,8 +242,8 @@ class ValetCard extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           content,
-          // Online/Offline at top-right on iOS only; on Android it is shown below name row
-          if (valet != null && !isLoading && !Platform.isAndroid)
+          // Online/Offline at top-right (Android and iOS)
+          if (valet != null && !isLoading)
             Positioned(
               top: 0,
               right: 0,
