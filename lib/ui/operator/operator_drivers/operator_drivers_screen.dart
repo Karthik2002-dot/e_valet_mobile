@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -112,27 +114,37 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                         widget.onNavigateToTab?.call(0);
                       },
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextComponent(
-                          labelText: TextConstants.valetDashboardTitle,
-                          color: AppColors.black,
-                          fontSize: MediaQuery.of(context).size.width * 0.03,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        const SizedBox(height: 4),
-                        TextComponent(
-                          labelText: TextConstants.valetDashboardDescription,
-                          color: AppColors.grey,
-                          fontSize: MediaQuery.of(context).size.width * 0.02,
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextComponent(
+                            labelText: TextConstants.valetDashboardTitle,
+                            color: AppColors.black,
+                            fontSize: MediaQuery.of(context).size.width *
+                                (Platform.isIOS ? 0.026 : 0.03),
+                            fontWeight: FontWeight.bold,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          TextComponent(
+                            labelText: TextConstants.valetDashboardDescription,
+                            color: AppColors.grey,
+                            fontSize: MediaQuery.of(context).size.width *
+                                (Platform.isIOS ? 0.018 : 0.02),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.width *
+                          (Platform.isIOS ? 0.32 : 0.4),
                       child: TextField(
                         controller: _searchController,
                         onChanged: (value) {

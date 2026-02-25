@@ -90,6 +90,15 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
+              text: TextConstants.carLogsHandoveredBy,
+              isActive: sortColumn == TextConstants.carLogsHandoveredBy,
+              sortIcon: getSortIcon(TextConstants.carLogsHandoveredBy),
+              onTap: () => onHeaderTap(TextConstants.carLogsHandoveredBy),
+            ),
+          ),
+          Expanded(
+            flex: 16,
+            child: SortableHeaderCellWidget(
               text: TextConstants.carLogsHandoverAt,
               isActive: sortColumn == TextConstants.carLogsHandoverAt,
               sortIcon: getSortIcon(TextConstants.carLogsHandoverAt),

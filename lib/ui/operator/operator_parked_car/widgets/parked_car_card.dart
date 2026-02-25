@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -90,39 +92,57 @@ class ParkedCarCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.credit_card,
-                            size: screenWidth * 0.018,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: screenWidth * 0.004),
-                          TextComponent(
-                            labelText: TextConstants.cardNumberWithHash(
-                                item.cardNumber),
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.02,
-                            color: AppColors.black,
-                          ),
-                        ],
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.credit_card,
+                              size: screenWidth *
+                                  (Platform.isIOS ? 0.016 : 0.018),
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: screenWidth * 0.004),
+                            Flexible(
+                              child: TextComponent(
+                                labelText: TextConstants.cardNumberWithHash(
+                                    item.cardNumber),
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth *
+                                    (Platform.isIOS ? 0.018 : 0.02),
+                                color: AppColors.black,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.timer_outlined,
-                            size: screenWidth * 0.018,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: screenWidth * 0.003),
-                          TextComponent(
-                            labelText: item.duration,
-                            fontSize: screenWidth * 0.02,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ],
+                      SizedBox(width: screenWidth * 0.02),
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.timer_outlined,
+                              size: screenWidth *
+                                  (Platform.isIOS ? 0.016 : 0.018),
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: screenWidth * 0.003),
+                            Expanded(
+                              child: TextComponent(
+                                labelText: item.duration,
+                                fontSize: screenWidth *
+                                    (Platform.isIOS ? 0.018 : 0.02),
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

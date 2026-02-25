@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
@@ -71,7 +73,9 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           ],
           LayoutBuilder(
             builder: (context, constraints) {
-              const crossAxisCount = 4;
+              // iOS only: 2 columns on narrow screens so each card has more width (avoids overflow). Android/others: always 4.
+              final crossAxisCount =
+                  (Platform.isIOS && screenWidth < 600) ? 2 : 4;
               final spacing = screenWidth * 0.02;
               final runSpacing = screenHeight * 0.02;
               final itemWidth =

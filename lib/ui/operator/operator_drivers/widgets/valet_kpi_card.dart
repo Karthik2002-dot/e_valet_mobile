@@ -21,14 +21,16 @@ class ValetKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return InkWell(
       onTap: isLoading ? null : onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.001)
+              ? AppColors.primary.withOpacity(0.05)
               : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -38,50 +40,66 @@ class ValetKpiCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ]
-              : null,
+              : [
+                  BoxShadow(
+                    color: AppColors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: isLoading
             ? Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SkeletonLoader(
-                    height: MediaQuery.of(context).size.height * 0.015,
-                    width: MediaQuery.of(context).size.width * 0.12,
+                    height: screenHeight * 0.012,
+                    width: 40,
                     borderRadius: 4,
                   ),
                   const SizedBox(height: 8),
                   SkeletonLoader(
-                    height: MediaQuery.of(context).size.height * 0.03,
-                    width: MediaQuery.of(context).size.width * 0.08,
+                    height: screenHeight * 0.015,
+                    width: 24,
                     borderRadius: 4,
                   ),
                 ],
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextComponent(
-                    labelText: label,
-                    color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.02,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                  const SizedBox(height: 4),
-                  TextComponent(
-                    labelText: value,
-                    color: AppColors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.025,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ],
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextComponent(
+                      labelText: label,
+                      color: AppColors.black,
+                      fontSize: screenHeight * 0.012,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    TextComponent(
+                      labelText: value,
+                      color: AppColors.black,
+                      fontSize: screenHeight * 0.015,
+                      fontWeight: FontWeight.bold,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
       ),
     );

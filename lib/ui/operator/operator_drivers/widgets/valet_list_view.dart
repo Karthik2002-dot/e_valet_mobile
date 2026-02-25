@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_bloc.dart';
@@ -7,6 +9,7 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_card.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_details_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_drivers_screen.dart';
 
 class ValetListView extends StatelessWidget {
@@ -26,19 +29,41 @@ class ValetListView extends StatelessWidget {
     return BlocBuilder<ValetListBloc, ValetListState>(
       builder: (context, state) {
         if (state is ValetListLoading) {
-          return GridView.builder(
+          const mainAxisSpacing = 12.0;
+          final width = MediaQuery.sizeOf(context).width;
+          // Phones: single column on narrow screens.
+          // Tablets: allow two columns when very wide, even on Android.
+          final useTwoColumns =
+              width >= 360 && (!Platform.isAndroid || width >= 600);
+          if (!useTwoColumns) {
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 3,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.only(bottom: mainAxisSpacing),
+                child: const ValetCard(isLoading: true),
+              ),
+            );
+          }
+          const crossAxisSpacing = 12.0;
+          return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.8,
-            ),
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              return const ValetCard(
-                isLoading: true,
+            itemCount: 3,
+            itemBuilder: (context, rowIndex) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: mainAxisSpacing),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Expanded(child: ValetCard(isLoading: true)),
+                      const SizedBox(width: crossAxisSpacing),
+                      const Expanded(child: ValetCard(isLoading: true)),
+                    ],
+                  ),
+                ),
               );
             },
           );
@@ -122,19 +147,74 @@ class ValetListView extends StatelessWidget {
             );
           }
 
-          return GridView.builder(
+          // Responsive: single column on narrow (e.g. small phones), two columns on wider.
+          const crossAxisSpacing = 12.0;
+          const mainAxisSpacing = 12.0;
+          final width = MediaQuery.sizeOf(context).width;
+          // Phones: single column on narrow screens.
+          // Tablets: allow two columns when very wide, even on Android.
+          final useTwoColumns =
+              width >= 360 && (!Platform.isAndroid || width >= 600);
+
+          if (!useTwoColumns) {
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredValets.length,
+              itemBuilder: (context, index) {
+                final valet = filteredValets[index];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: mainAxisSpacing),
+                  child: ValetCard(
+                    valet: valet,
+                    onTap: () => ValetDetailsDialog.show(context, valet),
+                  ),
+                );
+              },
+            );
+          }
+
+          // Two columns: cards side by side, row height = taller card
+          final rowCount = (filteredValets.length + 1) ~/ 2;
+          return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 2,
-            ),
-            itemCount: filteredValets.length,
-            itemBuilder: (context, index) {
-              return ValetCard(
-                valet: filteredValets[index],
+            itemCount: rowCount,
+            itemBuilder: (context, rowIndex) {
+              final leftIndex = rowIndex * 2;
+              final rightIndex = rowIndex * 2 + 1;
+              final leftValet = leftIndex < filteredValets.length
+                  ? filteredValets[leftIndex]
+                  : null;
+              final rightValet = rightIndex < filteredValets.length
+                  ? filteredValets[rightIndex]
+                  : null;
+              return Padding(
+                padding: EdgeInsets.only(bottom: mainAxisSpacing),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: ValetCard(
+                          valet: leftValet,
+                          onTap: () =>
+                              ValetDetailsDialog.show(context, leftValet!),
+                        ),
+                      ),
+                      const SizedBox(width: crossAxisSpacing),
+                      Expanded(
+                        child: rightValet != null
+                            ? ValetCard(
+                                valet: rightValet,
+                                onTap: () => ValetDetailsDialog.show(
+                                    context, rightValet!),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           );
