@@ -315,7 +315,7 @@ class TextConstants {
 
   // Car Logs Search and Messages
   static const String carLogsSearchHint =
-      'Search by card numnber, or parked by...';
+      'Search by card number, or parked by...';
   static const String carLogsNoDataMessage = 'No car logs available';
   static const String carLogsErrorMessage = 'Error loading car logs';
 
