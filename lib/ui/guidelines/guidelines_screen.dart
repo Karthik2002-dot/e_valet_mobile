@@ -3,8 +3,8 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/guidelines_main_title.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/guidelines_section.dart';
+import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_main_title.dart';
+import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_section.dart';
 
 /// Shared Guidelines screen for both Driver and Operator roles.
 /// Accessible from the overflow menu (driver) and side drawer (operator).

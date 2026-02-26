@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
-import 'package:niloufer_valet_mobile/ui/common/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
