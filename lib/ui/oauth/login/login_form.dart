@@ -83,6 +83,9 @@ class LoginForm extends StatelessWidget {
                     onSubmitted: (_) {
                       FocusScope.of(context).requestFocus(pinFocusNode);
                     },
+                    onComplete: () {
+                      FocusScope.of(context).requestFocus(pinFocusNode);
+                    },
                     onChanged: (value) =>
                         context.read<LoginBloc>().add(LoginIdChanged(value)),
                   ),
