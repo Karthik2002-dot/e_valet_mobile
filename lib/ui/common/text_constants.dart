@@ -8,6 +8,7 @@ class TextConstants {
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
   static const guidelines = 'Guidelines';
+  static const String operatorResponsibilities = 'Operator Responsibilities';
   static const logout = 'Logout';
 
   static const emptyText = '';

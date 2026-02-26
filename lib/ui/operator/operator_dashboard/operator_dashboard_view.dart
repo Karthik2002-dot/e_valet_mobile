@@ -63,10 +63,10 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         ),
       );
     } else if (index == 5) {
-      // Guidelines – navigate to shared guidelines screen
+      // Operator guidelines – show only Operator Responsibilities
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => const GuidelinesScreen(),
+          builder: (_) => const GuidelinesScreen(isOperatorGuidelines: true),
         ),
       );
     } else {
