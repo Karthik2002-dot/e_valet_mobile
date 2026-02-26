@@ -159,6 +159,12 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                             widget.onChanged!(
                                 '${TextConstants.countryCode}$value');
                           }
+                          // Auto-advance to next field when phone number is complete (10 digits)
+                          if (value.length == 10 && widget.onComplete != null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              widget.onComplete?.call();
+                            });
+                          }
                         },
                         decoration: inputDecoration.copyWith(
                           hintText: widget.hintText,
@@ -219,6 +225,14 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
 
               if (widget.onChanged != null) {
                 widget.onChanged!(phone.completeNumber);
+              }
+              // Auto-advance to next field when phone number is complete (10 digits for India)
+              if (phone.countryCode == '91' &&
+                  phone.number.length == 10 &&
+                  widget.onComplete != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onComplete?.call();
+                });
               }
             },
             validator: (phone) {
