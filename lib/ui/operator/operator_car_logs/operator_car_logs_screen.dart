@@ -414,42 +414,47 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                           const SizedBox(height: 24),
                           CarLogsKpiGrid(kpis: state.kpis),
                           const SizedBox(height: 24),
-                          if (state.carLogsResponse.logs.isEmpty)
-                            Expanded(
-                              child: Center(
-                                child: TextComponent(
-                                  labelText: TextConstants.carLogsNoDataMessage,
-                                  color: AppColors.grey,
-                                ),
-                              ),
-                            )
-                          else
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: _isTableLoading
-                                        ? const Center(
-                                            child: CircularProgressIndicator(),
-                                          )
-                                        : SingleChildScrollView(
-                                            child: CarLogsTableWidget(
-                                              logs: _sortLogs(
-                                                  state.carLogsResponse.logs),
-                                              sortColumn: _sortColumn,
-                                              sortDirection: _sortDirection,
-                                              onHeaderTap: _onHeaderTap,
-                                              getSortIcon: _getSortIcon,
-                                              sortLogs: _sortLogs,
-                                              onRowTap: _onRowTap,
-                                            ),
-                                          ),
+                          Builder(
+                            builder: (context) {
+                              final displayLogs = _filterLogsForExactSearch(
+                                  state.carLogsResponse.logs);
+                              if (displayLogs.isEmpty)
+                                return Expanded(
+                                  child: Center(
+                                    child: TextComponent(
+                                      labelText:
+                                          TextConstants.carLogsNoDataMessage,
+                                      color: AppColors.grey,
+                                    ),
                                   ),
-                                  _buildPaginationControls(
-                                      state.carLogsResponse.logs),
-                                ],
-                              ),
-                            ),
+                                );
+                              return Expanded(
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: _isTableLoading
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            )
+                                          : SingleChildScrollView(
+                                              child: CarLogsTableWidget(
+                                                logs: _sortLogs(displayLogs),
+                                                sortColumn: _sortColumn,
+                                                sortDirection: _sortDirection,
+                                                onHeaderTap: _onHeaderTap,
+                                                getSortIcon: _getSortIcon,
+                                                sortLogs: _sortLogs,
+                                                onRowTap: _onRowTap,
+                                              ),
+                                            ),
+                                    ),
+                                    _buildPaginationControls(displayLogs),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -512,6 +517,21 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
         ],
       ),
     );
+  }
+
+  /// When user searches by card number (numeric), show only logs that exactly
+  /// match that card number. Otherwise show all results from the API.
+  List<CarLog> _filterLogsForExactSearch(List<CarLog> logs) {
+    final query = _searchQuery.trim();
+    if (query.isEmpty) return logs;
+
+    // If search looks like a card number (digits only), show only exact matches
+    final isCardNumberSearch = int.tryParse(query) != null;
+    if (!isCardNumberSearch) return logs;
+
+    return logs
+        .where((log) => log.tagNumber.toString() == query)
+        .toList();
   }
 
   List<CarLog> _sortLogs(List<CarLog> logs) {

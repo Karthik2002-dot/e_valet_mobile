@@ -8,6 +8,9 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_vale
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_valet/valet_logout_api_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_card.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/widgets/valet_details_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_drivers_screen.dart';
@@ -156,6 +159,39 @@ class ValetListView extends StatelessWidget {
           final useTwoColumns =
               width >= 360 && (!Platform.isAndroid || width >= 600);
 
+          void onLogoutValet(ValetResponse v) async {
+            try {
+              await ValetLogoutApiService.logoutValet(userId: v.userId);
+              if (context.mounted) {
+                context.read<ValetListBloc>().add(FetchValetList(outletId: outletId));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(TextConstants.logout),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              }
+            } on ApiException catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${TextConstants.errorLabel}: $e'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            }
+          }
+
           if (!useTwoColumns) {
             return ListView.builder(
               shrinkWrap: true,
@@ -167,7 +203,12 @@ class ValetListView extends StatelessWidget {
                   padding: EdgeInsets.only(bottom: mainAxisSpacing),
                   child: ValetCard(
                     valet: valet,
-                    onTap: () => ValetDetailsDialog.show(context, valet),
+                    onTap: () => ValetDetailsDialog.show(
+                      context,
+                      valet,
+                      onLogoutValet: onLogoutValet,
+                    ),
+                    onLogoutValet: onLogoutValet,
                   ),
                 );
               },
@@ -198,8 +239,12 @@ class ValetListView extends StatelessWidget {
                       Expanded(
                         child: ValetCard(
                           valet: leftValet,
-                          onTap: () =>
-                              ValetDetailsDialog.show(context, leftValet!),
+                          onTap: () => ValetDetailsDialog.show(
+                            context,
+                            leftValet!,
+                            onLogoutValet: onLogoutValet,
+                          ),
+                          onLogoutValet: onLogoutValet,
                         ),
                       ),
                       const SizedBox(width: crossAxisSpacing),
@@ -208,7 +253,11 @@ class ValetListView extends StatelessWidget {
                             ? ValetCard(
                                 valet: rightValet,
                                 onTap: () => ValetDetailsDialog.show(
-                                    context, rightValet!),
+                                  context,
+                                  rightValet!,
+                                  onLogoutValet: onLogoutValet,
+                                ),
+                                onLogoutValet: onLogoutValet,
                               )
                             : const SizedBox.shrink(),
                       ),
