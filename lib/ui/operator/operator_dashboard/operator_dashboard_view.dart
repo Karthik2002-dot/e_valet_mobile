@@ -9,6 +9,7 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
@@ -52,7 +53,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _onMenuItemSelected(int index) {
-    if (index == 6) {
+    if (index == 7) {
       // Logout
       context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
     } else if (index == 4) {
@@ -63,6 +64,13 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
         ),
       );
     } else if (index == 5) {
+      // Help – shared screen for driver and operator
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const HelpScreen(),
+        ),
+      );
+    } else if (index == 6) {
       // Operator guidelines – show only Operator Responsibilities
       Navigator.of(context).push(
         MaterialPageRoute(

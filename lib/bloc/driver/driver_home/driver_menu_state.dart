@@ -13,7 +13,7 @@ class DriverMenuInitial extends DriverMenuState {
   const DriverMenuInitial();
 }
 
-enum DriverMenuActionType { logout, profile, guidelines }
+enum DriverMenuActionType { logout, profile, guidelines, help }
 
 class DriverMenuAction extends DriverMenuState {
   final DriverMenuActionType action;
