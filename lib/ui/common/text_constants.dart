@@ -8,6 +8,7 @@ class TextConstants {
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
   static const guidelines = 'Guidelines';
+  static const help = 'Help';
   static const String operatorResponsibilities = 'Operator Responsibilities';
   static const logout = 'Logout';
 
@@ -137,7 +138,12 @@ class TextConstants {
   static const String resetPassword = 'Reset Password';
   static const String profileMenuTitle = 'Profile';
   static const String guidelinesMenuTitle = 'Guidelines';
+  static const String helpMenuTitle = 'Help';
   static const String logoutMenuTitle = 'Logout';
+
+  // Help screen
+  static const String helpContactSupport = 'Contact & Support';
+  static const String helpCommonIssues = 'Common Issues';
 
   // Change Password Dialog
   static const String passwordChangedSuccess = 'Password changed successfully';

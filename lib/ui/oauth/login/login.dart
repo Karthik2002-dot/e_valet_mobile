@@ -9,6 +9,7 @@ import 'package:niloufer_valet_mobile/bloc/oauth/login/login_state.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -143,6 +144,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.of(ctx).push(
                               MaterialPageRoute(
                                 builder: (__) => const GuidelinesScreen(),
+                              ),
+                            );
+                            ctx
+                                .read<DriverMenuBloc>()
+                                .add(const DriverMenuReset());
+                            break;
+                          case DriverMenuActionType.help:
+                            Navigator.of(ctx).push(
+                              MaterialPageRoute(
+                                builder: (__) => const HelpScreen(),
                               ),
                             );
                             ctx

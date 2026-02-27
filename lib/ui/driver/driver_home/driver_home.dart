@@ -15,6 +15,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
@@ -502,6 +503,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const GuidelinesScreen(),
+                          ),
+                        );
+                        context
+                            .read<DriverMenuBloc>()
+                            .add(const DriverMenuReset());
+                        break;
+                      case DriverMenuActionType.help:
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const HelpScreen(),
                           ),
                         );
                         context

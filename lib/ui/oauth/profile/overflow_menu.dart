@@ -21,6 +21,13 @@ class OverflowMenu extends StatelessWidget {
           },
         ),
         PullDownMenuItem(
+          title: TextConstants.helpMenuTitle,
+          icon: Icons.support_agent,
+          onTap: () {
+            context.read<DriverMenuBloc>().add(const DriverHelpPressed());
+          },
+        ),
+        PullDownMenuItem(
           title: TextConstants.guidelinesMenuTitle,
           icon: Icons.menu_book_outlined,
           onTap: () {

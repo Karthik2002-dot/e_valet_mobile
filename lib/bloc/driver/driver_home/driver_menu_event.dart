@@ -19,6 +19,10 @@ class DriverGuidelinesPressed extends DriverMenuEvent {
   const DriverGuidelinesPressed();
 }
 
+class DriverHelpPressed extends DriverMenuEvent {
+  const DriverHelpPressed();
+}
+
 class DriverMenuReset extends DriverMenuEvent {
   const DriverMenuReset();
 }
