@@ -12,7 +12,8 @@ class ValetLogoutApiService {
   // Use valet (main) API base URL, which already includes /api/v1
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static Future<ValetLogoutResponse> logoutValet({required String userId}) async {
+  static Future<ValetLogoutResponse> logoutValet(
+      {required String userId}) async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       throw ApiException(
@@ -26,23 +27,10 @@ class ValetLogoutApiService {
     final base = BaseDioService(_baseUrl, headers);
     // Example: /api/v1/operators/drivers/21/force-logout
     final path = '/operators/drivers/$userId/force-logout';
-    final fullUrl = '$_baseUrl$path';
     const body = <String, dynamic>{};
-
-    // Print request
-    print('🔵 VALET FORCE LOGOUT REQUEST:');
-    print('   Method: POST');
-    print('   URL: $fullUrl');
-    print('   driverUserId (path): $userId');
-    print('   body: $body');
 
     try {
       final response = await base.post(path, data: body);
-
-      // Print response
-      print('🔵 VALET FORCE LOGOUT RESPONSE:');
-      print('   statusCode: ${response.statusCode}');
-      print('   data: ${response.data}');
 
       final data = response.data;
       if (data is Map<String, dynamic>) {
@@ -50,7 +38,7 @@ class ValetLogoutApiService {
       }
       return ValetLogoutResponse();
     } on ApiException catch (e) {
-      print('🔵 VALET FORCE LOGOUT ERROR RESPONSE:');
+      print('🔴 VALET FORCE LOGOUT ApiException:');
       print('   message: ${e.message}');
       print('   code: ${e.code}');
       print('   statusCode: ${e.statusCode}');

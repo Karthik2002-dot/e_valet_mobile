@@ -529,9 +529,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     final isCardNumberSearch = int.tryParse(query) != null;
     if (!isCardNumberSearch) return logs;
 
-    return logs
-        .where((log) => log.tagNumber.toString() == query)
-        .toList();
+    return logs.where((log) => log.tagNumber.toString() == query).toList();
   }
 
   List<CarLog> _sortLogs(List<CarLog> logs) {

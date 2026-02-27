@@ -17,6 +17,7 @@ class ValetDetailsDialog extends StatelessWidget {
 
   final ValetResponse valet;
   final VoidCallback? onClose;
+
   /// Called when operator taps "Log out" for this valet. Only shown when status is available, on-duty, or break (not offline).
   final void Function(ValetResponse valet)? onLogoutValet;
 
@@ -160,7 +161,8 @@ class ValetDetailsDialog extends StatelessWidget {
                         Navigator.of(context).pop();
                         onLogoutValet!(valet);
                       },
-                      icon: const Icon(Icons.logout, size: 22, color: AppColors.error),
+                      icon: const Icon(Icons.logout,
+                          size: 22, color: AppColors.error),
                       label: TextComponent(
                         labelText: TextConstants.logout,
                         fontSize: 17,

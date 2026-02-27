@@ -11,6 +11,7 @@ class ValetCard extends StatelessWidget {
   final ValetResponse? valet;
   final bool isLoading;
   final VoidCallback? onTap;
+
   /// Logout callback; when set, a Logout button is shown in the card when valet is online (available / on duty / on break). Hidden when offline.
   final void Function(ValetResponse valet)? onLogoutValet;
 
@@ -232,13 +233,15 @@ class ValetCard extends StatelessWidget {
                 ],
               ),
               // Logout button in box: only when valet is online (available / on duty / on break)
-              if (ValetUtils.isOnline(valet!.status) && onLogoutValet != null) ...[
+              if (ValetUtils.isOnline(valet!.status) &&
+                  onLogoutValet != null) ...[
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
                     onPressed: () => onLogoutValet!(valet!),
-                    icon: const Icon(Icons.logout, size: 20, color: AppColors.error),
+                    icon: const Icon(Icons.logout,
+                        size: 20, color: AppColors.error),
                     label: TextComponent(
                       labelText: TextConstants.logout,
                       fontSize: 16,

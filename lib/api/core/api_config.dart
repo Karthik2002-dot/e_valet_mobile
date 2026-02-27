@@ -13,7 +13,9 @@ class ApiConfig {
   /// Application ID for valet logout API. Reads EVALET_APPLICATION_BASE_URL (e.g. EVALET_APPLICATION_DEV_ID or EVALET_APPLICATION_PROD_ID)
   /// and uses that as the key to get the actual ID value from .env.
   static String get evaletApplicationId {
-    final key = (dotenv.env['EVALET_APPLICATION_BASE_URL'] ?? 'EVALET_APPLICATION_DEV_ID').trim();
+    final key = (dotenv.env['EVALET_APPLICATION_BASE_URL'] ??
+            'EVALET_APPLICATION_DEV_ID')
+        .trim();
     return (dotenv.env[key] ?? '').trim();
   }
 
