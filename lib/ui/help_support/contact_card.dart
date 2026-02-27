@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:niloufer_valet_mobile/models/help_support/support_member.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
+/// Contact info for display in ContactCard.
+/// [team] is optional; when null, displays [TextConstants.helpSupportTeam].
 class ContactInfo {
   final String name;
-  final String team;
+  final String? team;
   final String phone;
 
   const ContactInfo({
     required this.name,
-    required this.team,
+    this.team,
     required this.phone,
   });
+
+  /// Creates ContactInfo from [SupportMember] (API response).
+  factory ContactInfo.fromSupportMember(SupportMember member) {
+    final phone = member.phoneNumber.trim();
+    final displayPhone =
+        phone.startsWith('+') ? phone : '${TextConstants.countryCode}-$phone';
+    return ContactInfo(
+      name: member.name,
+      team: null,
+      phone: displayPhone,
+    );
+  }
 }
 
 class ContactCard extends StatelessWidget {
@@ -80,7 +96,7 @@ class ContactCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 TextComponent(
-                  labelText: contact.team,
+                  labelText: contact.team ?? TextConstants.helpSupportTeam,
                   fontSize: 13,
                   color: AppColors.mutedText,
                   fontWeight: FontWeight.w500,
