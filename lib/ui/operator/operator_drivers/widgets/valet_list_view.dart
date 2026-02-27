@@ -160,34 +160,63 @@ class ValetListView extends StatelessWidget {
               width >= 360 && (!Platform.isAndroid || width >= 600);
 
           void onLogoutValet(ValetResponse v) async {
+            // Entry point when operator taps "Logout" on a valet (card or details dialog)
+            print('🔵 OPERATOR VALET FORCE LOGOUT TAP:');
+            print('   outletId: $outletId');
+            print('   valet.userId: ${v.userId}');
+            print('   valet.name: ${v.name}');
+            print('   valet.status: ${v.status}');
+
             try {
+              print('🔵 OPERATOR VALET FORCE LOGOUT: calling ValetLogoutApiService.logoutValet...');
               await ValetLogoutApiService.logoutValet(userId: v.userId);
+              print('🟢 OPERATOR VALET FORCE LOGOUT: API call completed successfully for userId=${v.userId}');
+
               if (context.mounted) {
-                context.read<ValetListBloc>().add(FetchValetList(outletId: outletId));
+                print('🔄 OPERATOR VALET FORCE LOGOUT: refreshing valet list for outletId=$outletId');
+                context
+                    .read<ValetListBloc>()
+                    .add(FetchValetList(outletId: outletId));
+
+                print('🟢 OPERATOR VALET FORCE LOGOUT: showing success SnackBar');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(TextConstants.logout),
                     backgroundColor: AppColors.success,
                   ),
                 );
+              } else {
+                print('🟡 OPERATOR VALET FORCE LOGOUT: context not mounted, skipping UI updates');
               }
             } on ApiException catch (e) {
+              print('🔴 OPERATOR VALET FORCE LOGOUT ApiException:');
+              print('   message: ${e.message}');
+              print('   code: ${e.code}');
+
               if (context.mounted) {
+                print('🔴 OPERATOR VALET FORCE LOGOUT: showing error SnackBar (ApiException)');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(e.message),
                     backgroundColor: AppColors.error,
                   ),
                 );
+              } else {
+                print('🟡 OPERATOR VALET FORCE LOGOUT: context not mounted, cannot show error SnackBar');
               }
             } catch (e) {
+              print('🔴 OPERATOR VALET FORCE LOGOUT unknown error: $e');
+
               if (context.mounted) {
+                print('🔴 OPERATOR VALET FORCE LOGOUT: showing error SnackBar (unknown error)');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('${TextConstants.errorLabel}: $e'),
                     backgroundColor: AppColors.error,
                   ),
                 );
+              } else {
+                print('🟡 OPERATOR VALET FORCE LOGOUT: context not mounted, cannot show unknown error SnackBar');
               }
             }
           }

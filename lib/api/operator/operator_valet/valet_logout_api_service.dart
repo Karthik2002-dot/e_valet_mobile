@@ -4,13 +4,13 @@ import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_logout_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
-/// POST /api/v1/users/{id}/applications/{applicationId}/logout
-/// Logs out a valet (user) from the application. Uses [userId] and [applicationId] from env (EVALET_APPLICATION_BASE_URL).
+/// POST /api/v1/operators/drivers/{driverUserId}/force-logout
+/// Force-logs out a valet (driver user) from the application.
 class ValetLogoutApiService {
   ValetLogoutApiService._();
 
-  static String get _baseUrl => ApiConfig.authBaseUrl;
-  static String get _apiKey => ApiConfig.authApiKey;
+  // Use valet (main) API base URL, which already includes /api/v1
+  static String get _baseUrl => ApiConfig.valetBaseUrl;
 
   static Future<ValetLogoutResponse> logoutValet({required String userId}) async {
     final accessToken = await TokenStorage.getAccessToken();
@@ -20,38 +20,27 @@ class ValetLogoutApiService {
         code: 'no_token',
       );
     }
-    final applicationId = ApiConfig.evaletApplicationId;
-    if (applicationId.isEmpty) {
-      throw ApiException(
-        'Application ID not configured. Set EVALET_APPLICATION_BASE_URL and EVALET_APPLICATION_DEV_ID (or EVALET_APPLICATION_PROD_ID) in .env.',
-        code: 'no_application_id',
-      );
-    }
 
-    final headers = <String, String>{
-      ...ApiConfig.defaultJsonHeaders,
-      'Authorization': 'Bearer $accessToken',
-      'X-API-Key': _apiKey,
-    };
+    final headers = ApiConfig.authorizedHeaders(accessToken);
 
     final base = BaseDioService(_baseUrl, headers);
-    final path = '/users/$userId/applications/$applicationId/logout';
+    // Example: /api/v1/operators/drivers/21/force-logout
+    final path = '/operators/drivers/$userId/force-logout';
     final fullUrl = '$_baseUrl$path';
     const body = <String, dynamic>{};
 
     // Print request
-    print('🔵 VALET LOGOUT REQUEST:');
+    print('🔵 VALET FORCE LOGOUT REQUEST:');
     print('   Method: POST');
     print('   URL: $fullUrl');
-    print('   userId (path): $userId');
-    print('   applicationId (path): $applicationId');
+    print('   driverUserId (path): $userId');
     print('   body: $body');
 
     try {
       final response = await base.post(path, data: body);
 
       // Print response
-      print('🔵 VALET LOGOUT RESPONSE:');
+      print('🔵 VALET FORCE LOGOUT RESPONSE:');
       print('   statusCode: ${response.statusCode}');
       print('   data: ${response.data}');
 
@@ -61,7 +50,7 @@ class ValetLogoutApiService {
       }
       return ValetLogoutResponse();
     } on ApiException catch (e) {
-      print('🔵 VALET LOGOUT ERROR RESPONSE:');
+      print('🔵 VALET FORCE LOGOUT ERROR RESPONSE:');
       print('   message: ${e.message}');
       print('   code: ${e.code}');
       print('   statusCode: ${e.statusCode}');
