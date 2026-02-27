@@ -85,8 +85,8 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
-                iconData: Icons.menu_book_outlined,
-                title: t.get(TextConstants.guidelines),
+                iconData: Icons.support_agent,
+                title: t.get(TextConstants.help),
                 isSelected: selectedIndex == 5,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -94,12 +94,21 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
-                asset: 'assets/images/logout.png',
-                title: t.get(TextConstants.logout),
+                iconData: Icons.menu_book_outlined,
+                title: t.get(TextConstants.guidelines),
                 isSelected: selectedIndex == 6,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(6);
+                },
+              ),
+              OperatorDrawerItem(
+                asset: 'assets/images/logout.png',
+                title: t.get(TextConstants.logout),
+                isSelected: selectedIndex == 7,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(7);
                 },
               ),
             ],

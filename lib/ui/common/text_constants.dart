@@ -144,6 +144,10 @@ class TextConstants {
   // Help screen
   static const String helpContactSupport = 'Contact & Support';
   static const String helpCommonIssues = 'Common Issues';
+  static const String helpLoadingContacts = 'Loading contacts...';
+  static const String helpNoContacts = 'No support contacts available';
+  static const String helpFailedToLoad = 'Failed to load support contacts';
+  static const String helpSupportTeam = 'Support Team';
 
   // Change Password Dialog
   static const String passwordChangedSuccess = 'Password changed successfully';

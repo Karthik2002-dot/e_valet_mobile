@@ -1,29 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/api/ope_driv_help_support_api/help_support_api.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_main_title.dart';
 import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_section.dart';
 import 'package:niloufer_valet_mobile/ui/help_support/contact_card.dart';
 
 /// Shared Help screen for both Driver and Operator roles.
 /// Accessible from the overflow menu (driver) and side drawer (operator).
-/// Same content for both roles.
-class HelpScreen extends StatelessWidget {
+/// Fetches support members from GET /api/support-members.
+class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
 
-  static const List<ContactInfo> _contacts = [
-    ContactInfo(
-      name: 'Manish',
-      team: 'GPS Team',
-      phone: '+91-7207547219',
-    ),
-    ContactInfo(
-      name: 'Sai Charan',
-      team: 'Niloufer Banjara Team',
-      phone: '+91-9676511973',
-    ),
-  ];
+  @override
+  State<HelpScreen> createState() => _HelpScreenState();
+}
+
+class _HelpScreenState extends State<HelpScreen> {
+  List<ContactInfo>? _contacts;
+  String? _errorMessage;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSupportMembers();
+  }
+
+  Future<void> _loadSupportMembers() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _contacts = null;
+    });
+
+    try {
+      final members = await HelpSupportApi.fetchSupportMembers();
+      if (mounted) {
+        setState(() {
+          _contacts = members.map(ContactInfo.fromSupportMember).toList();
+          _isLoading = false;
+        });
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = TextConstants.helpFailedToLoad;
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +93,7 @@ class HelpScreen extends StatelessWidget {
                       items: const [],
                     ),
                     const SizedBox(height: 12),
-                    ..._contacts.map(
-                      (c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: ContactCard(contact: c),
-                      ),
-                    ),
+                    _buildContactsContent(),
                   ],
                 ),
               ),
@@ -69,6 +101,78 @@ class HelpScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildContactsContent() {
+    if (_isLoading) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 12),
+              TextComponent(
+                labelText: TextConstants.helpLoadingContacts,
+                fontSize: 14,
+                color: AppColors.mutedText,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Icon(Icons.error_outline, size: 48, color: AppColors.mutedText),
+              const SizedBox(height: 12),
+              TextComponent(
+                labelText: _errorMessage!,
+                fontSize: 14,
+                color: AppColors.mutedText,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _loadSupportMembers,
+                icon: const Icon(Icons.refresh),
+                label: Text(TextConstants.retryButton),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final contacts = _contacts ?? [];
+    if (contacts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: TextComponent(
+            labelText: TextConstants.helpNoContacts,
+            fontSize: 14,
+            color: AppColors.mutedText,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: contacts
+          .map(
+            (c) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: ContactCard(contact: c),
+            ),
+          )
+          .toList(),
     );
   }
 }
