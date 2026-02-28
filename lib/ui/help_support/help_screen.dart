@@ -97,12 +97,12 @@ class _HelpScreenState extends State<HelpScreen> {
                     GuidelinesMainTitle(title: title),
                     const SizedBox(height: 24),
                     GuidelinesSection(
-                      title: TextConstants.helpContactSupport,
+                      title: t.get(TextConstants.helpContactSupport),
                       icon: Icons.support_agent,
                       items: const [],
                     ),
                     const SizedBox(height: 12),
-                    _buildContactsContent(),
+                    _buildContactsContent(t),
                   ],
                 ),
               ),
@@ -113,7 +113,7 @@ class _HelpScreenState extends State<HelpScreen> {
     );
   }
 
-  Widget _buildContactsContent() {
+  Widget _buildContactsContent(AppTranslationsNotifier t) {
     if (_isLoading) {
       return Center(
         child: Padding(
@@ -123,7 +123,7 @@ class _HelpScreenState extends State<HelpScreen> {
               const CircularProgressIndicator(),
               const SizedBox(height: 12),
               TextComponent(
-                labelText: TextConstants.helpLoadingContacts,
+                labelText: t.get(TextConstants.helpLoadingContacts),
                 fontSize: 14,
                 color: AppColors.mutedText,
               ),
@@ -151,7 +151,8 @@ class _HelpScreenState extends State<HelpScreen> {
               TextButton.icon(
                 onPressed: _loadSupportMembers,
                 icon: const Icon(Icons.refresh),
-                label: Text(TextConstants.retryButton),
+                label:
+                    TextComponent(labelText: t.get(TextConstants.retryButton)),
               ),
             ],
           ),
@@ -165,7 +166,7 @@ class _HelpScreenState extends State<HelpScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: TextComponent(
-            labelText: TextConstants.helpNoContacts,
+            labelText: t.get(TextConstants.helpNoContacts),
             fontSize: 14,
             color: AppColors.mutedText,
           ),
