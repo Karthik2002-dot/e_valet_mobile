@@ -36,8 +36,11 @@ class ValetUtils {
     }
   }
 
-  /// Online if status is not OFFLINE (e.g. AVAILABLE, ON_DUTY, ON_BREAK).
+  /// True when valet is active (available, on duty, on break). False when offline or unknown.
+  /// Use this to show actions like "Logout" only for active valets.
   static bool isOnline(String status) {
-    return status.toUpperCase() != 'OFFLINE';
+    final s = status.trim().toUpperCase();
+    if (s.isEmpty) return false;
+    return s != 'OFFLINE';
   }
 }
