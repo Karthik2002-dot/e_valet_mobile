@@ -19,13 +19,20 @@ class Language {
 
   factory Language.fromJson(Map<String, dynamic> json) {
     return Language(
-      id: json['id'],
-      code: json['code'],
-      name: json['name'],
-      nativeName: json['nativeName'],
-      isActive: json['isActive'],
-      isDefault: json['isDefault'],
+      id: _parseInt(json['id']),
+      code: (json['code'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      nativeName: (json['nativeName'] as String?) ?? '',
+      isActive: json['isActive'] == true,
+      isDefault: json['isDefault'] == true,
     );
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -40,7 +47,11 @@ class Language {
   }
 
   static List<Language> fromJsonList(String jsonString) {
-    final List<dynamic> decoded = json.decode(jsonString);
-    return decoded.map((e) => Language.fromJson(e)).toList();
+    final decoded = json.decode(jsonString);
+    if (decoded is! List) return [];
+    return decoded
+        .where((e) => e is Map)
+        .map((e) => Language.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   }
 }

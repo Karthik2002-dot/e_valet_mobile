@@ -107,14 +107,18 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
     }
 
     if (_languages.isEmpty) {
-      return SizedBox(
-        width: _staticIconSize,
-        height: _staticIconSize,
-        child: Image.asset(
-          'assets/images/language.png',
-          fit: BoxFit.contain,
-          color: AppColors.white,
+      return IconButton(
+        onPressed: () => _fetchLanguages(),
+        icon: SizedBox(
+          width: _staticIconSize,
+          height: _staticIconSize,
+          child: Image.asset(
+            'assets/images/language.png',
+            fit: BoxFit.contain,
+            color: AppColors.white,
+          ),
         ),
+        tooltip: TextConstants.language,
       );
     }
 

@@ -6,6 +6,21 @@ import 'package:niloufer_valet_mobile/services/translations/translations_cache.d
 /// language so the app rebuilds with new translations.
 class AppTranslationsNotifier extends ChangeNotifier {
   Map<String, String>? _translations;
+  String? _currentLanguageCode;
+
+  /// Local fallbacks for keys that may be missing from the API.
+  /// Hindi (hi): Guidelines, Help
+  /// Telugu (te): Guidelines, Help
+  static const Map<String, Map<String, String>> _localFallbacks = {
+    'hi': {
+      'guidelines': 'दिशानिर्देश',
+      'help': 'सहायता',
+    },
+    'te': {
+      'guidelines': 'మార్గదర్శకాలు',
+      'help': 'సహాయం',
+    },
+  };
 
   /// Converts a display string (e.g. "Parked Car", "Dashboard") to the API key
   /// format (e.g. "parkedCar", "dashboard") so we can look up in the API response.
@@ -28,6 +43,13 @@ class AppTranslationsNotifier extends ChangeNotifier {
     final apiKey = _displayStringToApiKey(textConstant);
     final value = _translations?[apiKey];
     if (value != null && value.isNotEmpty) return value;
+    // Use local fallback for Guidelines and Help when API doesn't have them
+    final langCode = _currentLanguageCode?.toLowerCase();
+    if (langCode != null && langCode.isNotEmpty) {
+      final fallback = _localFallbacks[langCode]?[apiKey] ??
+          _localFallbacks[langCode.split('-').first]?[apiKey];
+      if (fallback != null && fallback.isNotEmpty) return fallback;
+    }
     return textConstant;
   }
 
@@ -38,6 +60,7 @@ class AppTranslationsNotifier extends ChangeNotifier {
     try {
       final response = await TranslationsCache().getTranslations();
       _translations = response?.translations;
+      _currentLanguageCode = response?.language;
       notifyListeners();
     } catch (_) {
       // Keep previous translations on error
