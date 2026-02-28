@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -20,6 +22,7 @@ class GuidelinesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
@@ -40,7 +43,7 @@ class GuidelinesScreen extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _buildContent(),
+                  children: _buildContent(t),
                 ),
               ),
             ),
@@ -51,11 +54,11 @@ class GuidelinesScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildContent() {
+  List<Widget> _buildContent(AppTranslationsNotifier t) {
     if (isOperatorGuidelines) {
       // Operator: show only Operator Responsibilities
       return [
-        GuidelinesMainTitle(title: TextConstants.guidelines),
+        GuidelinesMainTitle(title: t.get(TextConstants.guidelines)),
         const SizedBox(height: 24),
         GuidelinesSection(
           title: TextConstants.operatorResponsibilities,
@@ -85,6 +88,7 @@ class GuidelinesScreen extends StatelessWidget {
     }
 
     // Driver: show How to Park and How to Handover (no Operator Responsibilities)
+    // Keep English for driver screen - translations only on operator screen
     return [
       GuidelinesMainTitle(title: TextConstants.guidelines),
       const SizedBox(height: 24),

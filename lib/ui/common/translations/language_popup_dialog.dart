@@ -23,73 +23,144 @@ class LanguagePopupDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          12,
-        ),
-      ),
-      child: ConstrainedBox(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
         constraints: BoxConstraints(
-          maxWidth: 320,
+          maxWidth: 360,
           maxHeight: MediaQuery.of(context).size.height * 0.5,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow10.withOpacity(0.25),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Title row with Close button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            // Header with gradient accent
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 12, 16),
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
               child: Row(
                 children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.language_rounded,
+                      color: AppColors.primaryDark,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   TextComponent(
                     labelText: TextConstants.language,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.black,
                   ),
                   const Spacer(),
-                  IconButton(
-                    onPressed: onClose,
-                    icon: const Icon(Icons.close, color: AppColors.black),
-                    tooltip: TextConstants.close,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onClose,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: AppColors.mutedText,
+                          size: 22,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
             // Language list
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.all(16),
                 itemCount: languages.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final lang = languages[index];
                   final isSelected = selectedLanguage == lang;
-                  return ListTile(
-                    title: TextComponent(
-                      labelText: lang.nativeName,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: AppColors.black,
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () async {
+                        await onLanguageSelected(lang);
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primarySoft
+                              : AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary.withOpacity(0.5)
+                                : AppColors.surfaceBorder,
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextComponent(
+                                labelText: lang.nativeName,
+                                fontSize: 16,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            if (isSelected)
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.check_rounded,
+                                  color: AppColors.secondary,
+                                  size: 18,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
-                    trailing: isSelected
-                        ? const Icon(
-                            Icons.check,
-                            color: AppColors.secondary,
-                            size: 22,
-                          )
-                        : null,
-                    onTap: () async {
-                      await onLanguageSelected(lang);
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
                   );
                 },
               ),

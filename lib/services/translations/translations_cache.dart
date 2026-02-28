@@ -25,7 +25,10 @@ class TranslationsCache {
 
     final response =
         await TranslationsApiService.fetchTranslations(languageCode);
-    await box.put(_translationsJsonKey, response.toJsonString());
+    final lang = response.language.isEmpty ? languageCode : response.language;
+    final toStore = TranslationsResponse(
+        language: lang, translations: response.translations);
+    await box.put(_translationsJsonKey, toStore.toJsonString());
     await box.put(_selectedLanguageCodeKey, languageCode);
   }
 
@@ -33,7 +36,17 @@ class TranslationsCache {
   Future<TranslationsResponse?> getTranslations() async {
     final box = await _openBox();
     final jsonString = box.get(_translationsJsonKey) as String?;
-    return TranslationsResponse.fromJsonString(jsonString);
+    final response = TranslationsResponse.fromJsonString(jsonString);
+    if (response != null && response.language.isEmpty) {
+      final code = box.get(_selectedLanguageCodeKey) as String?;
+      if (code != null && code.isNotEmpty) {
+        return TranslationsResponse(
+          language: code,
+          translations: response.translations,
+        );
+      }
+    }
+    return response;
   }
 
   /// Call on app open (and effectively on install): ensure we have a selected
@@ -55,7 +68,10 @@ class TranslationsCache {
     try {
       final response = await TranslationsApiService.fetchTranslations(code);
       final box = await _openBox();
-      await box.put(_translationsJsonKey, response.toJsonString());
+      final lang = response.language.isEmpty ? code : response.language;
+      final toStore = TranslationsResponse(
+          language: lang, translations: response.translations);
+      await box.put(_translationsJsonKey, toStore.toJsonString());
     } catch (_) {
       // Keep existing cache on network failure
     }

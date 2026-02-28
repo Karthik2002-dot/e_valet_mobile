@@ -67,7 +67,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       // Help – shared screen for driver and operator
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => const HelpScreen(),
+          builder: (_) => const HelpScreen(isFromOperator: true),
         ),
       );
     } else if (index == 6) {

@@ -19,15 +19,30 @@ class LanguageCache {
       if (now.year == lastFetchDate.year &&
           now.month == lastFetchDate.month &&
           now.day == lastFetchDate.day) {
-        return Language.fromJsonList(cached);
+        final fromCache = Language.fromJsonList(cached);
+        if (fromCache.isNotEmpty) return fromCache;
       }
     }
 
-    // Fetch from API and cache
-    final languages = await LanguageApiService.fetchLanguages();
-    final jsonString = json.encode(languages.map((e) => e.toJson()).toList());
-    await box.put(_languagesKey, jsonString);
-    await box.put(_lastFetchKey, now.toIso8601String());
-    return languages;
+    try {
+      final languages = await LanguageApiService.fetchLanguages();
+      if (languages.isNotEmpty) {
+        final jsonString =
+            json.encode(languages.map((e) => e.toJson()).toList());
+        await box.put(_languagesKey, jsonString);
+        await box.put(_lastFetchKey, now.toIso8601String());
+        return languages;
+      }
+    } catch (_) {
+      // Fall through to use cached or default
+    }
+
+    // Fallback: use cached data even if stale
+    if (cached != null && cached is String) {
+      final fromCache = Language.fromJsonList(cached);
+      if (fromCache.isNotEmpty) return fromCache;
+    }
+
+    return [];
   }
 }

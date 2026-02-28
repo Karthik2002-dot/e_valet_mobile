@@ -32,7 +32,7 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
       // Help – shared screen for driver and operator
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => const HelpScreen(),
+          builder: (_) => const HelpScreen(isFromOperator: true),
         ),
       );
     } else if (index == 6) {

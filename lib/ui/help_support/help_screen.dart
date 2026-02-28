@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/api/ope_driv_help_support_api/help_support_api.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -12,8 +14,12 @@ import 'package:niloufer_valet_mobile/ui/help_support/contact_card.dart';
 /// Shared Help screen for both Driver and Operator roles.
 /// Accessible from the overflow menu (driver) and side drawer (operator).
 /// Fetches support members from GET /api/support-members.
+/// When [isFromOperator] is true, the title is translated (Hindi/Telugu).
 class HelpScreen extends StatefulWidget {
-  const HelpScreen({super.key});
+  /// When true, opened from operator drawer - show translated title.
+  final bool isFromOperator;
+
+  const HelpScreen({super.key, this.isFromOperator = false});
 
   @override
   State<HelpScreen> createState() => _HelpScreenState();
@@ -64,6 +70,9 @@ class _HelpScreenState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
+    final title =
+        widget.isFromOperator ? t.get(TextConstants.help) : TextConstants.help;
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
@@ -85,7 +94,7 @@ class _HelpScreenState extends State<HelpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GuidelinesMainTitle(title: TextConstants.help),
+                    GuidelinesMainTitle(title: title),
                     const SizedBox(height: 24),
                     GuidelinesSection(
                       title: TextConstants.helpContactSupport,
