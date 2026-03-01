@@ -520,6 +520,19 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     );
   }
 
+  /// When user searches by card number (numeric), show only logs that exactly
+  /// match that card number. Otherwise show all results from the API.
+  List<CarLog> _filterLogsForExactSearch(List<CarLog> logs) {
+    final query = _searchQuery.trim();
+    if (query.isEmpty) return logs;
+
+    // If search looks like a card number (digits only), show only exact matches
+    final isCardNumberSearch = int.tryParse(query) != null;
+    if (!isCardNumberSearch) return logs;
+
+    return logs.where((log) => log.tagNumber.toString() == query).toList();
+  }
+
   List<CarLog> _sortLogs(List<CarLog> logs) {
     if (_sortColumn.isEmpty || _sortDirection == SortDirection.none) {
       return logs;

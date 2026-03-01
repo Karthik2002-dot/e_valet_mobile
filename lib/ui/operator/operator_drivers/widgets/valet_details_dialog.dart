@@ -14,18 +14,27 @@ class ValetDetailsDialog extends StatelessWidget {
     super.key,
     required this.valet,
     this.onClose,
+    this.onLogoutValet,
   });
 
   final ValetResponse valet;
   final VoidCallback? onClose;
 
-  static Future<void> show(BuildContext context, ValetResponse valet) {
+  /// Called when operator taps "Log out" for this valet. Only shown when status is available, on-duty, or break (not offline).
+  final void Function(ValetResponse valet)? onLogoutValet;
+
+  static Future<void> show(
+    BuildContext context,
+    ValetResponse valet, {
+    void Function(ValetResponse valet)? onLogoutValet,
+  }) {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (context) => ValetDetailsDialog(
         valet: valet,
         onClose: () => Navigator.of(context).pop(),
+        onLogoutValet: onLogoutValet,
       ),
     );
   }
@@ -142,6 +151,32 @@ class ValetDetailsDialog extends StatelessWidget {
                 ),
               ),
             ),
+            // Logout: show only when status is available / on duty / on break; hide when offline
+            if (ValetUtils.isOnline(valet.status) && onLogoutValet != null) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        onLogoutValet!(valet);
+                      },
+                      icon: const Icon(Icons.logout,
+                          size: 22, color: AppColors.error),
+                      label: TextComponent(
+                        labelText: TextConstants.logout,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
