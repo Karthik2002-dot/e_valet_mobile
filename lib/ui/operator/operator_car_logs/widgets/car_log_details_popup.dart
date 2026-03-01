@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_log.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -118,6 +120,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenSize = MediaQuery.of(context).size;
 
     return SizedBox.expand(
@@ -167,7 +170,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                       child: Row(
                         children: [
                           TextComponent(
-                            labelText: TextConstants.carLogDetailsTitle,
+                            labelText: t.get(TextConstants.carLogDetailsTitle),
                             color: AppColors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -192,17 +195,17 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SimpleDetailRow(
-                                label: TextConstants.tagNumberLabel,
+                                label: t.get(TextConstants.tagNumberLabel),
                                 value: widget.carLog.tagNumber.toString()),
                             const SizedBox(height: 16),
                             SimpleDetailRow(
-                                label: TextConstants.parkedByLabel,
+                                label: t.get(TextConstants.parkedByLabel),
                                 value: widget.carLog.parkedBy.phone.isNotEmpty
                                     ? '${widget.carLog.parkedBy.name} (${widget.carLog.parkedBy.phone})'
                                     : widget.carLog.parkedBy.name),
                             const SizedBox(height: 16),
                             StatusDetailRow(
-                              label: TextConstants.carStatusLabel,
+                              label: t.get(TextConstants.carStatusLabel),
                               selectedStatus: _selectedStatus,
                               statusOptions: _statusOptions,
                               onStatusChanged: (value) {
@@ -231,7 +234,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                           TextButton(
                             onPressed: () => widget.onClose(),
                             child: TextComponent(
-                              labelText: TextConstants.cancelButton,
+                              labelText: t.get(TextConstants.cancelButton),
                               color: AppColors.grey,
                               fontWeight: FontWeight.w600,
                             ),
@@ -258,7 +261,8 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                                     ),
                                   )
                                 : TextComponent(
-                                    labelText: TextConstants.submitButton,
+                                    labelText:
+                                        t.get(TextConstants.submitButton),
                                     color: AppColors.white,
                                     fontWeight: FontWeight.w600,
                                   ),

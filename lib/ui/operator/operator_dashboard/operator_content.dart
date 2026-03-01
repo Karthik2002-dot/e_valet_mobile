@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -205,6 +207,7 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider.value(
       value: _dashboardBloc,
       child: SafeArea(
@@ -214,7 +217,7 @@ class _DashboardContentState extends State<DashboardContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextComponent(
-                labelText: TextConstants.dashboardOverview,
+                labelText: t.get(TextConstants.dashboardOverview),
                 color: AppColors.black,
                 fontSize: MediaQuery.of(context).size.height * 0.015,
               ),
@@ -315,7 +318,7 @@ class _DashboardContentState extends State<DashboardContent> {
                           children: [
                             TextComponent(
                               labelText:
-                                  '${TextConstants.errorLabel}: ${state.message}',
+                                  '${t.get(TextConstants.errorLabel)}: ${state.message}',
                               color: AppColors.error,
                               textAlign: TextAlign.center,
                             ),
@@ -328,8 +331,8 @@ class _DashboardContentState extends State<DashboardContent> {
                                   ),
                                 );
                               },
-                              child: const TextComponent(
-                                labelText: TextConstants.retryButton,
+                              child: TextComponent(
+                                labelText: t.get(TextConstants.retryButton),
                               ),
                             ),
                           ],

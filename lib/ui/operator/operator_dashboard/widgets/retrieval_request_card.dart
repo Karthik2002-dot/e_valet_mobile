@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
@@ -66,6 +68,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
       );
 
   void _showCancelAssignmentDialog() {
+    final t = context.read<AppTranslationsNotifier>();
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -87,7 +90,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                   );
             },
             child: Text(
-              TextConstants.cancelAssignmentConfirm,
+              t.get(TextConstants.cancelAssignmentConfirm),
               style: const TextStyle(color: AppColors.error),
             ),
           ),
@@ -175,6 +178,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return DragTarget<AvailableDriver>(
       onWillAcceptWithDetails: (details) {
         if (!_isAssignable) {
@@ -216,7 +220,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                 state.response.sessionId == widget.request.sessionId) {
               SnackBars.showSuccessSnackBar(
                 context,
-                TextConstants.cancelAssignmentSuccess,
+                t.get(TextConstants.cancelAssignmentSuccess),
               );
               widget.onAssignmentComplete();
             } else if (state is CancelAssignmentError &&
@@ -345,7 +349,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               TextComponent(
-                                labelText: '#${widget.request.cardNumber}',
+                                labelText:
+                                    '#${t.get(TextConstants.cardNumber)} ${widget.request.cardNumber}',
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.022,
                                 fontWeight: FontWeight.bold,
@@ -493,7 +498,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                           Row(
                             children: [
                               TextComponent(
-                                labelText: TextConstants.parkedByLabel,
+                                labelText: t.get(TextConstants.parkedByLabel),
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.014,
                                 color: AppColors.grey,
@@ -533,7 +538,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                             Row(
                               children: [
                                 TextComponent(
-                                  labelText: TextConstants.assignedToLabel,
+                                  labelText:
+                                      t.get(TextConstants.assignedToLabel),
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.014,
                                   color: AppColors.grey,

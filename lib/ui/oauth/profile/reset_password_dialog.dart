@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/change_password/change_password_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/change_password/change_password_event.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/change_password/change_password_state.dart';
@@ -43,6 +45,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider(
       create: (_) => ChangePasswordBloc(),
       child: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
@@ -91,7 +94,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextComponent(
-                        labelText: TextConstants.resetPassword,
+                        labelText: t.get(TextConstants.resetPassword),
                         fontSize: MediaQuery.of(context).size.width * 0.05,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
@@ -126,7 +129,8 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                             ),
                             Expanded(
                               child: TextComponent(
-                                labelText: TextConstants.passwordRequirements,
+                                labelText:
+                                    t.get(TextConstants.passwordRequirements),
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.032,
                                 fontWeight: FontWeight.w400,
@@ -142,24 +146,24 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                       ),
                       PasswordTextField(
                         controller: _currentPasswordController,
-                        labelText: TextConstants.currentPasswordLabel,
-                        hintText: TextConstants.currentPasswordHint,
+                        labelText: t.get(TextConstants.currentPasswordLabel),
+                        hintText: t.get(TextConstants.currentPasswordHint),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.015,
                       ),
                       PasswordTextField(
                         controller: _newPasswordController,
-                        labelText: TextConstants.newPasswordLabel,
-                        hintText: TextConstants.newPasswordHint,
+                        labelText: t.get(TextConstants.newPasswordLabel),
+                        hintText: t.get(TextConstants.newPasswordHint),
                       ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.015,
                       ),
                       PasswordTextField(
                         controller: _confirmPasswordController,
-                        labelText: TextConstants.confirmNewPasswordLabel,
-                        hintText: TextConstants.confirmNewPasswordHint,
+                        labelText: t.get(TextConstants.confirmNewPasswordLabel),
+                        hintText: t.get(TextConstants.confirmNewPasswordHint),
                       ),
                       // Error message display
                       if (errorMessage != null && errorMessage.isNotEmpty) ...[
@@ -211,7 +215,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButtonComponent(
-                            labelText: TextConstants.close,
+                            labelText: t.get(TextConstants.close),
                             onPressed: isLoading
                                 ? null
                                 : () => Navigator.of(context).pop(),
@@ -229,7 +233,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                             width: MediaQuery.of(context).size.width * 0.02,
                           ),
                           ElevatedButtonComponent(
-                            labelText: TextConstants.update,
+                            labelText: t.get(TextConstants.update),
                             onPressed: isLoading
                                 ? () {}
                                 : () => _handleUpdate(context),

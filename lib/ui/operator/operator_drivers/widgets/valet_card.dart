@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -21,6 +23,7 @@ class ValetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     // Larger fonts for clearer visibility in valet details card
     final bodyFontSize = (screenWidth * 0.022).clamp(11.0, 15.0);
@@ -142,7 +145,7 @@ class ValetCard extends StatelessWidget {
                   Expanded(
                     child: TextComponent(
                       labelText:
-                          '${TextConstants.carsPickedUpLabel}${valet!.carsPickedUp}',
+                          '${t.get(TextConstants.carsPickedUpLabel)}${valet!.carsPickedUp}',
                       fontSize: bodyFontSize,
                       color: AppColors.black,
                       maxLines: 2,
@@ -157,7 +160,7 @@ class ValetCard extends StatelessWidget {
                   Expanded(
                     child: TextComponent(
                       labelText:
-                          '${TextConstants.carsHandedOverLabel}${valet!.carsHandedOver}',
+                          '${t.get(TextConstants.carsHandedOverLabel)}${valet!.carsHandedOver}',
                       fontSize: bodyFontSize,
                       color: AppColors.black,
                       maxLines: 2,
@@ -172,7 +175,7 @@ class ValetCard extends StatelessWidget {
                   Expanded(
                     child: TextComponent(
                       labelText:
-                          '${TextConstants.onBreakDurationLabel}${valet!.onBreakDurationMinutes}${TextConstants.minsLabel}',
+                          '${t.get(TextConstants.onBreakDurationLabel)}${valet!.onBreakDurationMinutes}${t.get(TextConstants.minsLabel)}',
                       fontSize: bodyFontSize,
                       color: AppColors.black,
                       maxLines: 2,
@@ -187,7 +190,7 @@ class ValetCard extends StatelessWidget {
                   Expanded(
                     child: TextComponent(
                       labelText:
-                          '${TextConstants.clockInAtLabel}${valet!.clockInAt.isNotEmpty ? TimeUtils.formatUtcToIstFullDateTime(valet!.clockInAt) : 'N/A'}',
+                          '${t.get(TextConstants.clockInAtLabel)}${valet!.clockInAt.isNotEmpty ? TimeUtils.formatUtcToIstFullDateTime(valet!.clockInAt) : 'N/A'}',
                       fontSize: bodyFontSize,
                       color: AppColors.black,
                       maxLines: 2,
@@ -203,7 +206,7 @@ class ValetCard extends StatelessWidget {
                     Expanded(
                       child: TextComponent(
                         labelText:
-                            '${TextConstants.clockOutAtLabel}${TimeUtils.formatUtcToIstFullDateTime(valet!.clockOutAt)}',
+                            '${t.get(TextConstants.clockOutAtLabel)}${TimeUtils.formatUtcToIstFullDateTime(valet!.clockOutAt)}',
                         fontSize: bodyFontSize,
                         color: AppColors.black,
                         maxLines: 2,
@@ -219,7 +222,7 @@ class ValetCard extends StatelessWidget {
                   Expanded(
                     child: TextComponent(
                       labelText:
-                          '${TextConstants.lastActivityLabel}${valet!.lastActivity.isNotEmpty ? TimeUtils.formatUtcToIstFullDateTime(valet!.lastActivity) : 'N/A'}',
+                          '${t.get(TextConstants.lastActivityLabel)}${valet!.lastActivity.isNotEmpty ? TimeUtils.formatUtcToIstFullDateTime(valet!.lastActivity) : 'N/A'}',
                       fontSize: bodyFontSize,
                       color: AppColors.black,
                       maxLines: 2,

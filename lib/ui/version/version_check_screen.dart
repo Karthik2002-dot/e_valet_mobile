@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -51,32 +53,35 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                  strokeWidth: 2,
+      builder: (context) {
+        final t = context.watch<AppTranslationsNotifier>();
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: TextComponent(
-                  labelText: TextConstants.checkingForUpdates,
-                  fontSize: 16,
-                  color: AppColors.black,
+                const SizedBox(width: 20),
+                Expanded(
+                  child: TextComponent(
+                    labelText: t.get(TextConstants.checkingForUpdates),
+                    fontSize: 16,
+                    color: AppColors.black,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     try {

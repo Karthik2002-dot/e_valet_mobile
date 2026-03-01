@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -21,6 +23,7 @@ class DriverBreakToggleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocBuilder<DriverStatusBloc, DriverStatusState>(
       builder: (context, statusState) {
         // Get break status from API, fallback to false if not loaded yet
@@ -35,7 +38,7 @@ class DriverBreakToggleWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextComponent(
-              labelText: TextConstants.headerOnBreak,
+              labelText: t.get(TextConstants.headerOnBreak),
               fontSize: isDesktop
                   ? screenWidth * 0.012
                   : isTablet

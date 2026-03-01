@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -17,6 +19,7 @@ class CameraTopOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -61,7 +64,7 @@ class CameraTopOverlay extends StatelessWidget {
             // Instruction text
             Center(
               child: TextComponent(
-                labelText: TextConstants.captureCarInstruction,
+                labelText: t.get(TextConstants.captureCarInstruction),
                 textAlign: TextAlign.center,
                 color: AppColors.white,
                 fontSize: screenWidth * 0.04,

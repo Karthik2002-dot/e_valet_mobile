@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -21,6 +23,7 @@ class CompactDriverContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,9 +89,9 @@ class CompactDriverContent extends StatelessWidget {
               ),
             ),
             child: TextComponent(
-              labelText: TextConstants.recommendedForCard(
+              labelText: t.get(TextConstants.recommendedForCard(
                 recommendedCardNumber!,
-              ),
+              )),
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lottie/lottie.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -158,7 +160,9 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
       if (cardNumber == null) {
         SnackBars.showErrorSnackBar(
           submitContext,
-          TextConstants.validationEnterValidTagNumber,
+          submitContext
+              .read<AppTranslationsNotifier>()
+              .get(TextConstants.validationEnterValidTagNumber),
         );
         return;
       }
@@ -176,6 +180,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider(
       create: (_) => QrBloc(),
       child: MultiBlocListener(
@@ -233,14 +238,14 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextComponent(
-                        labelText: TextConstants.vehicleDetailsTitle,
+                        labelText: t.get(TextConstants.vehicleDetailsTitle),
                         fontSize: MediaQuery.of(context).size.width * 0.045,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
                       ),
                       SizedBox(height: widget.screenHeight * 0.006),
                       TextComponent(
-                        labelText: TextConstants.vehicleDetailsHint,
+                        labelText: t.get(TextConstants.vehicleDetailsHint),
                         fontSize: widget.screenWidth * 0.032,
                         color: AppColors.black,
                         fontWeight: FontWeight.w400,
@@ -251,12 +256,12 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                 ),
                 SizedBox(height: widget.screenHeight * 0.016),
                 // Tabs: Scan (default) | Type ID Number
-                _buildTabs(blocContext),
+                _buildTabs(t, blocContext),
                 SizedBox(height: widget.screenHeight * 0.018),
                 Expanded(
                   child: _selectedTab == 0
-                      ? _buildScanContent()
-                      : _buildTypeIdContent(),
+                      ? _buildScanContent(t)
+                      : _buildTypeIdContent(t),
                 ),
               ],
             );
@@ -266,7 +271,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     );
   }
 
-  Widget _buildTabs(BuildContext blocContext) {
+  Widget _buildTabs(AppTranslationsNotifier t, BuildContext blocContext) {
     final w = widget.screenWidth;
     final isTypeId = _selectedTab == 1;
     final isScan = _selectedTab == 0;
@@ -278,7 +283,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
           Expanded(
             child: TabChip(
               icon: Icons.qr_code_scanner,
-              label: TextConstants.scanTabLabel,
+              label: t.get(TextConstants.scanTabLabel),
               isActive: isScan,
               onTap: () => _onSelectScanTab(blocContext),
             ),
@@ -288,7 +293,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
           Expanded(
             child: TabChip(
               icon: Icons.dialpad,
-              label: TextConstants.typeParkingNumberTabLabel,
+              label: t.get(TextConstants.typeParkingNumberTabLabel),
               isActive: isTypeId,
               onTap: () => _onSelectTypeIdTab(blocContext),
             ),
@@ -299,7 +304,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
   }
 
   /// Scan tab: dark grey container with camera/Lottie; submit button at bottom (same style as Parking Number tab).
-  Widget _buildScanContent() {
+  Widget _buildScanContent(AppTranslationsNotifier t) {
     final w = widget.screenWidth;
     final h = widget.screenHeight;
 
@@ -402,7 +407,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextComponent(
-                                      labelText: TextConstants.submitButton,
+                                      labelText:
+                                          t.get(TextConstants.submitButton),
                                       fontSize: textSize,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.white,
@@ -428,7 +434,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     );
   }
 
-  Widget _buildTypeIdContent() {
+  Widget _buildTypeIdContent(AppTranslationsNotifier t) {
     final w = widget.screenWidth;
     final h = widget.screenHeight;
     return SingleChildScrollView(
@@ -459,7 +465,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextComponent(
-                    labelText: TextConstants.tagNumberLabel,
+                    labelText: t.get(TextConstants.tagNumberLabel),
                     fontSize: w * 0.048,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -467,8 +473,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                   Builder(
                     builder: (ctx) {
                       return TextFieldComponent(
-                        labelText: TextConstants.emptyText,
-                        hintText: TextConstants.tagNumberHint,
+                        labelText: t.get(TextConstants.emptyText),
+                        hintText: t.get(TextConstants.tagNumberHint),
                         controller: _tagNumberController,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
@@ -530,7 +536,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             TextComponent(
-                              labelText: TextConstants.submitButton,
+                              labelText: t.get(TextConstants.submitButton),
                               fontSize: textSize,
                               fontWeight: FontWeight.w600,
                               color: AppColors.white,

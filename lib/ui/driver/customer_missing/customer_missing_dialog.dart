@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/initiate_repark/initiate_repark_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/initiate_repark/initiate_repark_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/initiate_repark/initiate_repark_state.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
@@ -49,6 +51,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -100,7 +103,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
 
             // Main Question
             TextComponent(
-              labelText: TextConstants.reparkConfirmationTitle,
+              labelText: t.get(TextConstants.reparkConfirmationTitle),
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.w700,
               color: AppColors.black,
@@ -111,7 +114,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
 
             // Explanatory Text
             TextComponent(
-              labelText: TextConstants.reparkConfirmationMessage,
+              labelText: t.get(TextConstants.reparkConfirmationMessage),
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w400,
               color: AppColors.grey,
@@ -122,7 +125,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
 
             // Instruction text above proceed button
             TextComponent(
-              labelText: TextConstants.pressBelowToProceedRepark,
+              labelText: t.get(TextConstants.pressBelowToProceedRepark),
               fontSize: screenWidth * 0.038,
               fontWeight: FontWeight.w500,
               color: AppColors.black,
@@ -240,7 +243,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               TextComponent(
-                                labelText: TextConstants.proceedToRepark,
+                                labelText: t.get(TextConstants.proceedToRepark),
                                 fontSize: screenWidth * 0.05,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.black,
@@ -262,7 +265,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
 
             // Instruction and Cancel Button
             TextComponent(
-              labelText: TextConstants.pressBelowToCancel,
+              labelText: t.get(TextConstants.pressBelowToCancel),
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,
               color: AppColors.grey,
@@ -281,7 +284,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                           widget.onCancel?.call();
                         },
                   child: TextComponent(
-                    labelText: TextConstants.cancel,
+                    labelText: t.get(TextConstants.cancel),
                     fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w500,
                     color: isLoading ? AppColors.greyLight : AppColors.grey,

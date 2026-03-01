@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/phone_Number/phone_number%20validation.dart';
@@ -38,6 +40,7 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final effectiveFocusNode = widget.focusNode ?? _internalFocusNode;
     final inputDecoration = InputDecoration(
       hintText: widget.hintText,
@@ -130,7 +133,7 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                     Padding(
                       padding: const EdgeInsets.only(left: 16, right: 8),
                       child: TextComponent(
-                        labelText: TextConstants.countryCode,
+                        labelText: t.get(TextConstants.countryCode),
                         fontSize: 14,
                         color: AppColors.black,
                         fontWeight: FontWeight.w500,
@@ -157,7 +160,7 @@ class PhoneNumberFieldState extends State<PhoneNumberField> {
                           if (widget.onChanged != null) {
                             // Always prepend country code since country picker is disabled
                             widget.onChanged!(
-                                '${TextConstants.countryCode}$value');
+                                '${t.get(TextConstants.countryCode)}$value');
                           }
                           // Auto-advance to next field when phone number is complete (10 digits)
                           if (value.length == 10 && widget.onComplete != null) {

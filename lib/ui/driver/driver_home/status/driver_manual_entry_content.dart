@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -66,9 +68,10 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
       final cardNumber = int.tryParse(tagNumber);
       if (cardNumber == null) {
         // Show error if tag number is not a valid number
+        final t = context.read<AppTranslationsNotifier>();
         SnackBars.showErrorSnackBar(
           context,
-          TextConstants.validationEnterValidTagNumber,
+          t.get(TextConstants.validationEnterValidTagNumber),
         );
         return;
       }
@@ -93,6 +96,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final w = widget.screenWidth;
     final h = widget.screenHeight;
 
@@ -147,15 +151,15 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: TextComponent(
-                        labelText: TextConstants.tagNumberLabel,
+                        labelText: t.get(TextConstants.tagNumberLabel),
                         fontSize: w * 0.048,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
                       ),
                     ),
                     TextFieldComponent(
-                      labelText: TextConstants.emptyText,
-                      hintText: TextConstants.tagNumberHint,
+                      labelText: t.get(TextConstants.emptyText),
+                      hintText: t.get(TextConstants.tagNumberHint),
                       controller: _tagNumberController,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.done,
@@ -166,11 +170,12 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                       onSubmitEditing: _handleSubmit,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return TextConstants.validationEnterTagNumber;
+                          return t.get(TextConstants.validationEnterTagNumber);
                         }
                         final cardNumber = int.tryParse(value.trim());
                         if (cardNumber == null) {
-                          return TextConstants.validationEnterValidNumber;
+                          return t
+                              .get(TextConstants.validationEnterValidNumber);
                         }
                         return null;
                       },
@@ -189,7 +194,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: h * 0.015),
                   child: TextComponent(
-                    labelText: TextConstants.scanTagNumberLink,
+                    labelText: t.get(TextConstants.scanTagNumberLink),
                     fontSize: w * 0.042,
                     fontWeight: FontWeight.w500,
                     color: AppColors.mutedText,
@@ -234,7 +239,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               TextComponent(
-                                labelText: TextConstants.submitButton,
+                                labelText: t.get(TextConstants.submitButton),
                                 fontSize: textSize,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.white,

@@ -119,6 +119,7 @@ class MyApp extends StatelessWidget {
           builder: (context, child) {
             return BlocListener<ConnectivityBloc, ConnectivityState>(
               listener: (context, state) {
+                final t = context.read<AppTranslationsNotifier>();
                 final messenger = ScaffoldMessenger.of(context);
                 if (state is ConnectivityOffline) {
                   messenger.clearMaterialBanners();
@@ -126,7 +127,7 @@ class MyApp extends StatelessWidget {
                     MaterialBanner(
                       backgroundColor: AppColors.error,
                       content: TextComponent(
-                        labelText: TextConstants.noInternetConnection,
+                        labelText: t.get(TextConstants.noInternetConnection),
                         color: AppColors.white,
                         textAlign: TextAlign.center,
                       ),

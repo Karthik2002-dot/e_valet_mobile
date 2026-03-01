@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/help_support/support_member.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -49,6 +51,7 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -96,7 +99,8 @@ class ContactCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 TextComponent(
-                  labelText: contact.team ?? TextConstants.helpSupportTeam,
+                  labelText:
+                      contact.team ?? t.get(TextConstants.helpSupportTeam),
                   fontSize: 13,
                   color: AppColors.mutedText,
                   fontWeight: FontWeight.w500,

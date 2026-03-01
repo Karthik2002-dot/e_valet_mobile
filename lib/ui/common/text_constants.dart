@@ -258,6 +258,7 @@ class TextConstants {
 
   // Arrival Related
   static const String slideToConfirmArrival = 'Confirm Arrival';
+  static const String disabledRemainingSeconds = 'Seconds remaining:';
   static const String slideToConfirmHandover = 'Confirm Handover';
   static const String slideToCustomerMissing = 'Customer Missing';
   static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';

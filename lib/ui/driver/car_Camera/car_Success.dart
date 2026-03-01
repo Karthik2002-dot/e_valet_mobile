@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -54,6 +56,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -76,7 +79,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                   bottom: screenHeight * 0.04,
                 ),
                 child: TextComponent(
-                  labelText: TextConstants.successfullyParked,
+                  labelText: t.get(TextConstants.successfullyParked),
                   color: AppColors.white,
                   fontSize: screenWidth * 0.055,
                   fontWeight: FontWeight.w500,
@@ -164,7 +167,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                             ),
                           )
                         : TextComponent(
-                            labelText: TextConstants.returnToHome,
+                            labelText: t.get(TextConstants.returnToHome),
                             color: AppColors.black,
                             fontSize: screenWidth * 0.06,
                             fontWeight: FontWeight.w600,

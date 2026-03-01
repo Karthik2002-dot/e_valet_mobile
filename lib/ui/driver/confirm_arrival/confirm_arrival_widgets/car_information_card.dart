@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
@@ -20,6 +22,7 @@ class CarInformationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -57,7 +60,7 @@ class CarInformationCard extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     TextComponent(
-                      labelText: TextConstants.cardNumber,
+                      labelText: t.get(TextConstants.cardNumber),
                       fontSize:
                           compact ? screenWidth * 0.028 : screenWidth * 0.035,
                       color: AppColors.grey,
@@ -129,15 +132,15 @@ class CarInformationCard extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     TextComponent(
-                      labelText: TextConstants.parkedByLabel,
+                      labelText: t.get(TextConstants.parkedByLabel),
                       fontSize:
                           compact ? screenWidth * 0.028 : screenWidth * 0.035,
                       color: AppColors.grey,
                     ),
                     if (!compact) SizedBox(height: screenHeight * 0.01),
                     TextComponent(
-                      labelText:
-                          session.parkedBy?.name ?? TextConstants.unknown,
+                      labelText: session.parkedBy?.name ??
+                          t.get(TextConstants.unknown),
                       fontSize:
                           compact ? screenWidth * 0.032 : screenWidth * 0.04,
                       fontWeight: FontWeight.w500,

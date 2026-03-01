@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
@@ -107,6 +109,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider(
       create: (context) => ConfirmArrivalBloc(),
       child: BlocListener<ConfirmArrivalBloc, ConfirmArrivalState>(
@@ -155,7 +158,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                   SizedBox(height: screenHeight * 0.01),
                   Center(
                     child: TextComponent(
-                      labelText: TextConstants.retrievalRequest,
+                      labelText: t.get(TextConstants.retrievalRequest),
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
@@ -209,8 +212,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 TextComponent(
-                                  labelText:
-                                      TextConstants.pressBelowToConfirmArrival,
+                                  labelText: t.get(
+                                      TextConstants.pressBelowToConfirmArrival),
                                   fontSize: screenWidth * 0.04,
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.black,

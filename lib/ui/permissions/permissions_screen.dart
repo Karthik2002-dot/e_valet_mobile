@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -130,63 +132,67 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextComponent(
-                labelText:
-                    'You denied this permission multiple times. To enable it, open your device settings and turn the permission on for this app.',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.mutedText,
-                        side: const BorderSide(color: AppColors.surfaceBorder),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const TextComponent(
-                        labelText: TextConstants.exitButton,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        openAppSettings();
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.qrSuccessColor,
-                        foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const TextComponent(
-                        labelText: TextConstants.openSettings,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+      builder: (ctx) {
+        final t = ctx.watch<AppTranslationsNotifier>();
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-        ),
-      ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextComponent(
+                  labelText:
+                      'You denied this permission multiple times. To enable it, open your device settings and turn the permission on for this app.',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.mutedText,
+                          side:
+                              const BorderSide(color: AppColors.surfaceBorder),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: TextComponent(
+                          labelText: t.get(TextConstants.exitButton),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          openAppSettings();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.qrSuccessColor,
+                          foregroundColor: AppColors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: TextComponent(
+                          labelText: t.get(TextConstants.openSettings),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -214,9 +220,10 @@ class _PermissionsScreenState extends State<PermissionsScreen>
           MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
         );
       } else {
+        final t = context.read<AppTranslationsNotifier>();
         SnackBars.showErrorSnackBar(
           context,
-          TextConstants.accountNoPermissionsMessage,
+          t.get(TextConstants.accountNoPermissionsMessage),
         );
         Navigator.pushReplacement(
           context,
@@ -233,6 +240,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -245,7 +253,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextComponent(
-                  labelText: TextConstants.permissionsRequiredToContinue,
+                  labelText: t.get(TextConstants.permissionsRequiredToContinue),
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppColors.secondary,
@@ -255,7 +263,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextComponent(
-                  labelText: TextConstants.permissionsDescription,
+                  labelText: t.get(TextConstants.permissionsDescription),
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.mutedText,
@@ -274,9 +282,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                         children: [
                           _PermissionRow(
                             icon: Icons.location_on_outlined,
-                            title: TextConstants.permissionLocationTitle,
-                            description:
-                                TextConstants.permissionLocationDescription,
+                            title: t.get(TextConstants.permissionLocationTitle),
+                            description: t.get(
+                                TextConstants.permissionLocationDescription),
                             status: _statuses[Permission.location] ??
                                 PermissionStatusType.denied,
                             onTap: () => _onPermissionTap(Permission.location),
@@ -284,9 +292,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           const SizedBox(height: 16),
                           _PermissionRow(
                             icon: Icons.camera_alt_outlined,
-                            title: TextConstants.permissionCameraTitle,
-                            description:
-                                TextConstants.permissionCameraDescription,
+                            title: t.get(TextConstants.permissionCameraTitle),
+                            description: t
+                                .get(TextConstants.permissionCameraDescription),
                             status: _statuses[Permission.camera] ??
                                 PermissionStatusType.denied,
                             onTap: () => _onPermissionTap(Permission.camera),
@@ -294,9 +302,10 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           const SizedBox(height: 16),
                           _PermissionRow(
                             icon: Icons.notifications_outlined,
-                            title: TextConstants.permissionNotificationsTitle,
-                            description: TextConstants
-                                .permissionNotificationsDescription,
+                            title: t.get(
+                                TextConstants.permissionNotificationsTitle),
+                            description: t.get(TextConstants
+                                .permissionNotificationsDescription),
                             status: _statuses[Permission.notification] ??
                                 PermissionStatusType.denied,
                             onTap: () =>
@@ -331,10 +340,10 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                     ),
                     child: TextComponent(
                       labelText: _allGranted
-                          ? TextConstants.continueLabel
+                          ? t.get(TextConstants.continueLabel)
                           : (_firstMissingPermission != null
                               ? _permissionButtonLabel(_firstMissingPermission!)
-                              : TextConstants.continueLabel),
+                              : t.get(TextConstants.continueLabel)),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -415,7 +424,9 @@ class _PermissionRow extends StatelessWidget {
                     if (isPermanentlyDenied) ...[
                       const SizedBox(height: 6),
                       TextComponent(
-                        labelText: TextConstants.permissionDeniedTapSettings,
+                        labelText: context
+                            .watch<AppTranslationsNotifier>()
+                            .get(TextConstants.permissionDeniedTapSettings),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.mutedText,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_logs_kpis_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/skeleton_loader.dart';
@@ -52,6 +54,7 @@ class CarLogsKpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     if (isLoading) {
       return Row(
         children: [
@@ -70,28 +73,28 @@ class CarLogsKpiGrid extends StatelessWidget {
       children: [
         Expanded(
           child: KpiCard(
-            title: TextConstants.carLogsKpiTotalParked,
+            title: t.get(TextConstants.carLogsKpiTotalParked),
             value: kpis != null ? '${kpis!.totalCarsParked}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: TextConstants.carLogsKpiInTransit,
+            title: t.get(TextConstants.carLogsKpiInTransit),
             value: kpis != null ? '${kpis!.carsInTransit}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: TextConstants.carLogsKpiHandovered,
+            title: t.get(TextConstants.carLogsKpiHandovered),
             value: kpis != null ? '${kpis!.carsHandovered}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: TextConstants.carLogsKpiInLot,
+            title: t.get(TextConstants.carLogsKpiInLot),
             value: kpis != null ? '${kpis!.carsInLot}' : '0',
           ),
         ),

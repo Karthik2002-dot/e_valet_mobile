@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -24,6 +26,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocBuilder<QrBloc, QrState>(
       builder: (context, state) {
         final scanned = state.scannedCode;
@@ -102,7 +105,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextComponent(
-                        labelText: TextConstants.cardNumberLabel,
+                        labelText: t.get(TextConstants.cardNumberLabel),
                         fontSize: isDesktop
                             ? screenWidth * 0.01
                             : isTablet
@@ -143,7 +146,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
                           EdgeInsets.symmetric(vertical: screenHeight * 0.015),
                     ),
                     child: TextComponent(
-                      labelText: TextConstants.rescanButton,
+                      labelText: t.get(TextConstants.rescanButton),
                       fontSize: isDesktop
                           ? screenWidth * 0.012
                           : isTablet
@@ -218,7 +221,7 @@ class QrStatusDisplayWidget extends StatelessWidget {
                           EdgeInsets.symmetric(vertical: screenHeight * 0.015),
                     ),
                     child: TextComponent(
-                      labelText: TextConstants.rescanButton,
+                      labelText: t.get(TextConstants.rescanButton),
                       fontSize: isDesktop
                           ? screenWidth * 0.012
                           : isTablet

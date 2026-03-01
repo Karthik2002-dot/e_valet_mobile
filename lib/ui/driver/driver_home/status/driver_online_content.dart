@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -57,7 +59,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
   }
 
   /// First screen: two cards (Park Vehicle | Retrieve Vehicle). Park tappable → Vehicle details.
-  Widget _buildFirstScreen() {
+  Widget _buildFirstScreen(AppTranslationsNotifier t) {
     final w = widget.screenWidth;
     final h = widget.screenHeight;
     return Column(
@@ -71,8 +73,8 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                 children: [
                   SizedBox(height: h * 0.02),
                   TextComponent(
-                    labelText:
-                        TextConstants.readyToParkMessage(widget.driverName),
+                    labelText: t.get(
+                        TextConstants.readyToParkMessage(widget.driverName)),
                     fontSize: w * 0.048,
                     textAlign: TextAlign.center,
                     fontWeight: FontWeight.w600,
@@ -81,7 +83,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                   SizedBox(height: h * 0.025),
                   DriverActionCard(
                     imagePath: 'assets/images/park.png',
-                    buttonLabel: TextConstants.parkVehicle,
+                    buttonLabel: t.get(TextConstants.parkVehicle),
                     onTap: () => widget.onParkFlowChanged(true),
                     screenWidth: widget.screenWidth,
                     screenHeight: widget.screenHeight,
@@ -91,7 +93,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                   SizedBox(height: h * 0.04),
                   DriverActionCard(
                     imagePath: 'assets/images/retrive.png',
-                    buttonLabel: TextConstants.retrieveVehicle,
+                    buttonLabel: t.get(TextConstants.retrieveVehicle),
                     onTap: null,
                     screenWidth: widget.screenWidth,
                     screenHeight: widget.screenHeight,
@@ -120,6 +122,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider(
       create: (_) => TagSubmissionBloc(),
       child: BlocListener<TagSubmissionBloc, TagSubmissionState>(
@@ -148,7 +151,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
         },
         child: widget.showParkFlow
             ? _buildVehicleDetailsScreen()
-            : _buildFirstScreen(),
+            : _buildFirstScreen(t),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/password_reset_otp/password_reset_otp_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/password_reset_otp/password_reset_otp_event.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/password_reset_otp/password_reset_otp_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -33,6 +35,7 @@ class _NewPasswordStepState extends State<NewPasswordStep> {
   Widget build(BuildContext context) {
     return BlocBuilder<PasswordResetOtpBloc, PasswordResetOtpState>(
       builder: (context, state) {
+        final t = context.watch<AppTranslationsNotifier>();
         bool isPasswordValid = false;
         String? passwordError;
 
@@ -48,7 +51,7 @@ class _NewPasswordStepState extends State<NewPasswordStep> {
           children: [
             SizedBox(height: widget.size.height * 0.02),
             TextComponent(
-              labelText: TextConstants.otpVerifiedSetPassword,
+              labelText: t.get(TextConstants.otpVerifiedSetPassword),
               fontSize: widget.size.width * 0.04,
               fontWeight: FontWeight.w500,
               color: AppColors.black,
@@ -78,7 +81,7 @@ class _NewPasswordStepState extends State<NewPasswordStep> {
                   SizedBox(width: widget.size.width * 0.02),
                   Expanded(
                     child: TextComponent(
-                      labelText: TextConstants.passwordRequirements,
+                      labelText: t.get(TextConstants.passwordRequirements),
                       fontSize: widget.size.width * 0.032,
                       fontWeight: FontWeight.w400,
                       color: AppColors.black,
@@ -98,7 +101,7 @@ class _NewPasswordStepState extends State<NewPasswordStep> {
                     .add(PasswordResetOtpNewPasswordChanged(value));
               },
               decoration: InputDecoration(
-                labelText: TextConstants.newPasswordLabel,
+                labelText: t.get(TextConstants.newPasswordLabel),
                 border: const OutlineInputBorder(),
                 errorText: passwordError,
                 suffixIcon: IconButton(
@@ -118,8 +121,8 @@ class _NewPasswordStepState extends State<NewPasswordStep> {
                 opacity: (!widget.isResetting && isPasswordValid) ? 1.0 : 0.5,
                 child: ElevatedButtonComponent(
                   labelText: widget.isResetting
-                      ? TextConstants.submittingNewPassword
-                      : TextConstants.submitNewPassword,
+                      ? t.get(TextConstants.submittingNewPassword)
+                      : t.get(TextConstants.submitNewPassword),
                   onPressed: (!widget.isResetting && isPasswordValid)
                       ? () {
                           context.read<PasswordResetOtpBloc>().add(
