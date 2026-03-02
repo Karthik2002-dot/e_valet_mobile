@@ -354,11 +354,13 @@ class OperatorDashboardBloc
       // Delay the background refresh so the UI can process the optimistic
       // state first, avoiding a race where the refresh overwrites it and
       // causes flicker (session briefly showing as assigned again).
+      // Refresh KPIs (includes Available Valets count), drivers list, and requests
+      // so the UI shows correct data after the valet is unassigned.
       Future.delayed(const Duration(milliseconds: 400), () {
         if (!isClosed) {
           add(RefreshDashboardKpisSilently(
             outletId: outletId,
-            refreshKpis: false,
+            refreshKpis: true,
             refreshDrivers: true,
             refreshRequests: true,
           ));
