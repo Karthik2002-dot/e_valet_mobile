@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -34,6 +36,7 @@ class PasswordResetOtpCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final size = MediaQuery.of(context).size;
 
     return Container(
@@ -59,8 +62,8 @@ class PasswordResetOtpCard extends StatelessWidget {
           SizedBox(height: size.height * 0.02),
           TextComponent(
             labelText: isOtpVerified
-                ? TextConstants.enterNewPasswordTitle
-                : TextConstants.enterOtpTitle,
+                ? t.get(TextConstants.enterNewPasswordTitle)
+                : t.get(TextConstants.enterOtpTitle),
             fontSize: size.width * 0.06,
             fontWeight: FontWeight.w600,
             color: AppColors.black,

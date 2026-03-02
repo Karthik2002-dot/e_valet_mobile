@@ -95,6 +95,7 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     if (_loading) {
       return SizedBox(
         width: _staticIconSize,
@@ -118,7 +119,7 @@ class _LanguageDropdownButtonState extends State<LanguageDropdownButton> {
             color: AppColors.white,
           ),
         ),
-        tooltip: TextConstants.language,
+        tooltip: t.get(TextConstants.language),
       );
     }
 

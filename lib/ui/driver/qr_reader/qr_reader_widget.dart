@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -291,6 +293,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     // Ensure initial camera state check is done only once
     if (!_initialCameraCheckDone) {
       _initialCameraCheckDone = true;
@@ -367,8 +370,8 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                               ),
                               const SizedBox(height: 16),
                               TextComponent(
-                                labelText:
-                                    TextConstants.cameraErrorReinitializing,
+                                labelText: t.get(
+                                    TextConstants.cameraErrorReinitializing),
                                 color: AppColors.white,
                                 fontSize: widget.screenWidth * 0.04,
                                 textAlign: TextAlign.center,

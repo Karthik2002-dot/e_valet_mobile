@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -58,6 +60,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     if (widget.isLoading) {
       return _buildSkeleton(context);
     }
@@ -84,7 +87,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
     if (columnRequests.isEmpty) {
       return Center(
         child: TextComponent(
-          labelText: TextConstants.noPendingRetrievalRequests,
+          labelText: t.get(TextConstants.noPendingRetrievalRequests),
           fontSize: 14,
           color: AppColors.grey,
         ),
@@ -158,6 +161,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
   }
 
   Widget _buildEmpty(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -165,7 +169,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
           Icon(Icons.check_circle_outline, size: 48, color: AppColors.grey),
           const SizedBox(height: 8),
           TextComponent(
-            labelText: TextConstants.noPendingRetrievalRequests,
+            labelText: t.get(TextConstants.noPendingRetrievalRequests),
             fontSize: 14,
             color: AppColors.grey,
           ),

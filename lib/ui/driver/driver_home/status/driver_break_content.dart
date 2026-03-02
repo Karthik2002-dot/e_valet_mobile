@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
@@ -23,13 +25,14 @@ class DriverBreakContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: screenHeight * 0.05),
         // Break title
         TextComponent(
-          labelText: TextConstants.takingBreak,
+          labelText: t.get(TextConstants.takingBreak),
           fontSize: isDesktop
               ? screenWidth * 0.018
               : isTablet
@@ -61,7 +64,7 @@ class DriverBreakContent extends StatelessWidget {
             horizontal: screenWidth * 0.1,
           ),
           child: TextComponent(
-            labelText: TextConstants.relaxAndRestart,
+            labelText: t.get(TextConstants.relaxAndRestart),
             fontSize: isDesktop
                 ? screenWidth * 0.012
                 : isTablet
@@ -76,7 +79,7 @@ class DriverBreakContent extends StatelessWidget {
         // End break button
         if (onBreakEnd != null)
           ElevatedButtonComponent(
-            labelText: TextConstants.endBreak,
+            labelText: t.get(TextConstants.endBreak),
             onPressed: onBreakEnd!,
             elevatedButtonBackgroundColor: AppColors.primary,
             fontColor: AppColors.white,

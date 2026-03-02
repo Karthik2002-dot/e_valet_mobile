@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/translations/language.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -22,6 +24,7 @@ class LanguagePopupDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -70,7 +73,7 @@ class LanguagePopupDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   TextComponent(
-                    labelText: TextConstants.language,
+                    labelText: t.get(TextConstants.language),
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.black,

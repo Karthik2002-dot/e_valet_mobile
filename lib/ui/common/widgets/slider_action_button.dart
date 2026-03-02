@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -34,6 +36,7 @@ class SliderActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final buttonWidth = width ?? constraints.maxWidth;
@@ -64,7 +67,7 @@ class SliderActionButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   TextComponent(
-                    labelText: loadingText ?? labelText,
+                    labelText: t.get(loadingText ?? labelText),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: labelColor ?? AppColors.black,

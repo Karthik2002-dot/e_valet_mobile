@@ -61,7 +61,7 @@ class GuidelinesScreen extends StatelessWidget {
         GuidelinesMainTitle(title: t.get(TextConstants.guidelines)),
         const SizedBox(height: 24),
         GuidelinesSection(
-          title: TextConstants.operatorResponsibilities,
+          title: t.get(TextConstants.operatorResponsibilities),
           icon: Icons.admin_panel_settings,
           items: const [
             'English',
@@ -90,7 +90,7 @@ class GuidelinesScreen extends StatelessWidget {
     // Driver: show How to Park and How to Handover (no Operator Responsibilities)
     // Keep English for driver screen - translations only on operator screen
     return [
-      GuidelinesMainTitle(title: TextConstants.guidelines),
+      GuidelinesMainTitle(title: t.get(TextConstants.guidelines)),
       const SizedBox(height: 24),
       GuidelinesSection(
         title: 'How to Park',

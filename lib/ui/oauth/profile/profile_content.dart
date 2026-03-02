@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -18,6 +20,7 @@ class ProfileContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final user = profile.user;
 
     return SingleChildScrollView(
@@ -93,7 +96,7 @@ class ProfileContent extends StatelessWidget {
                       ),
                       ProfileInfoRow(
                         icon: Icons.phone_outlined,
-                        label: TextConstants.phoneLabel,
+                        label: t.get(TextConstants.phoneLabel),
                         value: user.phoneNumber,
                       ),
                       SizedBox(
@@ -101,7 +104,7 @@ class ProfileContent extends StatelessWidget {
                       ),
                       ProfileInfoRow(
                         icon: Icons.email_outlined,
-                        label: TextConstants.emailLabel,
+                        label: t.get(TextConstants.emailLabel),
                         value: user.email,
                       ),
                       SizedBox(
@@ -109,7 +112,7 @@ class ProfileContent extends StatelessWidget {
                       ),
                       ProfileInfoRow(
                         icon: Icons.badge_outlined,
-                        label: TextConstants.usernameLabel,
+                        label: t.get(TextConstants.usernameLabel),
                         value: user.username,
                       ),
                       SizedBox(
@@ -117,7 +120,7 @@ class ProfileContent extends StatelessWidget {
                       ),
                       ProfileInfoRow(
                         icon: Icons.calendar_today_outlined,
-                        label: TextConstants.joinedLabel,
+                        label: t.get(TextConstants.joinedLabel),
                         value: user.createdAt.split('T').first,
                       ),
                       SizedBox(
@@ -134,7 +137,7 @@ class ProfileContent extends StatelessWidget {
                                   const ResetPasswordDialog(),
                             );
                           },
-                          labelText: TextConstants.resetPassword,
+                          labelText: t.get(TextConstants.resetPassword),
                           fontColor: AppColors.black,
                         ),
                       ),

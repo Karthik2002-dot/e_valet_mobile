@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -189,6 +191,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   Widget _buildSkeletonLayout(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -213,14 +216,14 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextComponent(
-                      labelText: TextConstants.carLogsTitle,
+                      labelText: t.get(TextConstants.carLogsTitle),
                       color: AppColors.black,
                       fontSize: MediaQuery.of(context).size.width * 0.03,
                       fontWeight: FontWeight.bold,
                     ),
                     const SizedBox(height: 4),
                     TextComponent(
-                      labelText: TextConstants.carLogsDescription,
+                      labelText: t.get(TextConstants.carLogsDescription),
                       color: AppColors.grey,
                       fontSize: MediaQuery.of(context).size.width * 0.02,
                     ),
@@ -262,6 +265,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           SafeArea(
             child: BlocBuilder<CarLogsBloc, CarLogsState>(
               builder: (context, state) {
+                final t = context.watch<AppTranslationsNotifier>();
                 if (state is CarLogsLoading) {
                   return _buildSkeletonLayout(context);
                 } else if (state is CarLogsLoaded) {
@@ -306,7 +310,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                   children: [
                                     TextComponent(
                                       labelText:
-                                          '${TextConstants.carLogsTitle} (${state.carLogsResponse.total})',
+                                          '${t.get(TextConstants.carLogsTitle)} (${state.carLogsResponse.total})',
                                       color: AppColors.black,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
@@ -317,8 +321,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText:
-                                          TextConstants.carLogsDescription,
+                                      labelText: t.get(
+                                          TextConstants.carLogsDescription),
                                       color: AppColors.grey,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
@@ -347,7 +351,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     }
                                   },
                                   decoration: InputDecoration(
-                                    hintText: TextConstants.carLogsSearchHint,
+                                    hintText:
+                                        t.get(TextConstants.carLogsSearchHint),
                                     hintStyle: TextStyle(
                                       color: AppColors.grey,
                                       fontSize:
@@ -414,47 +419,43 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                           const SizedBox(height: 24),
                           CarLogsKpiGrid(kpis: state.kpis),
                           const SizedBox(height: 24),
-                          Builder(
-                            builder: (context) {
-                              final displayLogs = _filterLogsForExactSearch(
-                                  state.carLogsResponse.logs);
-                              if (displayLogs.isEmpty)
-                                return Expanded(
-                                  child: Center(
-                                    child: TextComponent(
-                                      labelText:
-                                          TextConstants.carLogsNoDataMessage,
-                                      color: AppColors.grey,
-                                    ),
-                                  ),
-                                );
-                              return Expanded(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: _isTableLoading
-                                          ? const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            )
-                                          : SingleChildScrollView(
-                                              child: CarLogsTableWidget(
-                                                logs: _sortLogs(displayLogs),
-                                                sortColumn: _sortColumn,
-                                                sortDirection: _sortDirection,
-                                                onHeaderTap: _onHeaderTap,
-                                                getSortIcon: _getSortIcon,
-                                                sortLogs: _sortLogs,
-                                                onRowTap: _onRowTap,
-                                              ),
-                                            ),
-                                    ),
-                                    _buildPaginationControls(displayLogs),
-                                  ],
+                          if (state.carLogsResponse.logs.isEmpty)
+                            Expanded(
+                              child: Center(
+                                child: TextComponent(
+                                  labelText:
+                                      t.get(TextConstants.carLogsNoDataMessage),
+                                  color: AppColors.grey,
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: _isTableLoading
+                                        ? const Center(
+                                            child: CircularProgressIndicator(),
+                                          )
+                                        : SingleChildScrollView(
+                                            child: CarLogsTableWidget(
+                                              logs: _sortLogs(
+                                                  state.carLogsResponse.logs),
+                                              sortColumn: _sortColumn,
+                                              sortDirection: _sortDirection,
+                                              onHeaderTap: _onHeaderTap,
+                                              getSortIcon: _getSortIcon,
+                                              sortLogs: _sortLogs,
+                                              onRowTap: _onRowTap,
+                                            ),
+                                          ),
+                                  ),
+                                  _buildPaginationControls(
+                                      context, state.carLogsResponse.logs),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -472,7 +473,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextComponent(
-                            labelText: TextConstants.carLogsErrorMessage,
+                            labelText: t.get(TextConstants.carLogsErrorMessage),
                             color: AppColors.error,
                           ),
                           const SizedBox(height: 8),
@@ -492,8 +493,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     _searchQuery.isEmpty ? null : _searchQuery,
                               ));
                             },
-                            child: const TextComponent(
-                              labelText: TextConstants.retryButton,
+                            child: TextComponent(
+                              labelText: t.get(TextConstants.retryButton),
                             ),
                           ),
                         ],
@@ -642,7 +643,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     }
   }
 
-  Widget _buildPaginationControls(List<CarLog> logs) {
+  Widget _buildPaginationControls(BuildContext context, List<CarLog> logs) {
+    final t = context.watch<AppTranslationsNotifier>();
     final totalPages = _getTotalPages();
     final pageInfoText =
         '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems';
@@ -689,8 +691,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
         // First page button (<<) - only show if not on first page
         if (_currentPage > 1)
           IconButton(
-            icon: const TextComponent(
-              labelText: TextConstants.paginationFirst,
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationFirst),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -704,8 +706,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
         // Previous page button (<) - only show if not on first page
         if (_currentPage > 1)
           IconButton(
-            icon: const TextComponent(
-              labelText: TextConstants.paginationPrev,
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationPrev),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -721,8 +723,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
         if (_currentPage < totalPages) const SizedBox(width: 8),
         if (_currentPage < totalPages)
           IconButton(
-            icon: const TextComponent(
-              labelText: TextConstants.paginationNext,
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationNext),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -735,8 +737,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           ),
         if (_currentPage < totalPages)
           IconButton(
-            icon: const TextComponent(
-              labelText: TextConstants.paginationLast,
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationLast),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -23,6 +25,7 @@ class RetrievalRequestSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -78,7 +81,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                           ),
                         ),
                         TextComponent(
-                          labelText: TextConstants.retrievalRequest,
+                          labelText: t.get(TextConstants.retrievalRequest),
                           fontSize: screenWidth * 0.045,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
@@ -103,8 +106,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: TextComponent(
-                              labelText:
-                                  TextConstants.noActiveRetrievalRequests,
+                              labelText: t
+                                  .get(TextConstants.noActiveRetrievalRequests),
                               textAlign: TextAlign.center,
                               fontSize: screenWidth * 0.04,
                               color: AppColors.mutedText,
@@ -149,7 +152,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextComponent(
-                                      labelText: TextConstants.acceptRequest,
+                                      labelText:
+                                          t.get(TextConstants.acceptRequest),
                                       fontSize: screenWidth * 0.05,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.black,

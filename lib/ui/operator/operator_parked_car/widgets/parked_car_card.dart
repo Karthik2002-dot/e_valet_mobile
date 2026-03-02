@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
@@ -24,6 +26,7 @@ class ParkedCarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -187,8 +190,8 @@ class ParkedCarCard extends StatelessWidget {
                         SizedBox(width: screenWidth * 0.004),
                         Expanded(
                           child: TextComponent(
-                            labelText: TextConstants.parkedByWithName(
-                                item.parkedByName!),
+                            labelText: t.get(TextConstants.parkedByWithName(
+                                item.parkedByName!)),
                             fontSize: screenWidth * 0.018,
                             color: AppColors.black,
                             maxLines: 2,
@@ -213,8 +216,8 @@ class ParkedCarCard extends StatelessWidget {
                       SizedBox(width: screenWidth * 0.004),
                       Expanded(
                         child: TextComponent(
-                          labelText: TimeUtils.formatUtcToIstFullDateTime(
-                              item.parkedAt),
+                          labelText: t.get(TimeUtils.formatUtcToIstFullDateTime(
+                              item.parkedAt)),
                           fontSize: screenWidth * 0.015,
                           color: AppColors.grey,
                           maxLines: 2,
@@ -234,7 +237,8 @@ class ParkedCarCard extends StatelessWidget {
                           item.sessionId,
                         ),
                         label: TextComponent(
-                          labelText: TextConstants.manualRequestButtonLabel,
+                          labelText:
+                              t.get(TextConstants.manualRequestButtonLabel),
                           fontSize: screenWidth * 0.015,
                           color: AppColors.white,
                           fontWeight: FontWeight.w600,

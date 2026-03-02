@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -38,6 +40,7 @@ class CarDetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final fontSize = screenWidth * 0.045;
     final labelFontSize = screenWidth * 0.045;
@@ -73,7 +76,7 @@ class CarDetailsSection extends StatelessWidget {
                   children: [
                     _DetailRow(
                       icon: Icons.confirmation_number_outlined,
-                      label: TextConstants.cardNumber,
+                      label: t.get(TextConstants.cardNumber),
                       value: session.cardNumber.toString(),
                       valueBold: true,
                       screenWidth: screenWidth,
@@ -101,7 +104,7 @@ class CarDetailsSection extends StatelessWidget {
                         Expanded(
                           child: TextComponent(
                             labelText:
-                                '${TextConstants.parkedByLabel} ${session.parkedBy?.name ?? TextConstants.unknown}',
+                                '${t.get(TextConstants.parkedByLabel)} ${session.parkedBy?.name ?? t.get(TextConstants.unknown)}',
                             fontSize: fontSize,
                             color: AppColors.black,
                             maxLines: 1,
@@ -205,6 +208,7 @@ class _CallButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Material(
       color: AppColors.transparent,
       child: InkWell(
@@ -218,7 +222,7 @@ class _CallButton extends StatelessWidget {
               Icon(Icons.phone_outlined, size: 18, color: AppColors.black),
               const SizedBox(width: 4),
               TextComponent(
-                labelText: TextConstants.callButton,
+                labelText: t.get(TextConstants.callButton),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,

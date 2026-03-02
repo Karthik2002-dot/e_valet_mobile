@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/cupertino_colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -56,16 +58,18 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     // iOS uses Cupertino design
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return _buildCupertinoDropdown(context);
+      return _buildCupertinoDropdown(context, t);
     }
 
     // Android and other platforms use Material Design
-    return _buildMaterialDropdown(context);
+    return _buildMaterialDropdown(context, t);
   }
 
-  Widget _buildCupertinoDropdown(BuildContext context) {
+  Widget _buildCupertinoDropdown(
+      BuildContext context, AppTranslationsNotifier t) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -89,7 +93,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
             value: widget.value,
             isExpanded: true,
             hint: TextComponent(
-              labelText: TextConstants.selectLabel(widget.labelText),
+              labelText: t.get(TextConstants.selectLabel(widget.labelText)),
               fontSize: 16,
               color: AppCupertinoColors.placeholderText(context),
             ),
@@ -155,7 +159,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
                       horizontal: 10,
                       vertical: 8,
                     ),
-                    hintText: TextConstants.searchBlockHint,
+                    hintText: t.get(TextConstants.searchBlockHint),
                     hintStyle: TextStyle(
                       fontSize: 14,
                       color: AppCupertinoColors.placeholderText(context),
@@ -201,7 +205,8 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
     );
   }
 
-  Widget _buildMaterialDropdown(BuildContext context) {
+  Widget _buildMaterialDropdown(
+      BuildContext context, AppTranslationsNotifier t) {
     return DropdownButtonFormField2<String>(
       value: widget.value,
       isExpanded: true,
@@ -214,7 +219,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
         ),
       ),
       hint: TextComponent(
-        labelText: TextConstants.selectLabel(widget.labelText),
+        labelText: t.get(TextConstants.selectLabel(widget.labelText)),
         fontSize: 16,
         color: AppColors.mutedText,
       ),
@@ -284,7 +289,7 @@ class _BlockDropdownWidgetState extends State<BlockDropdownWidget> {
                 horizontal: 12,
                 vertical: 10,
               ),
-              hintText: TextConstants.searchBlockHint,
+              hintText: t.get(TextConstants.searchBlockHint),
               hintStyle: TextStyle(
                 fontSize: 14,
                 color: AppColors.mutedText,

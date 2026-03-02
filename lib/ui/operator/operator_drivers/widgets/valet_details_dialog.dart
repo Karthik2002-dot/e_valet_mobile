@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -39,6 +41,7 @@ class ValetDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final media = MediaQuery.of(context);
     final screenWidth = media.size.width;
     final screenHeight = media.size.height;
@@ -107,24 +110,24 @@ class ValetDetailsDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     _DetailRow(
-                      label: TextConstants.carsPickedUpLabel,
+                      label: t.get(TextConstants.carsPickedUpLabel),
                       value: '${valet.carsPickedUp}',
                     ),
                     const SizedBox(height: 12),
                     _DetailRow(
-                      label: TextConstants.carsHandedOverLabel,
+                      label: t.get(TextConstants.carsHandedOverLabel),
                       value: '${valet.carsHandedOver}',
                     ),
                     const SizedBox(height: 12),
                     _DetailRow(
-                      label: TextConstants.onBreakDurationLabel,
+                      label: t.get(TextConstants.onBreakDurationLabel),
                       value:
                           '${valet.onBreakDurationMinutes}${TextConstants.minsLabel}',
                     ),
                     const SizedBox(height: 12),
                     if (valet.clockInAt.isNotEmpty) ...[
                       _DetailRow(
-                        label: TextConstants.clockInAtLabel,
+                        label: t.get(TextConstants.clockInAtLabel),
                         value: TimeUtils.formatUtcToIstFullDateTime(
                             valet.clockInAt),
                       ),
@@ -132,7 +135,7 @@ class ValetDetailsDialog extends StatelessWidget {
                     ],
                     if (valet.clockOutAt.isNotEmpty) ...[
                       _DetailRow(
-                        label: TextConstants.clockOutAtLabel,
+                        label: t.get(TextConstants.clockOutAtLabel),
                         value: TimeUtils.formatUtcToIstFullDateTime(
                             valet.clockOutAt),
                       ),
@@ -140,7 +143,7 @@ class ValetDetailsDialog extends StatelessWidget {
                     ],
                     if (valet.lastActivity.isNotEmpty) ...[
                       _DetailRow(
-                        label: TextConstants.lastActivityLabel,
+                        label: t.get(TextConstants.lastActivityLabel),
                         value: _formatLastActivity(valet.lastActivity),
                       ),
                     ],

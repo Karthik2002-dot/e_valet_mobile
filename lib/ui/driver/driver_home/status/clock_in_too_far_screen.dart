@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -21,6 +23,7 @@ class ClockInTooFarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final isTablet = screenWidth > 600;
@@ -52,7 +55,7 @@ class ClockInTooFarScreen extends StatelessWidget {
                     ),
                     SizedBox(height: screenHeight * 0.03),
                     TextComponent(
-                      labelText: TextConstants.clockInTooFarTitle,
+                      labelText: t.get(TextConstants.clockInTooFarTitle),
                       fontSize: isDesktop
                           ? screenWidth * 0.022
                           : isTablet
@@ -64,7 +67,7 @@ class ClockInTooFarScreen extends StatelessWidget {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     TextComponent(
-                      labelText: TextConstants.clockInTooFarSubtitle,
+                      labelText: t.get(TextConstants.clockInTooFarSubtitle),
                       fontSize: isDesktop
                           ? screenWidth * 0.014
                           : isTablet

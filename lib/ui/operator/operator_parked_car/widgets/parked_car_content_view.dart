@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -51,6 +53,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final occupiedSlots = widget.digitalKeyRack.keyRack.length;
     final filteredItems = _getFilteredAndSortedItems();
     final screenWidth = MediaQuery.of(context).size.width;
@@ -64,7 +67,8 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           // Show search results info if searching
           if (widget.searchQuery.isNotEmpty) ...[
             TextComponent(
-              labelText: TextConstants.showingResultsFor(widget.searchQuery),
+              labelText:
+                  t.get(TextConstants.showingResultsFor(widget.searchQuery)),
               color: AppColors.grey,
               fontSize: screenWidth * 0.013,
               fontWeight: FontWeight.w500,
@@ -120,7 +124,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 TextComponent(
-                  labelText: TextConstants.noCarsParked,
+                  labelText: t.get(TextConstants.noCarsParked),
                   fontSize: MediaQuery.of(context).size.width * 0.018,
                   color: AppColors.grey,
                 ),

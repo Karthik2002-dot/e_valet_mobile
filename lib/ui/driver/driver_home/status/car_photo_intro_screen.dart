@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -206,6 +208,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final w = MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
 
@@ -228,7 +231,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                 if (!didPop && mounted) {
                   SnackBars.showErrorSnackBar(
                     context,
-                    TextConstants.pleaseCompleteParkingProcess,
+                    t.get(TextConstants.pleaseCompleteParkingProcess),
                   );
                 }
               },
@@ -240,7 +243,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: h * 0.016),
-                      _buildHeaderAboveTabs(w, h),
+                      _buildHeaderAboveTabs(t, w, h),
                       SizedBox(height: h * 0.016),
                       Expanded(
                         child: _buildScanTabContent(w, h),
@@ -257,7 +260,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   }
 
   /// Same style as driver_qr_scanner_content: title + "what to do" hint above the tabs.
-  Widget _buildHeaderAboveTabs(double w, double h) {
+  Widget _buildHeaderAboveTabs(
+    AppTranslationsNotifier t,
+    double w,
+    double h,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -269,14 +276,14 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextComponent(
-            labelText: TextConstants.vehicleDetailsTitle,
+            labelText: t.get(TextConstants.vehicleDetailsTitle),
             fontSize: w * 0.045,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),
           SizedBox(height: h * 0.006),
           TextComponent(
-            labelText: TextConstants.vehicleDetailsParkingPhotoHint,
+            labelText: t.get(TextConstants.vehicleDetailsParkingPhotoHint),
             fontSize: w * 0.032,
             fontWeight: FontWeight.w400,
             color: AppColors.black,

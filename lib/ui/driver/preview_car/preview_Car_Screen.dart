@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
@@ -126,9 +128,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final t = context.watch<AppTranslationsNotifier>();
         return AlertDialog(
           title: TextComponent(
-            labelText: TextConstants.editDetails,
+            labelText: t.get(TextConstants.editDetails),
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.w600,
           ),
@@ -138,7 +141,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextComponent(
-                  labelText: TextConstants.parkingLocationLabel,
+                  labelText: t.get(TextConstants.parkingLocationLabel),
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -149,7 +152,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   autofocus: true,
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: TextConstants.enterParkingLocationHint,
+                    hintText: t.get(TextConstants.enterParkingLocationHint),
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -173,7 +176,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 ),
                 SizedBox(height: 16),
                 TextComponent(
-                  labelText: TextConstants.vehicleNumberLabel,
+                  labelText: t.get(TextConstants.vehicleNumberLabel),
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -188,7 +191,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   ],
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: TextConstants.enterVehicleNumberHint,
+                    hintText: t.get(TextConstants.enterVehicleNumberHint),
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -216,7 +219,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: TextComponent(
-                labelText: TextConstants.cancel,
+                labelText: t.get(TextConstants.cancel),
                 fontSize: screenWidth * 0.038,
                 color: AppColors.grey,
               ),
@@ -235,7 +238,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 } else {
                   SnackBars.showErrorSnackBar(
                     context,
-                    TextConstants.parkingLocationCannotBeEmpty,
+                    t.get(TextConstants.parkingLocationCannotBeEmpty),
                   );
                 }
               },
@@ -244,7 +247,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 foregroundColor: AppColors.white,
               ),
               child: TextComponent(
-                labelText: TextConstants.saveButton,
+                labelText: t.get(TextConstants.saveButton),
                 fontSize: screenWidth * 0.038,
                 color: AppColors.white,
               ),
@@ -287,6 +290,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
         },
         child: BlocBuilder<PreviewCarBloc, PreviewCarState>(
           builder: (context, state) {
+            final t = context.watch<AppTranslationsNotifier>();
             final isSubmitting = state is PreviewCarSubmitting || _isProcessing;
 
             final horizontalPadding = screenWidth * 0.04;
@@ -342,10 +346,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                       ),
                                     ),
                                     child: TextFieldComponent(
-                                      labelText:
-                                          TextConstants.parkingLocationLabel,
-                                      hintText:
-                                          TextConstants.parkingLocationHint,
+                                      labelText: t.get(
+                                          TextConstants.parkingLocationLabel),
+                                      hintText: t.get(
+                                          TextConstants.parkingLocationHint),
                                       controller: _parkingLocationController,
                                       keyboardType: TextInputType.text,
                                       textInputAction: TextInputAction.done,
@@ -367,7 +371,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                         .trim()
                                         .isNotEmpty,
                                     overrideLabel:
-                                        TextConstants.previewDoneButton,
+                                        t.get(TextConstants.previewDoneButton),
                                   ),
                                 ],
                               ),
@@ -484,8 +488,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 SizedBox(
                                                     width: screenWidth * 0.02),
                                                 TextComponent(
-                                                  labelText: TextConstants
-                                                      .vehicleNumberLabel,
+                                                  labelText: t.get(TextConstants
+                                                      .vehicleNumberLabel),
                                                   fontSize: screenWidth * 0.035,
                                                   fontWeight: FontWeight.w600,
                                                   color: AppColors.black,
@@ -504,8 +508,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                           SizedBox(
                                               height: screenHeight * 0.025),
                                           TextComponent(
-                                            labelText: TextConstants
-                                                .afterVehicleParkedConfirmInstruction,
+                                            labelText: t.get(TextConstants
+                                                .afterVehicleParkedConfirmInstruction),
                                             fontSize: screenWidth * 0.045,
                                             color: AppColors.black,
                                             height: 1.35,
@@ -548,8 +552,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                         ),
                                                       )
                                                     : TextComponent(
-                                                        labelText: TextConstants
-                                                            .okButton,
+                                                        labelText: t.get(
+                                                            TextConstants
+                                                                .okButton),
                                                         fontSize:
                                                             screenWidth * 0.16,
                                                         fontWeight:

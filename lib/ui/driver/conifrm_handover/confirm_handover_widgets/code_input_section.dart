@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -61,6 +63,7 @@ class _CodeInputSectionState extends State<CodeInputSection> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -70,7 +73,7 @@ class _CodeInputSectionState extends State<CodeInputSection> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
           child: TextComponent(
-            labelText: TextConstants.enterTwoDigitCode,
+            labelText: t.get(TextConstants.enterTwoDigitCode),
             textAlign: TextAlign.center,
             fontSize: screenWidth * 0.04,
             color: AppColors.black,
@@ -103,7 +106,7 @@ class _CodeInputSectionState extends State<CodeInputSection> {
             // TODO: Handle customer has no phone
           },
           child: TextComponent(
-            labelText: TextConstants.customerHasNoPhone,
+            labelText: t.get(TextConstants.customerHasNoPhone),
             fontSize: screenWidth * 0.035,
             color: AppColors.secondary,
             textDecoration: TextDecoration.underline,

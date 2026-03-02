@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -21,6 +23,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -44,7 +47,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                       width: MediaQuery.of(context).size.width * 0.01,
                     ),
                     TextComponent(
-                      labelText: TextConstants.confirmAssignment,
+                      labelText: t.get(TextConstants.confirmAssignment),
                       fontSize: MediaQuery.of(context).size.width * 0.015,
                       fontWeight: FontWeight.bold,
                       color: AppColors.black,
@@ -207,14 +210,15 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextComponent(
-                          labelText: TextConstants.cardNumberLabel,
+                          labelText: t.get(TextConstants.cardNumberLabel),
                           fontSize: MediaQuery.of(context).size.width * 0.012,
                           color: AppColors.grey,
                         ),
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.003),
                         TextComponent(
-                          labelText: '#${request.cardNumber}',
+                          labelText:
+                              '#${t.get(TextConstants.cardNumber)} ${request.cardNumber}',
                           fontSize: MediaQuery.of(context).size.width * 0.018,
                           fontWeight: FontWeight.bold,
                           color: AppColors.black,
@@ -244,7 +248,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                       ),
                     ),
                     child: TextComponent(
-                      labelText: TextConstants.cancelText,
+                      labelText: t.get(TextConstants.cancelText),
                       fontSize: MediaQuery.of(context).size.width * 0.016,
                       color: AppColors.grey,
                       fontWeight: FontWeight.w600,
@@ -276,7 +280,7 @@ class AssignmentConfirmationDialog extends StatelessWidget {
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.01),
                         TextComponent(
-                          labelText: TextConstants.confirm,
+                          labelText: t.get(TextConstants.confirm),
                           fontSize: MediaQuery.of(context).size.width * 0.016,
                           color: AppColors.white,
                           fontWeight: FontWeight.w600,

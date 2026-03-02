@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -82,6 +84,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return GestureDetector(
       onTap: () {
         // Dismiss keyboard when tapping outside
@@ -121,7 +124,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextComponent(
-                            labelText: TextConstants.valetDashboardTitle,
+                            labelText: t.get(TextConstants.valetDashboardTitle),
                             color: AppColors.black,
                             fontSize: MediaQuery.of(context).size.width *
                                 (Platform.isIOS ? 0.026 : 0.03),
@@ -131,7 +134,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           ),
                           const SizedBox(height: 4),
                           TextComponent(
-                            labelText: TextConstants.valetDashboardDescription,
+                            labelText:
+                                t.get(TextConstants.valetDashboardDescription),
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width *
                                 (Platform.isIOS ? 0.018 : 0.02),
@@ -153,7 +157,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           });
                         },
                         decoration: InputDecoration(
-                          hintText: TextConstants.searchByNameOrPhone,
+                          hintText: t.get(TextConstants.searchByNameOrPhone),
                           hintStyle: TextStyle(
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width * 0.02,
@@ -224,7 +228,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           children: [
                             TextComponent(
                               labelText:
-                                  '${TextConstants.errorLabel}: ${state.message}',
+                                  '${t.get(TextConstants.errorLabel)}: ${state.message}',
                               color: AppColors.error,
                               textAlign: TextAlign.center,
                             ),
@@ -235,8 +239,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                                   FetchValetKpis(outletId: _outletId),
                                 );
                               },
-                              child: const TextComponent(
-                                labelText: TextConstants.retryButton,
+                              child: TextComponent(
+                                labelText: t.get(TextConstants.retryButton),
                               ),
                             ),
                           ],
