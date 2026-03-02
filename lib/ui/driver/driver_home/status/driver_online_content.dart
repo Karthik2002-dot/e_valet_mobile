@@ -73,8 +73,8 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                 children: [
                   SizedBox(height: h * 0.02),
                   TextComponent(
-                    labelText: t.get(
-                        TextConstants.readyToParkMessage(widget.driverName)),
+                    labelText:
+                        '${t.get(TextConstants.hiGreeting)} ${widget.driverName},',
                     fontSize: w * 0.048,
                     textAlign: TextAlign.center,
                     fontWeight: FontWeight.w600,

@@ -102,7 +102,9 @@ class TextConstants {
   static const String driverHomeTitle = 'Driver Home';
   static const String driverFallbackName = 'Driver';
   static const String userFallbackName = 'User';
+  static const String hiGreeting = 'Hi';
   static String readyToParkMessage(String driverName) => 'Hi $driverName,';
+  static const String requestedAt = 'Requested at';
   static const String scanKeyTagInstruction =
       'Scan the key tag to start the parking process.';
   static const String parkVehicle = 'Park Vehicle';

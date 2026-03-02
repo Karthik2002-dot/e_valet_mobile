@@ -373,7 +373,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: TextComponent(
-                                      labelText: _statusLabel(),
+                                      labelText: t.get(_statusLabel()),
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.014,
@@ -483,7 +483,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                               ),
                               TextComponent(
                                 labelText:
-                                    'Requested at ${RetrievalRequestUtils.formatTime(widget.request.requestedAt)}',
+                                    '${t.get(TextConstants.requestedAt)} ${RetrievalRequestUtils.formatTime(widget.request.requestedAt)}',
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.014,
                                 color: AppColors.grey,
