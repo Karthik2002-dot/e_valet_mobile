@@ -350,7 +350,7 @@ class _QrReaderWidgetState extends State<QrReaderWidget>
                 children: [
                   MobileScanner(
                     controller: controller!,
-                    errorBuilder: (context, error) {
+                    errorBuilder: (context, error, child) {
                       // If there's an error, ensure camera is ready
                       Future.delayed(const Duration(milliseconds: 500), () {
                         if (mounted) {
