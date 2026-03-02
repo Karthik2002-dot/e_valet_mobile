@@ -488,8 +488,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 SizedBox(
                                                     width: screenWidth * 0.02),
                                                 TextComponent(
-                                                  labelText: TextConstants
-                                                      .vehicleNumberLabel,
+                                                  labelText: t.get(TextConstants
+                                                      .vehicleNumberLabel),
                                                   fontSize: screenWidth * 0.035,
                                                   fontWeight: FontWeight.w600,
                                                   color: AppColors.black,
@@ -508,8 +508,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                           SizedBox(
                                               height: screenHeight * 0.025),
                                           TextComponent(
-                                            labelText: TextConstants
-                                                .afterVehicleParkedConfirmInstruction,
+                                            labelText: t.get(TextConstants
+                                                .afterVehicleParkedConfirmInstruction),
                                             fontSize: screenWidth * 0.045,
                                             color: AppColors.black,
                                             height: 1.35,
@@ -552,8 +552,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                         ),
                                                       )
                                                     : TextComponent(
-                                                        labelText: TextConstants
-                                                            .okButton,
+                                                        labelText: t.get(
+                                                            TextConstants
+                                                                .okButton),
                                                         fontSize:
                                                             screenWidth * 0.16,
                                                         fontWeight:

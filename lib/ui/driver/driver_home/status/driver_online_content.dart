@@ -145,7 +145,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
           } else if (state is TagSubmissionError) {
             SnackBars.showErrorSnackBar(
               context,
-              TextConstants.tagSubmissionError,
+              t.get(TextConstants.tagSubmissionError),
             );
           }
         },

@@ -60,8 +60,8 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
       drawer: OperatorDrawer(
           selectedIndex: _selectedIndex, onItemSelected: _onMenuItemSelected),
       appBar: AppBar(
-        title: const TextComponent(
-          labelText: (TextConstants.operatorHomeTitle),
+        title: TextComponent(
+          labelText: t.get(TextConstants.operatorHomeTitle),
         ),
         actions: [
           IconButton(
@@ -75,7 +75,7 @@ class _OperatorHomeViewState extends State<OperatorHomeView> {
       ),
       body: Center(
         child: TextComponent(
-          labelText: '${t.get(TextConstants.welcomeOperator)}$_selectedIndex)',
+          labelText: '${t.get(TextConstants.welcomeOperator)} $_selectedIndex',
         ),
       ),
     );

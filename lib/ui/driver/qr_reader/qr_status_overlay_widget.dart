@@ -90,8 +90,8 @@ class QrStatusOverlayWidget extends StatelessWidget {
               Flexible(
                 child: TextComponent(
                   labelText: isSuccess
-                      ? TextConstants.scannedSuccess
-                      : (state.errorMessage ?? TextConstants.errorLabel),
+                      ? t.get(TextConstants.scannedSuccess)
+                      : (state.errorMessage ?? t.get(TextConstants.errorLabel)),
                   fontSize: isDesktop
                       ? screenWidth * 0.012
                       : isTablet
