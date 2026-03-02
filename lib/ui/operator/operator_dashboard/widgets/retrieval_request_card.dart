@@ -348,13 +348,17 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              TextComponent(
-                                labelText:
-                                    '#${t.get(TextConstants.cardNumber)} ${widget.request.cardNumber}',
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.022,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.black,
+                              Expanded(
+                                child: TextComponent(
+                                  labelText:
+                                      '#${t.get(TextConstants.cardNumber)} ${widget.request.cardNumber}',
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.022,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.black,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
