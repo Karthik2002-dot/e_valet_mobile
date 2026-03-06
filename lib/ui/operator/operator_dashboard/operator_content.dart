@@ -50,6 +50,15 @@ class _DashboardContentState extends State<DashboardContent> {
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
 
+  /// Auto mode toggle: when on, retrieval requests refresh every 30 seconds in the background. Default off; user turns on manually.
+  bool _isAutoMode = false;
+
+  /// Periodic timer for silent background refresh of retrieval requests every 30 seconds.
+  Timer? _retrievalRequestsRefreshTimer;
+
+  static const Duration _retrievalRequestsRefreshInterval =
+      Duration(seconds: 30);
+
   @override
   void initState() {
     super.initState();
@@ -70,10 +79,40 @@ class _DashboardContentState extends State<DashboardContent> {
       ),
     );
 
+    // Start periodic silent refresh when auto mode is on
+    if (_isAutoMode) {
+      _startRetrievalRequestsRefreshTimer();
+    }
+
     // Expose silent refresh method to parent
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshReady?.call(_silentRefresh);
     });
+  }
+
+  /// Silent background refresh of retrieval requests only (no loading indicator).
+  void _silentRefreshRetrievalRequests() {
+    _dashboardBloc.add(
+      RefreshDashboardKpisSilently(
+        outletId: _outletId,
+        refreshKpis: false,
+        refreshDrivers: false,
+        refreshRequests: true,
+      ),
+    );
+  }
+
+  void _startRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = Timer.periodic(
+      _retrievalRequestsRefreshInterval,
+      (_) => _silentRefreshRetrievalRequests(),
+    );
+  }
+
+  void _stopRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
   }
 
   void _silentRefresh() {
@@ -196,6 +235,8 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void dispose() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
     for (final timer in _highlightTimers.values) {
       timer.cancel();
     }
@@ -216,10 +257,41 @@ class _DashboardContentState extends State<DashboardContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextComponent(
-                labelText: t.get(TextConstants.dashboardOverview),
-                color: AppColors.black,
-                fontSize: MediaQuery.of(context).size.height * 0.015,
+              Row(
+                children: [
+                  TextComponent(
+                    labelText: t.get(TextConstants.dashboardOverview),
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.height * 0.015,
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextComponent(
+                        labelText: t.getByKey(
+                            'Auto Mode', TextConstants.autoToggleLabel),
+                        color: AppColors.black,
+                        fontSize: MediaQuery.of(context).size.height * 0.015,
+                      ),
+                      const SizedBox(width: 8),
+                      Switch(
+                        value: _isAutoMode,
+                        onChanged: (value) {
+                          setState(() {
+                            _isAutoMode = value;
+                            if (_isAutoMode) {
+                              _startRetrievalRequestsRefreshTimer();
+                            } else {
+                              _stopRetrievalRequestsRefreshTimer();
+                            }
+                          });
+                        },
+                        activeColor: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Expanded(

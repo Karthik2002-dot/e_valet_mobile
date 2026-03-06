@@ -319,6 +319,7 @@ class TextConstants {
 
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
+  static const String autoToggleLabel = 'Auto Mode';
   static const String retryButton = 'Retry';
   static const String availableTags = 'Available Tags';
   static const String availableValets = 'Available Valets';
