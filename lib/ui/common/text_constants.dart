@@ -42,6 +42,8 @@ class TextConstants {
   // Validation Messages
   static const String validationEmailRequired = 'Please enter your email';
   static const String validationEmailInvalid = 'Please enter a valid email';
+  static const String validationPhoneRequired =
+      'Please enter your Phone Number';
   static const String validationPasswordRequired = 'Please enter your password';
   static String validationPasswordMinLength(int minLength) =>
       'Password must be at least $minLength characters';
@@ -211,6 +213,9 @@ class TextConstants {
   // Camera Screen
   static const String captureCarInstruction =
       'Capture the car clearly with location\nlandmarks';
+  static const String captureAPhotoOfTheCar = 'Capture a photo of the car';
+  static const String captureTheCarClearlyWithLocationLandmarks =
+      'Capture the car clearly with location landmarks';
   static const String photoMode = 'PHOTO MODE';
   static const String cameraNotAvailable = 'No camera available on this device';
   static const String errorInitializingCamera = 'Error initializing camera';
@@ -390,6 +395,8 @@ class TextConstants {
   static const String onBreakValets = 'On Break';
   static const String offlineValets = 'Offline';
   static const String searchByNameOrPhone = 'Search By Name Or Phone...';
+  static const String searchByNameOrCardNumber =
+      'Search by name or card number';
 
   // Valet Status Labels
   static const String statusAvailable = 'Available';
@@ -397,6 +404,7 @@ class TextConstants {
   static const String statusOnBreak = 'On Break';
   static const String statusOffline = 'Offline';
   static const headerOnBreak = 'On Break';
+  static const onBreakScreen = 'On Break';
   static const statusLabel = 'Status';
   static const statusOnline = 'Online';
   static const statusValueOnline = 'online';

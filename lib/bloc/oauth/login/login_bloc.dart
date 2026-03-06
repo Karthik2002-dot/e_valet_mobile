@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
@@ -54,12 +55,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     // Validate inputs
     if (_loginId.isEmpty) {
-      emit(const LoginFailure('Please enter your Phone Number'));
+      emit(LoginFailure(TextConstants.validationPhoneRequired));
       return;
     }
 
     if (_pin.isEmpty) {
-      emit(const LoginFailure('Please enter your Password'));
+      emit(LoginFailure(TextConstants.validationPasswordRequired));
       return;
     }
 

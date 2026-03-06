@@ -157,7 +157,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           });
                         },
                         decoration: InputDecoration(
-                          hintText: t.get(TextConstants.searchByNameOrPhone),
+                          hintText:
+                              t.get(TextConstants.searchByNameOrCardNumber),
                           hintStyle: TextStyle(
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width * 0.02,

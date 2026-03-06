@@ -12,6 +12,8 @@ import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login_form.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
@@ -171,7 +173,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             );
           } else if (state is LoginFailure) {
-            SnackBars.showErrorSnackBar(context, state.message);
+            final t = context.read<AppTranslationsNotifier>();
+            String displayMessage = state.message;
+            if (state.message == TextConstants.validationPhoneRequired) {
+              displayMessage = t.get(TextConstants.validationPhoneRequired);
+            } else if (state.message ==
+                TextConstants.validationPasswordRequired) {
+              displayMessage = t.get(TextConstants.validationPasswordRequired);
+            }
+            SnackBars.showErrorSnackBar(context, displayMessage);
           }
         },
         child: GestureDetector(
