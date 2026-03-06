@@ -20,6 +20,8 @@ class TextConstants {
   static const String overtimeConfirmTitle = 'Confirm Overtime';
   static String overtimeConfirmMessage(String valetName, int minutes) =>
       'You have extended the $valetName time $minutes minutes more extra.';
+  static const String overtimeNoAvailableDrivers =
+      'No available drivers for now';
   static const String operatorResponsibilities = 'Operator Responsibilities';
   static const logout = 'Logout';
 

@@ -358,7 +358,7 @@ class OperatorDashboardBloc
         if (!isClosed) {
           add(RefreshDashboardKpisSilently(
             outletId: outletId,
-            refreshKpis: false,
+            refreshKpis: true,
             refreshDrivers: true,
             refreshRequests: true,
           ));

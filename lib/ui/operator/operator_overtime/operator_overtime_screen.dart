@@ -4,12 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_overtime/grant_overtime_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_valet/valet_list_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_home/operator_menu_state.dart';
-import 'package:niloufer_valet_mobile/models/operator/operator_overtime/grant_overtime_request.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_overtime/operator_overtime_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_overtime/operator_overtime_event.dart';
+import 'package:niloufer_valet_mobile/bloc/operator/operator_overtime/operator_overtime_state.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_confirm_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_valet_row.dart';
 
 /// Over Time screen for the valet operator.
@@ -39,9 +40,7 @@ class OperatorOverTimeScreen extends StatefulWidget {
 class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final OperatorMenuBloc _menuBloc;
-  List<ValetResponse>? _valets;
-  String? _errorMessage;
-  bool _isLoading = true;
+  late final OperatorOvertimeBloc _overtimeBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final Map<String, String> _overtimeInputs = {};
 
@@ -49,7 +48,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   void initState() {
     super.initState();
     _menuBloc = OperatorMenuBloc();
-    _loadValets();
+    _overtimeBloc = OperatorOvertimeBloc()
+      ..add(OvertimeLoadValets(outletId: _outletId));
   }
 
   void _goToDashboard() {
@@ -68,131 +68,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   @override
   void dispose() {
     _menuBloc.close();
+    _overtimeBloc.close();
     super.dispose();
-  }
-
-  Future<void> _loadValets() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _valets = null;
-    });
-    try {
-      final response = await ValetListApiService.getValets(outletId: _outletId);
-      if (mounted) {
-        setState(() {
-          _valets = response.valets;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _showOvertimeConfirmationDialog({
-    required String driverUserId,
-    required int extraMinutes,
-    required String valetName,
-  }) {
-    final t = context.read<AppTranslationsNotifier>();
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => AlertDialog(
-        title: TextComponent(
-          labelText: t.get(TextConstants.overtimeConfirmTitle),
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
-        content: TextComponent(
-          labelText: t.get(
-              TextConstants.overtimeConfirmMessage(valetName, extraMinutes)),
-          fontSize: 16,
-          color: AppColors.black,
-        ),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.grey,
-              side: BorderSide(color: AppColors.grey.withOpacity(0.5)),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: TextComponent(
-              labelText: t.get(TextConstants.cancelText),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.grey,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _grantOvertime(
-                driverUserId: driverUserId,
-                extraMinutes: extraMinutes,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-            ),
-            child: TextComponent(
-              labelText: t.get(TextConstants.confirm),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _grantOvertime({
-    required String driverUserId,
-    required int extraMinutes,
-  }) async {
-    final outletIdInt = int.tryParse(_outletId) ?? 0;
-    final request = GrantOvertimeRequest(
-      driverUserId: driverUserId,
-      outletId: outletIdInt,
-      extraMinutes: extraMinutes,
-      reason: 'Granted from operator app',
-    );
-
-    try {
-      final res = await GrantOvertimeApiService.grantOvertime(request: request);
-      final msg = (res.message?.trim().isNotEmpty ?? false)
-          ? res.message!.trim()
-          : 'Overtime granted';
-
-      if (!mounted) return;
-
-      SnackBars.showSuccessSnackBar(context, msg);
-      setState(() {
-        _overtimeInputs[driverUserId] = '';
-      });
-    } catch (e) {
-      print('🔴 OVERTIME submit failed: $e');
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(context, e.toString());
-    }
   }
 
   void _onMenuItemSelected(int index) {
@@ -256,8 +133,11 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
         isAndroidPhone ? (width * 0.05).clamp(18.0, 22.0) : (width * 0.03);
     final headerDescriptionFontSize =
         isAndroidPhone ? (width * 0.038).clamp(14.0, 16.0) : (width * 0.02);
-    return BlocProvider.value(
-      value: _menuBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _menuBloc),
+        BlocProvider.value(value: _overtimeBloc),
+      ],
       child: BlocListener<OperatorMenuBloc, OperatorMenuState>(
         listener: (context, state) {
           if (state is OperatorMenuLogoutSuccess) {
@@ -274,7 +154,19 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
             );
           }
         },
-        child: Scaffold(
+        child: BlocListener<OperatorOvertimeBloc, OperatorOvertimeState>(
+          listenWhen: (previous, current) =>
+              current is OperatorOvertimeGrantSuccess ||
+              current is OperatorOvertimeGrantError,
+          listener: (context, state) {
+            if (state is OperatorOvertimeGrantSuccess) {
+              SnackBars.showSuccessSnackBar(context, state.message);
+              setState(() => _overtimeInputs[state.driverUserId] = '');
+            } else if (state is OperatorOvertimeGrantError) {
+              SnackBars.showErrorSnackBar(context, state.message);
+            }
+          },
+          child: Scaffold(
           key: _scaffoldKey,
           backgroundColor: AppColors.white,
           endDrawer: OperatorDrawer(
@@ -285,7 +177,9 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
             showLanguageIcon: true,
             actions: [
               IconButton(
-                onPressed: _loadValets,
+                onPressed: () => _overtimeBloc.add(
+                  OvertimeLoadValets(outletId: _outletId),
+                ),
                 icon: const Icon(Icons.refresh, color: AppColors.white),
               ),
               IconButton(
@@ -356,42 +250,62 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        if (_isLoading)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(24),
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        else if (_errorMessage != null)
-                          Center(
-                            child: Column(
-                              children: [
-                                TextComponent(
-                                  labelText:
-                                      '${t.get(TextConstants.errorLabel)}: $_errorMessage',
-                                  color: AppColors.error,
-                                  textAlign: TextAlign.center,
+                        BlocBuilder<OperatorOvertimeBloc, OperatorOvertimeState>(
+                          builder: (context, overtimeState) {
+                            if (overtimeState is OperatorOvertimeLoading) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24),
+                                  child: CircularProgressIndicator(),
                                 ),
-                                const SizedBox(height: 16),
-                                TextButton(
-                                  onPressed: _loadValets,
+                              );
+                            }
+                            if (overtimeState is OperatorOvertimeLoadError) {
+                              return Center(
+                                child: Column(
+                                  children: [
+                                    TextComponent(
+                                      labelText:
+                                          '${t.get(TextConstants.errorLabel)}: ${overtimeState.message}',
+                                      color: AppColors.error,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    TextButton(
+                                      onPressed: () => _overtimeBloc.add(
+                                        OvertimeLoadValets(outletId: _outletId),
+                                      ),
+                                      child: TextComponent(
+                                        labelText: t.get(
+                                            TextConstants.retryButton),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            if (overtimeState is! OperatorOvertimeLoaded) {
+                              return const SizedBox.shrink();
+                            }
+                            final valets = overtimeState.valets;
+                            if (valets.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24),
                                   child: TextComponent(
-                                    labelText: t.get(TextConstants.retryButton),
+                                    labelText: t.get(
+                                        TextConstants.overtimeNoAvailableDrivers),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.grey,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 3,
                                   ),
                                 ),
-                              ],
-                            ),
-                          )
-                        else if (_valets == null || _valets!.isEmpty)
-                          Center(
-                            child: TextComponent(
-                              labelText: t.get(TextConstants.noValetsFound),
-                              color: AppColors.grey,
-                            ),
-                          )
-                        else ...[
-                          Builder(
+                              );
+                            }
+                            return Builder(
                             builder: (context) {
                               const crossAxisSpacing = 12.0;
                               const mainAxisSpacing = 12.0;
@@ -442,10 +356,21 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                       );
                                       return;
                                     }
-                                    _showOvertimeConfirmationDialog(
+                                    OvertimeConfirmDialog.show(
+                                      context,
                                       driverUserId: valet.userId,
                                       extraMinutes: minutes,
                                       valetName: valet.name,
+                                      onConfirm: () =>
+                                          context.read<OperatorOvertimeBloc>().add(
+                                                OvertimeGrantRequested(
+                                                  driverUserId: valet.userId,
+                                                  outletId:
+                                                      int.tryParse(_outletId) ??
+                                                          0,
+                                                  extraMinutes: minutes,
+                                                ),
+                                              ),
                                     );
                                   },
                                 );
@@ -455,11 +380,11 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                 return ListView.separated(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: _valets!.length,
+                                  itemCount: valets.length,
                                   separatorBuilder: (_, __) =>
                                       const SizedBox(height: mainAxisSpacing),
                                   itemBuilder: (context, index) {
-                                    return buildRowForValet(_valets![index]);
+                                    return buildRowForValet(valets[index]);
                                   },
                                 );
                               }
@@ -476,18 +401,19 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                     spacing: crossAxisSpacing,
                                     runSpacing: mainAxisSpacing,
                                     children: [
-                                      for (final valet in _valets!)
+                                      for (final v in valets)
                                         SizedBox(
                                           width: itemWidth,
-                                          child: buildRowForValet(valet),
+                                          child: buildRowForValet(v),
                                         ),
                                     ],
                                   );
                                 },
                               );
                             },
-                          ),
-                        ],
+                          );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -496,6 +422,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
