@@ -68,7 +68,8 @@ class LoginForm extends StatelessWidget {
                   ),
                   const SizedBox(height: verticalSpacing),
                   TextComponent(
-                    labelText: t.get(TextConstants.loginPrompt),
+                    labelText:
+                        t.getByKey('loginPrompt', TextConstants.loginPrompt),
                     fontSize: titleFontSize,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -76,8 +77,10 @@ class LoginForm extends StatelessWidget {
                   ),
                   const SizedBox(height: verticalSpacing),
                   PhoneNumberField(
-                    labelText: t.get(TextConstants.phoneNumberLabel),
-                    hintText: t.get(TextConstants.phoneNumberHint),
+                    labelText: t.getByKey(
+                        'phoneNumberLabel', TextConstants.phoneNumberLabel),
+                    hintText: t.getByKey(
+                        'phoneNumberHint', TextConstants.phoneNumberHint),
                     controller: loginIdController,
                     focusNode: loginIdFocusNode,
                     textInputAction: TextInputAction.next,
@@ -99,7 +102,8 @@ class LoginForm extends StatelessWidget {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleLogin(context),
                     labelText: t.get(TextConstants.passwordLabel),
-                    hintText: t.get(TextConstants.passwordHint),
+                    hintText:
+                        t.getByKey('passwordHint', TextConstants.passwordHint),
                     onChanged: (value) =>
                         context.read<LoginBloc>().add(PinChanged(value)),
                   ),
@@ -117,8 +121,10 @@ class LoginForm extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButtonComponent(
                           labelText: isLoading
-                              ? t.get(TextConstants.loginButtonLoading)
-                              : t.get(TextConstants.loginButton),
+                              ? t.getByKey('loginButtonLoading',
+                                  TextConstants.loginButtonLoading)
+                              : t.getByKey(
+                                  'loginButton', TextConstants.loginButton),
                           onPressed: handlePress,
                           elevatedButtonBackgroundColor: AppColors.accent,
                           radius: 8,
@@ -151,7 +157,8 @@ class LoginForm extends StatelessWidget {
                     children: [
                       const Spacer(),
                       TextButtonComponent(
-                        labelText: t.get(TextConstants.forgotPassword),
+                        labelText: t.getByKey(
+                            'forgotPassword', TextConstants.forgotPassword),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(

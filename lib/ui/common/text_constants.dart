@@ -438,7 +438,7 @@ class TextConstants {
       'Recommended for $cardNumber';
 
   static const String sessionContinue =
-      'Your session has been not completed please click on continue to proceed';
+      'Your session is not completed. Please click Continue to proceed.';
   static const String continueLabel = 'Continue';
 
   // Car Log Details Popup

@@ -180,7 +180,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: t.get(TextConstants.noAvailableDrivers),
+              labelText: t.getByKey('noAvailableDriversAtTheMoment',
+                  TextConstants.noAvailableDrivers),
               fontSize: 14,
               color: AppColors.grey,
             ),

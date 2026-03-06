@@ -152,8 +152,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextComponent(
-                                      labelText:
-                                          t.get(TextConstants.acceptRequest),
+                                      labelText: t.getByKey('acceptRequest',
+                                          TextConstants.acceptRequest),
                                       fontSize: screenWidth * 0.05,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.black,

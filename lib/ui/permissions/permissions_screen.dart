@@ -340,10 +340,12 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                     ),
                     child: TextComponent(
                       labelText: _allGranted
-                          ? t.get(TextConstants.continueLabel)
+                          ? t.getByKey(
+                              'continueLabel', TextConstants.continueLabel)
                           : (_firstMissingPermission != null
                               ? _permissionButtonLabel(_firstMissingPermission!)
-                              : t.get(TextConstants.continueLabel)),
+                              : t.getByKey('continueLabel',
+                                  TextConstants.continueLabel)),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

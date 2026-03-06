@@ -63,7 +63,8 @@ class PreviewSubmitButton extends StatelessWidget {
                     labelText: overrideLabel ??
                         (isReparking
                             ? t.get(TextConstants.submitRePark)
-                            : t.get(TextConstants.submitButton)),
+                            : t.getByKey(
+                                'submitButton', TextConstants.submitButton)),
                     fontSize: textSize,
                     color: AppColors.white,
                   ),

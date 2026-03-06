@@ -97,7 +97,8 @@ class SlideToConfirmButton extends StatelessWidget {
                 _leadingWidget(t, screenHeight, screenWidth),
                 SizedBox(width: useBigStyle ? 16 : 10),
                 TextComponent(
-                  labelText: t.get(TextConstants.slideToConfirmArrival),
+                  labelText: t.getByKey('slideToConfirmArrival',
+                      TextConstants.slideToConfirmArrival),
                   fontSize:
                       useBigStyle ? screenWidth * 0.06 : screenHeight * 0.025,
                   fontWeight: FontWeight.w600,

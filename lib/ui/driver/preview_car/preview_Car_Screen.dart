@@ -141,7 +141,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextComponent(
-                  labelText: t.get(TextConstants.parkingLocationLabel),
+                  labelText: t.getByKey('parkingLocationLabel',
+                      TextConstants.parkingLocationLabel),
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -152,7 +153,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   autofocus: true,
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: t.get(TextConstants.enterParkingLocationHint),
+                    hintText: t.getByKey('parkingLocationHint',
+                        TextConstants.parkingLocationHint),
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -346,9 +348,11 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                       ),
                                     ),
                                     child: TextFieldComponent(
-                                      labelText: t.get(
+                                      labelText: t.getByKey(
+                                          'parkingLocationLabel',
                                           TextConstants.parkingLocationLabel),
-                                      hintText: t.get(
+                                      hintText: t.getByKey(
+                                          'parkingLocationHint',
                                           TextConstants.parkingLocationHint),
                                       controller: _parkingLocationController,
                                       keyboardType: TextInputType.text,
@@ -370,8 +374,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     isEnabled: _parkingLocationController.text
                                         .trim()
                                         .isNotEmpty,
-                                    overrideLabel:
-                                        t.get(TextConstants.previewDoneButton),
+                                    overrideLabel: t.getByKey(
+                                        'previewDoneButton',
+                                        TextConstants.previewDoneButton),
                                   ),
                                 ],
                               ),

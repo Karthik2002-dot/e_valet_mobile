@@ -92,7 +92,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                     ],
                     enabled: !isLoading,
                     decoration: InputDecoration(
-                      hintText: t.get(TextConstants.tagNumberHint),
+                      hintText: t.getByKey(
+                          'tagNumberHint', TextConstants.tagNumberHint),
                       hintStyle: const TextStyle(
                         color: AppColors.black,
                         fontSize: 14,

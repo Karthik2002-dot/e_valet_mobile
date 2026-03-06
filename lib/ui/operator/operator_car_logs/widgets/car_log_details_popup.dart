@@ -261,8 +261,8 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                                     ),
                                   )
                                 : TextComponent(
-                                    labelText:
-                                        t.get(TextConstants.submitButton),
+                                    labelText: t.getByKey('submitButton',
+                                        TextConstants.submitButton),
                                     color: AppColors.white,
                                     fontWeight: FontWeight.w600,
                                   ),

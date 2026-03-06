@@ -276,14 +276,16 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextComponent(
-            labelText: t.get(TextConstants.vehicleDetailsTitle),
+            labelText: t.getByKey(
+                'vehicleDetailsTitle', TextConstants.vehicleDetailsTitle),
             fontSize: w * 0.045,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),
           SizedBox(height: h * 0.006),
           TextComponent(
-            labelText: t.get(TextConstants.vehicleDetailsParkingPhotoHint),
+            labelText: t.getByKey('vehicleDetailsParkingPhotoHint',
+                TextConstants.vehicleDetailsParkingPhotoHint),
             fontSize: w * 0.032,
             fontWeight: FontWeight.w400,
             color: AppColors.black,

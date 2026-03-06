@@ -32,7 +32,7 @@ class DriverBreakContent extends StatelessWidget {
         SizedBox(height: screenHeight * 0.05),
         // Break title
         TextComponent(
-          labelText: t.get(TextConstants.takingBreak),
+          labelText: t.getByKey('takingBreak', TextConstants.takingBreak),
           fontSize: isDesktop
               ? screenWidth * 0.018
               : isTablet
@@ -64,7 +64,8 @@ class DriverBreakContent extends StatelessWidget {
             horizontal: screenWidth * 0.1,
           ),
           child: TextComponent(
-            labelText: t.get(TextConstants.relaxAndRestart),
+            labelText:
+                t.getByKey('relaxAndRestart', TextConstants.relaxAndRestart),
             fontSize: isDesktop
                 ? screenWidth * 0.012
                 : isTablet

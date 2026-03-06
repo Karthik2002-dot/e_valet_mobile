@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:niloufer_valet_mobile/services/translations/translations_cache.dart';
-import 'package:niloufer_valet_mobile/ui/common/translation_api_keys.dart';
 
 /// Holds the current translation map in memory so the UI can read translated
 /// strings synchronously. Call [load] on app start and after the user changes
 /// language so the app rebuilds with new translations.
+///
+/// Translations come from the backend API only (GET /i18n/translations?language=xx).
+/// Use [getByKey] for keys that match the backend API exactly (e.g. 'takingBreak').
+/// Use [get] for display strings that convert to camelCase (e.g. "Parked Car" -> "parkedCar").
 class AppTranslationsNotifier extends ChangeNotifier {
   Map<String, String>? _translations;
   String? _currentLanguageCode;
@@ -28,16 +31,18 @@ class AppTranslationsNotifier extends ChangeNotifier {
   }
 
   /// Returns the translated string for [textConstant] (e.g. [TextConstants.logout]).
-  /// Looks up using derived key or [translationApiKeys]; returns from API or [textConstant].
+  /// Looks up using derived camelCase key from display string; returns from API or [textConstant].
   String get(String textConstant) {
-    var value = _translations?[_displayStringToApiKey(textConstant)];
-    if (value == null || value.isEmpty) {
-      for (final apiKey in translationApiKeys[textConstant] ?? []) {
-        value = _translations?[apiKey];
-        if (value != null && value.isNotEmpty) break;
-      }
-    }
+    final value = _translations?[_displayStringToApiKey(textConstant)];
     return value ?? textConstant;
+  }
+
+  /// Returns the translated string for [apiKey] from the backend API.
+  /// Use when the backend key differs from the display-string-to-camelCase conversion.
+  /// [fallback] is used when the API has no translation for this key.
+  String getByKey(String apiKey, [String? fallback]) {
+    final value = _translations?[apiKey];
+    return value ?? fallback ?? apiKey;
   }
 
   /// Loads translations from [TranslationsCache] and notifies listeners so the
