@@ -23,7 +23,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
-import 'package:niloufer_valet_mobile/utils/valet_utils.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_valet_row.dart';
 
 /// Over Time screen for the valet operator.
 /// Shows the same valet list data as the valet dashboard: name, phone, and status (Available / On Duty / On Break / Offline).
@@ -248,8 +248,9 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
     final width = MediaQuery.of(context).size.width;
-    final isAndroidPhone =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android && width < 600;
+    final isAndroidPhone = !kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.android &&
+        width < 600;
 
     final headerTitleFontSize =
         isAndroidPhone ? (width * 0.05).clamp(18.0, 22.0) : (width * 0.03);
@@ -368,7 +369,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                               children: [
                                 TextComponent(
                                   labelText:
-                                      '${TextConstants.errorLabel}: $_errorMessage',
+                                      '${t.get(TextConstants.errorLabel)}: $_errorMessage',
                                   color: AppColors.error,
                                   textAlign: TextAlign.center,
                                 ),
@@ -376,7 +377,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                 TextButton(
                                   onPressed: _loadValets,
                                   child: TextComponent(
-                                    labelText: TextConstants.retryButton,
+                                    labelText: t.get(TextConstants.retryButton),
                                   ),
                                 ),
                               ],
@@ -385,7 +386,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                         else if (_valets == null || _valets!.isEmpty)
                           Center(
                             child: TextComponent(
-                              labelText: TextConstants.noValetsFound,
+                              labelText: t.get(TextConstants.noValetsFound),
                               color: AppColors.grey,
                             ),
                           )
@@ -398,7 +399,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                               final useTwoColumns = width >= 600;
 
                               Widget buildRowForValet(ValetResponse valet) {
-                                return _ValetRow(
+                                return OvertimeValetRow(
                                   name: valet.name,
                                   phone: valet.phone,
                                   status: valet.status,
@@ -413,11 +414,12 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            t.get(
+                                          content: TextComponent(
+                                            labelText: t.get(
                                               TextConstants
                                                   .overtimeEnterNumbers,
                                             ),
+                                            color: AppColors.white,
                                           ),
                                         ),
                                       );
@@ -429,11 +431,12 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            t.get(
+                                          content: TextComponent(
+                                            labelText: t.get(
                                               TextConstants
                                                   .overtimeEnterNumbers,
                                             ),
+                                            color: AppColors.white,
                                           ),
                                         ),
                                       );
@@ -493,250 +496,6 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ValetRow extends StatefulWidget {
-  final String name;
-  final String phone;
-  final String status;
-  final String value;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onSubmit;
-
-  const _ValetRow({
-    required this.name,
-    required this.phone,
-    required this.status,
-    required this.value,
-    required this.onChanged,
-    required this.onSubmit,
-  });
-
-  @override
-  State<_ValetRow> createState() => _ValetRowState();
-}
-
-class _ValetRowState extends State<_ValetRow> {
-  late TextEditingController _controller;
-
-  void _applyDelta(int delta) {
-    final currentRaw = _controller.text.trim();
-    final current = int.tryParse(currentRaw) ?? 0;
-    final next = (current + delta);
-    final clamped = next < 0 ? 0 : next;
-    final nextText = clamped.toString();
-
-    _controller.value = _controller.value.copyWith(
-      text: nextText,
-      selection: TextSelection.collapsed(offset: nextText.length),
-      composing: TextRange.empty,
-    );
-    widget.onChanged(nextText);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.value);
-  }
-
-  @override
-  void didUpdateWidget(_ValetRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value && _controller.text != widget.value) {
-      _controller.text = widget.value;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.watch<AppTranslationsNotifier>();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final nameFontSize = (screenWidth * 0.04).clamp(16.0, 20.0);
-    final phoneFontSize = (screenWidth * 0.032).clamp(14.0, 18.0);
-    final statusColor = ValetUtils.getStatusColor(widget.status);
-    final statusLabel = ValetUtils.getStatusLabel(widget.status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.grey.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextComponent(
-                      labelText: widget.name,
-                      fontSize: nameFontSize,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    TextComponent(
-                      labelText: widget.phone,
-                      fontSize: phoneFontSize,
-                      color: AppColors.grey,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: statusColor.withOpacity(0.5),
-                    width: 1,
-                  ),
-                ),
-                child: TextComponent(
-                  labelText: statusLabel,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: statusColor,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const stepperWidth = 42.0;
-              const gapAfterInput = 6.0;
-              const gapBeforeButton = 8.0;
-              const submitMinWidth = 110.0;
-
-              final availableForInput = constraints.maxWidth -
-                  stepperWidth -
-                  gapAfterInput -
-                  gapBeforeButton -
-                  submitMinWidth;
-
-              // Make input as wide as possible (to show hint), without overflowing the row.
-              final inputWidth = availableForInput.clamp(140.0, 260.0);
-              return Row(
-                children: [
-                  SizedBox(
-                    width: inputWidth,
-                    child: TextField(
-                      controller: _controller,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      decoration: InputDecoration(
-                        hintText: t.get(TextConstants.overtimeInputHint),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                      ),
-                      onChanged: widget.onChanged,
-                      onSubmitted: (_) => widget.onSubmit(),
-                    ),
-                  ),
-                  const SizedBox(width: gapAfterInput),
-                  Container(
-                    width: 42,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: AppColors.grey.withOpacity(0.4)),
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: IconButton(
-                            icon: const Icon(Icons.keyboard_arrow_up),
-                            onPressed: () => _applyDelta(1),
-                            splashRadius: 18,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints.tightFor(
-                              width: 42,
-                              height: 23,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          height: 1,
-                          color: AppColors.grey.withOpacity(0.25),
-                        ),
-                        Expanded(
-                          child: IconButton(
-                            icon: const Icon(Icons.keyboard_arrow_down),
-                            onPressed: () => _applyDelta(-1),
-                            splashRadius: 18,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints.tightFor(
-                              width: 42,
-                              height: 23,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: submitMinWidth,
-                    child: ElevatedButton(
-                      onPressed: widget.onSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: TextComponent(
-                        labelText: t.get(TextConstants.submitButton),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ),
     );
   }
