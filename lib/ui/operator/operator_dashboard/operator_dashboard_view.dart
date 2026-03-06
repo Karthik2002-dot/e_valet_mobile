@@ -16,6 +16,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
 import 'operator_screen_router.dart';
 
 class OperatorDashboardView extends StatefulWidget {
@@ -53,24 +54,35 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _onMenuItemSelected(int index) {
-    if (index == 7) {
+    if (index == 8) {
       // Logout
       context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
     } else if (index == 4) {
+      // Over Time – open separate screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorOverTimeScreen(
+            onNavigateToTab: (tabIndex) {
+              setState(() => _selectedIndex = tabIndex);
+            },
+          ),
+        ),
+      );
+    } else if (index == 5) {
       // Profile – navigate to profile screen
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const ProfileScreen(),
         ),
       );
-    } else if (index == 5) {
+    } else if (index == 6) {
       // Help – shared screen for driver and operator
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const HelpScreen(isFromOperator: true),
         ),
       );
-    } else if (index == 6) {
+    } else if (index == 7) {
       // Operator guidelines – show only Operator Responsibilities
       Navigator.of(context).push(
         MaterialPageRoute(

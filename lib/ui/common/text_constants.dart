@@ -9,6 +9,19 @@ class TextConstants {
   static const profile = 'Profile';
   static const guidelines = 'Guidelines';
   static const help = 'Help';
+  static const overTime = 'Over Time';
+  static const String overtimeDescription =
+      'Enter overtime minutes for each valet';
+  static const String overtimeNote =
+      'Note: The number you enter will be considered in minutes.';
+  static const String overtimeInputHint = 'Enter numbers only';
+  static const String overtimeEnterNumbers =
+      'Please enter a value (numbers only)';
+  static const String overtimeConfirmTitle = 'Confirm Overtime';
+  static String overtimeConfirmMessage(String valetName, int minutes) =>
+      'You have extended the $valetName time $minutes minutes more extra.';
+  static const String overtimeNoAvailableDrivers =
+      'No available drivers for now';
   static const String operatorResponsibilities = 'Operator Responsibilities';
   static const logout = 'Logout';
 
