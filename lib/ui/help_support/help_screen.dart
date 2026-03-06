@@ -97,7 +97,8 @@ class _HelpScreenState extends State<HelpScreen> {
                     GuidelinesMainTitle(title: title),
                     const SizedBox(height: 24),
                     GuidelinesSection(
-                      title: t.get(TextConstants.helpContactSupport),
+                      title: t.getByKey('helpContactSupport',
+                          TextConstants.helpContactSupport),
                       icon: Icons.support_agent,
                       items: const [],
                     ),

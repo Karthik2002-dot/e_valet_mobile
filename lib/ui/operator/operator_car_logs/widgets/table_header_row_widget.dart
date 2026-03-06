@@ -57,7 +57,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsDuration),
+              text:
+                  t.getByKey('carLogsDuration', TextConstants.carLogsDuration),
               isActive: sortColumn == TextConstants.carLogsDuration,
               sortIcon: getSortIcon(TextConstants.carLogsDuration),
               onTap: () => onHeaderTap(TextConstants.carLogsDuration),
@@ -66,7 +67,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 20,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsParkLocation),
+              text: t.getByKey(
+                  'carLogsParkLocation', TextConstants.carLogsParkLocation),
               isActive: sortColumn == TextConstants.carLogsParkLocation,
               sortIcon: getSortIcon(TextConstants.carLogsParkLocation),
               onTap: () => onHeaderTap(TextConstants.carLogsParkLocation),
@@ -84,7 +86,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsParkedAt),
+              text:
+                  t.getByKey('carLogsParkedAt', TextConstants.carLogsParkedAt),
               isActive: sortColumn == TextConstants.carLogsParkedAt,
               sortIcon: getSortIcon(TextConstants.carLogsParkedAt),
               onTap: () => onHeaderTap(TextConstants.carLogsParkedAt),
@@ -93,7 +96,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsHandoveredBy),
+              text: t.getByKey(
+                  'carLogsHandoveredBy', TextConstants.carLogsHandoveredBy),
               isActive: sortColumn == TextConstants.carLogsHandoveredBy,
               sortIcon: getSortIcon(TextConstants.carLogsHandoveredBy),
               onTap: () => onHeaderTap(TextConstants.carLogsHandoveredBy),
@@ -102,7 +106,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsHandoverAt),
+              text: t.getByKey(
+                  'carLogsHandoverAt', TextConstants.carLogsHandoverAt),
               isActive: sortColumn == TextConstants.carLogsHandoverAt,
               sortIcon: getSortIcon(TextConstants.carLogsHandoverAt),
               onTap: () => onHeaderTap(TextConstants.carLogsHandoverAt),

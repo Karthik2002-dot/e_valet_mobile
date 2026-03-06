@@ -205,7 +205,8 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                                     : widget.carLog.parkedBy.name),
                             const SizedBox(height: 16),
                             StatusDetailRow(
-                              label: t.get(TextConstants.carStatusLabel),
+                              label: t.getByKey('carStatusLabel',
+                                  TextConstants.carStatusLabel),
                               selectedStatus: _selectedStatus,
                               statusOptions: _statusOptions,
                               onStatusChanged: (value) {

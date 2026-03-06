@@ -223,7 +223,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                     ),
                     const SizedBox(height: 4),
                     TextComponent(
-                      labelText: t.get(TextConstants.carLogsDescription),
+                      labelText: t.getByKey('carLogsDescription',
+                          TextConstants.carLogsDescription),
                       color: AppColors.grey,
                       fontSize: MediaQuery.of(context).size.width * 0.02,
                     ),
@@ -321,7 +322,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText: t.get(
+                                      labelText: t.getByKey(
+                                          'carLogsDescription',
                                           TextConstants.carLogsDescription),
                                       color: AppColors.grey,
                                       fontSize:
@@ -351,8 +353,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     }
                                   },
                                   decoration: InputDecoration(
-                                    hintText:
-                                        t.get(TextConstants.carLogsSearchHint),
+                                    hintText: t.getByKey('carLogsSearchHint',
+                                        TextConstants.carLogsSearchHint),
                                     hintStyle: TextStyle(
                                       color: AppColors.grey,
                                       fontSize:

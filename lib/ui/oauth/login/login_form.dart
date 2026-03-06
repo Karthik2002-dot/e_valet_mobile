@@ -101,7 +101,8 @@ class LoginForm extends StatelessWidget {
                     focusNode: pinFocusNode,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleLogin(context),
-                    labelText: t.get(TextConstants.passwordLabel),
+                    labelText: t.getByKey(
+                        'passwordLabel', TextConstants.passwordLabel),
                     hintText:
                         t.getByKey('passwordHint', TextConstants.passwordHint),
                     onChanged: (value) =>
