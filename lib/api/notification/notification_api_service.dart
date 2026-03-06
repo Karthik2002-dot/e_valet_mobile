@@ -15,7 +15,6 @@ class NotificationApiService extends BaseHttpService {
           defaultHeaders: ApiConfig.defaultJsonHeaders,
         );
   static String get _baseUrl => ApiConfig.valetBaseUrl;
-  static String get _apiKey => ApiConfig.authApiKey;
 
   /// Register FCM token with the backend
   Future<FcmRegisterResponse> registerFcmToken(

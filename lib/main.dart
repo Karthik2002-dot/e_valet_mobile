@@ -100,6 +100,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<SplashBloc>(
             create: (context) => SplashBloc(
               webSocketBloc: context.read<WebSocketBloc>(),
+              appTranslationsNotifier: context.read<AppTranslationsNotifier>(),
             ),
           ),
           BlocProvider<DriverStatusBloc>(

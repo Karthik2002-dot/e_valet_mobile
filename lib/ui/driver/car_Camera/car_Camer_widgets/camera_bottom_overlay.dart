@@ -101,7 +101,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
           children: [
             // Parking Location Input Header
             TextComponent(
-              labelText: t.get(TextConstants.parkingLocationLabel),
+              labelText: t.getByKey(
+                  'parkingLocationLabel', TextConstants.parkingLocationLabel),
               color: AppColors.black,
               fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.w600,
@@ -127,7 +128,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                   fontSize: screenWidth * 0.04,
                 ),
                 decoration: InputDecoration(
-                  hintText: t.get(TextConstants.enterParkingLocationHint),
+                  hintText: t.getByKey('enterParkingLocationHint',
+                      TextConstants.enterParkingLocationHint),
                   hintStyle: TextStyle(
                     color: AppColors.grey.withOpacity(0.6),
                     fontSize: screenWidth * 0.04,
@@ -158,8 +160,10 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         final parkingLocation =
                             _parkingLocationController.text.trim();
                         if (parkingLocation.isEmpty) {
-                          SnackBars.showErrorSnackBar(context,
-                              TextConstants.pleaseEnterParkingLocation);
+                          SnackBars.showErrorSnackBar(
+                              context,
+                              t.getByKey('pleaseEnterParkingLocation',
+                                  TextConstants.pleaseEnterParkingLocation));
                           return;
                         }
                         if (widget.onSubmit != null) {
@@ -188,7 +192,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         ),
                       )
                     : TextComponent(
-                        labelText: t.get(TextConstants.submitButton),
+                        labelText: t.getByKey(
+                            'submitButton', TextConstants.submitButton),
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.w600,
                       ),

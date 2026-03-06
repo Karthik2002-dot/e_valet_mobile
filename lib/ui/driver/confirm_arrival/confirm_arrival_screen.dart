@@ -212,7 +212,8 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 TextComponent(
-                                  labelText: t.get(
+                                  labelText: t.getByKey(
+                                      'pressBelowToConfirmArrival',
                                       TextConstants.pressBelowToConfirmArrival),
                                   fontSize: screenWidth * 0.04,
                                   fontWeight: FontWeight.w500,

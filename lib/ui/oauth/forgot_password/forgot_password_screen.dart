@@ -114,8 +114,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   ),
                                   // "Forgot Password" text
                                   TextComponent(
-                                    labelText: t
-                                        .get(TextConstants.forgotPasswordTitle),
+                                    labelText: t.getByKey('forgotPasswordTitle',
+                                        TextConstants.forgotPasswordTitle),
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.06,
@@ -129,8 +129,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   ),
                                   // Description text
                                   TextComponent(
-                                    labelText: t.get(TextConstants
-                                        .forgotPasswordDescription),
+                                    labelText: t.getByKey(
+                                        'forgotPasswordDescription',
+                                        TextConstants
+                                            .forgotPasswordDescription),
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.04,
@@ -147,10 +149,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       ForgotPasswordState>(
                                     builder: (context, state) {
                                       return PhoneNumberField(
-                                        labelText: t.get(
+                                        labelText: t.getByKey(
+                                            'phoneNumberLabel',
                                             TextConstants.phoneNumberLabel),
-                                        hintText: t
-                                            .get(TextConstants.phoneNumberHint),
+                                        hintText: t.getByKey('phoneNumberHint',
+                                            TextConstants.phoneNumberHint),
                                         controller: _phoneController,
                                         focusNode: _phoneFocusNode,
                                         initialCountryCode: 'IN',
@@ -199,10 +202,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                   isButtonEnabled ? 1.0 : 0.5,
                                               child: ElevatedButtonComponent(
                                                 labelText: isLoading
-                                                    ? t.get(TextConstants
-                                                        .sendResetInstructionsLoading)
-                                                    : t.get(TextConstants
-                                                        .sendResetInstructions),
+                                                    ? t.getByKey(
+                                                        'sendResetInstructionsLoading',
+                                                        TextConstants
+                                                            .sendResetInstructionsLoading)
+                                                    : t.getByKey(
+                                                        'sendResetInstructions',
+                                                        TextConstants
+                                                            .sendResetInstructions),
                                                 onPressed: handlePress,
                                                 elevatedButtonBackgroundColor:
                                                     AppColors.accent, // Orange

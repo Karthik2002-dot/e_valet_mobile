@@ -84,7 +84,7 @@ class ValetDetailsDialog extends StatelessWidget {
                   IconButton(
                     onPressed: onClose ?? () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close, color: AppColors.black),
-                    tooltip: TextConstants.close,
+                    tooltip: t.get(TextConstants.close),
                   ),
                 ],
               ),
@@ -99,13 +99,13 @@ class ValetDetailsDialog extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _DetailRow(label: 'Name', value: valet.name),
+                    _DetailRow(label: t.get('Name'), value: valet.name),
                     const SizedBox(height: 12),
-                    _DetailRow(label: 'Phone', value: valet.phone),
+                    _DetailRow(label: t.get('Phone'), value: valet.phone),
                     const SizedBox(height: 12),
                     _DetailRow(
-                      label: 'Status',
-                      value: ValetUtils.getStatusLabel(valet.status),
+                      label: t.get(TextConstants.statusLabel),
+                      value: t.get(ValetUtils.getStatusLabel(valet.status)),
                       valueColor: ValetUtils.getStatusColor(valet.status),
                     ),
                     const SizedBox(height: 12),
@@ -122,7 +122,7 @@ class ValetDetailsDialog extends StatelessWidget {
                     _DetailRow(
                       label: t.get(TextConstants.onBreakDurationLabel),
                       value:
-                          '${valet.onBreakDurationMinutes}${TextConstants.minsLabel}',
+                          '${valet.onBreakDurationMinutes}${t.get(TextConstants.minsLabel)}',
                     ),
                     const SizedBox(height: 12),
                     if (valet.clockInAt.isNotEmpty) ...[
@@ -167,7 +167,7 @@ class ValetDetailsDialog extends StatelessWidget {
                       icon: const Icon(Icons.logout,
                           size: 22, color: AppColors.error),
                       label: TextComponent(
-                        labelText: TextConstants.logout,
+                        labelText: t.get(TextConstants.logout),
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                         color: AppColors.error,

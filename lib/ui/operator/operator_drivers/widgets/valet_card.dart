@@ -246,7 +246,7 @@ class ValetCard extends StatelessWidget {
                     icon: const Icon(Icons.logout,
                         size: 20, color: AppColors.error),
                     label: TextComponent(
-                      labelText: TextConstants.logout,
+                      labelText: t.get(TextConstants.logout),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.error,
@@ -286,7 +286,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ),
                 child: TextComponent(
-                  labelText: ValetUtils.getStatusLabel(valet!.status),
+                  labelText: t.get(ValetUtils.getStatusLabel(valet!.status)),
                   fontSize: smallFontSize.clamp(9.0, 12.0),
                   fontWeight: FontWeight.w600,
                   color: ValetUtils.getStatusColor(valet!.status),

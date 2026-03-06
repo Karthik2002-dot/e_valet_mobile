@@ -124,7 +124,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextComponent(
-                            labelText: t.get(TextConstants.valetDashboardTitle),
+                            labelText: t.getByKey('valetDashboardTitle',
+                                TextConstants.valetDashboardTitle),
                             color: AppColors.black,
                             fontSize: MediaQuery.of(context).size.width *
                                 (Platform.isIOS ? 0.026 : 0.03),
@@ -134,8 +135,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           ),
                           const SizedBox(height: 4),
                           TextComponent(
-                            labelText:
-                                t.get(TextConstants.valetDashboardDescription),
+                            labelText: t.getByKey('valetDashboardDescription',
+                                TextConstants.valetDashboardDescription),
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width *
                                 (Platform.isIOS ? 0.018 : 0.02),
@@ -157,7 +158,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           });
                         },
                         decoration: InputDecoration(
-                          hintText: t.get(TextConstants.searchByNameOrPhone),
+                          hintText: t.getByKey('searchByNameOrCardNumber',
+                              TextConstants.searchByNameOrCardNumber),
                           hintStyle: TextStyle(
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width * 0.02,

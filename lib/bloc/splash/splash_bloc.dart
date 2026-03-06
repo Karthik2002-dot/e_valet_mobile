@@ -6,6 +6,7 @@ import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/services/translations/translations_cache.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'splash_event.dart';
@@ -13,8 +14,10 @@ import 'splash_state.dart';
 
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final WebSocketBloc? webSocketBloc;
+  final AppTranslationsNotifier appTranslationsNotifier;
 
-  SplashBloc({this.webSocketBloc}) : super(const SplashInitial()) {
+  SplashBloc({this.webSocketBloc, required this.appTranslationsNotifier})
+      : super(const SplashInitial()) {
     on<SplashStarted>(_onSplashStarted);
     on<SplashAnimationCompleted>(_onSplashAnimationCompleted);
   }
@@ -28,6 +31,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // Ensure translations are loaded/refreshed for current language (on open or install)
     try {
       await TranslationsCache().ensureTranslationsLoaded();
+      // Reload in-memory translations so login screen and other UI show translated strings
+      await appTranslationsNotifier.load();
     } catch (e, st) {
       // Log translation loading failures instead of silently swallowing them
       print('SplashBloc: Failed to ensure translations are loaded: $e');
@@ -60,7 +65,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     try {
       final profile = await ProfileApiService.getProfile();
       roles = profile.normalizedRoles;
-      userId = profile.user?.id;
+      userId = profile.user.id;
 
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));

@@ -49,7 +49,7 @@ class ValetKpisGrid extends StatelessWidget {
         Expanded(
           child: ValetKpiCard(
             value: kpis != null ? '${kpis!.onDutyValets}' : '0',
-            label: t.get(TextConstants.onDutyValets),
+            label: t.getByKey('onDutyValets', TextConstants.onDutyValets),
             isLoading: isLoading,
             isSelected: selectedFilter == ValetFilter.onDuty,
             onTap: () => onFilterChanged(ValetFilter.onDuty),
@@ -59,7 +59,7 @@ class ValetKpisGrid extends StatelessWidget {
         Expanded(
           child: ValetKpiCard(
             value: kpis != null ? '${kpis!.onBreakValets}' : '0',
-            label: t.get(TextConstants.onBreakValets),
+            label: t.getByKey('onBreakValets', TextConstants.onBreakValets),
             isLoading: isLoading,
             isSelected: selectedFilter == ValetFilter.onBreak,
             onTap: () => onFilterChanged(ValetFilter.onBreak),

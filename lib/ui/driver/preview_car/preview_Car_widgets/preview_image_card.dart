@@ -84,7 +84,8 @@ class PreviewImageCard extends StatelessWidget {
                   size: screenWidth * 0.05,
                 ),
                 label: TextComponent(
-                  labelText: t.get(TextConstants.retakeButton),
+                  labelText:
+                      t.getByKey('retakeButton', TextConstants.retakeButton),
                   fontSize: screenWidth * 0.04,
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,

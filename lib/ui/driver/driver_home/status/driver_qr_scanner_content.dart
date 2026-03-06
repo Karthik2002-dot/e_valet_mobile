@@ -238,14 +238,16 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextComponent(
-                        labelText: t.get(TextConstants.vehicleDetailsTitle),
+                        labelText: t.getByKey('vehicleDetailsTitle',
+                            TextConstants.vehicleDetailsTitle),
                         fontSize: MediaQuery.of(context).size.width * 0.045,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
                       ),
                       SizedBox(height: widget.screenHeight * 0.006),
                       TextComponent(
-                        labelText: t.get(TextConstants.vehicleDetailsHint),
+                        labelText: t.getByKey('vehicleDetailsHint',
+                            TextConstants.vehicleDetailsHint),
                         fontSize: widget.screenWidth * 0.032,
                         color: AppColors.black,
                         fontWeight: FontWeight.w400,
@@ -283,7 +285,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
           Expanded(
             child: TabChip(
               icon: Icons.qr_code_scanner,
-              label: t.get(TextConstants.scanTabLabel),
+              label: t.getByKey('scanTabLabel', TextConstants.scanTabLabel),
               isActive: isScan,
               onTap: () => _onSelectScanTab(blocContext),
             ),
@@ -407,8 +409,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextComponent(
-                                      labelText:
-                                          t.get(TextConstants.submitButton),
+                                      labelText: t.getByKey('submitButton',
+                                          TextConstants.submitButton),
                                       fontSize: textSize,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.white,
@@ -474,7 +476,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                     builder: (ctx) {
                       return TextFieldComponent(
                         labelText: t.get(TextConstants.emptyText),
-                        hintText: t.get(TextConstants.tagNumberHint),
+                        hintText: t.getByKey(
+                            'tagNumberHint', TextConstants.tagNumberHint),
                         controller: _tagNumberController,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
@@ -536,7 +539,8 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             TextComponent(
-                              labelText: t.get(TextConstants.submitButton),
+                              labelText: t.getByKey(
+                                  'submitButton', TextConstants.submitButton),
                               fontSize: textSize,
                               fontWeight: FontWeight.w600,
                               color: AppColors.white,

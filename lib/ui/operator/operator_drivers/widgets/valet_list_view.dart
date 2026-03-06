@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_valet/operator_valets/valet_list_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -29,6 +30,7 @@ class ValetListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocBuilder<ValetListBloc, ValetListState>(
       builder: (context, state) {
         if (state is ValetListLoading) {
@@ -78,7 +80,8 @@ class ValetListView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextComponent(
-                  labelText: '${TextConstants.errorLabel}: ${state.message}',
+                  labelText:
+                      '${t.get(TextConstants.errorLabel)}: ${state.message}',
                   color: AppColors.error,
                   textAlign: TextAlign.center,
                 ),
@@ -89,8 +92,8 @@ class ValetListView extends StatelessWidget {
                           FetchValetList(outletId: outletId),
                         );
                   },
-                  child: const TextComponent(
-                    labelText: TextConstants.retryButton,
+                  child: TextComponent(
+                    labelText: t.get(TextConstants.retryButton),
                   ),
                 ),
               ],
@@ -144,7 +147,7 @@ class ValetListView extends StatelessWidget {
           if (filteredValets.isEmpty) {
             return Center(
               child: TextComponent(
-                labelText: TextConstants.noValetsFound,
+                labelText: t.get(TextConstants.noValetsFound),
                 color: AppColors.grey,
               ),
             );
@@ -168,9 +171,10 @@ class ValetListView extends StatelessWidget {
                     .read<ValetListBloc>()
                     .add(FetchValetList(outletId: outletId));
 
+                final tr = context.read<AppTranslationsNotifier>();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(TextConstants.logout),
+                    content: Text(tr.get(TextConstants.logout)),
                     backgroundColor: AppColors.success,
                   ),
                 );
@@ -192,9 +196,10 @@ class ValetListView extends StatelessWidget {
               print('🔴 OPERATOR VALET FORCE LOGOUT unknown error: $e');
 
               if (context.mounted) {
+                final tr = context.read<AppTranslationsNotifier>();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${TextConstants.errorLabel}: $e'),
+                    content: Text('${tr.get(TextConstants.errorLabel)}: $e'),
                     backgroundColor: AppColors.error,
                   ),
                 );

@@ -106,9 +106,9 @@ class DriverStatusApiService {
       final clockOutResponse = ClockOutResponse.fromJson(data);
 
       return clockOutResponse;
-    } on ApiException catch (e) {
+    } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw ApiException(
         'Failed to clock out. Please try again.',
         code: 'unknown_error',

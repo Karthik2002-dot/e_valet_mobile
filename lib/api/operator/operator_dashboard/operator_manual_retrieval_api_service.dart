@@ -36,10 +36,10 @@ class OperatorManualRetrievalApiService {
       );
 
       return ManualRetrievalResponse.fromJson(response.data);
-    } on ApiException catch (e) {
+    } on ApiException {
       // Rethrow ApiException to preserve the original error message from API
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw ApiException(
         'Failed to create manual retrieval request. Please try again.',
         code: 'unknown_error',

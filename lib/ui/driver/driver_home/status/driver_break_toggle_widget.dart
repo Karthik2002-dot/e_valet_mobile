@@ -38,7 +38,8 @@ class DriverBreakToggleWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextComponent(
-              labelText: t.get(TextConstants.headerOnBreak),
+              labelText:
+                  t.getByKey('onBreakScreen', TextConstants.headerOnBreak),
               fontSize: isDesktop
                   ? screenWidth * 0.012
                   : isTablet

@@ -159,7 +159,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                     ),
                     TextFieldComponent(
                       labelText: t.get(TextConstants.emptyText),
-                      hintText: t.get(TextConstants.tagNumberHint),
+                      hintText: t.getByKey(
+                          'tagNumberHint', TextConstants.tagNumberHint),
                       controller: _tagNumberController,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.done,
@@ -239,7 +240,8 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               TextComponent(
-                                labelText: t.get(TextConstants.submitButton),
+                                labelText: t.getByKey(
+                                    'submitButton', TextConstants.submitButton),
                                 fontSize: textSize,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.white,

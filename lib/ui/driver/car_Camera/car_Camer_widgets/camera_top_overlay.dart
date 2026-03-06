@@ -64,7 +64,8 @@ class CameraTopOverlay extends StatelessWidget {
             // Instruction text
             Center(
               child: TextComponent(
-                labelText: t.get(TextConstants.captureCarInstruction),
+                labelText: t.getByKey('captureAPhotoOfTheCar',
+                    TextConstants.captureAPhotoOfTheCar),
                 textAlign: TextAlign.center,
                 color: AppColors.white,
                 fontSize: screenWidth * 0.04,

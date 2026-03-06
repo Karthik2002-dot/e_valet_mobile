@@ -24,6 +24,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     on<ReinitializeWebSocket>(_onReinitializeWebSocket);
     on<_PollAssignedSessions>(_onPollSessions);
     on<SetSessionsFromPending>(_onSetSessionsFromPending);
+    on<RetrievalCancelledReceived>(_onRetrievalCancelledReceived);
+    on<SessionsReceivedFromSocket>(_onSessionsReceivedFromSocket);
 
     // Setup WebSocket listeners and connection monitoring
     _setupWebSocketConnectionMonitoring();
@@ -91,9 +93,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
           webSocketBloc!.service.getEventStream('retrieval:cancelled');
 
       _retrievalCancelledSubscription = retrievalCancelledStream.listen(
-        (data) {
-          // Emit a state to indicate cancellation
-          emit(const AssignedSessionsCancelled());
+        (_) {
+          add(const RetrievalCancelledReceived());
         },
         onError: (error) {
           print('Error listening to retrieval cancelled updates: $error');
@@ -122,8 +123,7 @@ class AssignedSessionsBackgroundBloc extends Bloc<
 
       _retrievalAssignedSubscription = retrievalAssignedStream.listen(
         (data) {
-          // WebSocket now drives updates directly — no HTTP polling
-          _emitSessionsFromSocketPayload(data);
+          add(SessionsReceivedFromSocket(data));
         },
         onError: (error) {
           print('Error listening to retrieval assigned updates: $error');
@@ -251,10 +251,19 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     emit(AssignedSessionsBackgroundData(event.sessions));
   }
 
-  /// Emit sessions from WebSocket payload without hitting the REST API
-  void _emitSessionsFromSocketPayload(dynamic data) {
+  void _onRetrievalCancelledReceived(
+    RetrievalCancelledReceived event,
+    Emitter<AssignedSessionsBackgroundState> emit,
+  ) {
+    emit(const AssignedSessionsCancelled());
+  }
+
+  void _onSessionsReceivedFromSocket(
+    SessionsReceivedFromSocket event,
+    Emitter<AssignedSessionsBackgroundState> emit,
+  ) {
     try {
-      final sessions = _extractSessions(data);
+      final sessions = _extractSessions(event.data);
       if (sessions != null) {
         emit(AssignedSessionsBackgroundData(sessions));
       }
