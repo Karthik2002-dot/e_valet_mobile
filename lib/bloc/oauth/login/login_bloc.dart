@@ -87,6 +87,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final userId = profile.user.id;
         final isOperator = roles.any((r) => r.contains('operator'));
         final isDriver = roles.any((r) => r.contains('driver'));
+        final isScanner = roles.any((r) => r.contains('scanner'));
 
         try {
           if (webSocketBloc != null) {

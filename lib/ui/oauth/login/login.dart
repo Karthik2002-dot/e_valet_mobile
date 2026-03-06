@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/clock_in_too_
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -91,6 +92,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const OperatorDashboardScreen(),
+                ),
+              );
+            } else if (roles.contains('scanner')) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ScannerHomeScreen(),
                 ),
               );
             } else {
