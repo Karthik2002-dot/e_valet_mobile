@@ -65,7 +65,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     try {
       final profile = await ProfileApiService.getProfile();
       roles = profile.normalizedRoles;
-      userId = profile.user?.id;
+      userId = profile.user.id;
 
       // Get outletId if user is an operator
       final isOperator = roles.any((r) => r.contains('operator'));
