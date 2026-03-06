@@ -176,7 +176,8 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText: t.get(
+                                      labelText: t.getByKey(
+                                          'parkedCarDescription',
                                           TextConstants.parkedCarDescription),
                                       color: AppColors.grey,
                                       fontSize:

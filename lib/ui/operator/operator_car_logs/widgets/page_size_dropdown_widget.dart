@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -17,10 +19,12 @@ class PageSizeDropdownWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Row(
       children: [
         TextComponent(
-          labelText: TextConstants.paginationShowLabel,
+          labelText: t.getByKey(
+              'paginationShowLabel', TextConstants.paginationShowLabel),
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: AppColors.grey,
