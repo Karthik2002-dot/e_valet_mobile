@@ -68,6 +68,15 @@ class OperatorDrawer extends StatelessWidget {
                   onItemSelected?.call(3);
                 },
               ),
+              OperatorDrawerItem(
+                iconData: Icons.schedule,
+                title: t.get(TextConstants.overTime),
+                isSelected: selectedIndex == 4,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(4);
+                },
+              ),
               const Spacer(),
               Divider(
                 color: AppColors.black,
@@ -78,15 +87,6 @@ class OperatorDrawer extends StatelessWidget {
               OperatorDrawerItem(
                 asset: 'assets/images/profile.png',
                 title: t.get(TextConstants.profile),
-                isSelected: selectedIndex == 4,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onItemSelected?.call(4);
-                },
-              ),
-              OperatorDrawerItem(
-                iconData: Icons.support_agent,
-                title: t.get(TextConstants.help),
                 isSelected: selectedIndex == 5,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -94,8 +94,8 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
-                iconData: Icons.menu_book_outlined,
-                title: t.get(TextConstants.guidelines),
+                iconData: Icons.support_agent,
+                title: t.get(TextConstants.help),
                 isSelected: selectedIndex == 6,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -103,12 +103,21 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
-                asset: 'assets/images/logout.png',
-                title: t.get(TextConstants.logout),
+                iconData: Icons.menu_book_outlined,
+                title: t.get(TextConstants.guidelines),
                 isSelected: selectedIndex == 7,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(7);
+                },
+              ),
+              OperatorDrawerItem(
+                asset: 'assets/images/logout.png',
+                title: t.get(TextConstants.logout),
+                isSelected: selectedIndex == 8,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(8);
                 },
               ),
             ],
