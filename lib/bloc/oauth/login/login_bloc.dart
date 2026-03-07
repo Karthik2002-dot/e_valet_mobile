@@ -92,7 +92,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         try {
           if (webSocketBloc != null) {
             String? outletId;
-            if (isOperator) {
+            if (isOperator || isScanner) {
               outletId = dotenv.env['OUTLET_ID'] ?? '1';
             }
 
