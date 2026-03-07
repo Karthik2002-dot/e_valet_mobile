@@ -299,9 +299,9 @@ class _DashboardContentState extends State<DashboardContent> {
                           try {
                             await OperatorAutoAssignApiService
                                 .patchAutoAssignSettings(
-                                  outletId: _outletId,
-                                  enabled: value,
-                                );
+                              outletId: _outletId,
+                              enabled: value,
+                            );
                           } catch (e, st) {
                             print('[AutoAssign API] PATCH error: $e');
                             print('[AutoAssign API] PATCH stackTrace: $st');
