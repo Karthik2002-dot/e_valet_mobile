@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
@@ -50,6 +51,15 @@ class _DashboardContentState extends State<DashboardContent> {
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
 
+  /// Auto mode toggle: when on, retrieval requests refresh every 30 seconds in the background. Default off; user turns on manually.
+  bool _isAutoMode = false;
+
+  /// Periodic timer for silent background refresh of retrieval requests every 30 seconds.
+  Timer? _retrievalRequestsRefreshTimer;
+
+  static const Duration _retrievalRequestsRefreshInterval =
+      Duration(seconds: 30);
+
   @override
   void initState() {
     super.initState();
@@ -70,10 +80,40 @@ class _DashboardContentState extends State<DashboardContent> {
       ),
     );
 
+    // Start periodic silent refresh when auto mode is on
+    if (_isAutoMode) {
+      _startRetrievalRequestsRefreshTimer();
+    }
+
     // Expose silent refresh method to parent
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshReady?.call(_silentRefresh);
     });
+  }
+
+  /// Silent background refresh of retrieval requests only (no loading indicator).
+  void _silentRefreshRetrievalRequests() {
+    _dashboardBloc.add(
+      RefreshDashboardKpisSilently(
+        outletId: _outletId,
+        refreshKpis: false,
+        refreshDrivers: false,
+        refreshRequests: true,
+      ),
+    );
+  }
+
+  void _startRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = Timer.periodic(
+      _retrievalRequestsRefreshInterval,
+      (_) => _silentRefreshRetrievalRequests(),
+    );
+  }
+
+  void _stopRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
   }
 
   void _silentRefresh() {
@@ -196,6 +236,8 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void dispose() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
     for (final timer in _highlightTimers.values) {
       timer.cancel();
     }
@@ -216,10 +258,60 @@ class _DashboardContentState extends State<DashboardContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextComponent(
-                labelText: t.get(TextConstants.dashboardOverview),
-                color: AppColors.black,
-                fontSize: MediaQuery.of(context).size.height * 0.015,
+              Row(
+                children: [
+                  TextComponent(
+                    labelText: t.get(TextConstants.dashboardOverview),
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.height * 0.015,
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextComponent(
+                        labelText: t.getByKey(
+                            'Auto Mode', TextConstants.autoToggleLabel),
+                        color: AppColors.black,
+                        fontSize: MediaQuery.of(context).size.height * 0.015,
+                      ),
+                      const SizedBox(width: 8),
+                      Switch(
+                        value: _isAutoMode,
+                        onChanged: (value) async {
+                          setState(() {
+                            _isAutoMode = value;
+                            if (_isAutoMode) {
+                              _startRetrievalRequestsRefreshTimer();
+                            } else {
+                              _stopRetrievalRequestsRefreshTimer();
+                            }
+                          });
+                          // 1) GET current auto-assign settings
+                          try {
+                            await OperatorAutoAssignApiService
+                                .getAutoAssignSettings(outletId: _outletId);
+                          } catch (e, st) {
+                            print('[AutoAssign API] GET error: $e');
+                            print('[AutoAssign API] GET stackTrace: $st');
+                          }
+                          // 2) PATCH to set enabled = new toggle value (outletId from env)
+                          try {
+                            await OperatorAutoAssignApiService
+                                .patchAutoAssignSettings(
+                              outletId: _outletId,
+                              enabled: value,
+                            );
+                          } catch (e, st) {
+                            print('[AutoAssign API] PATCH error: $e');
+                            print('[AutoAssign API] PATCH stackTrace: $st');
+                          }
+                        },
+                        activeColor: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Expanded(
