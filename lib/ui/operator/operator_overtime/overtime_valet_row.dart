@@ -162,7 +162,8 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                       decoration: InputDecoration(
-                        hintText: t.get(TextConstants.overtimeInputHint),
+                        hintText: t.getByKey('overtimeInputHint',
+                            TextConstants.overtimeInputHint),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -235,7 +236,8 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                         ),
                       ),
                       child: TextComponent(
-                        labelText: t.get(TextConstants.submitButton),
+                        labelText: t.getByKey(
+                            'submitButton', TextConstants.submitButton),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
