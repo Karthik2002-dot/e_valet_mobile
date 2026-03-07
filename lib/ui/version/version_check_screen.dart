@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/version/version_check_args.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -39,9 +40,12 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
   Widget _buildDestination() {
     final args = widget.args;
     if (args.isAuthenticated) {
-      final isOperator = args.roles.any((r) => r.contains('operator'));
+      final isScanner = args.roles.any((r) => r.contains('scanner'));
+      final isOperatorOrAdmin = args.roles.any((r) =>
+          r.contains('operator') || r.contains('admin'));
       final isDriver = args.roles.any((r) => r.contains('driver'));
-      if (isOperator) return const OperatorDashboardScreen();
+      if (isScanner) return const ScannerHomeScreen();
+      if (isOperatorOrAdmin) return const OperatorDashboardScreen();
       if (isDriver) return const DriverHomeScreen();
       return const LoginScreen();
     }
@@ -137,9 +141,17 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
 
   void _navigateToDestination(BuildContext context, VersionCheckArgs args) {
     if (args.isAuthenticated) {
-      final isOperator = args.roles.any((r) => r.contains('operator'));
+      final isScanner = args.roles.any((r) => r.contains('scanner'));
+      final isOperatorOrAdmin = args.roles.any((r) =>
+          r.contains('operator') || r.contains('admin'));
       final isDriver = args.roles.any((r) => r.contains('driver'));
-      if (isOperator) {
+      if (isScanner) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ScannerHomeScreen()),
+        );
+        return;
+      }
+      if (isOperatorOrAdmin) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => const OperatorDashboardScreen(),

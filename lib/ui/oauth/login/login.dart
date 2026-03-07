@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/clock_in_too_
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -82,17 +83,24 @@ class _LoginScreenState extends State<LoginScreen> {
             final roles =
                 state.profile.roles.map((r) => r.toLowerCase()).toList();
 
-            // Navigate drivers to home screen - permissions will be requested there
-            if (roles.contains('driver')) {
-              _navigateToDriverHome(context);
-            } else if (roles.contains('operator')) {
-              // Operators go directly to dashboard without permissions
+            // Priority: scanner → operator/admin → driver
+            if (roles.any((r) => r.contains('scanner'))) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ScannerHomeScreen(),
+                ),
+              );
+            } else if (roles.any((r) =>
+                r.contains('operator') || r.contains('admin'))) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const OperatorDashboardScreen(),
                 ),
               );
+            } else if (roles.any((r) => r.contains('driver'))) {
+              _navigateToDriverHome(context);
             } else {
               // Unknown role - show error
               SnackBars.showErrorSnackBar(

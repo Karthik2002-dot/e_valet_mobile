@@ -67,10 +67,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       roles = profile.normalizedRoles;
       userId = profile.user.id;
 
-      // Get outletId if user is an operator
+      // Get outletId if user is operator or scanner (both need outlet room for real-time updates)
       final isOperator = roles.any((r) => r.contains('operator'));
+      final isScanner = roles.any((r) => r.contains('scanner'));
       final isDriver = roles.any((r) => r.contains('driver'));
-      if (isOperator) {
+      if (isOperator || isScanner) {
         outletId = dotenv.env['OUTLET_ID'] ?? '1';
       }
 
@@ -92,7 +93,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       }
 
       // Initialize WebSocket only when user is allowed to continue (operator, or driver with ONLINE status)
-      if (webSocketBloc != null && userId != null) {
+      if (webSocketBloc != null) {
         await WebSocketHelper.connectAfterLogin(
           webSocketBloc: webSocketBloc!,
           outletId: outletId,

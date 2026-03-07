@@ -85,13 +85,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // Connect WebSocket after successful login
         final roles = profile.roles.map((r) => r.toLowerCase()).toList();
         final userId = profile.user.id;
+        final isScanner = roles.any((r) => r.contains('scanner'));
         final isOperator = roles.any((r) => r.contains('operator'));
         final isDriver = roles.any((r) => r.contains('driver'));
 
         try {
           if (webSocketBloc != null) {
             String? outletId;
-            if (isOperator) {
+            if (isOperator || isScanner) {
               outletId = dotenv.env['OUTLET_ID'] ?? '1';
             }
 
