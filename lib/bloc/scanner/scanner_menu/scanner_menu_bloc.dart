@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/oauth/logout_api_service.dart';
-import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu_event.dart';
-import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu_state.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 

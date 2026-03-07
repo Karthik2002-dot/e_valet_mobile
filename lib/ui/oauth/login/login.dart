@@ -83,24 +83,24 @@ class _LoginScreenState extends State<LoginScreen> {
             final roles =
                 state.profile.roles.map((r) => r.toLowerCase()).toList();
 
-            // Navigate drivers to home screen - permissions will be requested there
-            if (roles.contains('driver')) {
-              _navigateToDriverHome(context);
-            } else if (roles.contains('operator')) {
-              // Operators go directly to dashboard without permissions
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const OperatorDashboardScreen(),
-                ),
-              );
-            } else if (roles.contains('scanner')) {
+            // Priority: scanner → operator/admin → driver
+            if (roles.any((r) => r.contains('scanner'))) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const ScannerHomeScreen(),
                 ),
               );
+            } else if (roles.any((r) =>
+                r.contains('operator') || r.contains('admin'))) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const OperatorDashboardScreen(),
+                ),
+              );
+            } else if (roles.any((r) => r.contains('driver'))) {
+              _navigateToDriverHome(context);
             } else {
               // Unknown role - show error
               SnackBars.showErrorSnackBar(

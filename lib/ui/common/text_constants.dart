@@ -527,4 +527,8 @@ class TextConstants {
   static const String paginationPrev = '<';
   static const String paginationNext = '>';
   static const String paginationLast = '>>';
+
+  // Scanner home
+  static const String scannerTapScanHint =
+      'Tap Scan to read the QR code from the valet card';
 }

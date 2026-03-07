@@ -206,10 +206,16 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     PermissionsService.setPermissionsCompletedOnce();
     final args = widget.args!;
     if (args.isAuthenticated) {
-      final isOperator = args.roles.any((r) => r.contains('operator'));
-      final isDriver = args.roles.any((r) => r.contains('driver'));
       final isScanner = args.roles.any((r) => r.contains('scanner'));
-      if (isOperator) {
+      final isOperatorOrAdmin = args.roles.any((r) =>
+          r.contains('operator') || r.contains('admin'));
+      final isDriver = args.roles.any((r) => r.contains('driver'));
+      if (isScanner) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ScannerHomeScreen()),
+        );
+      } else if (isOperatorOrAdmin) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -220,11 +226,6 @@ class _PermissionsScreenState extends State<PermissionsScreen>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
-        );
-      } else if (isScanner) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ScannerHomeScreen()),
         );
       } else {
         final t = context.read<AppTranslationsNotifier>();

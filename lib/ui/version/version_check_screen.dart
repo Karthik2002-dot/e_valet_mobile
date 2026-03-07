@@ -40,12 +40,13 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
   Widget _buildDestination() {
     final args = widget.args;
     if (args.isAuthenticated) {
-      final isOperator = args.roles.any((r) => r.contains('operator'));
-      final isDriver = args.roles.any((r) => r.contains('driver'));
       final isScanner = args.roles.any((r) => r.contains('scanner'));
-      if (isOperator) return const OperatorDashboardScreen();
-      if (isDriver) return const DriverHomeScreen();
+      final isOperatorOrAdmin = args.roles.any((r) =>
+          r.contains('operator') || r.contains('admin'));
+      final isDriver = args.roles.any((r) => r.contains('driver'));
       if (isScanner) return const ScannerHomeScreen();
+      if (isOperatorOrAdmin) return const OperatorDashboardScreen();
+      if (isDriver) return const DriverHomeScreen();
       return const LoginScreen();
     }
     return const LoginScreen();
@@ -140,10 +141,17 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
 
   void _navigateToDestination(BuildContext context, VersionCheckArgs args) {
     if (args.isAuthenticated) {
-      final isOperator = args.roles.any((r) => r.contains('operator'));
-      final isDriver = args.roles.any((r) => r.contains('driver'));
       final isScanner = args.roles.any((r) => r.contains('scanner'));
-      if (isOperator) {
+      final isOperatorOrAdmin = args.roles.any((r) =>
+          r.contains('operator') || r.contains('admin'));
+      final isDriver = args.roles.any((r) => r.contains('driver'));
+      if (isScanner) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ScannerHomeScreen()),
+        );
+        return;
+      }
+      if (isOperatorOrAdmin) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => const OperatorDashboardScreen(),
@@ -154,12 +162,6 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
       if (isDriver) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
-        );
-        return;
-      }
-      if (isScanner) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ScannerHomeScreen()),
         );
         return;
       }

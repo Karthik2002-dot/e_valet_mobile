@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu_event.dart';
-import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu_state.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_qr_dialog.dart';
 
 /// Scanner role home screen: top bar (same style as driver) and menu with
 /// Profile and Logout only.
@@ -17,7 +22,8 @@ class ScannerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
     final logoSize = screenWidth > 1200
         ? screenWidth * 0.08
         : screenWidth > 600
@@ -69,9 +75,68 @@ class ScannerHomeScreen extends StatelessWidget {
               SizedBox(width: screenWidth * 0.04),
             ],
           ),
-          body: const SafeArea(
-            child: Center(
-              child: Text('Scanner Home'),
+          body: SafeArea(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: size.height * 0.025,
+                ),
+                // Scan button with horizontal padding (centered, button-style)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
+                  child: Center(
+                    child: Material(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        onTap: () => ScannerQrDialog.show(context),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.25,
+                            vertical: size.height * 0.025,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.qr_code_scanner,
+                                color: AppColors.white,
+                                size: screenWidth * 0.06,
+                              ),
+                              SizedBox(width: screenWidth * 0.03),
+                              TextComponent(
+                                labelText: context
+                                    .watch<AppTranslationsNotifier>()
+                                    .get(TextConstants.scanTabLabel),
+                                fontSize: screenWidth * 0.045,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                      child: TextComponent(
+                        labelText: context
+                            .watch<AppTranslationsNotifier>()
+                            .get(TextConstants.scannerTapScanHint),
+                        fontSize: screenWidth * 0.04,
+                        color: AppColors.grey,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
