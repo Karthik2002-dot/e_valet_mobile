@@ -7,8 +7,23 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 /// Overtime confirmation dialog: "You have extended the [name] time [X] minutes more extra."
 /// Shows Cancel and Confirm; on Confirm calls [onConfirm].
+/// Backend key [overtimeConfirmMessage] expects template with {valetName} and {minutes}.
 class OvertimeConfirmDialog {
   OvertimeConfirmDialog._();
+
+  static String _formatOvertimeConfirmMessage(
+    AppTranslationsNotifier t,
+    String valetName,
+    int extraMinutes,
+  ) {
+    final template = t.getByKey(
+      'overtimeConfirmMessage',
+      TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
+    );
+    return template
+        .replaceAll('{valetName}', valetName)
+        .replaceAll('{minutes}', extraMinutes.toString());
+  }
 
   static void show(
     BuildContext context, {
@@ -23,14 +38,17 @@ class OvertimeConfirmDialog {
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
         title: TextComponent(
-          labelText: t.get(TextConstants.overtimeConfirmTitle),
+          labelText: t.getByKey(
+              'overtimeConfirmTitle', TextConstants.overtimeConfirmTitle),
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.black,
         ),
         content: TextComponent(
-          labelText: t.get(
-            TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
+          labelText: _formatOvertimeConfirmMessage(
+            t,
+            valetName,
+            extraMinutes,
           ),
           fontSize: 16,
           color: AppColors.black,

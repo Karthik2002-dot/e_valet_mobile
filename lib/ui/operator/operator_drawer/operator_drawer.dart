@@ -70,7 +70,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 iconData: Icons.schedule,
-                title: t.get(TextConstants.overTime),
+                title: t.getByKey('overtime', TextConstants.overTime),
                 isSelected: selectedIndex == 4,
                 onTap: () {
                   Navigator.of(context).pop();

@@ -202,7 +202,8 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                       });
                                     },
                                     decoration: InputDecoration(
-                                      hintText: t.get(
+                                      hintText: t.getByKey(
+                                          'searchByCardNumberHint',
                                           TextConstants.searchByCardNumberHint),
                                       hintStyle: TextStyle(
                                         color: AppColors.grey,

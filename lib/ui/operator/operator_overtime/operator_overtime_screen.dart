@@ -220,15 +220,16 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   TextComponent(
-                                    labelText: t.get(TextConstants.overTime),
+                                    labelText: t.getByKey(
+                                        'overtime', TextConstants.overTime),
                                     color: AppColors.black,
                                     fontSize: headerTitleFontSize,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   const SizedBox(height: 4),
                                   TextComponent(
-                                    labelText: t
-                                        .get(TextConstants.overtimeDescription),
+                                    labelText: t.getByKey('overtimeDescription',
+                                        TextConstants.overtimeDescription),
                                     color: AppColors.grey,
                                     fontSize: headerDescriptionFontSize,
                                   ),
@@ -241,7 +242,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                           Padding(
                             padding: const EdgeInsets.only(left: 4),
                             child: TextComponent(
-                              labelText: t.get(TextConstants.overtimeNote),
+                              labelText: t.getByKey(
+                                  'overtimeNote', TextConstants.overtimeNote),
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: AppColors.black,
@@ -296,8 +298,10 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 24),
                                     child: TextComponent(
-                                      labelText: t.get(TextConstants
-                                          .overtimeNoAvailableDrivers),
+                                      labelText: t.getByKey(
+                                          'overtimeNoAvailableDrivers',
+                                          TextConstants
+                                              .overtimeNoAvailableDrivers),
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.grey,
@@ -332,7 +336,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                               .showSnackBar(
                                             SnackBar(
                                               content: TextComponent(
-                                                labelText: t.get(
+                                                labelText: t.getByKey(
+                                                  'overtimeEnterNumbers',
                                                   TextConstants
                                                       .overtimeEnterNumbers,
                                                 ),
@@ -349,7 +354,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                               .showSnackBar(
                                             SnackBar(
                                               content: TextComponent(
-                                                labelText: t.get(
+                                                labelText: t.getByKey(
+                                                  'overtimeEnterNumbers',
                                                   TextConstants
                                                       .overtimeEnterNumbers,
                                                 ),
