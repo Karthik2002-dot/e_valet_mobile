@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 
 class DashboardContent extends StatefulWidget {
   final void Function(VoidCallback)? onRefreshReady;
@@ -277,7 +278,7 @@ class _DashboardContentState extends State<DashboardContent> {
                       const SizedBox(width: 8),
                       Switch(
                         value: _isAutoMode,
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           setState(() {
                             _isAutoMode = value;
                             if (_isAutoMode) {
@@ -286,6 +287,25 @@ class _DashboardContentState extends State<DashboardContent> {
                               _stopRetrievalRequestsRefreshTimer();
                             }
                           });
+                          // 1) GET current auto-assign settings
+                          try {
+                            await OperatorAutoAssignApiService
+                                .getAutoAssignSettings(outletId: _outletId);
+                          } catch (e, st) {
+                            print('[AutoAssign API] GET error: $e');
+                            print('[AutoAssign API] GET stackTrace: $st');
+                          }
+                          // 2) PATCH to set enabled = new toggle value (outletId from env)
+                          try {
+                            await OperatorAutoAssignApiService
+                                .patchAutoAssignSettings(
+                                  outletId: _outletId,
+                                  enabled: value,
+                                );
+                          } catch (e, st) {
+                            print('[AutoAssign API] PATCH error: $e');
+                            print('[AutoAssign API] PATCH stackTrace: $st');
+                          }
                         },
                         activeColor: AppColors.primary,
                       ),
