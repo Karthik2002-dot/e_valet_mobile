@@ -48,7 +48,8 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
-              text: t.get(TextConstants.carLogsCarStatus),
+              text: t.getByKey(
+                  'carLogsCarStatus', TextConstants.carLogsCarStatus),
               isActive: sortColumn == TextConstants.carLogsCarStatus,
               sortIcon: getSortIcon(TextConstants.carLogsCarStatus),
               onTap: () => onHeaderTap(TextConstants.carLogsCarStatus),

@@ -71,8 +71,8 @@ class _HelpScreenState extends State<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
-    final title =
-        widget.isFromOperator ? t.get(TextConstants.help) : TextConstants.help;
+    // Always use backend translation for title (Hindi/Telugu)
+    final title = t.getByKey('help', TextConstants.help);
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
