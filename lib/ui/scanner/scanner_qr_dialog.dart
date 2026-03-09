@@ -116,23 +116,23 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                               controller: _controller,
                               onDetect: _onDetect,
                               errorBuilder: (context, error, child) => Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.error_outline,
-                                    color: AppColors.error,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextComponent(
-                                    labelText: 'Camera error',
-                                    color: AppColors.black,
-                                    fontSize: 14,
-                                  ),
-                                ],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: AppColors.error,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextComponent(
+                                      labelText: 'Camera error',
+                                      color: AppColors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             ),
                             if (isProcessing)
                               Container(

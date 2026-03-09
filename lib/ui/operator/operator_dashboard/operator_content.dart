@@ -20,6 +20,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operato
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 
 class DashboardContent extends StatefulWidget {
   final bool isAutoMode;
@@ -51,6 +52,7 @@ class _DashboardContentState extends State<DashboardContent> {
   final Duration _highlightDuration = const Duration(seconds: 30);
   bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
+  bool _isUpdatingAutoMode = false;
 
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
@@ -90,6 +92,18 @@ class _DashboardContentState extends State<DashboardContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshReady?.call(_silentRefresh);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isAutoMode != widget.isAutoMode) {
+      if (widget.isAutoMode) {
+        _startRetrievalRequestsRefreshTimer();
+      } else {
+        _stopRetrievalRequestsRefreshTimer();
+      }
+    }
   }
 
   /// Silent background refresh of retrieval requests only (no loading indicator).
@@ -279,33 +293,55 @@ class _DashboardContentState extends State<DashboardContent> {
                       const SizedBox(width: 8),
                       Switch(
                         value: widget.isAutoMode,
-                        onChanged: (value) async {
-                          if (value) {
-                            _startRetrievalRequestsRefreshTimer();
-                          } else {
-                            _stopRetrievalRequestsRefreshTimer();
-                          }
-                          widget.onAutoModeChanged?.call(value);
-                          // 1) GET current auto-assign settings
-                          try {
-                            await OperatorAutoAssignApiService
-                                .getAutoAssignSettings(outletId: _outletId);
-                          } catch (e, st) {
-                            print('[AutoAssign API] GET error: $e');
-                            print('[AutoAssign API] GET stackTrace: $st');
-                          }
-                          // 2) PATCH to set enabled = new toggle value (outletId from env)
-                          try {
-                            await OperatorAutoAssignApiService
-                                .patchAutoAssignSettings(
-                              outletId: _outletId,
-                              enabled: value,
-                            );
-                          } catch (e, st) {
-                            print('[AutoAssign API] PATCH error: $e');
-                            print('[AutoAssign API] PATCH stackTrace: $st');
-                          }
-                        },
+                        onChanged: _isUpdatingAutoMode
+                            ? null
+                            : (value) async {
+                                final previousValue = widget.isAutoMode;
+
+                                if (value) {
+                                  _startRetrievalRequestsRefreshTimer();
+                                } else {
+                                  _stopRetrievalRequestsRefreshTimer();
+                                }
+                                widget.onAutoModeChanged?.call(value);
+
+                                setState(() => _isUpdatingAutoMode = true);
+                                try {
+                                  final res = await OperatorAutoAssignApiService
+                                      .patchAutoAssignSettings(
+                                    outletId: _outletId,
+                                    enabled: value,
+                                  );
+
+                                  if (!mounted) return;
+                                  if (res.autoAssignEnabled != value) {
+                                    if (res.autoAssignEnabled) {
+                                      _startRetrievalRequestsRefreshTimer();
+                                    } else {
+                                      _stopRetrievalRequestsRefreshTimer();
+                                    }
+                                    widget.onAutoModeChanged
+                                        ?.call(res.autoAssignEnabled);
+                                  }
+                                } catch (e) {
+                                  if (!mounted) return;
+
+                                  SnackBars.showErrorSnackBar(
+                                    context,
+                                    'Failed to update auto mode',
+                                  );
+
+                                  if (previousValue) {
+                                    _startRetrievalRequestsRefreshTimer();
+                                  } else {
+                                    _stopRetrievalRequestsRefreshTimer();
+                                  }
+                                  widget.onAutoModeChanged?.call(previousValue);
+                                } finally {
+                                  if (!mounted) return;
+                                  setState(() => _isUpdatingAutoMode = false);
+                                }
+                              },
                         activeColor: AppColors.primary,
                       ),
                     ],
@@ -326,14 +362,14 @@ class _DashboardContentState extends State<DashboardContent> {
                     final isLoaded = state is OperatorDashboardLoaded;
                     final isTransientActionState =
                         state is AssignmentInProgress ||
-                        state is AssignmentSuccess ||
-                        state is AssignmentError ||
-                        state is CancelAssignmentInProgress ||
-                        state is CancelAssignmentSuccess ||
-                        state is CancelAssignmentError ||
-                        state is ManualRequestInProgress ||
-                        state is ManualRequestSuccess ||
-                        state is ManualRequestError;
+                            state is AssignmentSuccess ||
+                            state is AssignmentError ||
+                            state is CancelAssignmentInProgress ||
+                            state is CancelAssignmentSuccess ||
+                            state is CancelAssignmentError ||
+                            state is ManualRequestInProgress ||
+                            state is ManualRequestSuccess ||
+                            state is ManualRequestError;
 
                     if (isLoaded) {
                       _lastLoadedState = state;
@@ -365,6 +401,7 @@ class _DashboardContentState extends State<DashboardContent> {
                               availableDrivers:
                                   OperatorAvailableDriversResponse(drivers: []),
                               onAssignmentComplete: () {},
+                              autoAssignEnabled: widget.isAutoMode,
                               isLoading: true,
                               highlightedRequestIds: const <String>{},
                             ),
@@ -403,6 +440,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                   ),
                                 );
                               },
+                              autoAssignEnabled: widget.isAutoMode,
                               isLoading: false,
                               highlightedRequestIds: _highlightedRequestIds,
                             ),

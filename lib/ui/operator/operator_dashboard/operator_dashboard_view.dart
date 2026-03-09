@@ -17,6 +17,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 import 'operator_screen_router.dart';
 
 class OperatorDashboardView extends StatefulWidget {
@@ -48,6 +49,26 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       outletId: _outletId,
     );
     _dashboardBloc.add(FetchDashboardKpis(outletId: _outletId));
+
+    _loadAutoAssignSetting();
+  }
+
+  Future<void> _loadAutoAssignSetting() async {
+    try {
+      final res = await OperatorAutoAssignApiService.getAutoAssignSettings(
+        outletId: _outletId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _isAutoMode = res.autoAssignEnabled;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      SnackBars.showErrorSnackBar(
+        context,
+        'Failed to load auto mode status',
+      );
+    }
   }
 
   @override

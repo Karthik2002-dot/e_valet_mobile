@@ -69,14 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
       listen: false,
     );
 
-
-
-
-
     // Get WebSocketBloc from context
     final webSocketBloc = context.read<WebSocketBloc>();
-
-    
 
     return BlocProvider(
       create: (context) => LoginBloc(
@@ -97,8 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (_) => const ScannerHomeScreen(),
                 ),
               );
-            } else if (roles.any((r) =>
-                r.contains('operator') || r.contains('admin'))) {
+            } else if (roles
+                .any((r) => r.contains('operator') || r.contains('admin'))) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

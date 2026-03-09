@@ -20,6 +20,7 @@ class RetrievalRequestCard extends StatefulWidget {
   final RetrievalRequest request;
   final List<AvailableDriver> availableDrivers;
   final VoidCallback onAssignmentComplete;
+  final bool autoAssignEnabled;
   final bool isHighlighted;
 
   const RetrievalRequestCard({
@@ -27,6 +28,7 @@ class RetrievalRequestCard extends StatefulWidget {
     required this.request,
     required this.availableDrivers,
     required this.onAssignmentComplete,
+    required this.autoAssignEnabled,
     this.isHighlighted = false,
   });
 
@@ -385,7 +387,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (_isAssigned) ...[
+                                  if (_isAssigned &&
+                                      !widget.autoAssignEnabled) ...[
                                     SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *
@@ -430,8 +433,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                             ],
                           ),
                           // Parking Location
-                          if (widget.request.vehicle.parkingLocation != null &&
-                              widget.request.vehicle.parkingLocation.isNotEmpty)
+                          if (widget.request.vehicle.parkingLocation.isNotEmpty)
                             Padding(
                               padding: EdgeInsets.only(
                                   top: MediaQuery.of(context).size.height *
@@ -560,7 +562,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                   onTap: () {
                                     final phone =
                                         widget.request.assignedTo.phone;
-                                    if (phone != null && phone.isNotEmpty) {
+                                    if (phone.isNotEmpty) {
                                       _callPhoneNumber(phone);
                                     } else {
                                       SnackBars.showErrorSnackBar(
