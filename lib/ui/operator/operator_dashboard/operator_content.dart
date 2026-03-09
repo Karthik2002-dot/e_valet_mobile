@@ -22,11 +22,15 @@ import 'package:niloufer_valet_mobile/services/notification/text_to_speech_servi
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 
 class DashboardContent extends StatefulWidget {
+  final bool isAutoMode;
+  final void Function(bool)? onAutoModeChanged;
   final void Function(VoidCallback)? onRefreshReady;
   final void Function(int)? onNavigateToTab;
 
   const DashboardContent({
     super.key,
+    this.isAutoMode = false,
+    this.onAutoModeChanged,
     this.onRefreshReady,
     this.onNavigateToTab,
   });
@@ -50,9 +54,6 @@ class _DashboardContentState extends State<DashboardContent> {
 
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
-
-  /// Auto mode toggle: when on, retrieval requests refresh every 30 seconds in the background. Default off; user turns on manually.
-  bool _isAutoMode = false;
 
   /// Periodic timer for silent background refresh of retrieval requests every 30 seconds.
   Timer? _retrievalRequestsRefreshTimer;
@@ -80,8 +81,8 @@ class _DashboardContentState extends State<DashboardContent> {
       ),
     );
 
-    // Start periodic silent refresh when auto mode is on
-    if (_isAutoMode) {
+    // Start periodic silent refresh when auto mode is on (state comes from parent so it persists across tab switches)
+    if (widget.isAutoMode) {
       _startRetrievalRequestsRefreshTimer();
     }
 
@@ -277,16 +278,14 @@ class _DashboardContentState extends State<DashboardContent> {
                       ),
                       const SizedBox(width: 8),
                       Switch(
-                        value: _isAutoMode,
+                        value: widget.isAutoMode,
                         onChanged: (value) async {
-                          setState(() {
-                            _isAutoMode = value;
-                            if (_isAutoMode) {
-                              _startRetrievalRequestsRefreshTimer();
-                            } else {
-                              _stopRetrievalRequestsRefreshTimer();
-                            }
-                          });
+                          if (value) {
+                            _startRetrievalRequestsRefreshTimer();
+                          } else {
+                            _stopRetrievalRequestsRefreshTimer();
+                          }
+                          widget.onAutoModeChanged?.call(value);
                           // 1) GET current auto-assign settings
                           try {
                             await OperatorAutoAssignApiService
@@ -325,9 +324,16 @@ class _DashboardContentState extends State<DashboardContent> {
                   builder: (context, state) {
                     final isLoading = state is OperatorDashboardLoading;
                     final isLoaded = state is OperatorDashboardLoaded;
-                    final isAssignmentState = state is AssignmentInProgress ||
+                    final isTransientActionState =
+                        state is AssignmentInProgress ||
                         state is AssignmentSuccess ||
-                        state is AssignmentError;
+                        state is AssignmentError ||
+                        state is CancelAssignmentInProgress ||
+                        state is CancelAssignmentSuccess ||
+                        state is CancelAssignmentError ||
+                        state is ManualRequestInProgress ||
+                        state is ManualRequestSuccess ||
+                        state is ManualRequestError;
 
                     if (isLoaded) {
                       _lastLoadedState = state;
@@ -366,7 +372,7 @@ class _DashboardContentState extends State<DashboardContent> {
                         ],
                       );
                     } else if (isLoaded ||
-                        (isAssignmentState && _lastLoadedState != null)) {
+                        (isTransientActionState && _lastLoadedState != null)) {
                       final data = isLoaded ? state : _lastLoadedState!;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

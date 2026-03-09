@@ -36,6 +36,9 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
+  /// Auto mode state lifted here so it persists when user switches tabs and comes back.
+  bool _isAutoMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +132,12 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
     return OperatorScreenRouter.getScreen(
       _selectedIndex,
       DashboardContent(
+        isAutoMode: _isAutoMode,
+        onAutoModeChanged: (value) {
+          setState(() {
+            _isAutoMode = value;
+          });
+        },
         onRefreshReady: (refresh) {
           print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;

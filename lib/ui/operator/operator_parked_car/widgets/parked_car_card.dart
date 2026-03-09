@@ -91,60 +91,52 @@ class ParkedCarCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Card Number and Parked Duration (same row)
+                  // Card Number (first line)
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.credit_card,
-                              size: screenWidth *
-                                  (Platform.isIOS ? 0.016 : 0.018),
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(width: screenWidth * 0.004),
-                            Flexible(
-                              child: TextComponent(
-                                labelText: TextConstants.cardNumberWithHash(
-                                    item.cardNumber),
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth *
-                                    (Platform.isIOS ? 0.018 : 0.02),
-                                color: AppColors.black,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                      Icon(
+                        Icons.credit_card,
+                        size: screenWidth *
+                            (Platform.isIOS ? 0.016 : 0.018),
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: screenWidth * 0.004),
+                      Flexible(
+                        child: TextComponent(
+                          labelText: TextConstants.cardNumberWithHash(
+                              item.cardNumber),
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth *
+                              (Platform.isIOS ? 0.018 : 0.02),
+                          color: AppColors.black,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: screenWidth * 0.02),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.004),
+                  // Parked Duration / Time (next line)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: screenWidth *
+                            (Platform.isIOS ? 0.016 : 0.018),
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: screenWidth * 0.003),
                       Flexible(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.timer_outlined,
-                              size: screenWidth *
-                                  (Platform.isIOS ? 0.016 : 0.018),
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(width: screenWidth * 0.003),
-                            Expanded(
-                              child: TextComponent(
-                                labelText: item.duration,
-                                fontSize: screenWidth *
-                                    (Platform.isIOS ? 0.018 : 0.02),
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                        child: TextComponent(
+                          labelText: item.duration,
+                          fontSize: screenWidth *
+                              (Platform.isIOS ? 0.018 : 0.02),
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
