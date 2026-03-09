@@ -13,6 +13,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
+  final bool autoAssignEnabled;
   final bool isLoading;
   final Set<String> highlightedRequestIds;
 
@@ -21,6 +22,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.onAssignmentComplete,
+    required this.autoAssignEnabled,
     this.isLoading = false,
     this.highlightedRequestIds = const <String>{},
   });
@@ -55,6 +57,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   retrievalRequests: retrievalRequests,
                   availableDrivers: availableDrivers,
                   onAssignmentComplete: onAssignmentComplete,
+                  autoAssignEnabled: autoAssignEnabled,
                   isLoading: isLoading,
                   isLeftColumn: true,
                   highlightedRequestIds: highlightedRequestIds,
@@ -67,6 +70,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   retrievalRequests: retrievalRequests,
                   availableDrivers: availableDrivers,
                   onAssignmentComplete: onAssignmentComplete,
+                  autoAssignEnabled: autoAssignEnabled,
                   isLoading: isLoading,
                   isLeftColumn: false,
                   highlightedRequestIds: highlightedRequestIds,

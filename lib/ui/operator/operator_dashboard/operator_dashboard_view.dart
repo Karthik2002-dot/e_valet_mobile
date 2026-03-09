@@ -17,6 +17,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 import 'operator_screen_router.dart';
 
 class OperatorDashboardView extends StatefulWidget {
@@ -36,6 +37,9 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
+  /// Auto mode state lifted here so it persists when user switches tabs and comes back.
+  bool _isAutoMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +49,26 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       outletId: _outletId,
     );
     _dashboardBloc.add(FetchDashboardKpis(outletId: _outletId));
+
+    _loadAutoAssignSetting();
+  }
+
+  Future<void> _loadAutoAssignSetting() async {
+    try {
+      final res = await OperatorAutoAssignApiService.getAutoAssignSettings(
+        outletId: _outletId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _isAutoMode = res.autoAssignEnabled;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      SnackBars.showErrorSnackBar(
+        context,
+        'Failed to load auto mode status',
+      );
+    }
   }
 
   @override
@@ -129,6 +153,12 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
     return OperatorScreenRouter.getScreen(
       _selectedIndex,
       DashboardContent(
+        isAutoMode: _isAutoMode,
+        onAutoModeChanged: (value) {
+          setState(() {
+            _isAutoMode = value;
+          });
+        },
         onRefreshReady: (refresh) {
           print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;

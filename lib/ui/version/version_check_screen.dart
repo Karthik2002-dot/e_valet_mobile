@@ -41,8 +41,8 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
     final args = widget.args;
     if (args.isAuthenticated) {
       final isScanner = args.roles.any((r) => r.contains('scanner'));
-      final isOperatorOrAdmin = args.roles.any((r) =>
-          r.contains('operator') || r.contains('admin'));
+      final isOperatorOrAdmin =
+          args.roles.any((r) => r.contains('operator') || r.contains('admin'));
       final isDriver = args.roles.any((r) => r.contains('driver'));
       if (isScanner) return const ScannerHomeScreen();
       if (isOperatorOrAdmin) return const OperatorDashboardScreen();
@@ -142,8 +142,8 @@ class _VersionCheckScreenState extends State<VersionCheckScreen> {
   void _navigateToDestination(BuildContext context, VersionCheckArgs args) {
     if (args.isAuthenticated) {
       final isScanner = args.roles.any((r) => r.contains('scanner'));
-      final isOperatorOrAdmin = args.roles.any((r) =>
-          r.contains('operator') || r.contains('admin'));
+      final isOperatorOrAdmin =
+          args.roles.any((r) => r.contains('operator') || r.contains('admin'));
       final isDriver = args.roles.any((r) => r.contains('driver'));
       if (isScanner) {
         Navigator.of(context).pushReplacement(

@@ -16,6 +16,7 @@ class RetrievalRequestColumn extends StatefulWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
+  final bool autoAssignEnabled;
   final bool isLoading;
   final bool isLeftColumn;
   final Set<String> highlightedRequestIds;
@@ -25,6 +26,7 @@ class RetrievalRequestColumn extends StatefulWidget {
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.onAssignmentComplete,
+    required this.autoAssignEnabled,
     this.isLoading = false,
     this.isLeftColumn = true,
     this.highlightedRequestIds = const <String>{},
@@ -108,6 +110,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
               request: request,
               availableDrivers: widget.availableDrivers.drivers,
               onAssignmentComplete: widget.onAssignmentComplete,
+              autoAssignEnabled: widget.autoAssignEnabled,
               isHighlighted:
                   widget.highlightedRequestIds.contains(request.sessionId),
             );

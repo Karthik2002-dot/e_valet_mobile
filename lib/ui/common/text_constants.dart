@@ -31,6 +31,9 @@ class TextConstants {
 
   // QR Scanner
   static const orEnterKey = 'Or Enter Key';
+  static const String scanQr = 'Scan QR';
+  static const String scanWhatsAppQrInstruction =
+      'Scan the WhatsApp QR code from the customer valet card';
 
   // Manual Request
   static const pleaseEnterCardNumber = 'Please enter a card number';
@@ -378,6 +381,7 @@ class TextConstants {
   static const String noCarsParked = 'No Cars Parked';
 
   // QR Reader
+  static const String cameraError = 'Camera error';
   static const String cameraErrorReinitializing =
       'Camera error. Reinitializing...';
 

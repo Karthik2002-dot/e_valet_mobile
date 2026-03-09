@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -48,6 +51,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final size = MediaQuery.of(context).size;
     return BlocListener<ScannerQrBloc, ScannerQrState>(
       listener: (context, state) {
@@ -82,7 +86,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextComponent(
-                        labelText: 'Scan QR',
+                        labelText: t.get(TextConstants.scanQr),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
@@ -116,23 +120,23 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                               controller: _controller,
                               onDetect: _onDetect,
                               errorBuilder: (context, error, child) => Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.error_outline,
-                                    color: AppColors.error,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextComponent(
-                                    labelText: 'Camera error',
-                                    color: AppColors.black,
-                                    fontSize: 14,
-                                  ),
-                                ],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: AppColors.error,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextComponent(
+                                      labelText: t.get(TextConstants.cameraError),
+                                      color: AppColors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             ),
                             if (isProcessing)
                               Container(
@@ -155,7 +159,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                   padding: const EdgeInsets.all(12),
                   child: TextComponent(
                     labelText:
-                        'Scan the WhatsApp QR code from the customer valet card',
+                        t.get(TextConstants.scanWhatsAppQrInstruction),
                     fontSize: 12,
                     color: AppColors.grey,
                     textAlign: TextAlign.center,

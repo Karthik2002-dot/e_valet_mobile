@@ -91,8 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (_) => const ScannerHomeScreen(),
                 ),
               );
-            } else if (roles.any((r) =>
-                r.contains('operator') || r.contains('admin'))) {
+            } else if (roles
+                .any((r) => r.contains('operator') || r.contains('admin'))) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

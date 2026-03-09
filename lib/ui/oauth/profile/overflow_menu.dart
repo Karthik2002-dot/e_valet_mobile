@@ -28,7 +28,9 @@ class OverflowMenu extends StatelessWidget {
               title: t.get(TextConstants.profileMenuTitle),
               icon: Icons.person_outline,
               onTap: () {
-                context.read<ScannerMenuBloc>().add(const ScannerProfilePressed());
+                context
+                    .read<ScannerMenuBloc>()
+                    .add(const ScannerProfilePressed());
               },
             ),
             const PullDownMenuDivider(),
@@ -36,7 +38,9 @@ class OverflowMenu extends StatelessWidget {
               title: t.get(TextConstants.logoutMenuTitle),
               icon: Icons.logout,
               onTap: () {
-                context.read<ScannerMenuBloc>().add(const ScannerLogoutPressed());
+                context
+                    .read<ScannerMenuBloc>()
+                    .add(const ScannerLogoutPressed());
               },
             ),
           ];
@@ -60,7 +64,9 @@ class OverflowMenu extends StatelessWidget {
             title: t.get(TextConstants.guidelinesMenuTitle),
             icon: Icons.menu_book_outlined,
             onTap: () {
-              context.read<DriverMenuBloc>().add(const DriverGuidelinesPressed());
+              context
+                  .read<DriverMenuBloc>()
+                  .add(const DriverGuidelinesPressed());
             },
           ),
           const PullDownMenuDivider(),

@@ -62,7 +62,8 @@ class ScannerRetrievalBloc
           add(const ScannerRetrievalRefreshSilently());
         },
         onError: (error) {
-          print('ScannerRetrievalBloc: Error listening to session status: $error');
+          print(
+              'ScannerRetrievalBloc: Error listening to session status: $error');
         },
       );
     } catch (e) {
