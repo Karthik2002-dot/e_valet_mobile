@@ -95,7 +95,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 iconData: Icons.support_agent,
-                title: t.get(TextConstants.help),
+                title: t.getByKey('help', TextConstants.help),
                 isSelected: selectedIndex == 6,
                 onTap: () {
                   Navigator.of(context).pop();

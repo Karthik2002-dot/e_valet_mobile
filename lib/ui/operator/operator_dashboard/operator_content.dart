@@ -286,7 +286,7 @@ class _DashboardContentState extends State<DashboardContent> {
                     children: [
                       TextComponent(
                         labelText: t.getByKey(
-                            'Auto Mode', TextConstants.autoToggleLabel),
+                            'autoToggleLabel', TextConstants.autoToggleLabel),
                         color: AppColors.black,
                         fontSize: MediaQuery.of(context).size.height * 0.015,
                       ),
