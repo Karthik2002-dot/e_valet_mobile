@@ -86,7 +86,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextComponent(
-                        labelText: 'Scan QR',
+                        labelText: t.get(TextConstants.scanQr),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
@@ -159,7 +159,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                   padding: const EdgeInsets.all(12),
                   child: TextComponent(
                     labelText:
-                        'Scan the WhatsApp QR code from the customer valet card',
+                        t.get(TextConstants.scanWhatsAppQrInstruction),
                     fontSize: 12,
                     color: AppColors.grey,
                     textAlign: TextAlign.center,
