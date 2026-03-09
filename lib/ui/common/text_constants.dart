@@ -378,6 +378,7 @@ class TextConstants {
   static const String noCarsParked = 'No Cars Parked';
 
   // QR Reader
+  static const String cameraError = 'Camera error';
   static const String cameraErrorReinitializing =
       'Camera error. Reinitializing...';
 

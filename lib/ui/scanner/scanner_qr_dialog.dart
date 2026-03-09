@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -48,6 +51,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final size = MediaQuery.of(context).size;
     return BlocListener<ScannerQrBloc, ScannerQrState>(
       listener: (context, state) {
@@ -126,7 +130,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                                     ),
                                     const SizedBox(height: 8),
                                     TextComponent(
-                                      labelText: 'Camera error',
+                                      labelText: t.get(TextConstants.cameraError),
                                       color: AppColors.black,
                                       fontSize: 14,
                                     ),
