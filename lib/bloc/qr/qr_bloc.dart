@@ -42,7 +42,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     final customerCardNumber = tryParseCardNumberFromWhatsAppUrl(raw);
     if (customerCardNumber != null) {
       // Successfully parsed customer QR code
-      final outletId = int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1;
+      final outletId = int.parse(dotenv.env['OUTLET_ID']!);
       final qrData = QrData(
         outletId: outletId,
         cardNumber: customerCardNumber,
