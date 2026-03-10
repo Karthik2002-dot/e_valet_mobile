@@ -130,7 +130,8 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                                     ),
                                     const SizedBox(height: 8),
                                     TextComponent(
-                                      labelText: t.get(TextConstants.cameraError),
+                                      labelText:
+                                          t.get(TextConstants.cameraError),
                                       color: AppColors.black,
                                       fontSize: 14,
                                     ),
@@ -158,8 +159,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: TextComponent(
-                    labelText:
-                        t.get(TextConstants.scanWhatsAppQrInstruction),
+                    labelText: t.get(TextConstants.scanWhatsAppQrInstruction),
                     fontSize: 12,
                     color: AppColors.grey,
                     textAlign: TextAlign.center,
