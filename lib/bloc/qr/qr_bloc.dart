@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
 import 'package:niloufer_valet_mobile/models/driver/qr/qr_data.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/utils/whatsapp_qr_parser.dart';
 
 class QrBloc extends Bloc<QrEvent, QrState> {
   QrBloc() : super(const QrState()) {
@@ -25,6 +28,7 @@ class QrBloc extends Bloc<QrEvent, QrState> {
     emit(state.copyWith(
       scannedCode: event.code,
       qrData: null,
+      customerCardNumber: null,
       isProcessing: true,
       successMessage: null,
       errorMessage: null,
@@ -32,35 +36,59 @@ class QrBloc extends Bloc<QrEvent, QrState> {
       cameraShouldBeActive: false, // Stop camera while processing
     ));
 
-    try {
-      // Parse JSON from QR code
-      final jsonData = jsonDecode(event.code) as Map<String, dynamic>;
-      final qrData = QrData.fromJson(jsonData);
+    final raw = event.code.trim();
 
-      // Show success message and stop scanner after parsing
+    // First, try to parse as WhatsApp QR code (customer card)
+    final customerCardNumber = tryParseCardNumberFromWhatsAppUrl(raw);
+    if (customerCardNumber != null) {
+      // Successfully parsed customer QR code
+      final outletId = int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1;
+      final qrData = QrData(
+        outletId: outletId,
+        cardNumber: customerCardNumber,
+      );
+
       emit(state.copyWith(
         scannedCode: event.code,
         qrData: qrData,
+        customerCardNumber: customerCardNumber,
         isProcessing: false,
-        successMessage: 'Scanned Success',
+        successMessage: 'Customer card scanned successfully',
         errorMessage: null,
-        shouldStopScanner:
-            true, // Stop scanner when data is successfully parsed
-        cameraShouldBeActive: false, // Keep camera stopped when data exists
+        shouldStopScanner: true,
+        cameraShouldBeActive: false,
       ));
+      return;
+    }
 
-      // Automatically submit the QR data
-      // This will be handled by the UI layer when qrData is not null
-    } catch (e) {
-      // On error, also stop scanner and show error message
+    // If not a WhatsApp QR, check if it's a valet QR code (JSON format)
+    try {
+      final jsonData = jsonDecode(raw) as Map<String, dynamic>;
+      final qrData = QrData.fromJson(jsonData);
+
+      // If JSON parsing succeeds, it's a valet card - show error
       emit(state.copyWith(
         scannedCode: event.code,
         qrData: null,
+        customerCardNumber: null,
         isProcessing: false,
         successMessage: null,
-        errorMessage: 'Invalid QR code format. Please scan again.',
-        shouldStopScanner: true, // Stop scanner on error too
-        cameraShouldBeActive: false, // Keep camera stopped on error
+        errorMessage: TextConstants.validationScanCustomerCardOnly,
+        shouldStopScanner: true,
+        cameraShouldBeActive: false,
+      ));
+      return;
+    } catch (_) {
+      // Neither WhatsApp nor JSON format - show generic error
+      emit(state.copyWith(
+        scannedCode: event.code,
+        qrData: null,
+        customerCardNumber: null,
+        isProcessing: false,
+        successMessage: null,
+        errorMessage: 'Invalid QR code format. Please scan a customer card.',
+        shouldStopScanner: true,
+        cameraShouldBeActive: false,
       ));
     }
   }

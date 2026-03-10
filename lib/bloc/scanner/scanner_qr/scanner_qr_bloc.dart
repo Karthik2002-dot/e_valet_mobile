@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:convert';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_state.dart';
@@ -15,6 +16,8 @@ class ScannerQrBloc extends Bloc<ScannerQrEvent, ScannerQrState> {
 
   static const String _invalidQrMessage =
       'Could not find card number in QR code. Please scan the WhatsApp QR from the valet card.';
+  static const String _valetQrScannedMessage =
+      'Please scan the customer QR, not the valet QR.';
   static const String _genericErrorMessage =
       'Failed to create retrieval request. Please try again.';
 
@@ -25,6 +28,22 @@ class ScannerQrBloc extends Bloc<ScannerQrEvent, ScannerQrState> {
     if (state is ScannerQrProcessing) return;
     final raw = event.rawValue.trim();
     if (raw.isEmpty) return;
+
+    // Check for valet QR format FIRST (JSON with outletId + cardNumber).
+    // Otherwise the WhatsApp parser can wrongly match "card" in "cardNumber" and hit the API.
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        final hasOutletId = decoded.containsKey('outletId');
+        final hasCardNumber = decoded.containsKey('cardNumber');
+        if (hasOutletId && hasCardNumber) {
+          emit(const ScannerQrValetCardScanned(_valetQrScannedMessage));
+          return;
+        }
+      }
+    } catch (_) {
+      // not JSON, continue
+    }
 
     final cardNumber = tryParseCardNumberFromWhatsAppUrl(raw);
     if (cardNumber == null) {

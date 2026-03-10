@@ -41,3 +41,14 @@ class ScannerQrInvalidQr extends ScannerQrState {
   @override
   List<Object?> get props => [message];
 }
+
+/// User scanned the valet (JSON) QR instead of the customer WhatsApp QR.
+/// UI should show the message and close the dialog.
+class ScannerQrValetCardScanned extends ScannerQrState {
+  final String message;
+
+  const ScannerQrValetCardScanned(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
