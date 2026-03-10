@@ -15,18 +15,25 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 /// customer card), [ScannerQrBloc] extracts card number and calls manual
 /// retrieval request API.
 class ScannerQrDialog extends StatefulWidget {
-  const ScannerQrDialog({super.key});
-
+  /// Returns when the dialog is closed. Snackbars are shown using the caller's
+  /// context so messages remain visible after closing the dialog.
   static Future<void> show(BuildContext context) {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => BlocProvider(
         create: (_) => ScannerQrBloc(),
-        child: const ScannerQrDialog(),
+        child: ScannerQrDialog(parentContext: context),
       ),
     );
   }
+
+  final BuildContext parentContext;
+
+  const ScannerQrDialog({
+    super.key,
+    required this.parentContext,
+  });
 
   @override
   State<ScannerQrDialog> createState() => _ScannerQrDialogState();
@@ -56,14 +63,23 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
     return BlocListener<ScannerQrBloc, ScannerQrState>(
       listener: (context, state) {
         if (state is ScannerQrSuccess) {
-          SnackBars.showSuccessSnackBar(context, state.message);
+          SnackBars.showSuccessSnackBar(widget.parentContext, state.message);
           Navigator.of(context).pop();
+        } else if (state is ScannerQrValetCardScanned) {
+          SnackBars.showErrorSnackBar(widget.parentContext, state.message);
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            if (context.mounted) Navigator.of(context).pop();
+          });
         } else if (state is ScannerQrError) {
-          SnackBars.showErrorSnackBar(context, state.message);
-          context.read<ScannerQrBloc>().add(const ScannerQrReset());
+          SnackBars.showErrorSnackBar(widget.parentContext, state.message);
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            if (context.mounted) Navigator.of(context).pop();
+          });
         } else if (state is ScannerQrInvalidQr) {
-          SnackBars.showErrorSnackBar(context, state.message);
-          context.read<ScannerQrBloc>().add(const ScannerQrReset());
+          SnackBars.showErrorSnackBar(widget.parentContext, state.message);
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            if (context.mounted) Navigator.of(context).pop();
+          });
         }
       },
       child: BlocBuilder<ScannerQrBloc, ScannerQrState>(
