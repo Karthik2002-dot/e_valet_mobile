@@ -279,6 +279,10 @@ class TextConstants {
   static const String proceedToRepark = 'Proceed to Re-Park';
   static const String cancel = 'Cancel';
 
+  // Operator Override (when operator marks Parked/Completed from dashboard)
+  static const String transactionCompletedByOperator =
+      'Transaction completed by operator. Returning to home.';
+
   // Arrival Related
   static const String slideToConfirmArrival = 'Confirm Arrival';
   static const String disabledRemainingSeconds = 'Seconds remaining:';

@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/confirm_arrival/confirm_arrival_state.dart';
@@ -46,11 +49,15 @@ class ConfirmArrivalScreen extends StatefulWidget {
   State<ConfirmArrivalScreen> createState() => _ConfirmArrivalScreenState();
 }
 
+/// Polling interval in seconds to detect operator override (Parked/Completed).
+const int _operatorOverridePollIntervalSeconds = 5;
+
 class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   bool _showHandoverButtons = false;
   bool _confirmArrivalButtonEnabled = true;
   int _confirmArrivalRemainingSeconds = 0;
   Timer? _enableConfirmArrivalTimer;
+  Timer? _operatorOverridePollTimer;
 
   /// After Confirm Arrival API success, Customer Missing button is disabled until this time (duration from CUSTOMER_MISSING_DISABLE_SECONDS in .env).
   DateTime? _customerMissingDisabledUntil;
@@ -99,11 +106,94 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
         );
       }
     }
+    _startOperatorOverridePolling();
+  }
+
+  /// Polls assigned sessions every 5 seconds. When operator overrides transaction
+  /// status to Parked/Completed from Operator Dashboard, the session is removed
+  /// from assigned-to-me. We detect that and pop to Home so valet becomes available.
+  void _startOperatorOverridePolling() {
+    _operatorOverridePollTimer?.cancel();
+    _operatorOverridePollTimer = Timer.periodic(
+      const Duration(seconds: _operatorOverridePollIntervalSeconds),
+      (_) => _checkOperatorOverride(),
+    );
+  }
+
+  Future<void> _checkOperatorOverride() async {
+    if (!mounted) return;
+    try {
+      // 1) GET /operators/assign-retrieval - primary source for status when operator changes in Car Logs
+      final assignmentStatus =
+          await OperatorAssignRetrievalApiService.getAssignmentStatus(
+        sessionId: widget.session.id,
+      );
+      if (!mounted) return;
+      if (assignmentStatus != null) {
+        if (assignmentStatus.isParked || assignmentStatus.isCompleted) {
+          _operatorOverridePollTimer?.cancel();
+          _operatorOverridePollTimer = null;
+          if (mounted) {
+            final t = context.read<AppTranslationsNotifier>();
+            SnackBars.showSuccessSnackBar(
+              context,
+              t.getByKey(
+                'transactionCompletedByOperator',
+                TextConstants.transactionCompletedByOperator,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+          return;
+        }
+        if (!_showHandoverButtons && assignmentStatus.isArrived) {
+          setState(() => _showHandoverButtons = true);
+          return;
+        }
+      }
+
+      // 2) Fallback: Check assigned sessions - session removed when operator completes
+      final sessions = await AssignedSessionsApiService.fetchAssignedSessions();
+      if (!mounted) return;
+      final sessionStillAssigned =
+          sessions.any((s) => s.id == widget.session.id);
+      if (!sessionStillAssigned) {
+        _operatorOverridePollTimer?.cancel();
+        _operatorOverridePollTimer = null;
+        if (mounted) {
+          final t = context.read<AppTranslationsNotifier>();
+          SnackBars.showSuccessSnackBar(
+            context,
+            t.getByKey(
+              'transactionCompletedByOperator',
+              TextConstants.transactionCompletedByOperator,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+        return;
+      }
+
+      // 3) Fallback: GET /sessions/pending - check if operator changed to ARRIVED
+      if (!_showHandoverButtons) {
+        final pending = await SessionsPendingApiService.getPendingSessions();
+        if (!mounted) return;
+        final matching = pending.sessions
+            .where((s) => s.sessionId == widget.session.id)
+            .toList();
+        if (matching.isNotEmpty && matching.first.isArrived) {
+          setState(() => _showHandoverButtons = true);
+        }
+      }
+    } catch (_) {
+      // Silently ignore polling errors; will retry on next interval
+    }
   }
 
   @override
   void dispose() {
     _enableConfirmArrivalTimer?.cancel();
+    _operatorOverridePollTimer?.cancel();
     super.dispose();
   }
 

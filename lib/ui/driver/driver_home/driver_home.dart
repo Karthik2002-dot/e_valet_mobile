@@ -98,6 +98,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
   bool _assignedSessionsPollingStarted = false;
 
+  // Poll pending sessions every 5s so operator override (e.g. ARRIVED in Car Logs) is detected
+  Timer? _pendingSessionsPollTimer;
+  bool _pendingSessionsPollingStarted = false;
+  static const int _pendingSessionsPollIntervalSeconds = 5;
+
   void _refreshPendingSessions() {
     try {
       context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
@@ -301,8 +306,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPopNext() {
     super.didPopNext();
-    // When user returns to driver home (e.g. from Car Camera), reset so home (two cards) is shown, not Vehicle details.
+    // When user returns to driver home (e.g. from Car Camera or Confirm Arrival), reset so home (two cards) is shown, not Vehicle details.
     _homeResetNotifier.value++;
+    // Reset so we can navigate to Confirm Arrival again if operator changed status while we were away
+    _hasNavigatedForStatus = false;
+    _refreshPendingSessions();
   }
 
   @override
@@ -327,6 +335,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _assignedBloc = null;
     _webSocketBloc = null;
     _assignedSessionsPollingStarted = false;
+    _pendingSessionsPollTimer?.cancel();
+    _pendingSessionsPollTimer = null;
+    _pendingSessionsPollingStarted = false;
     _cleanupTimer();
     _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
@@ -401,6 +412,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             if (!_assignedSessionsPollingStarted) {
               _assignedSessionsPollingStarted = true;
               assignedBloc.add(const StartAssignedSessionsPolling());
+            }
+
+            // Start 5-second polling for pending sessions (GET /sessions/pending) so operator
+            // override in Car Logs (e.g. status changed to ARRIVED) is detected and we navigate
+            // to Confirm Arrival with the correct UI
+            if (!_pendingSessionsPollingStarted) {
+              _pendingSessionsPollingStarted = true;
+              _pendingSessionsPollTimer = Timer.periodic(
+                const Duration(seconds: _pendingSessionsPollIntervalSeconds),
+                (_) {
+                  if (mounted) _refreshPendingSessions();
+                },
+              );
             }
 
             // When opened from retrieval notification tap, refresh session/pending API first
