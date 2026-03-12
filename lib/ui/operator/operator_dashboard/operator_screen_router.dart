@@ -11,6 +11,7 @@ class OperatorScreenRouter {
     Function(VoidCallback)? onSlotsRefreshReady,
     Function(VoidCallback)? onDriversRefreshReady,
     Function(int)? onNavigateToTab,
+    bool isAutoMode = false,
   }) {
     switch (selectedIndex) {
       case 0:
@@ -20,6 +21,7 @@ class OperatorScreenRouter {
           key: ValueKey(refreshKey),
           onRefreshReady: onSlotsRefreshReady,
           onNavigateToTab: onNavigateToTab,
+          isAutoMode: isAutoMode,
         );
       case 2:
         return OperatorDriversScreen(

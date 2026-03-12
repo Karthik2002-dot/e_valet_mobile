@@ -38,6 +38,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
           availableDrivers: availableDrivers,
           retrievalRequests: retrievalRequests,
           isLoading: isLoading,
+          autoAssignEnabled: autoAssignEnabled,
         ),
         const SizedBox(height: 12),
         // --- Retrieval Requests (two columns) ---

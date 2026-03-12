@@ -20,10 +20,14 @@ class OperatorParkedCarScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
   final Function(int)? onNavigateToTab;
 
+  /// When true (auto mode enabled), manual request button is disabled.
+  final bool isAutoMode;
+
   const OperatorParkedCarScreen({
     super.key,
     this.onRefreshReady,
     this.onNavigateToTab,
+    this.isAutoMode = false,
   });
 
   @override
@@ -278,6 +282,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                           digitalKeyRack: state.digitalKeyRack,
                           searchQuery: _searchQuery,
                           onManualRequest: _handleManualRequest,
+                          manualRequestEnabled: !widget.isAutoMode,
                         ),
                       ],
                     ),

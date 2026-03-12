@@ -17,11 +17,15 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final bool isLoading;
 
+  /// When true (auto mode), drag is disabled.
+  final bool autoAssignEnabled;
+
   const AvailableDriversHorizontalSection({
     super.key,
     required this.availableDrivers,
     required this.retrievalRequests,
     this.isLoading = false,
+    this.autoAssignEnabled = false,
   });
 
   @override
@@ -215,6 +219,7 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                   ),
                   recommendedCardNumber: recommendedCardNumber,
                   compact: true,
+                  dragEnabled: !autoAssignEnabled,
                 ),
               ),
             ],

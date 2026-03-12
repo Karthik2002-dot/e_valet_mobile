@@ -183,6 +183,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
           _selectedIndex = index;
         });
       },
+      isAutoMode: _isAutoMode,
     );
   }
 

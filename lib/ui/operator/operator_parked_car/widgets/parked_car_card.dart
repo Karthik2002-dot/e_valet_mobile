@@ -14,6 +14,10 @@ class ParkedCarCard extends StatelessWidget {
   final KeyRackItem item;
   final VoidCallback? onTap;
   final Function(int cardNumber, String sessionId)? onManualRequest;
+
+  /// When false (e.g. auto mode enabled), manual request button is disabled.
+  final bool manualRequestEnabled;
+
   final bool isHighlighted;
 
   const ParkedCarCard({
@@ -21,6 +25,7 @@ class ParkedCarCard extends StatelessWidget {
     required this.item,
     this.onTap,
     this.onManualRequest,
+    this.manualRequestEnabled = true,
     this.isHighlighted = false,
   });
 
@@ -216,16 +221,18 @@ class ParkedCarCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Manual Request Button
+                  // Manual Request Button (disabled when auto mode is on)
                   if (onManualRequest != null) ...[
                     SizedBox(height: screenHeight * 0.008),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () => onManualRequest!(
-                          item.cardNumber,
-                          item.sessionId,
-                        ),
+                        onPressed: manualRequestEnabled
+                            ? () => onManualRequest!(
+                                  item.cardNumber,
+                                  item.sessionId,
+                                )
+                            : null,
                         label: TextComponent(
                           labelText:
                               t.get(TextConstants.manualRequestButtonLabel),
@@ -234,7 +241,9 @@ class ParkedCarCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: manualRequestEnabled
+                              ? AppColors.primary
+                              : AppColors.grey,
                           foregroundColor: AppColors.white,
                           padding: EdgeInsets.symmetric(
                             vertical: screenHeight * 0.008,
