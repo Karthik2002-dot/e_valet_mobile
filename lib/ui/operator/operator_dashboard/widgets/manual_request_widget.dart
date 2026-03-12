@@ -15,9 +15,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 class ManualRequestWidget extends StatefulWidget {
   final VoidCallback onRequestCreated;
 
+  /// When true (auto mode enabled), manual request is disabled.
+  final bool isAutoMode;
+
   const ManualRequestWidget({
     super.key,
     required this.onRequestCreated,
+    this.isAutoMode = false,
   });
 
   @override
@@ -75,6 +79,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
           final t = context.watch<AppTranslationsNotifier>();
           final isLoading = state is ManualRequestInProgress;
 
+          final isDisabled = isLoading || widget.isAutoMode;
+
           return Padding(
             padding: EdgeInsets.symmetric(
               vertical: MediaQuery.of(context).size.height * 0.02,
@@ -90,7 +96,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],
-                    enabled: !isLoading,
+                    enabled: !isDisabled,
                     decoration: InputDecoration(
                       hintText: t.getByKey(
                           'tagNumberHint', TextConstants.tagNumberHint),
@@ -127,22 +133,23 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                       fontSize: 14,
                       color: AppColors.black,
                     ),
-                    onFieldSubmitted: (_) => _handleManualRequest(),
+                    onFieldSubmitted:
+                        isDisabled ? null : (_) => _handleManualRequest(),
                   ),
                 ),
 
                 const SizedBox(width: 16),
 
-                // Manual Request button
+                // Manual Request button (disabled when auto mode is on)
                 ElevatedButtonComponent(
-                  onPressed: isLoading ? () {} : _handleManualRequest,
+                  onPressed: isDisabled ? () {} : _handleManualRequest,
                   labelText: isLoading
                       ? t.get(TextConstants.processingText)
                       : t.get(TextConstants.manualRequest),
                   fontColor: AppColors.black,
                   fontSize: MediaQuery.of(context).size.width * 0.015,
                   elevatedButtonBackgroundColor:
-                      isLoading ? AppColors.grey : AppColors.primary,
+                      isDisabled ? AppColors.grey : AppColors.primary,
                   padding: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width * 0.03,
                     vertical: MediaQuery.of(context).size.height * 0.015,

@@ -488,6 +488,7 @@ class _DashboardContentState extends State<DashboardContent> {
                     ),
                   );
                 },
+                isAutoMode: widget.isAutoMode,
               ),
             ],
           ),

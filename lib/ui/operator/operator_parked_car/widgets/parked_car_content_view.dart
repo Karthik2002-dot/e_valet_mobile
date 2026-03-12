@@ -16,11 +16,15 @@ class ParkedCarContentView extends StatefulWidget {
   final String searchQuery;
   final Function(int cardNumber, String sessionId)? onManualRequest;
 
+  /// When false (e.g. auto mode enabled), manual request button is disabled.
+  final bool manualRequestEnabled;
+
   const ParkedCarContentView({
     super.key,
     required this.digitalKeyRack,
     required this.searchQuery,
     this.onManualRequest,
+    this.manualRequestEnabled = true,
   });
 
   @override
@@ -95,6 +99,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
                       child: ParkedCarCard(
                         item: filteredItems[i],
                         onManualRequest: widget.onManualRequest,
+                        manualRequestEnabled: widget.manualRequestEnabled,
                         isHighlighted: widget.searchQuery.isNotEmpty &&
                             filteredItems[i]
                                 .cardNumber
