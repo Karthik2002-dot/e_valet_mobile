@@ -73,28 +73,40 @@ class CarLogsKpiGrid extends StatelessWidget {
       children: [
         Expanded(
           child: KpiCard(
-            title: t.get(TextConstants.carLogsKpiTotalParked),
+            title: t.getByKey(
+              'carLogsKpiTotalParked',
+              TextConstants.carLogsKpiTotalParked,
+            ),
             value: kpis != null ? '${kpis!.totalCarsParked}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: t.get(TextConstants.carLogsKpiInTransit),
+            title: t.getByKey(
+              'carLogsKpiInTransit',
+              TextConstants.carLogsKpiInTransit,
+            ),
             value: kpis != null ? '${kpis!.carsInTransit}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: t.get(TextConstants.carLogsKpiHandovered),
+            title: t.getByKey(
+              'carLogsKpiHandovered',
+              TextConstants.carLogsKpiHandovered,
+            ),
             value: kpis != null ? '${kpis!.carsHandovered}' : '0',
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: t.get(TextConstants.carLogsKpiInLot),
+            title: t.getByKey(
+              'carLogsKpiInLot',
+              TextConstants.carLogsKpiInLot,
+            ),
             value: kpis != null ? '${kpis!.carsInLot}' : '0',
           ),
         ),
