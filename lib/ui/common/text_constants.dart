@@ -259,6 +259,7 @@ class TextConstants {
   static const String parkedBy = 'Parked By';
   static const String unknown = 'Unknown';
   static const String retrievalRequest = 'Retrieval Request';
+  static const String retrievalRequested = 'Retrieval Requested';
   static const String noActiveRetrievalRequests =
       'No active retrieval requests';
   static const String acceptRequest = 'Collect Keys';
