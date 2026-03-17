@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/services/translations/app_translations_not
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/utils/duration_utils.dart';
 
 /// Overtime confirmation dialog: shows selected time in hours+minutes.
 /// Shows Cancel and Confirm; on Confirm calls [onConfirm].
@@ -12,21 +13,29 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class OvertimeConfirmDialog {
   OvertimeConfirmDialog._();
 
-  static String _formatDuration(int totalMinutes) {
-    final clamped = totalMinutes < 0 ? 0 : totalMinutes;
-    final hours = clamped ~/ 60;
-    final minutes = clamped % 60;
+  static String _formatDuration(AppTranslationsNotifier t, int totalMinutes) {
+    final split = DurationUtils.splitToHoursMinutes(totalMinutes);
+    final hours = split.hours;
+    final minutes = split.minutes;
 
     if (hours > 0 && minutes > 0) {
-      final hLabel = hours == 1 ? 'hour' : 'hours';
-      final mLabel = minutes == 1 ? 'minute' : 'minutes';
+      final hLabel = hours == 1
+          ? t.getByKey('hourUnit', TextConstants.hourUnit)
+          : t.getByKey('hoursUnit', TextConstants.hoursUnit);
+      final mLabel = minutes == 1
+          ? t.getByKey('minuteUnit', TextConstants.minuteUnit)
+          : t.getByKey('minutesUnit', TextConstants.minutesUnit);
       return '$hours $hLabel $minutes $mLabel';
     }
     if (hours > 0) {
-      final hLabel = hours == 1 ? 'hour' : 'hours';
+      final hLabel = hours == 1
+          ? t.getByKey('hourUnit', TextConstants.hourUnit)
+          : t.getByKey('hoursUnit', TextConstants.hoursUnit);
       return '$hours $hLabel';
     }
-    final mLabel = minutes == 1 ? 'minute' : 'minutes';
+    final mLabel = minutes == 1
+        ? t.getByKey('minuteUnit', TextConstants.minuteUnit)
+        : t.getByKey('minutesUnit', TextConstants.minutesUnit);
     return '$minutes $mLabel';
   }
 
@@ -39,7 +48,7 @@ class OvertimeConfirmDialog {
       'overtimeConfirmMessage',
       TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
     );
-    final duration = _formatDuration(extraMinutes);
+    final duration = _formatDuration(t, extraMinutes);
     return template
         .replaceAll('{valetName}', valetName)
         .replaceAll('{minutes}', duration);

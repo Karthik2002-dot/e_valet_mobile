@@ -5,6 +5,7 @@ import 'package:niloufer_valet_mobile/services/translations/app_translations_not
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/utils/duration_utils.dart';
 import 'package:niloufer_valet_mobile/utils/valet_utils.dart';
 
 /// Single valet row for the overtime screen: name, phone, status, minutes input, and submit.
@@ -44,11 +45,9 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
   int get _totalMinutes => (_selectedHours * 60) + _selectedMinutes;
 
   void _syncFromTotalMinutes(int totalMinutes) {
-    final clamped = totalMinutes < 0 ? 0 : totalMinutes;
-    final hours = clamped ~/ 60;
-    final minutes = clamped % 60;
-    _selectedHours = hours;
-    _selectedMinutes = minutes;
+    final split = DurationUtils.splitToHoursMinutes(totalMinutes);
+    _selectedHours = split.hours;
+    _selectedMinutes = split.minutes;
 
     _suppressControllerListeners = true;
     _hoursController.text = _selectedHours.toString();

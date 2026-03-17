@@ -12,6 +12,10 @@ class TextConstants {
   static const overTime = 'Over Time';
   static const String hours = 'Hours';
   static const String minutes = 'Minutes';
+  static const String hourUnit = 'hour';
+  static const String hoursUnit = 'hours';
+  static const String minuteUnit = 'minute';
+  static const String minutesUnit = 'minutes';
   static const String overtimeDescription =
       'Enter overtime duration for each valet';
   static const String overtimeNote =
