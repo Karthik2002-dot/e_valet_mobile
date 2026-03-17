@@ -5,6 +5,21 @@ import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 class RetrievalRequestUtils {
   RetrievalRequestUtils._();
 
+  /// Converts a waiting time string into a duration label like "1h 05m" or "45m".
+  /// The API often provides `waitingTime` like "10 mins"; we normalize to hours/mins.
+  static String formatWaitingTime(String waitingTime) {
+    final minutesStr = waitingTime.replaceAll(RegExp(r'[^0-9]'), '');
+    final minutes = int.tryParse(minutesStr);
+    if (minutes == null) return waitingTime;
+    if (minutes < 60) return '${minutes}m';
+
+    final hours = minutes ~/ 60;
+    final rem = minutes % 60;
+    if (rem == 0) return '${hours}h';
+    final remPadded = rem.toString().padLeft(2, '0');
+    return '${hours}h ${remPadded}m';
+  }
+
   static Color getPriorityColor(String waitingTime) {
     final minutesStr = waitingTime.replaceAll(RegExp(r'[^0-9]'), '');
     final minutes = int.tryParse(minutesStr) ?? 0;

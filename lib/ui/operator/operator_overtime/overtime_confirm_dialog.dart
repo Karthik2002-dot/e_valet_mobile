@@ -5,11 +5,30 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
-/// Overtime confirmation dialog: "You have extended the [name] time [X] minutes more extra."
+/// Overtime confirmation dialog: shows selected time in hours+minutes.
 /// Shows Cancel and Confirm; on Confirm calls [onConfirm].
 /// Backend key [overtimeConfirmMessage] expects template with {valetName} and {minutes}.
+/// We replace {minutes} with a human readable "X hours Y minutes" string.
 class OvertimeConfirmDialog {
   OvertimeConfirmDialog._();
+
+  static String _formatDuration(int totalMinutes) {
+    final clamped = totalMinutes < 0 ? 0 : totalMinutes;
+    final hours = clamped ~/ 60;
+    final minutes = clamped % 60;
+
+    if (hours > 0 && minutes > 0) {
+      final hLabel = hours == 1 ? 'hour' : 'hours';
+      final mLabel = minutes == 1 ? 'minute' : 'minutes';
+      return '$hours $hLabel $minutes $mLabel';
+    }
+    if (hours > 0) {
+      final hLabel = hours == 1 ? 'hour' : 'hours';
+      return '$hours $hLabel';
+    }
+    final mLabel = minutes == 1 ? 'minute' : 'minutes';
+    return '$minutes $mLabel';
+  }
 
   static String _formatOvertimeConfirmMessage(
     AppTranslationsNotifier t,
@@ -20,9 +39,10 @@ class OvertimeConfirmDialog {
       'overtimeConfirmMessage',
       TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
     );
+    final duration = _formatDuration(extraMinutes);
     return template
         .replaceAll('{valetName}', valetName)
-        .replaceAll('{minutes}', extraMinutes.toString());
+        .replaceAll('{minutes}', duration);
   }
 
   static void show(

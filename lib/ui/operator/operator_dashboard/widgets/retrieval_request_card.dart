@@ -482,7 +482,9 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                       width: MediaQuery.of(context).size.width *
                                           0.008),
                                   TextComponent(
-                                    labelText: widget.request.waitingTime,
+                                    labelText:
+                                        RetrievalRequestUtils.formatWaitingTime(
+                                            widget.request.waitingTime),
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.016,
@@ -508,7 +510,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                           Row(
                             children: [
                               TextComponent(
-                                labelText: t.get(TextConstants.parkedByLabel),
+                                labelText:
+                                    '${t.get(TextConstants.parkedByLabel)} ',
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.014,
                                 color: AppColors.grey,
