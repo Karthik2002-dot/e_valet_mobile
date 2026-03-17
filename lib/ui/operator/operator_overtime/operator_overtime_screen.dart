@@ -42,7 +42,9 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   late final OperatorMenuBloc _menuBloc;
   late final OperatorOvertimeBloc _overtimeBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
-  final Map<String, String> _overtimeInputs = {};
+
+  /// Stores total overtime in minutes per driver userId.
+  final Map<String, int> _overtimeMinutesByDriverId = {};
 
   @override
   void initState() {
@@ -161,7 +163,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
           listener: (context, state) {
             if (state is OperatorOvertimeGrantSuccess) {
               SnackBars.showSuccessSnackBar(context, state.message);
-              setState(() => _overtimeInputs[state.driverUserId] = '');
+              setState(
+                  () => _overtimeMinutesByDriverId[state.driverUserId] = 0);
             } else if (state is OperatorOvertimeGrantError) {
               SnackBars.showErrorSnackBar(context, state.message);
             }
@@ -239,18 +242,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4),
-                            child: TextComponent(
-                              labelText: t.getByKey(
-                                  'overtimeNote', TextConstants.overtimeNote),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                              maxLines: 3,
-                              overflow: TextOverflow.visible,
-                            ),
-                          ),
+
                           const SizedBox(height: 24),
                           BlocBuilder<OperatorOvertimeBloc,
                               OperatorOvertimeState>(
@@ -323,32 +315,18 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                       name: valet.name,
                                       phone: valet.phone,
                                       status: valet.status,
-                                      value:
-                                          _overtimeInputs[valet.userId] ?? '',
-                                      onChanged: (v) => setState(
-                                        () => _overtimeInputs[valet.userId] = v,
+                                      totalMinutes: _overtimeMinutesByDriverId[
+                                              valet.userId] ??
+                                          0,
+                                      onChanged: (minutes) => setState(
+                                        () => _overtimeMinutesByDriverId[
+                                            valet.userId] = minutes,
                                       ),
                                       onSubmit: () {
-                                        final input =
-                                            _overtimeInputs[valet.userId] ?? '';
-                                        if (input.trim().isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: TextComponent(
-                                                labelText: t.getByKey(
-                                                  'overtimeEnterNumbers',
-                                                  TextConstants
-                                                      .overtimeEnterNumbers,
-                                                ),
-                                                color: AppColors.white,
-                                              ),
-                                            ),
-                                          );
-                                          return;
-                                        }
                                         final minutes =
-                                            int.tryParse(input.trim()) ?? 0;
+                                            _overtimeMinutesByDriverId[
+                                                    valet.userId] ??
+                                                0;
                                         if (minutes <= 0) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(

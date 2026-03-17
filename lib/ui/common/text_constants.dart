@@ -10,8 +10,14 @@ class TextConstants {
   static const guidelines = 'Guidelines';
   static const help = 'Help';
   static const overTime = 'Over Time';
+  static const String hours = 'Hours';
+  static const String minutes = 'Minutes';
+  static const String hourUnit = 'hour';
+  static const String hoursUnit = 'hours';
+  static const String minuteUnit = 'minute';
+  static const String minutesUnit = 'minutes';
   static const String overtimeDescription =
-      'Enter overtime minutes for each valet';
+      'Enter overtime duration for each valet';
   static const String overtimeNote =
       'Note: The number you enter will be considered in minutes.';
   static const String overtimeInputHint = 'Enter numbers only';
@@ -19,7 +25,7 @@ class TextConstants {
       'Please enter a value (numbers only)';
   static const String overtimeConfirmTitle = 'Confirm Overtime';
   static String overtimeConfirmMessage(String valetName, int minutes) =>
-      'You have extended the $valetName time $minutes minutes more extra.';
+      'You have extended the $valetName time $minutes more.';
   static const String overtimeNoAvailableDrivers =
       'No available drivers for now';
   static const String operatorResponsibilities = 'Operator Responsibilities';
