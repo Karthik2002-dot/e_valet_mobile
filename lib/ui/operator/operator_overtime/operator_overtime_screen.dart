@@ -42,6 +42,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
   late final OperatorMenuBloc _menuBloc;
   late final OperatorOvertimeBloc _overtimeBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
+
   /// Stores total overtime in minutes per driver userId.
   final Map<String, int> _overtimeMinutesByDriverId = {};
 
@@ -162,7 +163,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
           listener: (context, state) {
             if (state is OperatorOvertimeGrantSuccess) {
               SnackBars.showSuccessSnackBar(context, state.message);
-              setState(() => _overtimeMinutesByDriverId[state.driverUserId] = 0);
+              setState(
+                  () => _overtimeMinutesByDriverId[state.driverUserId] = 0);
             } else if (state is OperatorOvertimeGrantError) {
               SnackBars.showErrorSnackBar(context, state.message);
             }
@@ -240,7 +242,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                         
+
                           const SizedBox(height: 24),
                           BlocBuilder<OperatorOvertimeBloc,
                               OperatorOvertimeState>(

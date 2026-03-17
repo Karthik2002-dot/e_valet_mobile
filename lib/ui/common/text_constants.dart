@@ -10,8 +10,7 @@ class TextConstants {
   static const guidelines = 'Guidelines';
   static const help = 'Help';
   static const overTime = 'Over Time';
-  static const String overtimeDescription =
-      'Enter overtime  for each valet';
+  static const String overtimeDescription = 'Enter overtime  for each valet';
   static const String overtimeNote =
       'Note: The number you enter will be considered in minutes.';
   static const String overtimeInputHint = 'Enter numbers only';

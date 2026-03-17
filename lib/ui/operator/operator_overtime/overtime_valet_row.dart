@@ -12,6 +12,7 @@ class OvertimeValetRow extends StatefulWidget {
   final String name;
   final String phone;
   final String status;
+
   /// Total overtime minutes (hours+minutes combined).
   final int totalMinutes;
   final ValueChanged<int> onChanged;
@@ -162,7 +163,8 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
         vertical: 10,
       ),
       counterText: '',
-      suffixIconConstraints: const BoxConstraints.tightFor(width: 42, height: 46),
+      suffixIconConstraints:
+          const BoxConstraints.tightFor(width: 42, height: 46),
       suffixIcon: DecoratedBox(
         decoration: BoxDecoration(
           border: Border(
