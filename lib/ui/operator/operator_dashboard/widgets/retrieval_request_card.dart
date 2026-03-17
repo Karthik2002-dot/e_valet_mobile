@@ -510,11 +510,14 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                           Row(
                             children: [
                               TextComponent(
-                                labelText:
-                                    '${t.get(TextConstants.parkedByLabel)} ',
+                                labelText: t.get(TextConstants.parkedByLabel),
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.014,
                                 color: AppColors.grey,
+                              ),
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.004,
                               ),
                               TextComponent(
                                 labelText: widget.request.parkedBy.name,
