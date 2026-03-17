@@ -56,7 +56,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
     _suppressControllerListeners = false;
   }
 
-  void _emitChangeIfNeeded() {
+  void _emitChange() {
     widget.onChanged(_totalMinutes);
   }
 
@@ -89,7 +89,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
     );
     _suppressControllerListeners = false;
 
-    _emitChangeIfNeeded();
+    _emitChange();
   }
 
   void _applyHoursDelta(int delta) {
@@ -295,7 +295,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                     decoration: _inputDecoration(
-                      labelText: 'Hours',
+                      labelText: t.getByKey('hours', TextConstants.hours),
                       onUp: () => _applyHoursDelta(1),
                       onDown: () => _applyHoursDelta(-1),
                     ),
@@ -325,7 +325,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                     decoration: _inputDecoration(
-                      labelText: 'Minutes',
+                      labelText: t.getByKey('minutes', TextConstants.minutes),
                       onUp: () => _applyMinutesDelta(1),
                       onDown: () => _applyMinutesDelta(-1),
                     ),
