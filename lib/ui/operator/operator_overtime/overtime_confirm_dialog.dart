@@ -13,32 +13,6 @@ import 'package:niloufer_valet_mobile/utils/duration_utils.dart';
 class OvertimeConfirmDialog {
   OvertimeConfirmDialog._();
 
-  static String _formatDuration(AppTranslationsNotifier t, int totalMinutes) {
-    final split = DurationUtils.splitToHoursMinutes(totalMinutes);
-    final hours = split.hours;
-    final minutes = split.minutes;
-
-    if (hours > 0 && minutes > 0) {
-      final hLabel = hours == 1
-          ? t.getByKey('hourUnit', TextConstants.hourUnit)
-          : t.getByKey('hoursUnit', TextConstants.hoursUnit);
-      final mLabel = minutes == 1
-          ? t.getByKey('minuteUnit', TextConstants.minuteUnit)
-          : t.getByKey('minutesUnit', TextConstants.minutesUnit);
-      return '$hours $hLabel $minutes $mLabel';
-    }
-    if (hours > 0) {
-      final hLabel = hours == 1
-          ? t.getByKey('hourUnit', TextConstants.hourUnit)
-          : t.getByKey('hoursUnit', TextConstants.hoursUnit);
-      return '$hours $hLabel';
-    }
-    final mLabel = minutes == 1
-        ? t.getByKey('minuteUnit', TextConstants.minuteUnit)
-        : t.getByKey('minutesUnit', TextConstants.minutesUnit);
-    return '$minutes $mLabel';
-  }
-
   static String _formatOvertimeConfirmMessage(
     AppTranslationsNotifier t,
     String valetName,
@@ -48,7 +22,7 @@ class OvertimeConfirmDialog {
       'overtimeConfirmMessage',
       TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
     );
-    final duration = _formatDuration(t, extraMinutes);
+    final duration = DurationUtils.formatHoursMinutes(t, extraMinutes);
     return template
         .replaceAll('{valetName}', valetName)
         .replaceAll('{minutes}', duration);

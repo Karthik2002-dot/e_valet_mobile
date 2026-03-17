@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/utils/duration_utils.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 
 class RetrievalRequestUtils {
@@ -11,13 +12,7 @@ class RetrievalRequestUtils {
     final minutesStr = waitingTime.replaceAll(RegExp(r'[^0-9]'), '');
     final minutes = int.tryParse(minutesStr);
     if (minutes == null) return waitingTime;
-    if (minutes < 60) return '${minutes}m';
-
-    final hours = minutes ~/ 60;
-    final rem = minutes % 60;
-    if (rem == 0) return '${hours}h';
-    final remPadded = rem.toString().padLeft(2, '0');
-    return '${hours}h ${remPadded}m';
+    return DurationUtils.formatCompactHoursMinutes(minutes);
   }
 
   static Color getPriorityColor(String waitingTime) {
