@@ -24,8 +24,14 @@ class TextConstants {
   static const String overtimeEnterNumbers =
       'Please enter a value (numbers only)';
   static const String overtimeConfirmTitle = 'Confirm Overtime';
+  static const String overtimeGranted = 'Overtime granted';
+  /// Template for overtime confirmation popup.
+  ///
+  /// Important: this must contain `{valetName}` and `{minutes}` placeholders,
+  /// because `OvertimeConfirmDialog` replaces `{minutes}` with a formatted
+  /// "hours + minutes" string while still submitting raw minutes to backend.
   static String overtimeConfirmMessage(String valetName, int minutes) =>
-      'You have extended the $valetName time $minutes more.';
+      'You have extended the {valetName} time {minutes} more.';
   static const String overtimeNoAvailableDrivers =
       'No available drivers for now';
   static const String operatorResponsibilities = 'Operator Responsibilities';

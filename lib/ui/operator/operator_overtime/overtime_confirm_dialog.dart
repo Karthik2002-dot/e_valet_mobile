@@ -23,9 +23,19 @@ class OvertimeConfirmDialog {
       TextConstants.overtimeConfirmMessage(valetName, extraMinutes),
     );
     final duration = DurationUtils.formatHoursMinutes(t, extraMinutes);
-    return template
+
+    var formatted = template
         .replaceAll('{valetName}', valetName)
         .replaceAll('{minutes}', duration);
+
+    // Some backends may return an already-interpolated message like:
+    // "You have extended X time 125 more." (without `{minutes}` placeholder).
+    // In that case, replace the raw numeric value with the formatted duration.
+    if (!template.contains('{minutes}')) {
+      formatted = formatted.replaceAll(extraMinutes.toString(), duration);
+    }
+
+    return formatted;
   }
 
   static void show(

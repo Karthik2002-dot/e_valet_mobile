@@ -311,10 +311,21 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                   final useTwoColumns = width >= 600;
 
                                   Widget buildRowForValet(ValetResponse valet) {
+                                    final grants = valet.overtimeGrants;
+                                    final overtimeGrantedTotalMinutes = grants
+                                        .fold<int>(
+                                          0,
+                                          (sum, g) =>
+                                              sum + (g.extraMinutes ?? 0),
+                                        );
+
                                     return OvertimeValetRow(
                                       name: valet.name,
                                       phone: valet.phone,
                                       status: valet.status,
+                                      overtimeGrantedTotalMinutes:
+                                          overtimeGrantedTotalMinutes,
+                                      overtimeGrantsCount: grants.length,
                                       totalMinutes: _overtimeMinutesByDriverId[
                                               valet.userId] ??
                                           0,

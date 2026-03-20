@@ -13,6 +13,8 @@ class OvertimeValetRow extends StatefulWidget {
   final String name;
   final String phone;
   final String status;
+  final int overtimeGrantedTotalMinutes;
+  final int overtimeGrantsCount;
 
   /// Total overtime minutes (hours+minutes combined).
   final int totalMinutes;
@@ -24,6 +26,8 @@ class OvertimeValetRow extends StatefulWidget {
     required this.name,
     required this.phone,
     required this.status,
+    required this.overtimeGrantedTotalMinutes,
+    required this.overtimeGrantsCount,
     required this.totalMinutes,
     required this.onChanged,
     required this.onSubmit,
@@ -239,6 +243,18 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (widget.overtimeGrantsCount > 0) ...[
+                      const SizedBox(height: 4),
+                      TextComponent(
+                        labelText:
+                            '${t.getByKey('overtimeGranted', TextConstants.overtimeGranted)}: ${DurationUtils.formatCompactHoursMinutes(widget.overtimeGrantedTotalMinutes)}',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     const SizedBox(height: 4),
                     TextComponent(
                       labelText: widget.phone,
