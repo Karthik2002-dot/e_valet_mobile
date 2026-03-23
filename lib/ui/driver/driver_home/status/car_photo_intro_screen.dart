@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -45,14 +46,18 @@ class CarPhotoIntroScreen extends StatefulWidget {
 }
 
 class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
+  static const Duration _pendingSessionPollInterval = Duration(minutes: 5);
+
   /// 0 = Lottie, 1 = camera (only Car Photo flow now)
   int _selectedTab = 1;
 
   /// 0 = Lottie (2 sec), 1 = camera in same area (only when on Scan tab)
   int _scanPhase = 0;
   Timer? _lottieTimer;
+  Timer? _pendingSessionPollTimer;
   late CarCameraBloc _cameraBloc;
   bool _isCapturing = false;
+  bool _isHandlingCancellation = false;
 
   @override
   void initState() {
@@ -69,6 +74,46 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
     // (e.g. another card in same session) skip animation and show camera. Flags cleared on logout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _initCarPhotoIntro();
+    });
+    _startPendingSessionPolling();
+  }
+
+  void _startPendingSessionPolling() {
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer =
+        Timer.periodic(_pendingSessionPollInterval, (_) {
+      _checkPendingSessionCancellation();
+    });
+    _checkPendingSessionCancellation();
+  }
+
+  Future<void> _checkPendingSessionCancellation() async {
+    if (!mounted || _isHandlingCancellation) return;
+    final sessionId = await TokenStorage.getSessionId();
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    try {
+      final pending = await SessionsPendingApiService.getPendingSessions();
+      final stillExists = pending.sessions.any((s) => s.sessionId == sessionId);
+      if (!stillExists) {
+        await _redirectToHomeOnCancellation();
+      }
+    } catch (_) {
+      // Ignore transient errors and retry on next poll tick.
+    }
+  }
+
+  Future<void> _redirectToHomeOnCancellation() async {
+    if (_isHandlingCancellation) return;
+    _isHandlingCancellation = true;
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer = null;
+    await TokenStorage.clearSessionId();
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      _isHandlingCancellation = false;
     });
   }
 
@@ -202,6 +247,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   @override
   void dispose() {
     _lottieTimer?.cancel();
+    _pendingSessionPollTimer?.cancel();
     _cameraBloc.close();
     super.dispose();
   }
