@@ -183,10 +183,6 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
     final t = context.watch<AppTranslationsNotifier>();
     return DragTarget<AvailableDriver>(
       onWillAcceptWithDetails: (details) {
-        // When auto assign is enabled, manual drag-and-drop is disabled
-        if (widget.autoAssignEnabled) {
-          return false;
-        }
         if (!_isAssignable) {
           return false;
         }
@@ -391,8 +387,7 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (_isAssigned &&
-                                      !widget.autoAssignEnabled) ...[
+                                  if (_isAssigned) ...[
                                     SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *

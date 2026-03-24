@@ -41,8 +41,8 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
-  // Temporary flag: keep auto mode feature code, hide its UI toggle for now.
-  static const bool _showAutoModeToggle = false;
+  // Keep toggle visible so operators can enable/disable auto mode.
+  static const bool _showAutoModeToggle = true;
 
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';

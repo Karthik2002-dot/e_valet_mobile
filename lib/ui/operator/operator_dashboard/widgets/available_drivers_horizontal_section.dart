@@ -219,7 +219,7 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                   ),
                   recommendedCardNumber: recommendedCardNumber,
                   compact: true,
-                  dragEnabled: !autoAssignEnabled,
+                  dragEnabled: true,
                 ),
               ),
             ],
