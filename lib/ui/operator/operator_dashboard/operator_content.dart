@@ -41,6 +41,9 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
+  // Temporary flag: keep auto mode feature code, hide its UI toggle for now.
+  static const bool _showAutoModeToggle = false;
+
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final TextToSpeechService _ttsService = TextToSpeechService();
@@ -281,71 +284,74 @@ class _DashboardContentState extends State<DashboardContent> {
                     fontSize: MediaQuery.of(context).size.height * 0.015,
                   ),
                   const Spacer(),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextComponent(
-                        labelText: t.getByKey(
-                            'autoToggleLabel', TextConstants.autoToggleLabel),
-                        color: AppColors.black,
-                        fontSize: MediaQuery.of(context).size.height * 0.015,
-                      ),
-                      const SizedBox(width: 8),
-                      Switch(
-                        value: widget.isAutoMode,
-                        onChanged: _isUpdatingAutoMode
-                            ? null
-                            : (value) async {
-                                final previousValue = widget.isAutoMode;
+                  if (_showAutoModeToggle)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextComponent(
+                          labelText: t.getByKey(
+                              'autoToggleLabel', TextConstants.autoToggleLabel),
+                          color: AppColors.black,
+                          fontSize: MediaQuery.of(context).size.height * 0.015,
+                        ),
+                        const SizedBox(width: 8),
+                        Switch(
+                          value: widget.isAutoMode,
+                          onChanged: _isUpdatingAutoMode
+                              ? null
+                              : (value) async {
+                                  final previousValue = widget.isAutoMode;
 
-                                if (value) {
-                                  _startRetrievalRequestsRefreshTimer();
-                                } else {
-                                  _stopRetrievalRequestsRefreshTimer();
-                                }
-                                widget.onAutoModeChanged?.call(value);
+                                  if (value) {
+                                    _startRetrievalRequestsRefreshTimer();
+                                  } else {
+                                    _stopRetrievalRequestsRefreshTimer();
+                                  }
+                                  widget.onAutoModeChanged?.call(value);
 
-                                setState(() => _isUpdatingAutoMode = true);
-                                try {
-                                  final res = await OperatorAutoAssignApiService
-                                      .patchAutoAssignSettings(
-                                    outletId: _outletId,
-                                    enabled: value,
-                                  );
+                                  setState(() => _isUpdatingAutoMode = true);
+                                  try {
+                                    final res = await OperatorAutoAssignApiService
+                                        .patchAutoAssignSettings(
+                                      outletId: _outletId,
+                                      enabled: value,
+                                    );
 
-                                  if (!mounted) return;
-                                  if (res.autoAssignEnabled != value) {
-                                    if (res.autoAssignEnabled) {
+                                    if (!mounted) return;
+                                    if (res.autoAssignEnabled != value) {
+                                      if (res.autoAssignEnabled) {
+                                        _startRetrievalRequestsRefreshTimer();
+                                      } else {
+                                        _stopRetrievalRequestsRefreshTimer();
+                                      }
+                                      widget.onAutoModeChanged
+                                          ?.call(res.autoAssignEnabled);
+                                    }
+                                  } catch (e) {
+                                    if (!mounted) return;
+
+                                    SnackBars.showErrorSnackBar(
+                                      context,
+                                      'Failed to update auto mode',
+                                    );
+
+                                    if (previousValue) {
                                       _startRetrievalRequestsRefreshTimer();
                                     } else {
                                       _stopRetrievalRequestsRefreshTimer();
                                     }
                                     widget.onAutoModeChanged
-                                        ?.call(res.autoAssignEnabled);
+                                        ?.call(previousValue);
+                                  } finally {
+                                    if (!mounted) return;
+                                    setState(
+                                        () => _isUpdatingAutoMode = false);
                                   }
-                                } catch (e) {
-                                  if (!mounted) return;
-
-                                  SnackBars.showErrorSnackBar(
-                                    context,
-                                    'Failed to update auto mode',
-                                  );
-
-                                  if (previousValue) {
-                                    _startRetrievalRequestsRefreshTimer();
-                                  } else {
-                                    _stopRetrievalRequestsRefreshTimer();
-                                  }
-                                  widget.onAutoModeChanged?.call(previousValue);
-                                } finally {
-                                  if (!mounted) return;
-                                  setState(() => _isUpdatingAutoMode = false);
-                                }
-                              },
-                        activeColor: AppColors.primary,
-                      ),
-                    ],
-                  ),
+                                },
+                          activeColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
