@@ -25,6 +25,7 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_da
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_confirm_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_valet_row.dart';
+import 'package:niloufer_valet_mobile/utils/time_utils.dart';
 
 /// Over Time screen for the valet operator.
 /// Shows the same valet list data as the valet dashboard: name, phone, and status (Available / On Duty / On Break / Offline).
@@ -318,6 +319,31 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                           (sum, g) =>
                                               sum + (g.extraMinutes ?? 0),
                                         );
+                                    String latestOvertimeExpiryLabel = '';
+                                    final grantsWithExpiry = grants
+                                        .where(
+                                          (g) =>
+                                              (g.expiresAt?.trim().isNotEmpty ??
+                                                  false),
+                                        )
+                                        .toList()
+                                      ..sort((a, b) {
+                                        final aDate = DateTime.tryParse(
+                                                a.expiresAt ?? '') ??
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                                0);
+                                        final bDate = DateTime.tryParse(
+                                                b.expiresAt ?? '') ??
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                                0);
+                                        return bDate.compareTo(aDate);
+                                      });
+                                    if (grantsWithExpiry.isNotEmpty) {
+                                      latestOvertimeExpiryLabel =
+                                          TimeUtils.formatUtcToIst12Hour(
+                                        grantsWithExpiry.first.expiresAt!,
+                                      );
+                                    }
 
                                     return OvertimeValetRow(
                                       name: valet.name,
@@ -326,6 +352,8 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
                                       overtimeGrantedTotalMinutes:
                                           overtimeGrantedTotalMinutes,
                                       overtimeGrantsCount: grants.length,
+                                      latestOvertimeExpiryLabel:
+                                          latestOvertimeExpiryLabel,
                                       totalMinutes: _overtimeMinutesByDriverId[
                                               valet.userId] ??
                                           0,

@@ -25,6 +25,7 @@ class TextConstants {
       'Please enter a value (numbers only)';
   static const String overtimeConfirmTitle = 'Confirm Overtime';
   static const String overtimeGranted = 'Overtime granted';
+  static const String overtimeExpiresAt = 'Overtime till';
   /// Template for overtime confirmation popup.
   ///
   /// Important: this must contain `{valetName}` and `{minutes}` placeholders,
