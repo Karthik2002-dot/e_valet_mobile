@@ -387,7 +387,8 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (_isAssigned) ...[
+                                  if (_isAssigned &&
+                                      !widget.autoAssignEnabled) ...[
                                     SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *

@@ -233,6 +233,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -245,6 +246,14 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
                       maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    TextComponent(
+                      labelText: widget.phone,
+                      fontSize: phoneFontSize,
+                      color: AppColors.grey,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (widget.overtimeGrantsCount > 0) ...[
@@ -271,14 +280,6 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                         ),
                       ],
                     ],
-                    const SizedBox(height: 4),
-                    TextComponent(
-                      labelText: widget.phone,
-                      fontSize: phoneFontSize,
-                      color: AppColors.grey,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
                 ),
               ),
