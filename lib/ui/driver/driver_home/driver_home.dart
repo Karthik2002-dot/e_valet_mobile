@@ -144,7 +144,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         _cleanupTimer();
                       },
                       child: Container(
-                        color: AppColors.black,
+                        // Keep the overlay clickable without hiding the sheet.
+                        // Previously this was opaque black, which looked like the
+                        // bottom sheet "became blank" after 60 seconds.
+                        color: AppColors.transparent,
                       ),
                     ),
                   ),
