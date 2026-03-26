@@ -319,8 +319,9 @@ class _DashboardContentState extends State<DashboardContent> {
 
                                   setState(() => _isUpdatingAutoMode = true);
                                   try {
-                                    final res = await OperatorAutoAssignApiService
-                                        .patchAutoAssignSettings(
+                                    final res =
+                                        await OperatorAutoAssignApiService
+                                            .patchAutoAssignSettings(
                                       outletId: _outletId,
                                       enabled: value,
                                     );
@@ -352,8 +353,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                         ?.call(previousValue);
                                   } finally {
                                     if (!mounted) return;
-                                    setState(
-                                        () => _isUpdatingAutoMode = false);
+                                    setState(() => _isUpdatingAutoMode = false);
                                   }
                                 },
                           activeColor: AppColors.primary,

@@ -108,7 +108,8 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
           availableDrivers: widget.availableDrivers.drivers,
           onAssignmentComplete: widget.onAssignmentComplete,
           autoAssignEnabled: widget.autoAssignEnabled,
-          isHighlighted: widget.highlightedRequestIds.contains(request.sessionId),
+          isHighlighted:
+              widget.highlightedRequestIds.contains(request.sessionId),
         );
       },
     );

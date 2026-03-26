@@ -313,12 +313,11 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
 
                                   Widget buildRowForValet(ValetResponse valet) {
                                     final grants = valet.overtimeGrants;
-                                    final overtimeGrantedTotalMinutes = grants
-                                        .fold<int>(
-                                          0,
-                                          (sum, g) =>
-                                              sum + (g.extraMinutes ?? 0),
-                                        );
+                                    final overtimeGrantedTotalMinutes =
+                                        grants.fold<int>(
+                                      0,
+                                      (sum, g) => sum + (g.extraMinutes ?? 0),
+                                    );
                                     String latestOvertimeExpiryLabel = '';
                                     final grantsWithExpiry = grants
                                         .where(

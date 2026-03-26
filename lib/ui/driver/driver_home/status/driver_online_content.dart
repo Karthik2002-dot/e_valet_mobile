@@ -53,8 +53,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
   void _startPendingSessionWatchdog() {
     if (_pendingSessionWatchdogStarted) return;
     _pendingSessionWatchdogStarted = true;
-    _pendingSessionPollTimer =
-        Timer.periodic(_pendingSessionPollInterval, (_) {
+    _pendingSessionPollTimer = Timer.periodic(_pendingSessionPollInterval, (_) {
       // Fire-and-forget; errors are handled inside the async check.
       _checkPendingSessionCancellation();
     });
@@ -101,7 +100,8 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
     // 2) Pop any "next screens" (CarPhotoIntro / CarCamera / Preview) above DriverHome.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
       _handlingPendingCancellation = false;
     });
   }

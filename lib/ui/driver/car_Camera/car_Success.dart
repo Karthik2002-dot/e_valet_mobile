@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class CarSuccessScreen extends StatefulWidget {
   final String? imagePath;
@@ -32,6 +33,11 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
   @override
   void initState() {
     super.initState();
+    // After a successful park, the previous "pending session" id must be cleared.
+    // Otherwise, the pending-session watchdog in `DriverOnlineContent` will detect
+    // it as "cancelled" on the next Park attempt and pop the user back to Home.
+    TokenStorage.clearSessionId();
+    TokenStorage.clearSessionIdFromGetApi();
     _autoReturnTimer = Timer(_autoReturnDuration, _navigateToHome);
   }
 
