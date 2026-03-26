@@ -15,7 +15,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 class ManualRequestWidget extends StatefulWidget {
   final VoidCallback onRequestCreated;
 
-  /// When true (auto mode enabled), manual request is disabled.
+  /// Auto mode state (kept for compatibility; does not disable manual request).
   final bool isAutoMode;
 
   const ManualRequestWidget({
@@ -79,7 +79,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
           final t = context.watch<AppTranslationsNotifier>();
           final isLoading = state is ManualRequestInProgress;
 
-          final isDisabled = isLoading || widget.isAutoMode;
+          final isDisabled = isLoading;
 
           return Padding(
             padding: EdgeInsets.symmetric(
@@ -140,7 +140,7 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
 
                 const SizedBox(width: 16),
 
-                // Manual Request button (disabled when auto mode is on)
+                // Manual Request button
                 ElevatedButtonComponent(
                   onPressed: isDisabled ? () {} : _handleManualRequest,
                   labelText: isLoading

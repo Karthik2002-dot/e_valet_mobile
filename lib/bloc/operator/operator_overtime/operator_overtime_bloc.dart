@@ -43,15 +43,19 @@ class OperatorOvertimeBloc
 
     try {
       final res = await GrantOvertimeApiService.grantOvertime(request: request);
+      final refreshedResponse = await ValetListApiService.getValets(
+        outletId: event.outletId.toString(),
+      );
+      final refreshedValets = refreshedResponse.valets;
       final msg = (res.message?.trim().isNotEmpty ?? false)
           ? res.message!.trim()
           : 'Overtime granted';
       emit(OperatorOvertimeGrantSuccess(
-        valets: valets,
+        valets: refreshedValets,
         driverUserId: event.driverUserId,
         message: msg,
       ));
-      emit(OperatorOvertimeLoaded(valets: valets));
+      emit(OperatorOvertimeLoaded(valets: refreshedValets));
     } catch (e) {
       emit(OperatorOvertimeGrantError(
         valets: valets,

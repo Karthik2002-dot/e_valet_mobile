@@ -13,6 +13,9 @@ class OvertimeValetRow extends StatefulWidget {
   final String name;
   final String phone;
   final String status;
+  final int overtimeGrantedTotalMinutes;
+  final int overtimeGrantsCount;
+  final String latestOvertimeExpiryLabel;
 
   /// Total overtime minutes (hours+minutes combined).
   final int totalMinutes;
@@ -24,6 +27,9 @@ class OvertimeValetRow extends StatefulWidget {
     required this.name,
     required this.phone,
     required this.status,
+    required this.overtimeGrantedTotalMinutes,
+    required this.overtimeGrantsCount,
+    required this.latestOvertimeExpiryLabel,
     required this.totalMinutes,
     required this.onChanged,
     required this.onSubmit,
@@ -34,6 +40,7 @@ class OvertimeValetRow extends StatefulWidget {
 }
 
 class _OvertimeValetRowState extends State<OvertimeValetRow> {
+  static const int _maxHours = 24;
   int _selectedHours = 0;
   int _selectedMinutes = 0;
   late final TextEditingController _hoursController;
@@ -71,6 +78,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
       _selectedMinutes += 60;
     }
     if (_selectedHours < 0) _selectedHours = 0;
+    if (_selectedHours > _maxHours) _selectedHours = _maxHours;
     if (_selectedMinutes < 0) _selectedMinutes = 0;
 
     _suppressControllerListeners = true;
@@ -225,6 +233,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -247,6 +256,30 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (widget.overtimeGrantsCount > 0) ...[
+                      const SizedBox(height: 4),
+                      TextComponent(
+                        labelText:
+                            '${t.getByKey('overtimeGranted', TextConstants.overtimeGranted)}: ${DurationUtils.formatCompactHoursMinutes(widget.overtimeGrantedTotalMinutes)}',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (widget.latestOvertimeExpiryLabel.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        TextComponent(
+                          labelText:
+                              '${t.getByKey('overtimeExpiresAt', TextConstants.overtimeExpiresAt)}: ${widget.latestOvertimeExpiryLabel}',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.grey,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ],
                 ),
               ),
@@ -298,10 +331,11 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                       onUp: () => _applyHoursDelta(1),
                       onDown: () => _applyHoursDelta(-1),
                     ),
-                    maxLength: 3,
+                    maxLength: 2,
                     onChanged: (v) {
                       if (_suppressControllerListeners) return;
-                      final parsed = int.tryParse(v) ?? 0;
+                      final parsed =
+                          (int.tryParse(v) ?? 0).clamp(0, _maxHours);
                       setState(() => _selectedHours = parsed);
                       _normalizeAndEmit();
                     },

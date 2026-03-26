@@ -282,7 +282,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                           digitalKeyRack: state.digitalKeyRack,
                           searchQuery: _searchQuery,
                           onManualRequest: _handleManualRequest,
-                          manualRequestEnabled: !widget.isAutoMode,
+                          manualRequestEnabled: true,
                         ),
                       ],
                     ),
