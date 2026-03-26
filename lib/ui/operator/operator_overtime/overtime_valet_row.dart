@@ -334,8 +334,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
                     maxLength: 2,
                     onChanged: (v) {
                       if (_suppressControllerListeners) return;
-                      final parsed =
-                          (int.tryParse(v) ?? 0).clamp(0, _maxHours);
+                      final parsed = (int.tryParse(v) ?? 0).clamp(0, _maxHours);
                       setState(() => _selectedHours = parsed);
                       _normalizeAndEmit();
                     },

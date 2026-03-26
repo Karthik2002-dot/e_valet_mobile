@@ -67,8 +67,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
   void _startPendingSessionPolling() {
     _pendingSessionPollTimer?.cancel();
-    _pendingSessionPollTimer =
-        Timer.periodic(_pendingSessionPollInterval, (_) {
+    _pendingSessionPollTimer = Timer.periodic(_pendingSessionPollInterval, (_) {
       _checkPendingSessionCancellation();
     });
     _checkPendingSessionCancellation();
@@ -99,7 +98,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     if (!mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
       _isHandlingCancellation = false;
     });
   }

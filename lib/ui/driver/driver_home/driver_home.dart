@@ -62,9 +62,6 @@ class DriverHomeScreen extends StatefulWidget {
 
 class _DriverHomeScreenState extends State<DriverHomeScreen>
     with WidgetsBindingObserver, RouteAware {
-  Timer? _dismissTimer;
-  final ValueNotifier<bool> _dismissNotifier = ValueNotifier(false);
-
   /// When this changes, DriverHomeContent resets so home (two cards) is shown on reopen/return.
   final ValueNotifier<int> _homeResetNotifier = ValueNotifier(0);
   final DriverHomeRouteObserver _routeObserver = DriverHomeRouteObserver();
@@ -113,83 +110,33 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   void _presentAssignedSessionSheet(BuildContext context) {
     _isShowingAssignedSheet = true;
-    _dismissNotifier.value = false;
-    _dismissTimer?.cancel();
-    _dismissTimer = Timer(const Duration(seconds: 60), () {
-      if (mounted) {
-        _dismissNotifier.value = true;
-      }
-    });
-
     final assignedSessionsBloc = context.read<AssignedSessionsBackgroundBloc>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
-      isDismissible: _dismissNotifier.value,
+      // Critical: this sheet must NOT close via outside tap, swipe/drag, or back.
+      // It should close only when our backend/API state indicates no sessions.
+      isDismissible: false,
       enableDrag: false,
       builder: (BuildContext modalContext) => BlocProvider.value(
         value: assignedSessionsBloc,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: _dismissNotifier,
-          builder: (context, canDismiss, _) {
-            return Stack(
-              children: [
-                if (canDismiss)
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(modalContext).pop();
-                        _cleanupTimer();
-                      },
-                      child: Container(
-                        // Keep the overlay clickable without hiding the sheet.
-                        // Previously this was opaque black, which looked like the
-                        // bottom sheet "became blank" after 60 seconds.
-                        color: AppColors.transparent,
-                      ),
-                    ),
-                  ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: FractionallySizedBox(
-                    heightFactor: 0.6,
-                    alignment: Alignment.bottomCenter,
-                    child: Stack(
-                      children: [
-                        const AssignedSessionSheetLoader(),
-                        if (canDismiss)
-                          Positioned.fill(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(modalContext).pop();
-                                _cleanupTimer();
-                              },
-                              child: Container(
-                                color: AppColors.transparent,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+        child: PopScope(
+          canPop: false,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: 0.6,
+              alignment: Alignment.bottomCenter,
+              child: const AssignedSessionSheetLoader(),
+            ),
+          ),
         ),
       ),
     ).then((_) {
-      _cleanupTimer();
       _isShowingAssignedSheet = false;
     });
-  }
-
-  void _cleanupTimer() {
-    _dismissTimer?.cancel();
-    _dismissTimer = null;
-    _dismissNotifier.value = false;
   }
 
   void _closeAssignedSessionSheetIfOpen(BuildContext context) {
@@ -341,8 +288,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _pendingSessionsPollTimer?.cancel();
     _pendingSessionsPollTimer = null;
     _pendingSessionsPollingStarted = false;
-    _cleanupTimer();
-    _dismissNotifier.dispose();
     _hasShownSessionDialog = false; // Reset flag
     _hasNavigatedForStatus = false; // Reset navigation flag
     _pendingShowSheetWhenMenuLoaded = false;
