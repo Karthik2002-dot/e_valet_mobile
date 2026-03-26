@@ -38,7 +38,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
   /// Auto mode state lifted here so it persists when user switches tabs and comes back.
-  bool _isAutoMode = false;
+  bool _isAutoMode = true;
 
   @override
   void initState() {
@@ -50,24 +50,18 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
     );
     _dashboardBloc.add(FetchDashboardKpis(outletId: _outletId));
 
-    _loadAutoAssignSetting();
+    _ensureAutoAssignEnabled();
   }
 
-  Future<void> _loadAutoAssignSetting() async {
+  Future<void> _ensureAutoAssignEnabled() async {
     try {
-      final res = await OperatorAutoAssignApiService.getAutoAssignSettings(
+      // Force auto-assign enabled server-side as well (UI toggle is hidden).
+      await OperatorAutoAssignApiService.patchAutoAssignSettings(
         outletId: _outletId,
+        enabled: true,
       );
-      if (!mounted) return;
-      setState(() {
-        _isAutoMode = res.autoAssignEnabled;
-      });
     } catch (e) {
-      if (!mounted) return;
-      SnackBars.showErrorSnackBar(
-        context,
-        'Failed to load auto mode status',
-      );
+      // Keep UI behavior as auto mode even if backend update fails.
     }
   }
 
@@ -154,11 +148,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       _selectedIndex,
       DashboardContent(
         isAutoMode: _isAutoMode,
-        onAutoModeChanged: (value) {
-          setState(() {
-            _isAutoMode = value;
-          });
-        },
+        onAutoModeChanged: null,
         onRefreshReady: (refresh) {
           print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;

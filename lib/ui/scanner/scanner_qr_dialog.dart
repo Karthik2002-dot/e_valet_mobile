@@ -17,8 +17,10 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class ScannerQrDialog extends StatefulWidget {
   /// Returns when the dialog is closed. Snackbars are shown using the caller's
   /// context so messages remain visible after closing the dialog.
-  static Future<void> show(BuildContext context) {
-    return showDialog<void>(
+  ///
+  /// Returns `true` if a QR was scanned and API call succeeded, otherwise `false`.
+  static Future<bool> show(BuildContext context) async {
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => BlocProvider(
@@ -26,6 +28,7 @@ class ScannerQrDialog extends StatefulWidget {
         child: ScannerQrDialog(parentContext: context),
       ),
     );
+    return result ?? false;
   }
 
   final BuildContext parentContext;
@@ -64,21 +67,21 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
       listener: (context, state) {
         if (state is ScannerQrSuccess) {
           SnackBars.showSuccessSnackBar(widget.parentContext, state.message);
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         } else if (state is ScannerQrValetCardScanned) {
           SnackBars.showErrorSnackBar(widget.parentContext, state.message);
           Future<void>.delayed(const Duration(milliseconds: 150), () {
-            if (context.mounted) Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(context).pop(false);
           });
         } else if (state is ScannerQrError) {
           SnackBars.showErrorSnackBar(widget.parentContext, state.message);
           Future<void>.delayed(const Duration(milliseconds: 150), () {
-            if (context.mounted) Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(context).pop(false);
           });
         } else if (state is ScannerQrInvalidQr) {
           SnackBars.showErrorSnackBar(widget.parentContext, state.message);
           Future<void>.delayed(const Duration(milliseconds: 150), () {
-            if (context.mounted) Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(context).pop(false);
           });
         }
       },
@@ -111,7 +114,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                         icon: const Icon(Icons.close, color: AppColors.black),
                         onPressed: isProcessing
                             ? null
-                            : () => Navigator.of(context).pop(),
+                            : () => Navigator.of(context).pop(false),
                       ),
                     ],
                   ),

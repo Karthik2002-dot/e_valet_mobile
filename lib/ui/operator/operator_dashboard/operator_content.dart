@@ -21,6 +21,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retriev
 import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_qr_dialog.dart';
 
 class DashboardContent extends StatefulWidget {
   final bool isAutoMode;
@@ -41,8 +42,9 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
-  // Keep toggle visible so operators can enable/disable auto mode.
-  static const bool _showAutoModeToggle = true;
+  // Auto mode is forced ON; hide the toggle.
+  static const bool _showAutoModeToggle = false;
+  static const bool _showManualRequest = false;
 
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
@@ -143,6 +145,12 @@ class _DashboardContentState extends State<DashboardContent> {
         refreshRequests: true,
       ),
     );
+  }
+
+  Future<void> _openScanDialogAndRefresh() async {
+    final success = await ScannerQrDialog.show(context);
+    if (!mounted) return;
+    if (success) _silentRefresh();
   }
 
   void _handleRetrievalRequestUpdates(
@@ -485,17 +493,63 @@ class _DashboardContentState extends State<DashboardContent> {
                   },
                 ),
               ),
-              ManualRequestWidget(
-                onRequestCreated: () {
-                  // Refresh the dashboard
-                  _dashboardBloc.add(
-                    FetchDashboardKpis(
-                      outletId: _outletId,
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.height * 0.02,
+                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Material(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: _openScanDialogAndRefresh,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.03,
+                          vertical: MediaQuery.of(context).size.height * 0.018,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.qr_code_scanner,
+                              color: AppColors.white,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 10),
+                            TextComponent(
+                              labelText: t.getByKey(
+                                'scanCardLabel',
+                                TextConstants.scanCardLabel,
+                              ),
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize:
+                                  MediaQuery.of(context).size.height * 0.016,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  );
-                },
-                isAutoMode: widget.isAutoMode,
+                  ),
+                ),
               ),
+              if (_showManualRequest)
+                ManualRequestWidget(
+                  onRequestCreated: () {
+                    // Refresh the dashboard
+                    _dashboardBloc.add(
+                      FetchDashboardKpis(
+                        outletId: _outletId,
+                      ),
+                    );
+                  },
+                  isAutoMode: widget.isAutoMode,
+                ),
             ],
           ),
         ),
