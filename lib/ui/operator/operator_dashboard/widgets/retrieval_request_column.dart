@@ -38,6 +38,8 @@ class RetrievalRequestColumn extends StatefulWidget {
 
 class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
   final ScrollController _scrollController = ScrollController();
+  // Keep drag/drop implementation in codebase, but disabled on dashboard.
+  static const bool _manualDragDropEnabled = false;
 
   static int _statusOrder(String status) {
     switch (status.toUpperCase()) {
@@ -96,26 +98,31 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
       );
     }
 
+    final list = ListView.builder(
+      controller: _scrollController,
+      itemCount: columnRequests.length,
+      itemBuilder: (context, index) {
+        final request = columnRequests[index];
+        return RetrievalRequestCard(
+          request: request,
+          availableDrivers: widget.availableDrivers.drivers,
+          onAssignmentComplete: widget.onAssignmentComplete,
+          autoAssignEnabled: widget.autoAssignEnabled,
+          isHighlighted: widget.highlightedRequestIds.contains(request.sessionId),
+        );
+      },
+    );
+
+    if (!_manualDragDropEnabled) {
+      return list;
+    }
+
     return DragTarget<Object>(
       onMove: (details) {
         _handleAutoScroll(context, details.offset);
       },
       builder: (context, candidateData, rejectedData) {
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: columnRequests.length,
-          itemBuilder: (context, index) {
-            final request = columnRequests[index];
-            return RetrievalRequestCard(
-              request: request,
-              availableDrivers: widget.availableDrivers.drivers,
-              onAssignmentComplete: widget.onAssignmentComplete,
-              autoAssignEnabled: widget.autoAssignEnabled,
-              isHighlighted:
-                  widget.highlightedRequestIds.contains(request.sessionId),
-            );
-          },
-        );
+        return list;
       },
     );
   }

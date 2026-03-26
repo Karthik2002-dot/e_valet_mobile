@@ -40,6 +40,9 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _highlightController;
   late final Animation<double> _highlightAnimation;
+  // Keep drag/drop implementation in codebase, but disabled on dashboard.
+  static const bool _manualDragDropEnabled = false;
+  bool _isDraggingOver = false;
 
   void _callPhoneNumber(String phoneNumber) async {
     try {
@@ -52,12 +55,9 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
     }
   }
 
-  bool _isDraggingOver = false;
-
+  bool get _isAssigned => widget.request.status.toUpperCase() == 'ASSIGNED';
   bool get _isAssignable =>
       RetrievalRequestUtils.isAssignable(widget.request.status);
-
-  bool get _isAssigned => widget.request.status.toUpperCase() == 'ASSIGNED';
 
   Color _statusColor() => RetrievalRequestUtils.getStatusColor(
         status: widget.request.status,
@@ -181,116 +181,83 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
   @override
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
-    return DragTarget<AvailableDriver>(
-      onWillAcceptWithDetails: (details) {
-        if (!_isAssignable) {
-          return false;
-        }
-        // Only accept if driver status is 'free'
-        return details.data.status.toLowerCase() == 'free';
-      },
-      onAcceptWithDetails: (details) {
-        if (!_isAssignable) {
-          setState(() {
-            _isDraggingOver = false;
-          });
-          return;
-        }
-        setState(() {
-          _isDraggingOver = false;
-        });
-        _showAssignmentDialog(details.data);
-      },
-      onMove: (details) {
-        if (_isAssignable && !_isDraggingOver) {
-          setState(() {
-            _isDraggingOver = true;
-          });
+    final cardBody = BlocListener<OperatorDashboardBloc, OperatorDashboardState>(
+      listenWhen: (prev, curr) =>
+          curr is CancelAssignmentSuccess || curr is CancelAssignmentError,
+      listener: (context, state) {
+        if (state is CancelAssignmentSuccess &&
+            state.response.sessionId == widget.request.sessionId) {
+          SnackBars.showSuccessSnackBar(
+            context,
+            t.get(TextConstants.cancelAssignmentSuccess),
+          );
+          widget.onAssignmentComplete();
+        } else if (state is CancelAssignmentError &&
+            state.sessionId == widget.request.sessionId) {
+          SnackBars.showErrorSnackBar(context, state.message);
         }
       },
-      onLeave: (data) {
-        setState(() {
-          _isDraggingOver = false;
-        });
-      },
-      builder: (context, candidateData, rejectedData) {
-        return BlocListener<OperatorDashboardBloc, OperatorDashboardState>(
-          listenWhen: (prev, curr) =>
-              curr is CancelAssignmentSuccess || curr is CancelAssignmentError,
-          listener: (context, state) {
-            if (state is CancelAssignmentSuccess &&
-                state.response.sessionId == widget.request.sessionId) {
-              SnackBars.showSuccessSnackBar(
-                context,
-                t.get(TextConstants.cancelAssignmentSuccess),
-              );
-              widget.onAssignmentComplete();
-            } else if (state is CancelAssignmentError &&
-                state.sessionId == widget.request.sessionId) {
-              SnackBars.showErrorSnackBar(context, state.message);
-            }
-          },
-          child: AnimatedBuilder(
-            animation: _highlightAnimation,
-            builder: (context, child) {
-              final pulse =
-                  widget.isHighlighted ? _highlightAnimation.value : 0.0;
-              final baseBorderColor =
-                  _isDraggingOver ? AppColors.primary : _statusColor();
-              final baseBackgroundColor = _isDraggingOver
+      child: AnimatedBuilder(
+        animation: _highlightAnimation,
+        builder: (context, child) {
+          final pulse = widget.isHighlighted ? _highlightAnimation.value : 0.0;
+          final baseBorderColor =
+              (_manualDragDropEnabled && _isDraggingOver)
+                  ? AppColors.primary
+                  : _statusColor();
+          final baseBackgroundColor =
+              (_manualDragDropEnabled && _isDraggingOver)
                   ? AppColors.primary.withOpacity(0.05)
                   : AppColors.white;
-              final highlightBorderColor =
-                  Color.lerp(baseBorderColor, AppColors.accent, pulse) ??
-                      baseBorderColor;
-              final highlightBackgroundColor = Color.lerp(
-                    baseBackgroundColor,
-                    AppColors.accent.withOpacity(0.12),
-                    pulse,
-                  ) ??
-                  baseBackgroundColor;
-              final baseShadowColor = _isDraggingOver
-                  ? AppColors.primary.withOpacity(0.3)
-                  : AppColors.grey.withOpacity(0.1);
-              final highlightShadowColor = Color.lerp(
-                    baseShadowColor,
-                    AppColors.accent.withOpacity(0.35),
-                    pulse,
-                  ) ??
-                  baseShadowColor;
+          final highlightBorderColor =
+              Color.lerp(baseBorderColor, AppColors.accent, pulse) ??
+                  baseBorderColor;
+          final highlightBackgroundColor = Color.lerp(
+                baseBackgroundColor,
+                AppColors.accent.withOpacity(0.12),
+                pulse,
+              ) ??
+              baseBackgroundColor;
+          final baseShadowColor = (_manualDragDropEnabled && _isDraggingOver)
+              ? AppColors.primary.withOpacity(0.3)
+              : AppColors.grey.withOpacity(0.1);
+          final highlightShadowColor = Color.lerp(
+                baseShadowColor,
+                AppColors.accent.withOpacity(0.35),
+                pulse,
+              ) ??
+              baseShadowColor;
 
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).size.height * 0.015,
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * 0.015,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.01,
+              vertical: MediaQuery.of(context).size.height * 0.01,
+            ),
+            decoration: BoxDecoration(
+              color: highlightBackgroundColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: (_manualDragDropEnabled && _isDraggingOver)
+                    ? AppColors.primary
+                    : highlightBorderColor,
+                width: (_manualDragDropEnabled && _isDraggingOver) ? 3 : 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (_manualDragDropEnabled && _isDraggingOver)
+                      ? baseShadowColor
+                      : highlightShadowColor,
+                  spreadRadius: (_manualDragDropEnabled && _isDraggingOver) ? 2 : 1,
+                  blurRadius: (_manualDragDropEnabled && _isDraggingOver) ? 8 : 4,
+                  offset: const Offset(0, 2),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.01,
-                  vertical: MediaQuery.of(context).size.height * 0.01,
-                ),
-                decoration: BoxDecoration(
-                  color: highlightBackgroundColor,
-                  borderRadius: BorderRadius.circular(
-                    12,
-                  ),
-                  border: Border.all(
-                    color: _isDraggingOver
-                        ? AppColors.primary
-                        : highlightBorderColor,
-                    width: _isDraggingOver ? 3 : 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _isDraggingOver
-                          ? baseShadowColor
-                          : highlightShadowColor,
-                      spreadRadius: _isDraggingOver ? 2 : 1,
-                      blurRadius: _isDraggingOver ? 8 : 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
+              ],
+            ),
+            child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Vehicle Image - tap to view full size
@@ -590,11 +557,48 @@ class _RetrievalRequestCardState extends State<RetrievalRequestCard>
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-        );
+          );
+        },
+      ),
+    );
+
+    if (!_manualDragDropEnabled) {
+      return cardBody;
+    }
+
+    return DragTarget<AvailableDriver>(
+      onWillAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          return false;
+        }
+        // Only accept if driver status is 'free'
+        return details.data.status.toLowerCase() == 'free';
       },
+      onAcceptWithDetails: (details) {
+        if (!_isAssignable) {
+          setState(() {
+            _isDraggingOver = false;
+          });
+          return;
+        }
+        setState(() {
+          _isDraggingOver = false;
+        });
+        _showAssignmentDialog(details.data);
+      },
+      onMove: (details) {
+        if (_isAssignable && !_isDraggingOver) {
+          setState(() {
+            _isDraggingOver = true;
+          });
+        }
+      },
+      onLeave: (data) {
+        setState(() {
+          _isDraggingOver = false;
+        });
+      },
+      builder: (context, candidateData, rejectedData) => cardBody,
     );
   }
 }

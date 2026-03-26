@@ -219,7 +219,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                   ),
                   recommendedCardNumber: recommendedCardNumber,
                   compact: true,
-                  dragEnabled: true,
+                  // Manual drag-and-drop assignment is disabled on dashboard.
+                  dragEnabled: false,
                 ),
               ),
             ],

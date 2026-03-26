@@ -45,6 +45,7 @@ class TextConstants {
   // QR Scanner
   static const orEnterKey = 'Or Enter Key';
   static const String scanQr = 'Scan QR';
+  static const String scanCardLabel = 'Scan Card';
   static const String scanWhatsAppQrInstruction =
       'Scan the WhatsApp QR code from the customer valet card';
 
