@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/operator_grouping_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_confirm_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/overtime_valet_row.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
@@ -105,6 +106,17 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const GuidelinesScreen(isOperatorGuidelines: true),
+        ),
+      );
+      return;
+    }
+
+    if (index == 9) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorGroupingScreen(
+            onNavigateToTab: widget.onNavigateToTab,
+          ),
         ),
       );
       return;

@@ -69,6 +69,15 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
+                iconData: Icons.groups,
+                title: t.getByKey('grouping', 'Grouping'),
+                isSelected: selectedIndex == 9,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(9);
+                },
+              ),
+              OperatorDrawerItem(
                 iconData: Icons.schedule,
                 title: t.getByKey('overtime', TextConstants.overTime),
                 isSelected: selectedIndex == 4,
