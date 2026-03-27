@@ -211,7 +211,7 @@ class GroupingGroupListCard extends StatelessWidget {
                                     labelText: m.name.isEmpty ? '—' : m.name,
                                     color: AppColors.black,
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 14,
+                                    fontSize: 17,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -219,18 +219,8 @@ class GroupingGroupListCard extends StatelessWidget {
                                   TextComponent(
                                     labelText: m.phone,
                                     color: AppColors.grey,
-                                    fontSize: 12,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  TextComponent(
-                                    labelText:
-                                        '${t.getByKey('joinedAt', 'Joined at')}: ${m.joinedAt}',
-                                    color: AppColors.grey,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w400,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
