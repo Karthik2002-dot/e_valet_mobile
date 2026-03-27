@@ -57,6 +57,7 @@ class _GroupingAddGroupDialogBodyState
     extends State<_GroupingAddGroupDialogBody> {
   late final TextEditingController _nameController;
   final List<ValetResponse> _selectedValets = [];
+  Future<Set<String>>? _assignedDriverIdsFuture;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -64,6 +65,10 @@ class _GroupingAddGroupDialogBodyState
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _assignedDriverIdsFuture =
+        OperatorDriverGroupsApiService.getAssignedDriverUserIds(
+      outletId: widget.outletId,
+    );
   }
 
   @override
@@ -198,6 +203,8 @@ class _GroupingAddGroupDialogBodyState
                     const SizedBox(height: 16),
                     GroupingDialogValetField(
                       valetsFutureGetter: widget.valetsFutureGetter,
+                      assignedDriverIdsFutureGetter: () =>
+                          _assignedDriverIdsFuture,
                       isSubmitting: _isSubmitting,
                       selectedValets: _selectedValets,
                       t: t,

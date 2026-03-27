@@ -102,6 +102,107 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
     );
   }
 
+  Future<void> _removeMemberFromGroup({
+    required int groupId,
+    required DriverGroupMember member,
+  }) async {
+    final t = context.read<AppTranslationsNotifier>();
+    final shouldRemove = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 24,
+              ),
+              titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 10),
+              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+              actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              title: TextComponent(
+                labelText: t.getByKey('removeMember', 'Remove member'),
+                color: AppColors.black,
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+              ),
+              content: TextComponent(
+                labelText: t.getByKey(
+                  'removeMemberConfirm',
+                  'Are you sure you want to remove this driver from this group?',
+                ),
+                color: AppColors.grey,
+                fontSize: 16,
+                maxLines: 4,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(110, 46),
+                  ),
+                  child: TextComponent(
+                    labelText: t.getByKey('cancel', 'Cancel'),
+                    color: AppColors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: AppColors.white,
+                    minimumSize: const Size(120, 46),
+                  ),
+                  child: TextComponent(
+                    labelText: t.getByKey('remove', 'Remove'),
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    if (!shouldRemove) return;
+
+    try {
+      await OperatorDriverGroupsApiService.removeDriverGroupMember(
+        outletId: _outletId,
+        groupId: groupId,
+        driverUserId: member.driverUserId,
+      );
+
+      if (!mounted) return;
+      _loadGroups();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextComponent(
+            labelText: t.getByKey(
+              'memberRemoved',
+              'Driver removed from group',
+            ),
+            color: AppColors.white,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: TextComponent(
+            labelText: e.toString(),
+            color: AppColors.white,
+            maxLines: 3,
+          ),
+        ),
+      );
+    }
+  }
+
   void _goToDashboard() {
     if (widget.onNavigateToTab != null) {
       widget.onNavigateToTab?.call(0);
@@ -220,7 +321,7 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextComponent(
-                        labelText: t.getByKey('grouping', 'Grouping'),
+                        labelText: t.getByKey('driversGroup', 'Drivers Group'),
                         color: AppColors.black,
                         fontSize: headerTitleFontSize,
                         fontWeight: FontWeight.bold,
@@ -229,7 +330,7 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
                       TextComponent(
                         labelText: t.getByKey(
                           'groupingDescription',
-                          'Manage operator groupings',
+                          'Manage Drivers Group',
                         ),
                         color: AppColors.grey,
                         fontSize: headerDescriptionFontSize,
@@ -360,6 +461,10 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
                               ).then((res) => res.members);
                             });
                           },
+                          onRemoveMember: (member) => _removeMemberFromGroup(
+                            groupId: g.id,
+                            member: member,
+                          ),
                         ),
                     ],
                   );

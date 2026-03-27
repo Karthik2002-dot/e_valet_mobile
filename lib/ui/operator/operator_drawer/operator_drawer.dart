@@ -70,7 +70,7 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 iconData: Icons.groups,
-                title: t.getByKey('grouping', 'Grouping'),
+                title: t.getByKey('driversGroup', TextConstants.driversGroup),
                 isSelected: selectedIndex == 9,
                 onTap: () {
                   Navigator.of(context).pop();

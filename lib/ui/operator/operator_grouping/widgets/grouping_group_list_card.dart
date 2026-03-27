@@ -13,6 +13,7 @@ class GroupingGroupListCard extends StatelessWidget {
     required this.membersFuture,
     required this.onAddMembers,
     required this.onRetryMembers,
+    required this.onRemoveMember,
   });
 
   final DriverGroup group;
@@ -20,6 +21,7 @@ class GroupingGroupListCard extends StatelessWidget {
   final Future<List<DriverGroupMember>> membersFuture;
   final VoidCallback onAddMembers;
   final VoidCallback onRetryMembers;
+  final Future<void> Function(DriverGroupMember member) onRemoveMember;
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +235,28 @@ class GroupingGroupListCard extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: t.getByKey(
+                                'remove',
+                                'Remove',
+                              ),
+                              onPressed: () => onRemoveMember(m),
+                              style: IconButton.styleFrom(
+                                backgroundColor: AppColors.white,
+                                foregroundColor: AppColors.error,
+                                padding: const EdgeInsets.all(8),
+                                minimumSize: const Size(40, 40),
+                                side: BorderSide(
+                                  color: AppColors.error.withValues(alpha: 0.4),
+                                  width: 1,
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 24,
+                                color: AppColors.error,
                               ),
                             ),
                           ],
