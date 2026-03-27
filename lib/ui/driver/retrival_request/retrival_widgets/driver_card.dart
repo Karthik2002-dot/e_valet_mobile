@@ -69,15 +69,15 @@ class DriverCard extends StatelessWidget {
                           color: AppColors.primaryDark,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 4),
                       // Name
                       Expanded(
                         child: TextComponent(
                           labelText: driver.name,
-                          fontSize: screenWidth * 0.03,
+                          fontSize: screenWidth * 0.035,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

@@ -41,7 +41,7 @@ class PassAvailableDriversBloc
     try {
       final message = await PassAvailableDriversApiService.passSessionToDriver(
         sessionId: event.sessionId,
-        driverId: event.driverId,
+        driverUserId: event.driverId,
       );
       emit(SessionPassedToDriver(message));
     } catch (e) {
