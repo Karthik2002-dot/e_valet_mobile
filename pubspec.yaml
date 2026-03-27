@@ -69,6 +69,7 @@ dependencies:
   workmanager: ^0.5.2
   url_launcher: ^6.3.0
   vibration: ^2.0.0
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +100,7 @@ flutter:
     - assets/jsons/
     - assets/images/
     - assets/svg/
+    - assets/sounds/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
