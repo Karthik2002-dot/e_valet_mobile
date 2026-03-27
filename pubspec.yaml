@@ -68,6 +68,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   workmanager: ^0.5.2
   url_launcher: ^6.3.0
+  vibration: ^2.0.0
 
 dev_dependencies:
   flutter_test:

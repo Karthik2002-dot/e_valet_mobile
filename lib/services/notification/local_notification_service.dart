@@ -65,16 +65,25 @@ class LocalNotificationService {
     if (defaultTargetPlatform != TargetPlatform.android) return;
 
     try {
-      // High priority channel for urgent notifications
-      // Using default system sound (no custom sound specified) with playSound: true
-      const highPriorityChannel = AndroidNotificationChannel(
+      // Vibration pattern used for retrieval-request alerts:
+      // immediate 900 ms buzz → 300 ms off → 900 ms → 300 ms → 900 ms → 300 ms → 900 ms
+      // NOTE: Android channel properties are immutable after first creation.
+      // If the app was previously installed, uninstall / clear app data to
+      // let the new pattern take effect.
+      final retrievalVibrationPattern =
+          Int64List.fromList([0, 900, 300, 900, 300, 900, 300, 900]);
+
+      // High priority channel — this is the DEFAULT channel used by FCM for
+      // background/terminated notifications (set in AndroidManifest.xml).
+      // We give it the same aggressive pattern so all background notifications vibrate well.
+      final highPriorityChannel = AndroidNotificationChannel(
         'high_priority_channel',
         'High Priority Notifications',
         description: 'This channel is used for high priority notifications',
-        importance: Importance.high,
+        importance: Importance.max,
         playSound: true,
         enableVibration: true,
-        // No sound parameter = uses default system notification sound
+        vibrationPattern: retrievalVibrationPattern,
       );
 
       // Default channel
@@ -85,18 +94,18 @@ class LocalNotificationService {
         importance: Importance.defaultImportance,
         playSound: true,
         enableVibration: true,
-        // No sound parameter = uses default system notification sound
       );
 
-      // Retrieval request channel
-      const retrievalRequestChannel = AndroidNotificationChannel(
+      // Retrieval request channel — used for locally-shown foreground notifications
+      // and by the system when the FCM payload specifies this channel ID.
+      final retrievalRequestChannel = AndroidNotificationChannel(
         'retrieval_request_channel',
         'Retrieval Requests',
         description: 'Notifications for valet retrieval requests',
-        importance: Importance.high,
+        importance: Importance.max,
         playSound: true,
         enableVibration: true,
-        // No sound parameter = uses default system notification sound
+        vibrationPattern: retrievalVibrationPattern,
       );
 
       // Driver updates channel

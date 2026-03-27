@@ -10,6 +10,7 @@ import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'notification_service.dart';
 import 'local_notification_service.dart';
 import 'text_to_speech_service.dart';
+import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 
 /// Top-level function to handle background messages.
 /// Must be a top-level function (not a class method).
@@ -231,6 +232,13 @@ class FirebaseMessagingService implements NotificationService {
         'type': data['type'],
         'timestamp': DateTime.now().toIso8601String(),
       });
+
+      // Retrieval request arrived while app is in foreground — start vibration
+      // immediately and trigger the same session-refresh that background taps use.
+      if (data['type'] == 'retrieval_request') {
+        VibrationController.startRetrievalAlert();
+        _retrievalNotificationTapController.add(null);
+      }
     } catch (e) {
       log('Error handling foreground message: $e');
     }
@@ -293,8 +301,10 @@ class FirebaseMessagingService implements NotificationService {
     if (type == null) return;
 
     try {
-      // Always emit retrieval-tap event, even if navigator is not yet ready.
+      // Always emit retrieval-tap event and start vibration, even if navigator
+      // is not yet ready.
       if (type == 'retrieval_request') {
+        VibrationController.startRetrievalAlert();
         _retrievalNotificationTapController.add(null);
       }
       // Ensure navigator is ready before attempting navigation to avoid crashes.

@@ -13,6 +13,7 @@ import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
+import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 
 class AssignedSessionSheetLoader extends StatefulWidget {
   const AssignedSessionSheetLoader({super.key});
@@ -29,6 +30,12 @@ class _AssignedSessionSheetLoaderState
 
   /// The session ID for which we last fetched available pass-drivers.
   String? _lastFetchedSessionId;
+
+  @override
+  void dispose() {
+    VibrationController.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +56,7 @@ class _AssignedSessionSheetLoaderState
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
           if (!assignedState.hasSessions) {
+            VibrationController.stop();
             return const SizedBox.shrink();
           }
           final rawSession = assignedState.sessions.first;
@@ -100,6 +108,15 @@ class _AssignedSessionSheetLoaderState
           final effectiveSessionId = sessionId ?? typedSession?.id;
           final canAccept =
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
+
+          // Fallback: start vibration if the widget becomes visible with a
+          // session but the notification handler didn't trigger it yet
+          // (e.g. user opened the app manually after a background notification).
+          if (typedSession != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) VibrationController.startRetrievalAlert();
+            });
+          }
 
           return Align(
             alignment: Alignment.bottomCenter,
@@ -186,6 +203,7 @@ class _AssignedSessionSheetLoaderState
                           onAccept: canAccept
                               ? () {
                                   if (_isAcceptLoading) return;
+                                  VibrationController.stop();
                                   setState(() {
                                     _isAcceptLoading = true;
                                     _acceptTriggeredAt = DateTime.now();
@@ -215,6 +233,7 @@ class _AssignedSessionSheetLoaderState
                                   passingDriverId == null &&
                                   !_isAcceptLoading)
                               ? (PassAvailableDriver driver) {
+                                  VibrationController.stop();
                                   context
                                       .read<PassAvailableDriversBloc>()
                                       .add(PassSessionToDriver(
