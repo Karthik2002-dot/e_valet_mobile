@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_event.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_state.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_event.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_requesy_state.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pass_available_driver.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
@@ -21,16 +25,16 @@ class AssignedSessionSheetLoader extends StatefulWidget {
 class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
   bool _isAcceptLoading = false;
-
-  /// When user taps Collect Keys (accept API triggered). Used to start 30s disable from that moment.
   DateTime? _acceptTriggeredAt;
+
+  /// The session ID for which we last fetched available pass-drivers.
+  String? _lastFetchedSessionId;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AssignedSessionsBackgroundBloc,
         AssignedSessionsBackgroundState>(
       buildWhen: (previous, current) {
-        // Rebuild only when the displayed session (id + photo) changes, so the bottom sheet image does not flicker every 5s
         if (current is! AssignedSessionsBackgroundData) return true;
         if (!current.hasSessions) return true;
         if (previous is! AssignedSessionsBackgroundData ||
@@ -44,7 +48,6 @@ class _AssignedSessionSheetLoaderState
       },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
-          // Never show empty sheet content — when no sessions, parent closes sheet
           if (!assignedState.hasSessions) {
             return const SizedBox.shrink();
           }
@@ -60,129 +63,168 @@ class _AssignedSessionSheetLoaderState
               sessionId = rawSession.id;
               sessionJson = rawSession.toJson();
             } else if (rawSession is Map<String, dynamic>) {
-              // API/WebSocket may use 'sessionId' or 'id' - check both (same as AssignedSession.fromJson)
               final rawId =
                   (rawSession['sessionId'] ?? rawSession['id'])?.toString();
               sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
               sessionJson = rawSession;
-              // Try to parse the session to get typed object with all fields
               try {
                 typedSession = AssignedSession.fromJson(rawSession);
-                // Fallback: use typed id if raw extraction missed it
                 if (sessionId == null && typedSession.id.isNotEmpty) {
                   sessionId = typedSession.id;
                 }
-              } catch (e) {
-                // If parsing fails, keep sessionJson as raw map
-                // This ensures we still have the data even if model parsing fails
-              }
+              } catch (_) {}
             }
 
             if (sessionId != null) {
-              TokenStorage.saveSessionIdFromGetApi(sessionId).catchError((e) {
-                // ignore or log
-              });
+              TokenStorage.saveSessionIdFromGetApi(sessionId).catchError((_) {});
             }
             if (sessionJson != null) {
-              TokenStorage.saveAssignedSessionData(sessionJson).catchError((e) {
-                // ignore or log
-              });
-              // Save parkingLocation if present - check both typed session and raw JSON
+              TokenStorage.saveAssignedSessionData(sessionJson).catchError((_) {});
               String? parkingLocation;
               if (typedSession != null &&
                   typedSession.parkingLocation.isNotEmpty) {
-                // Use parkingLocation from typed session if available
                 parkingLocation = typedSession.parkingLocation;
               } else if (sessionJson is Map<String, dynamic>) {
-                // Fallback to raw JSON if typed session doesn't have it
                 final rawLocation = sessionJson['parkingLocation'];
                 if (rawLocation != null) {
                   parkingLocation = rawLocation.toString();
                 }
               }
-
-              // Save parkingLocation if we found it
-              if (parkingLocation != null &&
-                  parkingLocation.trim().isNotEmpty) {
+              if (parkingLocation != null && parkingLocation.trim().isNotEmpty) {
                 TokenStorage.saveParkingLocation(parkingLocation)
-                    .catchError((e) {
-                  // ignore or log
-                });
+                    .catchError((_) {});
               }
             }
           }
 
-          // Use typed session id as fallback when we have a session to display
           final effectiveSessionId = sessionId ?? typedSession?.id;
           final canAccept =
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
 
           return Align(
             alignment: Alignment.bottomCenter,
-            child: BlocProvider(
-              create: (context) => RetrivalRequestBloc(),
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (_) => RetrivalRequestBloc()),
+                BlocProvider(create: (_) => PassAvailableDriversBloc()),
+              ],
               child: Builder(
                 builder: (blocContext) {
-                  return BlocListener<RetrivalRequestBloc,
-                      RetrivalRequestState>(
-                    listener: (context, state) {
-                      if (state is RetrivalRequestLoading) {
-                        if (mounted) {
-                          setState(() {
-                            _isAcceptLoading = true;
-                          });
-                        }
+                  // Fetch available pass-drivers once per unique session
+                  if (effectiveSessionId != null &&
+                      effectiveSessionId != _lastFetchedSessionId) {
+                    _lastFetchedSessionId = effectiveSessionId;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (blocContext.mounted) {
+                        blocContext.read<PassAvailableDriversBloc>().add(
+                              FetchPassAvailableDrivers(effectiveSessionId),
+                            );
                       }
-                      if (state is RetrivalRequestAccepted) {
-                        SnackBars.showSuccessSnackBar(context, state.message);
-                        if (mounted) {
-                          setState(() {
-                            _isAcceptLoading = false;
-                          });
-                        }
-                        Navigator.of(context).pop();
-                        _navigateToConfirmArrival(context);
-                      } else if (state is RetrivalRequestError) {
-                        SnackBars.showErrorSnackBar(context, state.message);
-                        if (mounted) {
-                          setState(() {
-                            _isAcceptLoading = false;
-                          });
-                        }
-                      }
-                    },
-                    child: RetrievalRequestSheet(
-                      // If you make this parameter `AssignedSession?` in the sheet:
-                      session: typedSession,
-                      message: typedSession == null
-                          ? 'No active retrieval requests'
-                          : null,
-                      isLoading: false,
-                      isAcceptLoading: _isAcceptLoading,
-                      onAccept: canAccept
-                          ? () {
-                              if (_isAcceptLoading) return;
-                              final id = effectiveSessionId;
-                              setState(() {
-                                _isAcceptLoading = true;
-                                _acceptTriggeredAt = DateTime.now();
-                              });
-                              if (blocContext.mounted) {
-                                blocContext.read<RetrivalRequestBloc>().add(
-                                      AcceptRetrivalRequest(id),
-                                    );
-                              } else if (mounted) {
-                                setState(() => _isAcceptLoading = false);
-                              }
+                    });
+                  }
+
+                  return MultiBlocListener(
+                    listeners: [
+                      // RetrivalRequest listener (accept flow)
+                      BlocListener<RetrivalRequestBloc, RetrivalRequestState>(
+                        listener: (context, state) {
+                          if (state is RetrivalRequestLoading) {
+                            if (mounted) {
+                              setState(() => _isAcceptLoading = true);
                             }
-                          : (typedSession != null
+                          } else if (state is RetrivalRequestAccepted) {
+                            SnackBars.showSuccessSnackBar(
+                                context, state.message);
+                            if (mounted) {
+                              setState(() => _isAcceptLoading = false);
+                            }
+                            Navigator.of(context).pop();
+                            _navigateToConfirmArrival(context);
+                          } else if (state is RetrivalRequestError) {
+                            SnackBars.showErrorSnackBar(context, state.message);
+                            if (mounted) {
+                              setState(() => _isAcceptLoading = false);
+                            }
+                          }
+                        },
+                      ),
+
+                      // PassAvailableDrivers listener (pass flow)
+                      BlocListener<PassAvailableDriversBloc,
+                          PassAvailableDriversState>(
+                        listener: (context, state) {
+                          if (state is SessionPassedToDriver) {
+                            SnackBars.showSuccessSnackBar(
+                                context, state.message);
+                            // Close the bottom sheet — session has been passed
+                            Navigator.of(context).pop();
+                          } else if (state is PassToDriverError) {
+                            SnackBars.showErrorSnackBar(
+                                context, state.message);
+                          }
+                        },
+                      ),
+                    ],
+                    child: BlocBuilder<PassAvailableDriversBloc,
+                        PassAvailableDriversState>(
+                      builder: (context, passState) {
+                        final drivers = _driversFromState(passState);
+                        final isDriversLoading =
+                            passState is PassAvailableDriversLoading;
+                        final passingDriverId =
+                            passState is PassingSessionToDriver
+                                ? passState.driverId
+                                : null;
+
+                        return RetrievalRequestSheet(
+                          session: typedSession,
+                          message: typedSession == null
+                              ? 'No active retrieval requests'
+                              : null,
+                          isLoading: false,
+                          isAcceptLoading: _isAcceptLoading,
+                          onAccept: canAccept
                               ? () {
-                                  SnackBars.showErrorSnackBar(
-                                    context,
-                                    'Unable to accept: session info is missing.',
-                                  );
+                                  if (_isAcceptLoading) return;
+                                  setState(() {
+                                    _isAcceptLoading = true;
+                                    _acceptTriggeredAt = DateTime.now();
+                                  });
+                                  if (blocContext.mounted) {
+                                    blocContext
+                                        .read<RetrivalRequestBloc>()
+                                        .add(AcceptRetrivalRequest(
+                                            effectiveSessionId));
+                                  } else if (mounted) {
+                                    setState(() => _isAcceptLoading = false);
+                                  }
                                 }
-                              : null),
+                              : (typedSession != null
+                                  ? () {
+                                      SnackBars.showErrorSnackBar(
+                                        context,
+                                        'Unable to accept: session info is missing.',
+                                      );
+                                    }
+                                  : null),
+                          // Pass-to-driver params
+                          availableDrivers: drivers,
+                          isDriversLoading: isDriversLoading,
+                          passingDriverId: passingDriverId,
+                          onPassToDriver: (effectiveSessionId != null &&
+                                  passingDriverId == null &&
+                                  !_isAcceptLoading)
+                              ? (PassAvailableDriver driver) {
+                                  context
+                                      .read<PassAvailableDriversBloc>()
+                                      .add(PassSessionToDriver(
+                                        sessionId: effectiveSessionId,
+                                        driverId: driver.userId,
+                                      ));
+                                }
+                              : null,
+                        );
+                      },
                     ),
                   );
                 },
@@ -203,6 +245,14 @@ class _AssignedSessionSheetLoaderState
     );
   }
 
+  List<PassAvailableDriver> _driversFromState(
+      PassAvailableDriversState state) {
+    if (state is PassAvailableDriversLoaded) return state.drivers;
+    if (state is PassingSessionToDriver) return state.drivers;
+    if (state is PassToDriverError) return state.drivers;
+    return [];
+  }
+
   void _navigateToConfirmArrival(BuildContext context) async {
     final navigator = Navigator.of(context);
     final sessionData = await TokenStorage.getAssignedSessionData();
@@ -219,11 +269,7 @@ class _AssignedSessionSheetLoaderState
             ),
           ),
         );
-      } catch (e) {
-        // log parse error
-      }
-    } else {
-      // no data found
+      } catch (_) {}
     }
   }
 }

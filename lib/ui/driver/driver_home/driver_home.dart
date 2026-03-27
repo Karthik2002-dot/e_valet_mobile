@@ -122,16 +122,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       enableDrag: false,
       builder: (BuildContext modalContext) => BlocProvider.value(
         value: assignedSessionsBloc,
-        child: PopScope(
+        child: const PopScope(
           canPop: false,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              heightFactor: 0.6,
-              alignment: Alignment.bottomCenter,
-              child: const AssignedSessionSheetLoader(),
-            ),
-          ),
+          child: AssignedSessionSheetLoader(),
         ),
       ),
     ).then((_) {
