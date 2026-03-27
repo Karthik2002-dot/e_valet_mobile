@@ -75,11 +75,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   /// re-check when [DriverHomeLoaded] arrives.
   bool _pendingShowSheetWhenMenuLoaded = false;
 
-  /// When we skip showing the sheet because route isn't current yet (e.g. app
-  /// just resumed from notification), we schedule one retry. This avoids
-  /// scheduling multiple retries.
-  bool _didScheduleSheetRetryForRoute = false;
-  bool _pendingShowSheetWhenRouteCurrent = false;
   bool _isShowingAssignedSheet = false;
 
   // Store bloc references to avoid context issues in timer callbacks
@@ -114,6 +109,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
     showModalBottomSheet(
       context: context,
+      // useRootNavigator: true makes the sheet attach to the root navigator so
+      // it appears on top of ANY driver screen (CarPhotoIntroScreen, ConfirmArrivalScreen,
+      // ProfileScreen, etc.), not only when DriverHomeScreen is the current route.
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
       // Critical: this sheet must NOT close via outside tap, swipe/drag, or back.
@@ -160,13 +159,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   }
 
   void _onRouteChanged() {
-    if (!mounted) return;
-    if (_pendingShowSheetWhenRouteCurrent) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _attemptShowAssignedSessionSheet(context);
-      });
-    }
+    // Route changes no longer need special handling: the retrieval sheet uses
+    // useRootNavigator: true and therefore appears on top of any driver screen.
   }
 
   void _startWebSocketHealthCheck() {
@@ -281,11 +275,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _pendingSessionsPollTimer?.cancel();
     _pendingSessionsPollTimer = null;
     _pendingSessionsPollingStarted = false;
-    _hasShownSessionDialog = false; // Reset flag
-    _hasNavigatedForStatus = false; // Reset navigation flag
+    _hasShownSessionDialog = false;
+    _hasNavigatedForStatus = false;
     _pendingShowSheetWhenMenuLoaded = false;
-    _didScheduleSheetRetryForRoute = false;
-    _pendingShowSheetWhenRouteCurrent = false;
     _isShowingAssignedSheet = false;
     super.dispose();
   }
@@ -293,10 +285,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   void _attemptShowAssignedSessionSheet(BuildContext blocContext) {
     if (!mounted || _isShowingAssignedSheet) return;
 
-    if (ModalRoute.of(blocContext)?.isCurrent != true) {
-      _pendingShowSheetWhenRouteCurrent = true;
-      return;
-    }
+    // No isCurrent check needed: the sheet uses useRootNavigator: true, so it
+    // appears on top of any driver screen (not just the home screen).
 
     final assignedState =
         blocContext.read<AssignedSessionsBackgroundBloc>().state;
@@ -323,8 +313,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     }
 
     _pendingShowSheetWhenMenuLoaded = false;
-    _pendingShowSheetWhenRouteCurrent = false;
-    _didScheduleSheetRetryForRoute = false;
     _presentAssignedSessionSheet(blocContext);
   }
 
@@ -398,23 +386,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     _closeAssignedSessionSheetIfOpen(blocContext);
                     return;
                   }
-                  // Data available → show sheet only when we have sessions (with data)
+                  // Data available → attempt to show sheet on any driver screen.
+                  // The sheet uses useRootNavigator: true, so it appears on top of
+                  // whatever driver screen is currently active.
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!mounted) return;
-                    if (ModalRoute.of(blocContext)?.isCurrent == true) {
-                      _attemptShowAssignedSessionSheet(blocContext);
-                    } else if (!_didScheduleSheetRetryForRoute) {
-                      _pendingShowSheetWhenRouteCurrent = true;
-                      _didScheduleSheetRetryForRoute = true;
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        if (!mounted) return;
-                        try {
-                          blocContext
-                              .read<AssignedSessionsBackgroundBloc>()
-                              .add(const RefreshAssignedSessions());
-                        } catch (_) {}
-                      });
-                    }
+                    _attemptShowAssignedSessionSheet(blocContext);
                   });
                 },
               ),
