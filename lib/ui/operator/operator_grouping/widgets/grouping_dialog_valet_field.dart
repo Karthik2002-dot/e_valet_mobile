@@ -15,6 +15,7 @@ class GroupingDialogValetField extends StatelessWidget {
     required this.t,
     required this.reloadValets,
     required this.setLocalState,
+    this.assignedDriverIdsFutureGetter,
   });
 
   final Future<List<ValetResponse>>? Function() valetsFutureGetter;
@@ -23,6 +24,7 @@ class GroupingDialogValetField extends StatelessWidget {
   final AppTranslationsNotifier t;
   final VoidCallback reloadValets;
   final void Function(VoidCallback fn) setLocalState;
+  final Future<Set<String>>? Function()? assignedDriverIdsFutureGetter;
 
   @override
   Widget build(BuildContext context) {
@@ -81,89 +83,154 @@ class GroupingDialogValetField extends StatelessWidget {
             }
 
             final allValets = snap.data ?? [];
+            if (assignedDriverIdsFutureGetter == null) {
+              return _buildPickerContent(context, allValets);
+            }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  readOnly: true,
-                  enabled: !isSubmitting,
-                  decoration: InputDecoration(
-                    hintText: t.getByKey(
-                      'selectMembers',
-                      'Select members',
+            return FutureBuilder<Set<String>>(
+              future: assignedDriverIdsFutureGetter!(),
+              builder: (context, assignedSnap) {
+                if (assignedSnap.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
-                    prefixIcon: const Icon(
-                      Icons.people,
-                      color: AppColors.primary,
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.arrow_drop_down,
-                      color: AppColors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onTap: () async {
-                    final picked =
-                        await showModalBottomSheet<List<ValetResponse>>(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: AppColors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(16),
-                        ),
-                      ),
-                      builder: (sheetContext) => GroupingValetPickerSheet(
-                        allValets: allValets,
-                        initialSelection:
-                            List<ValetResponse>.from(selectedValets),
-                        t: t,
-                      ),
-                    );
+                  );
+                }
 
-                    if (!context.mounted) return;
-                    if (picked == null) return;
-                    setLocalState(() {
-                      selectedValets
-                        ..clear()
-                        ..addAll(picked);
-                    });
-                  },
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final v in selectedValets)
-                      Chip(
-                        label: TextComponent(
-                          labelText: v.name,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.black,
-                        ),
-                        deleteIcon: const Icon(
-                          Icons.close,
-                          size: 18,
-                        ),
-                        onDeleted: isSubmitting
+                if (assignedSnap.hasError) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextComponent(
+                        labelText: assignedSnap.error.toString(),
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w600,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: isSubmitting
                             ? null
                             : () {
-                                setLocalState(() {
-                                  selectedValets.removeWhere(
-                                    (x) => x.userId == v.userId,
-                                  );
-                                });
+                                setLocalState(() {});
                               },
+                        child: TextComponent(
+                          labelText: t.getByKey('retry', 'Retry'),
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                  ],
-                ),
-              ],
+                    ],
+                  );
+                }
+
+                final assignedIds = assignedSnap.data ?? <String>{};
+                final availableValets = allValets
+                    .where((v) => !assignedIds.contains(v.userId))
+                    .toList();
+                return _buildPickerContent(context, availableValets);
+              },
             );
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPickerContent(
+    BuildContext context,
+    List<ValetResponse> allValets,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (allValets.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: TextComponent(
+              labelText: t.getByKey(
+                'noAvailableMembers',
+                'No available drivers',
+              ),
+              color: AppColors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        TextField(
+          readOnly: true,
+          enabled: !isSubmitting && allValets.isNotEmpty,
+          decoration: InputDecoration(
+            hintText: t.getByKey(
+              'selectMembers',
+              'Select members',
+            ),
+            prefixIcon: const Icon(
+              Icons.people,
+              color: AppColors.primary,
+            ),
+            suffixIcon: const Icon(
+              Icons.arrow_drop_down,
+              color: AppColors.grey,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onTap: () async {
+            final picked = await showModalBottomSheet<List<ValetResponse>>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: AppColors.white,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+              builder: (sheetContext) => GroupingValetPickerSheet(
+                allValets: allValets,
+                initialSelection: List<ValetResponse>.from(selectedValets),
+                t: t,
+              ),
+            );
+
+            if (!context.mounted) return;
+            if (picked == null) return;
+            setLocalState(() {
+              selectedValets
+                ..clear()
+                ..addAll(picked);
+            });
+          },
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final v in selectedValets)
+              Chip(
+                label: TextComponent(
+                  labelText: v.name,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+                deleteIcon: const Icon(
+                  Icons.close,
+                  size: 18,
+                ),
+                onDeleted: isSubmitting
+                    ? null
+                    : () {
+                        setLocalState(() {
+                          selectedValets.removeWhere(
+                            (x) => x.userId == v.userId,
+                          );
+                        });
+                      },
+              ),
+          ],
         ),
       ],
     );

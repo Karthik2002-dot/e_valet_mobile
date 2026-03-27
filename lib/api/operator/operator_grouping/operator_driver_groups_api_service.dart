@@ -261,4 +261,75 @@ class OperatorDriverGroupsApiService {
       );
     }
   }
+
+  static Future<void> removeDriverGroupMember({
+    required String outletId,
+    required int groupId,
+    required String driverUserId,
+  }) async {
+    final accessToken = await TokenStorage.getAccessToken();
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw ApiException(
+        'Access token not found. Please login again.',
+        code: 'no_token',
+      );
+    }
+
+    final base = BaseDioService(
+      _baseUrl,
+      ApiConfig.authorizedHeaders(accessToken),
+    );
+
+    try {
+      final response = await base.delete(
+        '/operators/driver-groups/$groupId/members/$driverUserId',
+        queryParameters: {
+          'outletId': int.tryParse(outletId) ?? 1,
+        },
+      );
+
+      // Swagger shows 200 on successful delete
+      if (response.statusCode == 200 || response.statusCode == 204) return;
+
+      throw ApiException(
+        'Failed to remove group member. Status: ${response.statusCode}',
+        code: 'remove_group_member_error',
+        statusCode: response.statusCode,
+      );
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        'Error removing group member: $e',
+        code: 'remove_group_member_exception',
+      );
+    }
+  }
+
+  static Future<Set<String>> getAssignedDriverUserIds({
+    required String outletId,
+  }) async {
+    final groupsRes = await getDriverGroups(outletId: outletId);
+    if (groupsRes.groups.isEmpty) return <String>{};
+
+    final membersResponses = await Future.wait(
+      groupsRes.groups.map(
+        (g) => getDriverGroupMembers(
+          outletId: outletId,
+          groupId: g.id,
+        ),
+      ),
+    );
+
+    final ids = <String>{};
+    for (final res in membersResponses) {
+      for (final member in res.members) {
+        if (member.driverUserId.isNotEmpty) {
+          ids.add(member.driverUserId);
+        }
+      }
+    }
+    return ids;
+  }
 }

@@ -5,6 +5,7 @@ class TextConstants {
   static const slots = 'Slots';
   static const parkedCar = 'Parked Car';
   static const valets = 'Valets';
+  static const driversGroup = 'Drivers Group';
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
   static const guidelines = 'Guidelines';

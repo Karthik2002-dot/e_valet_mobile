@@ -24,6 +24,10 @@ class GroupingAddMembersDialog {
     ensureValetsLoaded();
 
     final selectedValets = <ValetResponse>[];
+    final assignedDriverIdsFuture =
+        OperatorDriverGroupsApiService.getAssignedDriverUserIds(
+      outletId: outletId,
+    );
     var isSubmitting = false;
     String? errorText;
 
@@ -123,6 +127,8 @@ class GroupingAddMembersDialog {
                           children: [
                             GroupingDialogValetField(
                               valetsFutureGetter: valetsFutureGetter,
+                              assignedDriverIdsFutureGetter: () =>
+                                  assignedDriverIdsFuture,
                               isSubmitting: isSubmitting,
                               selectedValets: selectedValets,
                               t: t,
