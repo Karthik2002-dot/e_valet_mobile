@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'text_to_speech_service.dart';
 
 class LocalNotificationService {
@@ -73,15 +73,22 @@ class LocalNotificationService {
       final retrievalVibrationPattern =
           Int64List.fromList([0, 900, 300, 900, 300, 900, 300, 900]);
 
+      // Custom sound for retrieval-request alerts (file in android/app/src/main/res/raw/).
+      // NOTE: Android channel sound is immutable after first creation; uninstall
+      // the app (or clear app data) to pick up a sound change.
+      const retrievalSound =
+          RawResourceAndroidNotificationSound('retrieval_alert');
+
       // High priority channel — this is the DEFAULT channel used by FCM for
       // background/terminated notifications (set in AndroidManifest.xml).
-      // We give it the same aggressive pattern so all background notifications vibrate well.
+      // Uses the custom retrieval-alert sound + aggressive vibration pattern.
       final highPriorityChannel = AndroidNotificationChannel(
         'high_priority_channel',
         'High Priority Notifications',
         description: 'This channel is used for high priority notifications',
         importance: Importance.max,
         playSound: true,
+        sound: retrievalSound,
         enableVibration: true,
         vibrationPattern: retrievalVibrationPattern,
       );
@@ -104,6 +111,7 @@ class LocalNotificationService {
         description: 'Notifications for valet retrieval requests',
         importance: Importance.max,
         playSound: true,
+        sound: retrievalSound,
         enableVibration: true,
         vibrationPattern: retrievalVibrationPattern,
       );
@@ -188,8 +196,13 @@ class LocalNotificationService {
       final vibrationPattern =
           Int64List.fromList([0, 2000, 500, 2000, 500, 2000, 500, 2000, 500]);
 
-      // Android notification details
-      // No sound parameter = uses default system notification sound (enabled by default)
+      // Use the custom retrieval-alert sound for retrieval_request notifications;
+      // fall back to the default system sound for all other types.
+      final isRetrieval = payload?['type'] == 'retrieval_request';
+      final notifSound = isRetrieval
+          ? const RawResourceAndroidNotificationSound('retrieval_alert')
+          : null;
+
       final androidDetails = AndroidNotificationDetails(
         effectiveChannelId,
         effectiveChannelName,
@@ -197,9 +210,9 @@ class LocalNotificationService {
         importance: importance,
         priority: priority,
         playSound: true,
+        sound: notifSound,
         enableVibration: true,
         vibrationPattern: vibrationPattern,
-        // No sound parameter = uses default system notification sound
         icon: '@mipmap/ic_launcher',
         styleInformation: BigTextStyleInformation(
           body,
@@ -207,11 +220,12 @@ class LocalNotificationService {
         ),
       );
 
-      // iOS notification details
-      const iosDetails = DarwinNotificationDetails(
+      // iOS notification details — use the custom sound for retrieval requests.
+      final iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
+        sound: isRetrieval ? 'retrieval_alert.mp3' : null,
       );
 
       // Combined notification details

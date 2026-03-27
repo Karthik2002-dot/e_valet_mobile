@@ -1,6 +1,8 @@
 package com.niloufer.valet
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -15,24 +17,22 @@ import java.util.Locale
 import java.util.UUID
 
 /**
- * Custom FCM service that speaks the notification body aloud and starts a
- * repeating vibration alert when the app is in background or terminated.
+ * Custom FCM service that plays the retrieval-alert sound, speaks the
+ * notification body aloud, and starts a repeating vibration alert when the
+ * app is in background or terminated.
  * Extends Flutter's service so the Dart background handler and notification
  * display still work normally.
  */
 class ValetFirebaseMessagingService : FlutterFirebaseMessagingService() {
 
     override fun onMessageReceived(@NonNull remoteMessage: RemoteMessage) {
-        // DIAGNOSTIC: this line only appears in logcat if onMessageReceived is
-        // actually called by Android.  If you never see it while the app is in
-        // the background, the FCM message has a 'notification' block — see the
-        // README note below about data-only messages.
         Log.d(TAG, "onMessageReceived called — type=${remoteMessage.data["type"]} " +
                 "hasNotification=${remoteMessage.notification != null}")
 
-        // Start repeating vibration for retrieval requests so the driver is
-        // alerted even when the app is in background or terminated.
         if (remoteMessage.data["type"] == "retrieval_request") {
+            // Play the custom level-up alert sound
+            playRetrievalSound()
+            // Also start the repeating vibration pattern
             startRepeatingVibration()
         }
 
@@ -48,6 +48,40 @@ class ValetFirebaseMessagingService : FlutterFirebaseMessagingService() {
             speakWithTts(textToSpeak)
         }
         super.onMessageReceived(remoteMessage)
+    }
+
+    /**
+     * Play retrieval_alert.mp3 from res/raw once using MediaPlayer at full volume.
+     * We fire-and-forget (no loop) — the repeating vibration + the foreground
+     * AudioPlayer loop (started in Dart when the sheet opens) cover the rest.
+     */
+    private fun playRetrievalSound() {
+        try {
+            val resId = resources.getIdentifier("retrieval_alert", "raw", packageName)
+            if (resId == 0) {
+                Log.w(TAG, "retrieval_alert raw resource not found")
+                return
+            }
+            val player = MediaPlayer()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                player.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            val afd = resources.openRawResourceFd(resId)
+            player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+            player.setVolume(1.0f, 1.0f)
+            player.prepare()
+            player.setOnCompletionListener { it.release() }
+            player.start()
+            Log.d(TAG, "Retrieval alert sound started")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play retrieval alert sound: ${e.message}")
+        }
     }
 
     /**
