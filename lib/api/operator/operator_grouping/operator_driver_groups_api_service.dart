@@ -13,7 +13,7 @@ class OperatorDriverGroupsApiService {
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static void _debugLog(String message) {
+  static void _errorLog(String message) {
     if (!kDebugMode) return;
     debugPrint('[OperatorDriverGroupsApiService] $message');
   }
@@ -146,9 +146,6 @@ class OperatorDriverGroupsApiService {
     );
 
     try {
-      _debugLog(
-        'POST /operators/driver-groups outletId=$outletId body={name:$name}',
-      );
       final response = await base.post(
         '/operators/driver-groups',
         queryParameters: {
@@ -157,10 +154,6 @@ class OperatorDriverGroupsApiService {
         data: {
           'name': name,
         },
-      );
-
-      _debugLog(
-        'POST /operators/driver-groups status=${response.statusCode} data=${response.data}',
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -186,9 +179,6 @@ class OperatorDriverGroupsApiService {
         // refetch groups and find the created group by name (latest id wins).
         if (created.id == 0) {
           try {
-            _debugLog(
-              'Create returned id=0; refetching groups to resolve id for name="$name"',
-            );
             final groups = await getDriverGroups(outletId: outletId);
             final match = groups.groups
                 .where((g) => g.name.trim() == name.trim())
@@ -202,10 +192,9 @@ class OperatorDriverGroupsApiService {
                 createdAt: '',
                 updatedAt: '',
               );
-              _debugLog('Resolved created group id=$match from GET list.');
             }
           } catch (e) {
-            _debugLog('Failed to resolve created group id from GET: $e');
+            _errorLog('Failed to resolve created group id from GET: $e');
           }
         }
 
@@ -247,19 +236,12 @@ class OperatorDriverGroupsApiService {
     );
 
     try {
-      _debugLog(
-        'POST /operators/driver-groups/$groupId/members outletId=$outletId body=${request.toJson()}',
-      );
       final response = await base.post(
         '/operators/driver-groups/$groupId/members',
         queryParameters: {
           'outletId': int.tryParse(outletId) ?? 1,
         },
         data: request.toJson(),
-      );
-
-      _debugLog(
-        'POST /operators/driver-groups/$groupId/members status=${response.statusCode} data=${response.data}',
       );
 
       // Swagger says 201 success
