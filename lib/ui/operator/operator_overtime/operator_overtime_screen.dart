@@ -56,10 +56,16 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
       ..add(OvertimeLoadValets(outletId: _outletId));
   }
 
+  /// Returns to the operator dashboard on tab 0 (main KPI view).
+  ///
+  /// When overtime was opened on top of other pushed screens (e.g. Drivers Group),
+  /// a single [Navigator.pop] would only reveal the previous route. We pop until the
+  /// root route (dashboard after login) so behavior matches opening overtime from the
+  /// dashboard drawer (same as switching back to the main tab shell as with Parked).
   void _goToDashboard() {
     if (widget.onNavigateToTab != null) {
       widget.onNavigateToTab?.call(0);
-      Navigator.of(context).pop();
+      Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
 
@@ -123,10 +129,10 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
     }
 
     if (index >= 0 && index <= 3) {
-      // Switch operator dashboard tab
+      // Switch operator dashboard tab (pop entire overlay stack, same as back to dashboard)
       if (widget.onNavigateToTab != null) {
-        Navigator.of(context).pop();
         widget.onNavigateToTab?.call(index);
+        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const OperatorDashboardScreen()),
@@ -182,7 +188,13 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
               SnackBars.showErrorSnackBar(context, state.message);
             }
           },
-          child: Scaffold(
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, dynamic result) {
+              if (didPop) return;
+              _goToDashboard();
+            },
+            child: Scaffold(
             key: _scaffoldKey,
             backgroundColor: AppColors.white,
             endDrawer: OperatorDrawer(
@@ -464,6 +476,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }

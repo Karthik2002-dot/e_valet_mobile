@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
 import 'package:provider/provider.dart';
 
 class OperatorGroupMembersScreen extends StatefulWidget {
@@ -58,6 +59,17 @@ class _OperatorGroupMembersScreenState
     if (index == 9) {
       // Grouping is a separate area; return to Grouping list by popping.
       Navigator.of(context).pop();
+      return;
+    }
+
+    if (index == 4) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorOverTimeScreen(
+            onNavigateToTab: widget.onNavigateToTab,
+          ),
+        ),
+      );
       return;
     }
 

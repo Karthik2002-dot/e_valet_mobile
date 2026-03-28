@@ -15,6 +15,7 @@ import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/widgets/grouping_add_group_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/widgets/grouping_add_members_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/widgets/grouping_group_list_card.dart';
 import 'package:provider/provider.dart';
@@ -203,10 +204,13 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
     }
   }
 
+  /// Return to operator dashboard tab 0. When this screen was opened on top of
+  /// other routes (e.g. Overtime → Drivers Group), a single [Navigator.pop] would
+  /// reveal Overtime again; pop until the post-login root matches overtime back behavior.
   void _goToDashboard() {
     if (widget.onNavigateToTab != null) {
       widget.onNavigateToTab?.call(0);
-      Navigator.of(context).pop();
+      Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
     Navigator.of(context).pop();
@@ -218,8 +222,13 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
     }
 
     if (index == 4) {
-      Navigator.of(context).pop();
-      widget.onNavigateToTab?.call(0);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorOverTimeScreen(
+            onNavigateToTab: widget.onNavigateToTab,
+          ),
+        ),
+      );
       return;
     }
 
@@ -254,8 +263,8 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
 
     if (index >= 0 && index <= 3) {
       if (widget.onNavigateToTab != null) {
-        Navigator.of(context).pop();
         widget.onNavigateToTab?.call(index);
+        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         Navigator.of(context).pop();
       }
@@ -275,7 +284,13 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
     final headerDescriptionFontSize =
         isAndroidPhone ? (width * 0.038).clamp(14.0, 16.0) : (width * 0.02);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        _goToDashboard();
+      },
+      child: Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColors.white,
       endDrawer: OperatorDrawer(
@@ -473,6 +488,7 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
