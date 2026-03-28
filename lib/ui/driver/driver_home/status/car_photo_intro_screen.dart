@@ -20,6 +20,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.da
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 
 /// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
 /// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
@@ -62,6 +63,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   @override
   void initState() {
     super.initState();
+    ParkFlowSignals.beginCarPhotoParkFlow();
     _cameraBloc = CarCameraBloc();
     _selectedTab = 1;
     _scanPhase = 0;
@@ -246,6 +248,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
 
   @override
   void dispose() {
+    ParkFlowSignals.endCarPhotoParkFlow();
     _lottieTimer?.cancel();
     _pendingSessionPollTimer?.cancel();
     _cameraBloc.close();

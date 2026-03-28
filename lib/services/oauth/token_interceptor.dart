@@ -52,6 +52,10 @@ class TokenStorage {
   static const String _currentLocationKey = 'current_location';
   static const String _currentLatitudeKey = 'current_latitude';
   static const String _currentLongitudeKey = 'current_longitude';
+  /// Retrieval session id: user tapped Collect Keys during CHECKED_IN park flow;
+  /// auto Confirm Arrival navigation is skipped until parking phase ends.
+  static const String _collectKeysInTransitSessionIdKey =
+      'collect_keys_in_transit_session_id';
 
   /// Must be called once at app start (after Hive.initFlutter()).
   static Future<void> init() async {
@@ -272,6 +276,16 @@ class TokenStorage {
     }
   }
 
+  /// Sync read for park-flow checks (e.g. camera vs retrieval session match).
+  static String? getSessionIdSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      return Hive.box(_boxName).get(_sessionIdKey) as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<void> clearSessionId() async {
     try {
       await _box.delete(_sessionIdKey);
@@ -459,6 +473,54 @@ class TokenStorage {
     } catch (e) {
       print('[TokenStorage] ❌ Error clearing current location: $e');
     }
+  }
+
+  /// Called when driver taps Collect Keys on the retrieval sheet while still
+  /// in the park flow (CHECKED_IN). Does not call the accept API — local only.
+  /// Suppresses re-showing the retrieval sheet for this session id until the
+  /// assignment clears (see [getCollectKeysInTransitAckSessionIdSync]).
+  static Future<void> saveCollectKeysInTransitAck(String sessionId) async {
+    try {
+      await _box.put(_collectKeysInTransitSessionIdKey, sessionId);
+    } catch (e) {
+      print('[TokenStorage] Error saving collect-keys-in-transit ack: $e');
+      rethrow;
+    }
+  }
+
+  static Future<String?> getCollectKeysInTransitAckSessionId() async {
+    try {
+      return _box.get(_collectKeysInTransitSessionIdKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error reading collect-keys-in-transit ack: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearCollectKeysInTransitAck() async {
+    try {
+      await _box.delete(_collectKeysInTransitSessionIdKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing collect-keys-in-transit ack: $e');
+    }
+  }
+
+  /// Sync read for UI (e.g. suppress retrieval sheet) when the box is open.
+  static String? getCollectKeysInTransitAckSessionIdSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      return Hive.box(_boxName).get(_collectKeysInTransitSessionIdKey)
+          as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static void clearCollectKeysInTransitAckSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      Hive.box(_boxName).delete(_collectKeysInTransitSessionIdKey);
+    } catch (_) {}
   }
 
   // Bulk helpers

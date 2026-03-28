@@ -243,6 +243,20 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     return _sessionDisplayKey(sessions.first);
   }
 
+  /// Session id of the first assigned retrieval (for local-only Collect Keys gate).
+  static String? sessionIdOfFirstSession(List<dynamic> sessions) {
+    if (sessions.isEmpty) return null;
+    final s = sessions.first;
+    if (s is AssignedSession) {
+      return s.id.isNotEmpty ? s.id : null;
+    }
+    if (s is Map<String, dynamic>) {
+      final id = (s['sessionId'] ?? s['id'])?.toString();
+      return (id != null && id.isNotEmpty) ? id : null;
+    }
+    return null;
+  }
+
   void _onSetSessionsFromPending(
     SetSessionsFromPending event,
     Emitter<AssignedSessionsBackgroundState> emit,

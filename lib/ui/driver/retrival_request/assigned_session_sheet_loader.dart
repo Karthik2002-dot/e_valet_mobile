@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_state.dart';
@@ -12,6 +14,7 @@ import 'package:niloufer_valet_mobile/models/driver/session/pass_available_drive
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 
@@ -205,6 +208,22 @@ class _AssignedSessionSheetLoaderState
                           onAccept: canAccept
                               ? () {
                                   if (_isAcceptLoading) return;
+                                  final sid = effectiveSessionId;
+                                  final inTransit =
+                                      _isInTransitParkFlow(context, sid);
+                                  if (inTransit) {
+                                    VibrationController.stop();
+                                    TokenStorage.saveCollectKeysInTransitAck(sid)
+                                        .then((_) {
+                                      if (!context.mounted) return;
+                                      SnackBars.showSuccessSnackBar(
+                                        context,
+                                        'Collect keys saved. Continue parking.',
+                                      );
+                                      Navigator.of(context).pop();
+                                    });
+                                    return;
+                                  }
                                   VibrationController.stop();
                                   setState(() {
                                     _isAcceptLoading = true;
@@ -263,6 +282,33 @@ class _AssignedSessionSheetLoaderState
         );
       },
     );
+  }
+
+  /// Park flow (tag / camera): do not run accept API or Confirm Arrival — local Hive only.
+  bool _isInTransitParkFlow(BuildContext context, String retrievalSessionId) {
+    try {
+      // User is on car photo / camera stack — retrieval must not stack Confirm Arrival
+      // on top (popping would return here incorrectly).
+      if (ParkFlowSignals.isCarPhotoParkFlowActive) {
+        return true;
+      }
+      final hiveParking = TokenStorage.getSessionIdSync();
+      if (hiveParking != null &&
+          hiveParking.isNotEmpty &&
+          hiveParking == retrievalSessionId) {
+        return true;
+      }
+      final menu = context.read<DriverMenuBloc>().state;
+      if (menu is! DriverHomeLoaded || menu.pendingSessions == null) {
+        return false;
+      }
+      final pending = menu.pendingSessions!;
+      if (!pending.hasCheckedInSession) return false;
+      final checked = pending.checkedInSession;
+      return checked != null && checked.sessionId == retrievalSessionId;
+    } catch (_) {
+      return false;
+    }
   }
 
   List<PassAvailableDriver> _driversFromState(PassAvailableDriversState state) {
