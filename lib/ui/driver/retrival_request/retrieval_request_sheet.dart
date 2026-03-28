@@ -120,8 +120,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: TextComponent(
-                              labelText: t.get(
-                                  TextConstants.noActiveRetrievalRequests),
+                              labelText: t
+                                  .get(TextConstants.noActiveRetrievalRequests),
                               textAlign: TextAlign.center,
                               fontSize: screenWidth * 0.04,
                               color: AppColors.mutedText,

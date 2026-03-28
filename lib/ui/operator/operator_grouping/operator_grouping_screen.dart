@@ -291,204 +291,205 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
         _goToDashboard();
       },
       child: Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: AppColors.white,
-      endDrawer: OperatorDrawer(
-        selectedIndex: 9,
-        onItemSelected: _onMenuItemSelected,
-      ),
-      appBar: CustomAppBar(
-        showLanguageIcon: true,
-        actions: [
-          IconButton(
-            onPressed: _loadGroups,
-            icon: const Icon(Icons.refresh, color: AppColors.white),
-          ),
-          IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.white),
-            onPressed: () {
-              final currentScope = FocusScope.of(context);
-              if (!currentScope.hasPrimaryFocus &&
-                  currentScope.focusedChild != null) {
-                currentScope.unfocus();
-              }
-              _scaffoldKey.currentState?.openEndDrawer();
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(width * 0.02),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    color: AppColors.black,
-                    onPressed: _goToDashboard,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextComponent(
-                        labelText: t.getByKey('driversGroup', 'Drivers Group'),
-                        color: AppColors.black,
-                        fontSize: headerTitleFontSize,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      const SizedBox(height: 4),
-                      TextComponent(
-                        labelText: t.getByKey(
-                          'groupingDescription',
-                          'Manage Drivers Group',
+        key: _scaffoldKey,
+        backgroundColor: AppColors.white,
+        endDrawer: OperatorDrawer(
+          selectedIndex: 9,
+          onItemSelected: _onMenuItemSelected,
+        ),
+        appBar: CustomAppBar(
+          showLanguageIcon: true,
+          actions: [
+            IconButton(
+              onPressed: _loadGroups,
+              icon: const Icon(Icons.refresh, color: AppColors.white),
+            ),
+            IconButton(
+              icon: const Icon(Icons.menu, color: AppColors.white),
+              onPressed: () {
+                final currentScope = FocusScope.of(context);
+                if (!currentScope.hasPrimaryFocus &&
+                    currentScope.focusedChild != null) {
+                  currentScope.unfocus();
+                }
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(width * 0.02),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      color: AppColors.black,
+                      onPressed: _goToDashboard,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextComponent(
+                          labelText:
+                              t.getByKey('driversGroup', 'Drivers Group'),
+                          color: AppColors.black,
+                          fontSize: headerTitleFontSize,
+                          fontWeight: FontWeight.bold,
                         ),
-                        color: AppColors.grey,
-                        fontSize: headerDescriptionFontSize,
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: _showAddGroupDialog,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
-                      ),
-                    ),
-                    icon: Icon(
-                      Icons.add_circle_outline,
-                      size: (headerTitleFontSize * 1.2).clamp(22.0, 28.0),
-                    ),
-                    label: TextComponent(
-                      labelText: t.getByKey('addGroup', 'Add Group'),
-                      color: AppColors.primary,
-                      fontSize: headerTitleFontSize,
-                      fontWeight: FontWeight.bold,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              FutureBuilder<List<DriverGroup>>(
-                future: _groupsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            TextComponent(
-                              labelText: t.getByKey(
-                                'groupingLoadFailed',
-                                'Failed to load groups',
-                              ),
-                              color: AppColors.error,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            TextComponent(
-                              labelText: snapshot.error.toString(),
-                              color: AppColors.grey,
-                              fontSize: 12,
-                              textAlign: TextAlign.center,
-                              maxLines: 4,
-                            ),
-                            const SizedBox(height: 16),
-                            TextButton(
-                              onPressed: _loadGroups,
-                              child: TextComponent(
-                                labelText: t.getByKey('retry', 'Retry'),
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  final groups = snapshot.data ?? [];
-                  if (groups.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: TextComponent(
+                        const SizedBox(height: 4),
+                        TextComponent(
                           labelText: t.getByKey(
-                            'groupingNoGroups',
-                            'No groups found',
+                            'groupingDescription',
+                            'Manage Drivers Group',
                           ),
                           color: AppColors.grey,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          textAlign: TextAlign.center,
+                          fontSize: headerDescriptionFontSize,
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: _showAddGroupDialog,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
                         ),
                       ),
-                    );
-                  }
+                      icon: Icon(
+                        Icons.add_circle_outline,
+                        size: (headerTitleFontSize * 1.2).clamp(22.0, 28.0),
+                      ),
+                      label: TextComponent(
+                        labelText: t.getByKey('addGroup', 'Add Group'),
+                        color: AppColors.primary,
+                        fontSize: headerTitleFontSize,
+                        fontWeight: FontWeight.bold,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                FutureBuilder<List<DriverGroup>>(
+                  future: _groupsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
 
-                  return Column(
-                    children: [
-                      for (final g in groups)
-                        GroupingGroupListCard(
-                          group: g,
-                          t: t,
-                          membersFuture: _membersFuturesByGroupId.putIfAbsent(
-                            g.id,
-                            () => OperatorDriverGroupsApiService
-                                .getDriverGroupMembers(
-                              outletId: _outletId,
-                              groupId: g.id,
-                            ).then((res) => res.members),
-                          ),
-                          onAddMembers: () => _showAddMembersDialog(
-                            groupId: g.id,
-                            groupName: g.name,
-                          ),
-                          onRetryMembers: () {
-                            setState(() {
-                              _membersFuturesByGroupId[g.id] =
-                                  OperatorDriverGroupsApiService
-                                      .getDriverGroupMembers(
-                                outletId: _outletId,
-                                groupId: g.id,
-                              ).then((res) => res.members);
-                            });
-                          },
-                          onRemoveMember: (member) => _removeMemberFromGroup(
-                            groupId: g.id,
-                            member: member,
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              TextComponent(
+                                labelText: t.getByKey(
+                                  'groupingLoadFailed',
+                                  'Failed to load groups',
+                                ),
+                                color: AppColors.error,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              TextComponent(
+                                labelText: snapshot.error.toString(),
+                                color: AppColors.grey,
+                                fontSize: 12,
+                                textAlign: TextAlign.center,
+                                maxLines: 4,
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: _loadGroups,
+                                child: TextComponent(
+                                  labelText: t.getByKey('retry', 'Retry'),
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                      );
+                    }
+
+                    final groups = snapshot.data ?? [];
+                    if (groups.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: TextComponent(
+                            labelText: t.getByKey(
+                              'groupingNoGroups',
+                              'No groups found',
+                            ),
+                            color: AppColors.grey,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: [
+                        for (final g in groups)
+                          GroupingGroupListCard(
+                            group: g,
+                            t: t,
+                            membersFuture: _membersFuturesByGroupId.putIfAbsent(
+                              g.id,
+                              () => OperatorDriverGroupsApiService
+                                  .getDriverGroupMembers(
+                                outletId: _outletId,
+                                groupId: g.id,
+                              ).then((res) => res.members),
+                            ),
+                            onAddMembers: () => _showAddMembersDialog(
+                              groupId: g.id,
+                              groupName: g.name,
+                            ),
+                            onRetryMembers: () {
+                              setState(() {
+                                _membersFuturesByGroupId[g.id] =
+                                    OperatorDriverGroupsApiService
+                                        .getDriverGroupMembers(
+                                  outletId: _outletId,
+                                  groupId: g.id,
+                                ).then((res) => res.members);
+                              });
+                            },
+                            onRemoveMember: (member) => _removeMemberFromGroup(
+                              groupId: g.id,
+                              member: member,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

@@ -84,10 +84,12 @@ class _AssignedSessionSheetLoaderState
             }
 
             if (sessionId != null) {
-              TokenStorage.saveSessionIdFromGetApi(sessionId).catchError((_) {});
+              TokenStorage.saveSessionIdFromGetApi(sessionId)
+                  .catchError((_) {});
             }
             if (sessionJson != null) {
-              TokenStorage.saveAssignedSessionData(sessionJson).catchError((_) {});
+              TokenStorage.saveAssignedSessionData(sessionJson)
+                  .catchError((_) {});
               String? parkingLocation;
               if (typedSession != null &&
                   typedSession.parkingLocation.isNotEmpty) {
@@ -98,7 +100,8 @@ class _AssignedSessionSheetLoaderState
                   parkingLocation = rawLocation.toString();
                 }
               }
-              if (parkingLocation != null && parkingLocation.trim().isNotEmpty) {
+              if (parkingLocation != null &&
+                  parkingLocation.trim().isNotEmpty) {
                 TokenStorage.saveParkingLocation(parkingLocation)
                     .catchError((_) {});
               }
@@ -176,8 +179,7 @@ class _AssignedSessionSheetLoaderState
                             // Close the bottom sheet — session has been passed
                             Navigator.of(context).pop();
                           } else if (state is PassToDriverError) {
-                            SnackBars.showErrorSnackBar(
-                                context, state.message);
+                            SnackBars.showErrorSnackBar(context, state.message);
                           }
                         },
                       ),
@@ -209,9 +211,8 @@ class _AssignedSessionSheetLoaderState
                                     _acceptTriggeredAt = DateTime.now();
                                   });
                                   if (blocContext.mounted) {
-                                    blocContext
-                                        .read<RetrivalRequestBloc>()
-                                        .add(AcceptRetrivalRequest(
+                                    blocContext.read<RetrivalRequestBloc>().add(
+                                        AcceptRetrivalRequest(
                                             effectiveSessionId));
                                   } else if (mounted) {
                                     setState(() => _isAcceptLoading = false);
@@ -264,8 +265,7 @@ class _AssignedSessionSheetLoaderState
     );
   }
 
-  List<PassAvailableDriver> _driversFromState(
-      PassAvailableDriversState state) {
+  List<PassAvailableDriver> _driversFromState(PassAvailableDriversState state) {
     if (state is PassAvailableDriversLoaded) return state.drivers;
     if (state is PassingSessionToDriver) return state.drivers;
     if (state is PassToDriverError) return state.drivers;
