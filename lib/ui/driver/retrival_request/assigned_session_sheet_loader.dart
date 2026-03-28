@@ -161,8 +161,18 @@ class _AssignedSessionSheetLoaderState
                             if (mounted) {
                               setState(() => _isAcceptLoading = false);
                             }
-                            Navigator.of(context).pop();
-                            _navigateToConfirmArrival(context);
+                            final sid = effectiveSessionId;
+                            final skipRetrievalNext = sid != null &&
+                                _isInTransitParkFlow(context, sid);
+                            if (skipRetrievalNext) {
+                              TokenStorage.saveCollectKeysInTransitAckSync(sid);
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            } else {
+                              Navigator.of(context).pop();
+                              _navigateToConfirmArrival(context);
+                            }
                           } else if (state is RetrivalRequestError) {
                             SnackBars.showErrorSnackBar(context, state.message);
                             if (mounted) {
@@ -208,22 +218,6 @@ class _AssignedSessionSheetLoaderState
                           onAccept: canAccept
                               ? () {
                                   if (_isAcceptLoading) return;
-                                  final sid = effectiveSessionId;
-                                  final inTransit =
-                                      _isInTransitParkFlow(context, sid);
-                                  if (inTransit) {
-                                    VibrationController.stop();
-                                    TokenStorage.saveCollectKeysInTransitAck(sid)
-                                        .then((_) {
-                                      if (!context.mounted) return;
-                                      SnackBars.showSuccessSnackBar(
-                                        context,
-                                        'Collect keys saved. Continue parking.',
-                                      );
-                                      Navigator.of(context).pop();
-                                    });
-                                    return;
-                                  }
                                   VibrationController.stop();
                                   setState(() {
                                     _isAcceptLoading = true;
@@ -284,7 +278,8 @@ class _AssignedSessionSheetLoaderState
     );
   }
 
-  /// Park flow (tag / camera): do not run accept API or Confirm Arrival — local Hive only.
+  /// Park / camera flow: after accept API succeeds, skip Confirm Arrival and
+  /// return to the previous screen only (Hive flags that for [driver_home] too).
   bool _isInTransitParkFlow(BuildContext context, String retrievalSessionId) {
     try {
       // User is on car photo / camera stack — retrieval must not stack Confirm Arrival

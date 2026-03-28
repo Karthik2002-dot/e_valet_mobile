@@ -25,6 +25,8 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_d
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
 import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 
 class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
@@ -287,6 +289,52 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     super.dispose();
   }
 
+  /// First ARRIVED row that still needs Confirm Arrival (not in in-transit set).
+  PendingSession? _firstArrivedNeedingConfirm(PendingSessionsResponse pending) {
+    for (final s in pending.sessions) {
+      if (s.isArrived &&
+          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  /// First ACCEPTED row that still needs Confirm Arrival (not in in-transit set).
+  PendingSession? _firstAcceptedNeedingConfirm(
+      PendingSessionsResponse pending) {
+    for (final s in pending.sessions) {
+      if (s.isAccepted &&
+          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  /// Pending has ARRIVED or ACCEPTED for this **same** session id and Confirm
+  /// Arrival is still required (not in in-transit Collect Keys set).
+  bool _pendingNeedsConfirmForAssignedRetrieval(
+    PendingSessionsResponse? pending,
+    String assignedRetrievalSessionId,
+  ) {
+    if (pending == null) return false;
+    final aid = assignedRetrievalSessionId.trim();
+    if (aid.isEmpty) return false;
+    for (final s in pending.sessions) {
+      if (s.sessionId.trim() != aid) continue;
+      if (s.isArrived &&
+          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+        return true;
+      }
+      if (s.isAccepted &&
+          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _attemptShowAssignedSessionSheet(BuildContext blocContext) {
     if (!mounted || _isShowingAssignedSheet) return;
 
@@ -300,14 +348,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return;
     }
 
-    final suppressedId =
-        TokenStorage.getCollectKeysInTransitAckSessionIdSync();
-    if (suppressedId != null && suppressedId.isNotEmpty) {
-      final firstId = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession(
-          assignedState.sessions);
-      if (firstId == suppressedId) {
-        return;
-      }
+    final firstId = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession(
+        assignedState.sessions);
+    if (firstId != null &&
+        firstId.isNotEmpty &&
+        TokenStorage.collectKeysInTransitAckContainsSync(firstId)) {
+      return;
     }
 
     final driverMenuState = blocContext.read<DriverMenuBloc>().state;
@@ -316,15 +362,25 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return;
     }
 
-    // Block sheet when we handle these via direct navigation (Confirm Arrival or
-    // vehicle details). Do not block on CHECKED_IN — retrieval may still be
-    // assigned during the park flow; [AssignedSessionSheetLoader] handles that.
     final pendingSessions = driverMenuState.pendingSessions;
-    final hasBlockingStatus = pendingSessions != null &&
-        (pendingSessions.hasArrivedSession ||
-            pendingSessions.hasAcceptedSession ||
-            pendingSessions.hasReparkingSession);
-    if (hasBlockingStatus) {
+
+    // Reparking: only block retrieval for the **same** session as this assignment.
+    // Otherwise a different REPARKING row was hiding the sheet on camera/preview.
+    if (pendingSessions != null && pendingSessions.hasReparkingSession) {
+      final rep = pendingSessions.reparkingSession;
+      if (rep != null &&
+          firstId != null &&
+          rep.sessionId.trim() == firstId.trim()) {
+        return;
+      }
+    }
+
+    // Block retrieval sheet only when **this** assigned retrieval session still
+    // needs Confirm Arrival. Another session’s ACCEPTED/ARRIVED must not hide
+    // a new assignment while you’re on another screen.
+    if (firstId != null &&
+        firstId.isNotEmpty &&
+        _pendingNeedsConfirmForAssignedRetrieval(pendingSessions, firstId)) {
       return;
     }
 
@@ -496,130 +552,85 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     // Check if there's a CHECKED_IN session and show dialog
                     // Only show once per screen load
 
-                    // Priority order: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN
-                    // ARRIVED/ACCEPTED: go directly to Confirm Arrival so app reopen after accept triggers correctly (session/pending API).
+                    // Priority: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN dialog.
+                    // Confirm Arrival only if some row still needs it (not in-transit
+                    // Collect Keys set). Nested so REPARKING/CHECKED_IN still run when
+                    // pending is non-null but target is null.
                     if (!_hasNavigatedForStatus &&
-                        state.pendingSessions != null &&
-                        state.pendingSessions!.hasArrivedSession) {
-                      _closeAssignedSessionSheetIfOpen(context);
-                      WidgetsBinding.instance.addPostFrameCallback((_) async {
-                        if (!mounted) return;
-                        final navigator = Navigator.of(context);
-                        final routeIsCurrent =
-                            ModalRoute.of(context)?.isCurrent == true;
-                        final arrivedSession =
-                            state.pendingSessions!.arrivedSession;
-                        if (arrivedSession == null || !routeIsCurrent) {
-                          return;
-                        }
-                        final skipId =
-                            await TokenStorage.getCollectKeysInTransitAckSessionId();
-                        if (skipId != null &&
-                            skipId == arrivedSession.sessionId) {
-                          return;
-                        }
-                        if (!mounted) return;
-                        _hasNavigatedForStatus = true;
-                        final assignedSession = SessionConverter.pendingToAssigned(
-                            arrivedSession);
-                        navigator.push(
-                          MaterialPageRoute(
-                            builder: (_) => ConfirmArrivalScreen(
-                              session: assignedSession,
-                              preventBackNavigation: true,
-                              showHandoverOnLoad: true,
-                            ),
-                          ),
-                        );
-                      });
-                    } else if (!_hasNavigatedForStatus &&
-                        state.pendingSessions != null &&
-                        state.pendingSessions!.hasAcceptedSession) {
-                      _closeAssignedSessionSheetIfOpen(context);
-                      WidgetsBinding.instance.addPostFrameCallback((_) async {
-                        if (!mounted) return;
-                        final navigator = Navigator.of(context);
-                        final routeIsCurrent =
-                            ModalRoute.of(context)?.isCurrent == true;
-                        final acceptedSession =
-                            state.pendingSessions!.acceptedSession;
-                        if (acceptedSession == null || !routeIsCurrent) {
-                          return;
-                        }
-                        final skipId =
-                            await TokenStorage.getCollectKeysInTransitAckSessionId();
-                        if (skipId != null &&
-                            skipId == acceptedSession.sessionId) {
-                          return;
-                        }
-                        if (!mounted) return;
-                        _hasNavigatedForStatus = true;
-                        final assignedSession = SessionConverter.pendingToAssigned(
-                            acceptedSession);
-                        navigator.push(
-                          MaterialPageRoute(
-                            builder: (_) => ConfirmArrivalScreen(
-                              session: assignedSession,
-                              preventBackNavigation: true,
-                            ),
-                          ),
-                        );
-                      });
-                    }
-                    // Check for REPARKING status — open latest vehicle details screen (Scan / Type Parking Number)
-                    else if (!_hasNavigatedForStatus &&
-                        state.pendingSessions != null &&
-                        state.pendingSessions!.hasReparkingSession) {
-                      _hasNavigatedForStatus = true;
-                      _closeAssignedSessionSheetIfOpen(context);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted &&
-                            ModalRoute.of(context)?.isCurrent == true) {
-                          final reparkingSession =
-                              state.pendingSessions!.reparkingSession;
-                          if (reparkingSession != null) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => CarPhotoIntroScreen(
-                                  cameViaTagNumber: false,
-                                  sessionId: reparkingSession.sessionId,
-                                  isReparking: true,
-                                ),
+                        state.pendingSessions != null) {
+                      final pending = state.pendingSessions!;
+                      final arrivedNav = _firstArrivedNeedingConfirm(pending);
+                      final target = arrivedNav ??
+                          _firstAcceptedNeedingConfirm(pending);
+                      if (target != null) {
+                        _closeAssignedSessionSheetIfOpen(context);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          final navigator = Navigator.of(context);
+                          final routeIsCurrent =
+                              ModalRoute.of(context)?.isCurrent == true;
+                          if (!routeIsCurrent) return;
+                          if (!mounted) return;
+                          _hasNavigatedForStatus = true;
+                          final assignedSession =
+                              SessionConverter.pendingToAssigned(target);
+                          navigator.push(
+                            MaterialPageRoute(
+                              builder: (_) => ConfirmArrivalScreen(
+                                session: assignedSession,
+                                preventBackNavigation: true,
+                                showHandoverOnLoad: target.isArrived,
                               ),
-                            );
-                          }
-                        }
-                      });
-                    }
-                    // Check for CHECKED_IN session and show dialog — on Continue open latest vehicle details screen (Scan / Type Parking Number)
-                    else if (!_hasShownSessionDialog &&
-                        state.pendingSessions != null &&
-                        state.pendingSessions!.hasCheckedInSession) {
-                      _hasShownSessionDialog = true;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted &&
-                            ModalRoute.of(context)?.isCurrent == true) {
-                          final checkedInSession =
-                              state.pendingSessions!.checkedInSession;
-                          if (checkedInSession != null) {
-                            SessionIncompleteDialog.show(
-                              context,
-                              cardNumber:
-                                  checkedInSession.cardNumber.toString(),
-                              onContinue: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => CarPhotoIntroScreen(
-                                      cameViaTagNumber: false,
-                                      sessionId: checkedInSession.sessionId,
-                                    ),
+                            ),
+                          );
+                        });
+                      } else if (pending.hasReparkingSession) {
+                        _hasNavigatedForStatus = true;
+                        _closeAssignedSessionSheetIfOpen(context);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted &&
+                              ModalRoute.of(context)?.isCurrent == true) {
+                            final reparkingSession = pending.reparkingSession;
+                            if (reparkingSession != null) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => CarPhotoIntroScreen(
+                                    cameViaTagNumber: false,
+                                    sessionId: reparkingSession.sessionId,
+                                    isReparking: true,
                                   ),
-                                );
-                              },
-                            );
+                                ),
+                              );
+                            }
                           }
-                        }
-                      });
+                        });
+                      } else if (!_hasShownSessionDialog &&
+                          pending.hasCheckedInSession) {
+                        _hasShownSessionDialog = true;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted &&
+                              ModalRoute.of(context)?.isCurrent == true) {
+                            final checkedInSession = pending.checkedInSession;
+                            if (checkedInSession != null) {
+                              SessionIncompleteDialog.show(
+                                context,
+                                cardNumber:
+                                    checkedInSession.cardNumber.toString(),
+                                onContinue: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => CarPhotoIntroScreen(
+                                        cameViaTagNumber: false,
+                                        sessionId: checkedInSession.sessionId,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                          }
+                        });
+                      }
                     }
                   }
                 },

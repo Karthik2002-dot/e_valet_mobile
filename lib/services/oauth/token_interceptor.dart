@@ -52,10 +52,13 @@ class TokenStorage {
   static const String _currentLocationKey = 'current_location';
   static const String _currentLatitudeKey = 'current_latitude';
   static const String _currentLongitudeKey = 'current_longitude';
-  /// Retrieval session id: user tapped Collect Keys during CHECKED_IN park flow;
-  /// auto Confirm Arrival navigation is skipped until parking phase ends.
+  /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
       'collect_keys_in_transit_session_id';
+
+  /// Session ids for which user tapped Collect Keys in-transit (skip Confirm Arrival).
+  static const String _collectKeysInTransitSessionIdsKey =
+      'collect_keys_in_transit_session_ids';
 
   /// Must be called once at app start (after Hive.initFlutter()).
   static Future<void> init() async {
@@ -475,51 +478,97 @@ class TokenStorage {
     }
   }
 
-  /// Called when driver taps Collect Keys on the retrieval sheet while still
-  /// in the park flow (CHECKED_IN). Does not call the accept API — local only.
-  /// Suppresses re-showing the retrieval sheet for this session id until the
-  /// assignment clears (see [getCollectKeysInTransitAckSessionIdSync]).
-  static Future<void> saveCollectKeysInTransitAck(String sessionId) async {
+  /// After in-transit Collect Keys (API + this set): adds each **retrieval
+  /// session id** so we skip Confirm Arrival for that id and suppress that
+  /// assignment’s sheet until park completes. Multiple in-transit retrievals
+  /// are all tracked. Cleared after a successful park (CarSuccessScreen) and
+  /// when assigned sessions become empty.
+  ///
+  /// Prefer [saveCollectKeysInTransitAckSync] before closing the retrieval
+  /// sheet so pending-session polling cannot open Confirm Arrival before Hive
+  /// reflects the new id.
+  static void saveCollectKeysInTransitAckSync(String sessionId) {
     try {
-      await _box.put(_collectKeysInTransitSessionIdKey, sessionId);
+      final trimmed = sessionId.trim();
+      if (trimmed.isEmpty) return;
+      final ids = _readCollectKeysInTransitIds();
+      ids.add(trimmed);
+      _box.put(_collectKeysInTransitSessionIdsKey, ids.toList());
+      _box.delete(_collectKeysInTransitSessionIdKey);
     } catch (e) {
-      print('[TokenStorage] Error saving collect-keys-in-transit ack: $e');
-      rethrow;
+      print('[TokenStorage] Error saving collect-keys-in-transit ack (sync): $e');
     }
   }
 
-  static Future<String?> getCollectKeysInTransitAckSessionId() async {
+  static Future<void> saveCollectKeysInTransitAck(String sessionId) async {
+    saveCollectKeysInTransitAckSync(sessionId);
+    return Future.value();
+  }
+
+  static Set<String> _readCollectKeysInTransitIds() {
+    final ids = <String>{};
     try {
-      return _box.get(_collectKeysInTransitSessionIdKey) as String?;
-    } catch (e) {
-      print('[TokenStorage] Error reading collect-keys-in-transit ack: $e');
-      return null;
+      final raw = _box.get(_collectKeysInTransitSessionIdsKey);
+      if (raw is List) {
+        for (final e in raw) {
+          final s = (e?.toString() ?? '').trim();
+          if (s.isNotEmpty) ids.add(s);
+        }
+      }
+      final legacy = _box.get(_collectKeysInTransitSessionIdKey) as String?;
+      final leg = legacy?.trim() ?? '';
+      if (leg.isNotEmpty) ids.add(leg);
+    } catch (_) {}
+    return ids;
+  }
+
+  static Set<String> _readCollectKeysInTransitIdsSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return {};
+      final box = Hive.box(_boxName);
+      final ids = <String>{};
+      final raw = box.get(_collectKeysInTransitSessionIdsKey);
+      if (raw is List) {
+        for (final e in raw) {
+          final s = (e?.toString() ?? '').trim();
+          if (s.isNotEmpty) ids.add(s);
+        }
+      }
+      final legacy = box.get(_collectKeysInTransitSessionIdKey) as String?;
+      final leg = legacy?.trim() ?? '';
+      if (leg.isNotEmpty) ids.add(leg);
+      return ids;
+    } catch (_) {
+      return {};
     }
+  }
+
+  /// True if this session had in-transit Collect Keys (skip Confirm Arrival).
+  static Future<bool> collectKeysInTransitAckContains(String sessionId) async {
+    return collectKeysInTransitAckContainsSync(sessionId);
+  }
+
+  static bool collectKeysInTransitAckContainsSync(String sessionId) {
+    final t = sessionId.trim();
+    if (t.isEmpty) return false;
+    return _readCollectKeysInTransitIdsSync().contains(t);
   }
 
   static Future<void> clearCollectKeysInTransitAck() async {
     try {
+      await _box.delete(_collectKeysInTransitSessionIdsKey);
       await _box.delete(_collectKeysInTransitSessionIdKey);
     } catch (e) {
       print('[TokenStorage] Error clearing collect-keys-in-transit ack: $e');
     }
   }
 
-  /// Sync read for UI (e.g. suppress retrieval sheet) when the box is open.
-  static String? getCollectKeysInTransitAckSessionIdSync() {
-    try {
-      if (!Hive.isBoxOpen(_boxName)) return null;
-      return Hive.box(_boxName).get(_collectKeysInTransitSessionIdKey)
-          as String?;
-    } catch (_) {
-      return null;
-    }
-  }
-
   static void clearCollectKeysInTransitAckSync() {
     try {
       if (!Hive.isBoxOpen(_boxName)) return;
-      Hive.box(_boxName).delete(_collectKeysInTransitSessionIdKey);
+      final box = Hive.box(_boxName);
+      box.delete(_collectKeysInTransitSessionIdsKey);
+      box.delete(_collectKeysInTransitSessionIdKey);
     } catch (_) {}
   }
 

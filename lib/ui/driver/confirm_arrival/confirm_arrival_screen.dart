@@ -123,6 +123,12 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   Future<void> _checkOperatorOverride() async {
     if (!mounted) return;
     try {
+      // Avoid popping while confirm arrival / handover API is in flight (race → double pop → blank screen).
+      try {
+        final blocState = context.read<ConfirmArrivalBloc>().state;
+        if (blocState is ConfirmArrivalLoading) return;
+      } catch (_) {}
+
       // 1) GET /operators/assign-retrieval - primary source for status when operator changes in Car Logs
       final assignmentStatus =
           await OperatorAssignRetrievalApiService.getAssignmentStatus(
@@ -142,7 +148,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                 TextConstants.transactionCompletedByOperator,
               ),
             );
-            Navigator.of(context).pop();
+            _safePopAfterSnackBar();
           }
           return;
         }
@@ -169,7 +175,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
               TextConstants.transactionCompletedByOperator,
             ),
           );
-          Navigator.of(context).pop();
+          _safePopAfterSnackBar();
         }
         return;
       }
@@ -190,10 +196,25 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
     }
   }
 
+  void _cancelOperatorOverridePolling() {
+    _operatorOverridePollTimer?.cancel();
+    _operatorOverridePollTimer = null;
+  }
+
+  /// Pop once on the next frame after snackbar schedules; cancels operator polling
+  /// first to avoid a race with [_checkOperatorOverride] (double pop → blank screen).
+  void _safePopAfterSnackBar() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _cancelOperatorOverridePolling();
+      Navigator.of(context).pop();
+    });
+  }
+
   @override
   void dispose() {
     _enableConfirmArrivalTimer?.cancel();
-    _operatorOverridePollTimer?.cancel();
+    _cancelOperatorOverridePolling();
     super.dispose();
   }
 
@@ -226,9 +247,11 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
               SnackBars.showErrorSnackBar(context, state.message);
             }
           } else if (state is ConfirmHandoverSuccess) {
+            if (!context.mounted) return;
+            _cancelOperatorOverridePolling();
             SnackBars.showSuccessSnackBar(context, state.message);
-            // After handover success, navigate back to the same flow
-            Navigator.of(context).pop();
+            // Pop next frame so SnackBar attaches; one pop only — avoids blank stack.
+            _safePopAfterSnackBar();
           } else if (state is ConfirmHandoverError) {
             SnackBars.showErrorSnackBar(context, state.message);
           }
