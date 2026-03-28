@@ -137,6 +137,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Stop native preview before the Activity/engine can detach; otherwise camera
+    // frames may hit FlutterRenderer after FlutterJNI is gone (fatal on Android).
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _cameraBloc.add(const DisposeCameraRequested());
+      return;
+    }
     if (state == AppLifecycleState.resumed && !_isInitializing) {
       // Add delay when app resumes to ensure camera service is ready
       // This is especially important after app is cleared and reopened
@@ -153,7 +160,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
     _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _pendingSessionPollTimer?.cancel();
-    _cameraBloc.dispose();
+    _cameraBloc.close();
     // Reset preferred orientations when leaving camera screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -212,7 +219,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       child: BlocListener<CarCameraBloc, CarCameraState>(
         listener: (context, state) {
           if (state is CarCameraValidationSuccess) {
-            // Navigate to preview screen on successful validation
+            // Stop camera before leaving the route so native frames cannot hit
+            // FlutterRenderer after the surface/engine tears down.
+            context.read<CarCameraBloc>().add(const DisposeCameraRequested());
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -473,6 +482,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
       // Navigate directly to preview screen with parking location
       if (mounted) {
+        context.read<CarCameraBloc>().add(const DisposeCameraRequested());
         Navigator.push(
           context,
           MaterialPageRoute(

@@ -18,6 +18,23 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.da
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 
+/// FIFO order matches [assignedState.sessions].
+List<String> sessionIdsFromAssignedQueue(List<dynamic> sessions) {
+  final out = <String>[];
+  for (final s in sessions) {
+    String? id;
+    if (s is AssignedSession) {
+      final x = s.id.trim();
+      if (x.isNotEmpty) id = x;
+    } else if (s is Map<String, dynamic>) {
+      final raw = (s['sessionId'] ?? s['id'])?.toString().trim();
+      if (raw != null && raw.isNotEmpty) id = raw;
+    }
+    if (id != null) out.add(id);
+  }
+  return out;
+}
+
 class AssignedSessionSheetLoader extends StatefulWidget {
   const AssignedSessionSheetLoader({super.key});
 
@@ -49,6 +66,13 @@ class _AssignedSessionSheetLoaderState
         if (!current.hasSessions) return true;
         if (previous is! AssignedSessionsBackgroundData ||
             !previous.hasSessions) {
+          return true;
+        }
+        // Rebuild when queue ids change OR first row display (photo) changes.
+        if (AssignedSessionsBackgroundBloc.orderedSessionIdsSignature(
+                previous.sessions) !=
+            AssignedSessionsBackgroundBloc.orderedSessionIdsSignature(
+                current.sessions)) {
           return true;
         }
         return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
@@ -115,6 +139,11 @@ class _AssignedSessionSheetLoaderState
           final canAccept =
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
 
+          final queueIds = sessionIdsFromAssignedQueue(assignedState.sessions);
+          final showAcceptAll = queueIds.length > 1 &&
+              effectiveSessionId != null &&
+              _isInTransitParkFlow(context, effectiveSessionId);
+
           // Fallback: start vibration if the widget becomes visible with a
           // session but the notification handler didn't trigger it yet
           // (e.g. user opened the app manually after a background notification).
@@ -161,11 +190,18 @@ class _AssignedSessionSheetLoaderState
                             if (mounted) {
                               setState(() => _isAcceptLoading = false);
                             }
-                            final sid = effectiveSessionId;
-                            final skipRetrievalNext = sid != null &&
-                                _isInTransitParkFlow(context, sid);
+                            final ids = state.acceptedIds.isNotEmpty
+                                ? state.acceptedIds
+                                : (effectiveSessionId != null
+                                    ? [effectiveSessionId]
+                                    : <String>[]);
+                            final skipRetrievalNext = ids.isNotEmpty &&
+                                _isInTransitParkFlow(context, ids.first);
                             if (skipRetrievalNext) {
-                              TokenStorage.saveCollectKeysInTransitAckSync(sid);
+                              for (final sid in ids) {
+                                TokenStorage.saveCollectKeysInTransitAckSync(
+                                    sid);
+                              }
                               if (context.mounted) {
                                 Navigator.of(context).pop();
                               }
@@ -215,6 +251,26 @@ class _AssignedSessionSheetLoaderState
                               : null,
                           isLoading: false,
                           isAcceptLoading: _isAcceptLoading,
+                          showAcceptAll: showAcceptAll,
+                          queueCount: queueIds.length,
+                          onAcceptAll: showAcceptAll
+                              ? () {
+                                  if (_isAcceptLoading) return;
+                                  VibrationController.stop();
+                                  setState(() {
+                                    _isAcceptLoading = true;
+                                    _acceptTriggeredAt = DateTime.now();
+                                  });
+                                  if (blocContext.mounted) {
+                                    blocContext
+                                        .read<RetrivalRequestBloc>()
+                                        .add(AcceptAllRetrivalRequests(
+                                            queueIds));
+                                  } else if (mounted) {
+                                    setState(() => _isAcceptLoading = false);
+                                  }
+                                }
+                              : null,
                           onAccept: canAccept
                               ? () {
                                   if (_isAcceptLoading) return;
@@ -225,8 +281,11 @@ class _AssignedSessionSheetLoaderState
                                   });
                                   if (blocContext.mounted) {
                                     blocContext.read<RetrivalRequestBloc>().add(
-                                        AcceptRetrivalRequest(
-                                            effectiveSessionId));
+                                          AcceptRetrivalRequest(
+                                            effectiveSessionId,
+                                            assignedSession: typedSession,
+                                          ),
+                                        );
                                   } else if (mounted) {
                                     setState(() => _isAcceptLoading = false);
                                   }

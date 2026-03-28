@@ -3,6 +3,7 @@ import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/utils/assigned_sessions_fifo.dart';
 
 class AssignedSessionsApiService {
   AssignedSessionsApiService._();
@@ -40,7 +41,8 @@ class AssignedSessionsApiService {
               .toList() ??
           [];
 
-      return sessions;
+      // Oldest assignment first so polling + sheet [sessions.first] show true "next" FIFO.
+      return sortAssignedSessionsFifo(sessions);
     } on ApiException catch (e) {
       print('❌ [GET API] HTTP Status Code: ${e.statusCode ?? 'N/A'}');
       print('❌ [GET API] Error: ${e.message}');

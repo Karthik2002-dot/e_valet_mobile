@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/utils/assigned_sessions_fifo.dart';
 
 part 'assigned_sessions_background_event.dart';
 part 'assigned_sessions_background_state.dart';
@@ -228,11 +229,39 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     return '';
   }
 
+  static String? _sessionIdOfEntry(dynamic s) {
+    if (s is AssignedSession) {
+      return s.id.isNotEmpty ? s.id : null;
+    }
+    if (s is Map<String, dynamic>) {
+      final id = (s['sessionId'] ?? s['id'])?.toString();
+      return (id != null && id.isNotEmpty) ? id : null;
+    }
+    return null;
+  }
+
+  /// Ordered session ids so we emit when the queue changes (FIFO add/remove/reorder),
+  /// not only when the first row's photo URL changes. Comparing [first] alone missed
+  /// cases like [A]→[A,B,C] or [A,B,C]→[B,C] when A and B shared the same display key.
+  static String _orderedSessionIdsSignature(List<dynamic> sessions) {
+    return sessions.map((s) => _sessionIdOfEntry(s) ?? '').join('|');
+  }
+
+  /// Public for retrieval sheet [BlocBuilder.buildWhen] so the UI updates when the
+  /// queue changes, not only when the first row's photo URL changes.
+  static String orderedSessionIdsSignature(List<dynamic> sessions) {
+    return _orderedSessionIdsSignature(sessions);
+  }
+
   /// True if the list has the same display content so we avoid reloading the bottom sheet image.
   static bool _isSameDisplayContent(
       List<dynamic> current, List<dynamic> incoming) {
     if (current.length != incoming.length) return false;
     if (current.isEmpty) return true;
+    if (_orderedSessionIdsSignature(current) !=
+        _orderedSessionIdsSignature(incoming)) {
+      return false;
+    }
     return _sessionDisplayKey(current.first) ==
         _sessionDisplayKey(incoming.first);
   }
@@ -262,7 +291,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     Emitter<AssignedSessionsBackgroundState> emit,
   ) {
     if (event.sessions.isEmpty) return;
-    emit(AssignedSessionsBackgroundData(event.sessions));
+    emit(AssignedSessionsBackgroundData(
+        sortAssignedSessionsFifoDynamic(event.sessions)));
   }
 
   void _onRetrievalCancelledReceived(
@@ -279,7 +309,8 @@ class AssignedSessionsBackgroundBloc extends Bloc<
     try {
       final sessions = _extractSessions(event.data);
       if (sessions != null) {
-        emit(AssignedSessionsBackgroundData(sessions));
+        emit(AssignedSessionsBackgroundData(
+            sortAssignedSessionsFifoDynamic(sessions)));
       }
     } catch (e) {
       print('Failed to parse WebSocket assigned sessions payload: $e');

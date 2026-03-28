@@ -28,6 +28,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
 import 'package:niloufer_valet_mobile/utils/session_converter.dart';
+import 'package:niloufer_valet_mobile/utils/pending_sessions_fifo.dart';
 
 class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   static final DriverHomeRouteObserver _instance =
@@ -204,6 +205,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       _checkWebSocketOnResume();
       _hasNavigatedForStatus = false;
       _refreshPendingSessions();
+      try {
+        if (_assignedBloc != null && !_assignedBloc!.isClosed) {
+          _assignedBloc!.add(const RefreshAssignedSessions());
+        }
+      } catch (_) {}
     }
   }
 
@@ -255,6 +261,18 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     // Reset so we can navigate to Confirm Arrival again if operator changed status while we were away
     _hasNavigatedForStatus = false;
     _refreshPendingSessions();
+    // Refetch assigned-to-me immediately so the next retrieval in the queue surfaces
+    // (polling alone can leave stale state for up to 5s; another park looked like the "fix").
+    try {
+      if (_assignedBloc != null && !_assignedBloc!.isClosed) {
+        _assignedBloc!.add(const RefreshAssignedSessions());
+      }
+    } catch (_) {}
+    // Pending refresh is async; retry sheet after the queue has likely updated (next in FIFO).
+    Future<void>.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      _attemptShowAssignedSessionSheet(context);
+    });
   }
 
   @override
@@ -290,8 +308,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   }
 
   /// First ARRIVED row that still needs Confirm Arrival (not in in-transit set).
+  /// Uses FIFO order so the next retrieval matches the assigned-to-me queue.
   PendingSession? _firstArrivedNeedingConfirm(PendingSessionsResponse pending) {
-    for (final s in pending.sessions) {
+    for (final s in pendingSessionsFifoSorted(pending.sessions)) {
       if (s.isArrived &&
           !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
         return s;
@@ -303,7 +322,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   /// First ACCEPTED row that still needs Confirm Arrival (not in in-transit set).
   PendingSession? _firstAcceptedNeedingConfirm(
       PendingSessionsResponse pending) {
-    for (final s in pending.sessions) {
+    for (final s in pendingSessionsFifoSorted(pending.sessions)) {
       if (s.isAccepted &&
           !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
         return s;
@@ -549,8 +568,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       });
                     }
 
-                    // Check if there's a CHECKED_IN session and show dialog
-                    // Only show once per screen load
+                    // When we stack Confirm Arrival / repark / incomplete dialog, do not
+                    // also open the retrieval sheet in the same tick (sheet would cover it).
+                    var scheduledDriverFlowNavigation = false;
 
                     // Priority: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN dialog.
                     // Confirm Arrival only if some row still needs it (not in-transit
@@ -563,6 +583,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       final target = arrivedNav ??
                           _firstAcceptedNeedingConfirm(pending);
                       if (target != null) {
+                        scheduledDriverFlowNavigation = true;
                         _closeAssignedSessionSheetIfOpen(context);
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (!mounted) return;
@@ -585,6 +606,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           );
                         });
                       } else if (pending.hasReparkingSession) {
+                        scheduledDriverFlowNavigation = true;
                         _hasNavigatedForStatus = true;
                         _closeAssignedSessionSheetIfOpen(context);
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -606,6 +628,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         });
                       } else if (!_hasShownSessionDialog &&
                           pending.hasCheckedInSession) {
+                        scheduledDriverFlowNavigation = true;
                         _hasShownSessionDialog = true;
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted &&
@@ -631,6 +654,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                           }
                         });
                       }
+                    }
+
+                    // After pending refresh, surface the next assigned retrieval (FIFO)
+                    // when we did not navigate to another driver flow above.
+                    if (!scheduledDriverFlowNavigation) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        _attemptShowAssignedSessionSheet(context);
+                      });
                     }
                   }
                 },

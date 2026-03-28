@@ -24,12 +24,21 @@ class AssignedSession {
     required this.parkingLocation,
   });
 
+  /// Normalizes API status (map or string) so [retrievalLifecycleStatus] works.
+  static Map<String, dynamic> _statusMapFromJson(dynamic rawStatus) {
+    if (rawStatus is Map<String, dynamic>) return rawStatus;
+    if (rawStatus is String && rawStatus.trim().isNotEmpty) {
+      return {'name': rawStatus.trim()};
+    }
+    return const {};
+  }
+
   factory AssignedSession.fromJson(Map<String, dynamic> json) {
     final rawStatus = json['status'];
     return AssignedSession(
       id: (json['sessionId'] ?? json['id'] ?? '').toString(),
       cardNumber: json['cardNumber'] as int? ?? 0,
-      status: (rawStatus is Map<String, dynamic>) ? rawStatus : const {},
+      status: _statusMapFromJson(rawStatus),
       outletName: (json['outletName'] ?? '').toString(),
       assignedAt: (json['assignedAt'] ?? '').toString(),
       customerPhone: (json['customerPhone'] ?? '').toString(),
@@ -50,6 +59,23 @@ class AssignedSession {
   bool get hasPhotos => photos.isNotEmpty;
 
   String? get photoUrl => photos.isNotEmpty ? photos.first.url : null;
+
+  /// Uppercase lifecycle for retrieval (e.g. ASSIGNED, ACCEPTED). Accept API expects ASSIGNED.
+  String get retrievalLifecycleStatus {
+    if (status.isEmpty) return '';
+    for (final k in ['name', 'value', 'status', 'state', 'code']) {
+      final v = status[k];
+      if (v is String && v.trim().isNotEmpty) return v.trim().toUpperCase();
+    }
+    return '';
+  }
+
+  /// True when POST accept is valid; false when already past ASSIGNED (caller should skip API).
+  bool get canCallAcceptRetrievalApi {
+    final s = retrievalLifecycleStatus;
+    if (s.isEmpty) return true;
+    return s == 'ASSIGNED';
+  }
 
   // Add a field to store pending photo path
   String? pendingPhotoPath;
