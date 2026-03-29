@@ -24,7 +24,7 @@ class AcceptRetrivalRequest extends RetrivalRequestEvent {
   List<Object?> get props => [sessionId, assignedSession];
 }
 
-/// In-transit / queue: call POST accept for every session id (FIFO order).
+/// Multiple assignments: call POST accept for every session id (FIFO order).
 class AcceptAllRetrivalRequests extends RetrivalRequestEvent {
   final List<String> sessionIds;
 

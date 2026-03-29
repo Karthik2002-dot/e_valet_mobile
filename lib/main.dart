@@ -26,6 +26,7 @@ import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 
 void main() async {
@@ -115,6 +116,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
           navigatorKey: FirebaseMessagingService.navigatorKey,
+          navigatorObservers: [DriverHomeRouteObserver()],
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
           builder: (context, child) {

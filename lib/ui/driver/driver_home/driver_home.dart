@@ -25,34 +25,24 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_d
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
 import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 import 'package:niloufer_valet_mobile/utils/pending_sessions_fifo.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
 
-class DriverHomeRouteObserver extends RouteObserver<PageRoute<dynamic>> {
-  static final DriverHomeRouteObserver _instance =
-      DriverHomeRouteObserver._internal();
-  factory DriverHomeRouteObserver() => _instance;
-  DriverHomeRouteObserver._internal();
-
-  void Function()? _onRouteChanged;
-
-  void setOnRouteChanged(void Function() callback) {
-    _onRouteChanged = callback;
+/// True when every queued assignment id is in collect-keys-in-transit ack
+/// (sheet should stay hidden until park completes or queue clears).
+bool allQueuedSessionsInCollectKeysAck(List<dynamic> sessions) {
+  if (sessions.isEmpty) return true;
+  for (final s in sessions) {
+    final id = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession([s]);
+    if (id == null || id.isEmpty) continue;
+    if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return false;
   }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPop(route, previousRoute);
-    _onRouteChanged?.call();
-  }
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPush(route, previousRoute);
-    _onRouteChanged?.call();
-  }
+  return true;
 }
 
 class DriverHomeScreen extends StatefulWidget {
@@ -85,11 +75,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   AssignedSessionsBackgroundBloc? _assignedBloc;
   WebSocketBloc? _webSocketBloc;
 
+  /// [DriverMenuBloc] lives under [MultiBlocProvider] in [build]; [State.context] is above
+  /// that subtree, so async callbacks must not use [State.context] for [context.read].
+  BuildContext? _driverFlowContext;
+  DriverMenuBloc? _driverMenuBloc;
+
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
 
   // Track if we've already navigated for accepted/arrived sessions
   bool _hasNavigatedForStatus = false;
+
+  /// Last session id we auto-opened Confirm Arrival for (detect stuck guard if route observer misses didPopNext).
+  String? _lastPushedConfirmArrivalSessionId;
 
   // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
   bool _assignedSessionsPollingStarted = false;
@@ -101,7 +99,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   void _refreshPendingSessions() {
     try {
-      context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+      final bloc = _driverMenuBloc;
+      if (bloc != null && !bloc.isClosed) {
+        bloc.add(const DriverPendingSessionsRefresh());
+      }
     } catch (e) {
       // Ignore refresh errors when context is not ready
     }
@@ -204,6 +205,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       // User stays on QR/park flow unless they press back.
       _checkWebSocketOnResume();
       _hasNavigatedForStatus = false;
+      _lastPushedConfirmArrivalSessionId = null;
       _refreshPendingSessions();
       try {
         if (_assignedBloc != null && !_assignedBloc!.isClosed) {
@@ -260,6 +262,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _homeResetNotifier.value++;
     // Reset so we can navigate to Confirm Arrival again if operator changed status while we were away
     _hasNavigatedForStatus = false;
+    _lastPushedConfirmArrivalSessionId = null;
     _refreshPendingSessions();
     // Refetch assigned-to-me immediately so the next retrieval in the queue surfaces
     // (polling alone can leave stale state for up to 5s; another park looked like the "fix").
@@ -268,10 +271,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
         _assignedBloc!.add(const RefreshAssignedSessions());
       }
     } catch (_) {}
-    // Pending refresh is async; retry sheet after the queue has likely updated (next in FIFO).
-    Future<void>.delayed(const Duration(milliseconds: 600), () {
+    // Pending/assigned refresh is async; re-run full driver-flow resolution so the
+    // next deferred Confirm Arrival opens even if DriverMenuBloc did not emit again.
+    Future<void>.delayed(const Duration(milliseconds: 850), () {
       if (!mounted) return;
-      _attemptShowAssignedSessionSheet(context);
+      final ctx = _driverFlowContext;
+      if (ctx == null || !ctx.mounted) return;
+      _tryResumeDriverFlowFromHome(ctx);
     });
   }
 
@@ -296,44 +302,98 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     WidgetsBinding.instance.removeObserver(this);
     _assignedBloc = null;
     _webSocketBloc = null;
+    _driverFlowContext = null;
+    _driverMenuBloc = null;
     _assignedSessionsPollingStarted = false;
     _pendingSessionsPollTimer?.cancel();
     _pendingSessionsPollTimer = null;
     _pendingSessionsPollingStarted = false;
     _hasShownSessionDialog = false;
     _hasNavigatedForStatus = false;
+    _lastPushedConfirmArrivalSessionId = null;
     _pendingShowSheetWhenMenuLoaded = false;
     _isShowingAssignedSheet = false;
     super.dispose();
   }
 
-  /// First ARRIVED row that still needs Confirm Arrival (not in in-transit set).
-  /// Uses FIFO order so the next retrieval matches the assigned-to-me queue.
-  PendingSession? _firstArrivedNeedingConfirm(PendingSessionsResponse pending) {
-    for (final s in pendingSessionsFifoSorted(pending.sessions)) {
+  /// Deferred Collect Keys: block auto Confirm Arrival only while park flow is active.
+  bool _canResumeDeferredRetrievalConfirm(
+    BuildContext context,
+    String sessionId,
+  ) {
+    try {
+      if (ParkFlowSignals.isCarPhotoParkFlowActive) return false;
+    } catch (_) {}
+    try {
+      final route = ModalRoute.of(context);
+      if (route?.isCurrent != true) return false;
+    } catch (_) {}
+    try {
+      final hivePark = TokenStorage.getSessionIdSync();
+      if (hivePark != null &&
+          hivePark.isNotEmpty &&
+          hivePark.trim() == sessionId.trim()) {
+        return false;
+      }
+    } catch (_) {}
+    try {
+      final menu = context.read<DriverMenuBloc>().state;
+      if (menu is DriverHomeLoaded && menu.pendingSessions != null) {
+        final p = menu.pendingSessions!;
+        final rep = p.reparkingSession;
+        if (rep != null && rep.sessionId.trim() == sessionId.trim()) {
+          return false;
+        }
+        final chk = p.checkedInSession;
+        if (chk != null && chk.sessionId.trim() == sessionId.trim()) {
+          return false;
+        }
+      }
+    } catch (_) {}
+    return true;
+  }
+
+  bool _pendingSessionNeedsConfirmArrivalNavigation(
+    BuildContext context,
+    PendingSession s,
+  ) {
+    if (TokenStorage.shouldSuppressAutoConfirmArrivalForSessionSync(
+        s.sessionId)) {
+      return false;
+    }
+    if (!TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+      return true;
+    }
+    return _canResumeDeferredRetrievalConfirm(context, s.sessionId);
+  }
+
+  /// Next Confirm Arrival target from **GET /sessions/pending** only: FIFO by
+  /// [PendingSession.assignedAt]/[createdAt], then status priority ARRIVED → ACCEPTED.
+  /// Each 5s poll refreshes pending; [_tryResumeDriverFlowFromHome] re-runs on each
+  /// [DriverHomeLoaded] so status changes redirect to the right UI one session at a time.
+  PendingSession? _firstPendingSessionForConfirmArrival(
+    BuildContext context,
+    PendingSessionsResponse pending,
+  ) {
+    final sorted = pendingSessionsFifoSorted(pending.sessions);
+    for (final s in sorted) {
       if (s.isArrived &&
-          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
         return s;
       }
     }
-    return null;
-  }
-
-  /// First ACCEPTED row that still needs Confirm Arrival (not in in-transit set).
-  PendingSession? _firstAcceptedNeedingConfirm(
-      PendingSessionsResponse pending) {
-    for (final s in pendingSessionsFifoSorted(pending.sessions)) {
+    for (final s in sorted) {
       if (s.isAccepted &&
-          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
         return s;
       }
     }
     return null;
   }
 
-  /// Pending has ARRIVED or ACCEPTED for this **same** session id and Confirm
-  /// Arrival is still required (not in in-transit Collect Keys set).
+  /// Same session id as assigned retrieval still needs Confirm Arrival (including deferred after park).
   bool _pendingNeedsConfirmForAssignedRetrieval(
+    BuildContext context,
     PendingSessionsResponse? pending,
     String assignedRetrievalSessionId,
   ) {
@@ -343,15 +403,220 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     for (final s in pending.sessions) {
       if (s.sessionId.trim() != aid) continue;
       if (s.isArrived &&
-          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
         return true;
       }
       if (s.isAccepted &&
-          !TokenStorage.collectKeysInTransitAckContainsSync(s.sessionId)) {
+          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
         return true;
       }
     }
     return false;
+  }
+
+  AssignedSession? _findAssignedSessionById(List<dynamic> sessions, String id) {
+    final aid = id.trim();
+    if (aid.isEmpty) return null;
+    for (final s in sessions) {
+      if (s is AssignedSession) {
+        if (s.id.trim() == aid) return s;
+      } else if (s is Map<String, dynamic>) {
+        final raw = (s['sessionId'] ?? s['id'])?.toString().trim();
+        if (raw == aid) {
+          try {
+            return AssignedSession.fromJson(s);
+          } catch (_) {}
+        }
+      }
+    }
+    return null;
+  }
+
+  /// When pending API lags, next deferred id may still appear on assigned-to-me only.
+  AssignedSession? _firstAssignedDeferredNeedingConfirm(BuildContext context) {
+    final defOrder = TokenStorage.collectKeysInTransitOrderedIdsSync();
+    if (defOrder.isEmpty) return null;
+    final assignedState =
+        context.read<AssignedSessionsBackgroundBloc>().state;
+    if (assignedState is! AssignedSessionsBackgroundData ||
+        !assignedState.hasSessions) {
+      return null;
+    }
+    for (final id in defOrder) {
+      final s = _findAssignedSessionById(assignedState.sessions, id);
+      if (s == null) continue;
+      final st = s.retrievalLifecycleStatus;
+      if (st == 'ARRIVED' &&
+          _canResumeDeferredRetrievalConfirm(context, id)) {
+        return s;
+      }
+    }
+    for (final id in defOrder) {
+      final s = _findAssignedSessionById(assignedState.sessions, id);
+      if (s == null) continue;
+      final st = s.retrievalLifecycleStatus;
+      if (st == 'ACCEPTED' &&
+          _canResumeDeferredRetrievalConfirm(context, id)) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  /// Confirm Arrival / repark / checked-in / retrieval sheet — single place so
+  /// [didPopNext] can re-run the same logic after a route pop (listener alone may not fire).
+  void _tryResumeDriverFlowFromHome(BuildContext context) {
+    if (!mounted) return;
+    final menuState = context.read<DriverMenuBloc>().state;
+    if (menuState is! DriverHomeLoaded) return;
+
+    if (_pendingShowSheetWhenMenuLoaded && mounted) {
+      _pendingShowSheetWhenMenuLoaded = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _attemptShowAssignedSessionSheet(context);
+      });
+    }
+
+    var scheduledDriverFlowNavigation = false;
+
+    PendingSession? nextPendingConfirm;
+    if (menuState.pendingSessions != null) {
+      nextPendingConfirm = _firstPendingSessionForConfirmArrival(
+        context,
+        menuState.pendingSessions!,
+      );
+    }
+    // If the next pending row is a different session than what we last opened,
+    // clear the stuck guard (RouteAware.didPopNext only runs when this observer
+    // is on MaterialApp.navigatorObservers).
+    if (_hasNavigatedForStatus &&
+        nextPendingConfirm != null &&
+        nextPendingConfirm.sessionId.trim() !=
+            (_lastPushedConfirmArrivalSessionId ?? '').trim()) {
+      _hasNavigatedForStatus = false;
+    }
+
+    if (!_hasNavigatedForStatus) {
+      PendingSession? target;
+      AssignedSession? assignedOnlyTarget;
+
+      if (menuState.pendingSessions != null) {
+        target = nextPendingConfirm;
+        if (target == null) {
+          assignedOnlyTarget = _firstAssignedDeferredNeedingConfirm(context);
+        }
+      } else {
+        assignedOnlyTarget = _firstAssignedDeferredNeedingConfirm(context);
+      }
+
+      if (target != null) {
+        scheduledDriverFlowNavigation = true;
+        _closeAssignedSessionSheetIfOpen(context);
+        final pendingTarget = target;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final routeIsCurrent =
+              ModalRoute.of(context)?.isCurrent == true;
+          if (!routeIsCurrent) return;
+          if (!mounted) return;
+          _hasNavigatedForStatus = true;
+          _lastPushedConfirmArrivalSessionId = pendingTarget.sessionId.trim();
+          final assignedSession =
+              SessionConverter.pendingToAssigned(pendingTarget);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ConfirmArrivalScreen(
+                session: assignedSession,
+                preventBackNavigation: true,
+                showHandoverOnLoad: pendingTarget.isArrived,
+              ),
+            ),
+          );
+        });
+      } else if (assignedOnlyTarget != null) {
+        scheduledDriverFlowNavigation = true;
+        _closeAssignedSessionSheetIfOpen(context);
+        final sessionToOpen = assignedOnlyTarget;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final routeIsCurrent =
+              ModalRoute.of(context)?.isCurrent == true;
+          if (!routeIsCurrent) return;
+          if (!mounted) return;
+          _hasNavigatedForStatus = true;
+          _lastPushedConfirmArrivalSessionId = sessionToOpen.id.trim();
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ConfirmArrivalScreen(
+                session: sessionToOpen,
+                preventBackNavigation: true,
+                showHandoverOnLoad:
+                    sessionToOpen.retrievalLifecycleStatus == 'ARRIVED',
+              ),
+            ),
+          );
+        });
+      } else if (menuState.pendingSessions != null) {
+        final pending = menuState.pendingSessions!;
+        if (pending.hasReparkingSession) {
+          scheduledDriverFlowNavigation = true;
+          _hasNavigatedForStatus = true;
+          _closeAssignedSessionSheetIfOpen(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                ModalRoute.of(context)?.isCurrent == true) {
+              final reparkingSession = pending.reparkingSession;
+              if (reparkingSession != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => CarPhotoIntroScreen(
+                      cameViaTagNumber: false,
+                      sessionId: reparkingSession.sessionId,
+                      isReparking: true,
+                    ),
+                  ),
+                );
+              }
+            }
+          });
+        } else if (!_hasShownSessionDialog &&
+            pending.hasCheckedInSession) {
+          scheduledDriverFlowNavigation = true;
+          _hasShownSessionDialog = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                ModalRoute.of(context)?.isCurrent == true) {
+              final checkedInSession = pending.checkedInSession;
+              if (checkedInSession != null) {
+                SessionIncompleteDialog.show(
+                  context,
+                  cardNumber:
+                      checkedInSession.cardNumber.toString(),
+                  onContinue: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CarPhotoIntroScreen(
+                          cameViaTagNumber: false,
+                          sessionId: checkedInSession.sessionId,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }
+            }
+          });
+        }
+      }
+    }
+
+    if (!scheduledDriverFlowNavigation) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _attemptShowAssignedSessionSheet(context);
+      });
+    }
   }
 
   void _attemptShowAssignedSessionSheet(BuildContext blocContext) {
@@ -367,13 +632,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return;
     }
 
-    final firstId = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession(
-        assignedState.sessions);
-    if (firstId != null &&
-        firstId.isNotEmpty &&
-        TokenStorage.collectKeysInTransitAckContainsSync(firstId)) {
+    if (allQueuedSessionsInCollectKeysAck(assignedState.sessions)) {
       return;
     }
+
+    final firstId = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession(
+        assignedState.sessions);
 
     final driverMenuState = blocContext.read<DriverMenuBloc>().state;
     if (driverMenuState is! DriverHomeLoaded) {
@@ -399,7 +663,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     // a new assignment while you’re on another screen.
     if (firstId != null &&
         firstId.isNotEmpty &&
-        _pendingNeedsConfirmForAssignedRetrieval(pendingSessions, firstId)) {
+        _pendingNeedsConfirmForAssignedRetrieval(
+            blocContext, pendingSessions, firstId)) {
       return;
     }
 
@@ -423,6 +688,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       child: Builder(
         builder: (context) {
           // Now we can safely access the blocs since we're inside the MultiBlocProvider
+          _driverFlowContext = context;
+          _driverMenuBloc = context.read<DriverMenuBloc>();
           try {
             final assignedBloc = context.read<AssignedSessionsBackgroundBloc>();
             // Store the bloc reference for use in timer callbacks
@@ -434,9 +701,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               assignedBloc.add(const StartAssignedSessionsPolling());
             }
 
-            // Start 5-second polling for pending sessions (GET /sessions/pending) so operator
-            // override in Car Logs (e.g. status changed to ARRIVED) is detected and we navigate
-            // to Confirm Arrival with the correct UI
+            // Poll GET /sessions/pending every 5s — source of truth for status-driven
+            // navigation (Confirm Arrival, etc.). Each refresh emits [DriverHomeLoaded] and
+            // [_tryResumeDriverFlowFromHome] runs for the next FIFO row that needs action.
             if (!_pendingSessionsPollingStarted) {
               _pendingSessionsPollingStarted = true;
               _pendingSessionsPollTimer = Timer.periodic(
@@ -558,112 +825,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         break;
                     }
                   } else if (state is DriverHomeLoaded) {
-                    // If we skipped showing the retrieval sheet earlier (opened from
-                    // push) because menu wasn't loaded, re-trigger so the sheet shows now.
-                    if (_pendingShowSheetWhenMenuLoaded && mounted) {
-                      _pendingShowSheetWhenMenuLoaded = false;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        _attemptShowAssignedSessionSheet(context);
-                      });
-                    }
-
-                    // When we stack Confirm Arrival / repark / incomplete dialog, do not
-                    // also open the retrieval sheet in the same tick (sheet would cover it).
-                    var scheduledDriverFlowNavigation = false;
-
-                    // Priority: ARRIVED > ACCEPTED > REPARKING > CHECKED_IN dialog.
-                    // Confirm Arrival only if some row still needs it (not in-transit
-                    // Collect Keys set). Nested so REPARKING/CHECKED_IN still run when
-                    // pending is non-null but target is null.
-                    if (!_hasNavigatedForStatus &&
-                        state.pendingSessions != null) {
-                      final pending = state.pendingSessions!;
-                      final arrivedNav = _firstArrivedNeedingConfirm(pending);
-                      final target = arrivedNav ??
-                          _firstAcceptedNeedingConfirm(pending);
-                      if (target != null) {
-                        scheduledDriverFlowNavigation = true;
-                        _closeAssignedSessionSheetIfOpen(context);
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (!mounted) return;
-                          final navigator = Navigator.of(context);
-                          final routeIsCurrent =
-                              ModalRoute.of(context)?.isCurrent == true;
-                          if (!routeIsCurrent) return;
-                          if (!mounted) return;
-                          _hasNavigatedForStatus = true;
-                          final assignedSession =
-                              SessionConverter.pendingToAssigned(target);
-                          navigator.push(
-                            MaterialPageRoute(
-                              builder: (_) => ConfirmArrivalScreen(
-                                session: assignedSession,
-                                preventBackNavigation: true,
-                                showHandoverOnLoad: target.isArrived,
-                              ),
-                            ),
-                          );
-                        });
-                      } else if (pending.hasReparkingSession) {
-                        scheduledDriverFlowNavigation = true;
-                        _hasNavigatedForStatus = true;
-                        _closeAssignedSessionSheetIfOpen(context);
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted &&
-                              ModalRoute.of(context)?.isCurrent == true) {
-                            final reparkingSession = pending.reparkingSession;
-                            if (reparkingSession != null) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => CarPhotoIntroScreen(
-                                    cameViaTagNumber: false,
-                                    sessionId: reparkingSession.sessionId,
-                                    isReparking: true,
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        });
-                      } else if (!_hasShownSessionDialog &&
-                          pending.hasCheckedInSession) {
-                        scheduledDriverFlowNavigation = true;
-                        _hasShownSessionDialog = true;
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted &&
-                              ModalRoute.of(context)?.isCurrent == true) {
-                            final checkedInSession = pending.checkedInSession;
-                            if (checkedInSession != null) {
-                              SessionIncompleteDialog.show(
-                                context,
-                                cardNumber:
-                                    checkedInSession.cardNumber.toString(),
-                                onContinue: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => CarPhotoIntroScreen(
-                                        cameViaTagNumber: false,
-                                        sessionId: checkedInSession.sessionId,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                          }
-                        });
-                      }
-                    }
-
-                    // After pending refresh, surface the next assigned retrieval (FIFO)
-                    // when we did not navigate to another driver flow above.
-                    if (!scheduledDriverFlowNavigation) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        _attemptShowAssignedSessionSheet(context);
-                      });
-                    }
+                    _tryResumeDriverFlowFromHome(context);
                   }
                 },
               ),

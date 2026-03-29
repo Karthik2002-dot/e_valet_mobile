@@ -38,8 +38,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
     // it as "cancelled" on the next Park attempt and pop the user back to Home.
     TokenStorage.clearSessionId();
     TokenStorage.clearSessionIdFromGetApi();
-    // In-transit Collect Keys hid retrieval UI for this session id only; park is done.
-    TokenStorage.clearCollectKeysInTransitAckSync();
+    // Deferred retrieval ids stay in Hive until Confirm Arrival / handover completes.
     _autoReturnTimer = Timer(_autoReturnDuration, _navigateToHome);
   }
 

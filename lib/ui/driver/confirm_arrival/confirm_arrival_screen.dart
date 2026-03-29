@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
 import 'package:niloufer_valet_mobile/ui/driver/customer_missing/customer_missing_dialog.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ConfirmArrivalScreen extends StatefulWidget {
   final AssignedSession session;
@@ -58,6 +59,13 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   int _confirmArrivalRemainingSeconds = 0;
   Timer? _enableConfirmArrivalTimer;
   Timer? _operatorOverridePollTimer;
+
+  /// True after user taps Confirm Handover — in-flight [_checkOperatorOverride] must not pop,
+  /// or it races with [ConfirmHandoverSuccess] and causes a double pop → blank navigator.
+  bool _userHandoverRequestInFlight = false;
+
+  /// Ensures only one [Navigator.pop] is scheduled (operator complete + handover success overlap).
+  bool _navigationPopScheduled = false;
 
   /// After Confirm Arrival API success, Customer Missing button is disabled until this time (duration from CUSTOMER_MISSING_DISABLE_SECONDS in .env).
   DateTime? _customerMissingDisabledUntil;
@@ -126,8 +134,30 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       // Avoid popping while confirm arrival / handover API is in flight (race → double pop → blank screen).
       try {
         final blocState = context.read<ConfirmArrivalBloc>().state;
-        if (blocState is ConfirmArrivalLoading) return;
+        if (blocState is ConfirmArrivalLoading) {
+          dev.log(
+            'ConfirmArrival poll: skip (bloc loading) session=${widget.session.id}',
+            name: 'ConfirmArrival',
+          );
+          return;
+        }
       } catch (_) {}
+
+      if (_userHandoverRequestInFlight) {
+        dev.log(
+          'ConfirmArrival poll: skip (user handover in flight) session=${widget.session.id}',
+          name: 'ConfirmArrival',
+        );
+        return;
+      }
+
+      if (_navigationPopScheduled) {
+        dev.log(
+          'ConfirmArrival poll: skip (pop already scheduled) session=${widget.session.id}',
+          name: 'ConfirmArrival',
+        );
+        return;
+      }
 
       // 1) GET /operators/assign-retrieval - primary source for status when operator changes in Car Logs
       final assignmentStatus =
@@ -137,6 +167,10 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       if (!mounted) return;
       if (assignmentStatus != null) {
         if (assignmentStatus.isParked || assignmentStatus.isCompleted) {
+          dev.log(
+            'ConfirmArrival poll: operator parked/completed → schedule pop session=${widget.session.id}',
+            name: 'ConfirmArrival',
+          );
           _operatorOverridePollTimer?.cancel();
           _operatorOverridePollTimer = null;
           if (mounted) {
@@ -148,7 +182,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                 TextConstants.transactionCompletedByOperator,
               ),
             );
-            _safePopAfterSnackBar();
+            _safePopAfterSnackBar(reason: 'operator_assignment_status');
           }
           return;
         }
@@ -164,6 +198,10 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       final sessionStillAssigned =
           sessions.any((s) => s.id == widget.session.id);
       if (!sessionStillAssigned) {
+        dev.log(
+          'ConfirmArrival poll: session not in assigned-to-me → schedule pop session=${widget.session.id}',
+          name: 'ConfirmArrival',
+        );
         _operatorOverridePollTimer?.cancel();
         _operatorOverridePollTimer = null;
         if (mounted) {
@@ -175,7 +213,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
               TextConstants.transactionCompletedByOperator,
             ),
           );
-          _safePopAfterSnackBar();
+          _safePopAfterSnackBar(reason: 'session_removed_assigned');
         }
         return;
       }
@@ -191,8 +229,13 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
           setState(() => _showHandoverButtons = true);
         }
       }
-    } catch (_) {
-      // Silently ignore polling errors; will retry on next interval
+    } catch (e, st) {
+      dev.log(
+        'ConfirmArrival poll error session=${widget.session.id}',
+        name: 'ConfirmArrival',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
@@ -203,18 +246,76 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
 
   /// Pop once on the next frame after snackbar schedules; cancels operator polling
   /// first to avoid a race with [_checkOperatorOverride] (double pop → blank screen).
-  void _safePopAfterSnackBar() {
+  void _safePopAfterSnackBar({required String reason}) {
+    if (_navigationPopScheduled) {
+      dev.log(
+        'ConfirmArrival _safePopAfterSnackBar IGNORED (already scheduled) reason=$reason session=${widget.session.id}',
+        name: 'ConfirmArrival',
+      );
+      return;
+    }
+    _navigationPopScheduled = true;
+    TokenStorage.markRetrievalConfirmFlowCompletedCooldownSync(
+      widget.session.id,
+    );
+    dev.log(
+      'ConfirmArrival schedule pop reason=$reason session=${widget.session.id}',
+      name: 'ConfirmArrival',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted) {
+        dev.log(
+          'ConfirmArrival pop callback: unmounted, abort session=${widget.session.id}',
+          name: 'ConfirmArrival',
+        );
+        return;
+      }
       _cancelOperatorOverridePolling();
-      Navigator.of(context).pop();
+      try {
+        TokenStorage.removeCollectKeysInTransitAckForSessionSync(
+            widget.session.id);
+      } catch (e, st) {
+        dev.log(
+          'ConfirmArrival Hive removeCollectKeys error',
+          name: 'ConfirmArrival',
+          error: e,
+          stackTrace: st,
+        );
+      }
+      try {
+        final nav = Navigator.of(context);
+        if (nav.canPop()) {
+          dev.log(
+            'ConfirmArrival Navigator.pop() session=${widget.session.id}',
+            name: 'ConfirmArrival',
+          );
+          nav.pop();
+        } else {
+          dev.log(
+            'ConfirmArrival Navigator.canPop()==false — NOT popping (would blank stack) session=${widget.session.id}',
+            name: 'ConfirmArrival',
+          );
+        }
+      } catch (e, st) {
+        dev.log(
+          'ConfirmArrival Navigator.pop threw',
+          name: 'ConfirmArrival',
+          error: e,
+          stackTrace: st,
+        );
+      }
     });
   }
 
   @override
   void dispose() {
+    dev.log(
+      'ConfirmArrival dispose session=${widget.session.id}',
+      name: 'ConfirmArrival',
+    );
     _enableConfirmArrivalTimer?.cancel();
     _cancelOperatorOverridePolling();
+    _userHandoverRequestInFlight = false;
     super.dispose();
   }
 
@@ -247,12 +348,22 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
               SnackBars.showErrorSnackBar(context, state.message);
             }
           } else if (state is ConfirmHandoverSuccess) {
+            dev.log(
+              'ConfirmArrival bloc: ConfirmHandoverSuccess session=${widget.session.id} msg=${state.message}',
+              name: 'ConfirmArrival',
+            );
             if (!context.mounted) return;
+            _userHandoverRequestInFlight = false;
             _cancelOperatorOverridePolling();
             SnackBars.showSuccessSnackBar(context, state.message);
             // Pop next frame so SnackBar attaches; one pop only — avoids blank stack.
-            _safePopAfterSnackBar();
+            _safePopAfterSnackBar(reason: 'handover_success');
           } else if (state is ConfirmHandoverError) {
+            _userHandoverRequestInFlight = false;
+            dev.log(
+              'ConfirmArrival bloc: ConfirmHandoverError session=${widget.session.id} ${state.message}',
+              name: 'ConfirmArrival',
+            );
             SnackBars.showErrorSnackBar(context, state.message);
           }
         },
@@ -305,6 +416,12 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                               customerMissingDisabledUntil:
                                   _customerMissingDisabledUntil,
                               onConfirmHandover: () {
+                                dev.log(
+                                  'ConfirmArrival UI: ConfirmHandover tap session=${widget.session.id}',
+                                  name: 'ConfirmArrival',
+                                );
+                                setState(
+                                    () => _userHandoverRequestInFlight = true);
                                 context.read<ConfirmArrivalBloc>().add(
                                       ConfirmHandoverRequested(
                                           sessionId: widget.session.id),

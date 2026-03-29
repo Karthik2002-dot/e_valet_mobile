@@ -22,17 +22,41 @@ import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 List<String> sessionIdsFromAssignedQueue(List<dynamic> sessions) {
   final out = <String>[];
   for (final s in sessions) {
-    String? id;
-    if (s is AssignedSession) {
-      final x = s.id.trim();
-      if (x.isNotEmpty) id = x;
-    } else if (s is Map<String, dynamic>) {
-      final raw = (s['sessionId'] ?? s['id'])?.toString().trim();
-      if (raw != null && raw.isNotEmpty) id = raw;
-    }
+    final id = sessionIdOfQueueEntry(s);
     if (id != null) out.add(id);
   }
   return out;
+}
+
+/// Session id for one queue entry (same rules as [AssignedSessionsBackgroundBloc]).
+String? sessionIdOfQueueEntry(dynamic s) {
+  if (s is AssignedSession) {
+    final x = s.id.trim();
+    return x.isNotEmpty ? x : null;
+  }
+  if (s is Map<String, dynamic>) {
+    final raw = (s['sessionId'] ?? s['id'])?.toString().trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+  }
+  return null;
+}
+
+/// Next retrieval row to show: first FIFO item not in collect-keys-in-transit ack.
+/// When the head is acked (in-transit accept done) but other assignments remain, this surfaces them.
+dynamic firstQueueEntryVisibleForRetrievalSheet(List<dynamic> sessions) {
+  for (final s in sessions) {
+    final id = sessionIdOfQueueEntry(s);
+    if (id == null || id.isEmpty) continue;
+    if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return s;
+  }
+  return null;
+}
+
+/// Display key for the row actually shown (skips acked head rows).
+String firstQueueVisibleDisplayKey(List<dynamic> sessions) {
+  final v = firstQueueEntryVisibleForRetrievalSheet(sessions);
+  if (v == null) return '';
+  return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession([v]);
 }
 
 class AssignedSessionSheetLoader extends StatefulWidget {
@@ -75,10 +99,8 @@ class _AssignedSessionSheetLoaderState
                 current.sessions)) {
           return true;
         }
-        return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
-                previous.sessions) !=
-            AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
-                current.sessions);
+        return firstQueueVisibleDisplayKey(previous.sessions) !=
+            firstQueueVisibleDisplayKey(current.sessions);
       },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
@@ -86,52 +108,55 @@ class _AssignedSessionSheetLoaderState
             VibrationController.stop();
             return const SizedBox.shrink();
           }
-          final rawSession = assignedState.sessions.first;
+          final rawSession =
+              firstQueueEntryVisibleForRetrievalSheet(assignedState.sessions);
+          if (rawSession == null) {
+            VibrationController.stop();
+            return const SizedBox.shrink();
+          }
 
           AssignedSession? typedSession;
           String? sessionId;
           dynamic sessionJson;
 
-          if (rawSession != null) {
-            if (rawSession is AssignedSession) {
-              typedSession = rawSession;
-              sessionId = rawSession.id;
-              sessionJson = rawSession.toJson();
-            } else if (rawSession is Map<String, dynamic>) {
-              final rawId =
-                  (rawSession['sessionId'] ?? rawSession['id'])?.toString();
-              sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
-              sessionJson = rawSession;
-              try {
-                typedSession = AssignedSession.fromJson(rawSession);
-                if (sessionId == null && typedSession.id.isNotEmpty) {
-                  sessionId = typedSession.id;
-                }
-              } catch (_) {}
-            }
+          if (rawSession is AssignedSession) {
+            typedSession = rawSession;
+            sessionId = rawSession.id;
+            sessionJson = rawSession.toJson();
+          } else if (rawSession is Map<String, dynamic>) {
+            final rawId =
+                (rawSession['sessionId'] ?? rawSession['id'])?.toString();
+            sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
+            sessionJson = rawSession;
+            try {
+              typedSession = AssignedSession.fromJson(rawSession);
+              if (sessionId == null && typedSession.id.isNotEmpty) {
+                sessionId = typedSession.id;
+              }
+            } catch (_) {}
+          }
 
-            if (sessionId != null) {
-              TokenStorage.saveSessionIdFromGetApi(sessionId)
-                  .catchError((_) {});
+          if (sessionId != null) {
+            TokenStorage.saveSessionIdFromGetApi(sessionId)
+                .catchError((_) {});
+          }
+          if (sessionJson != null) {
+            TokenStorage.saveAssignedSessionData(sessionJson)
+                .catchError((_) {});
+            String? parkingLocation;
+            if (typedSession != null &&
+                typedSession.parkingLocation.isNotEmpty) {
+              parkingLocation = typedSession.parkingLocation;
+            } else if (sessionJson is Map<String, dynamic>) {
+              final rawLocation = sessionJson['parkingLocation'];
+              if (rawLocation != null) {
+                parkingLocation = rawLocation.toString();
+              }
             }
-            if (sessionJson != null) {
-              TokenStorage.saveAssignedSessionData(sessionJson)
+            if (parkingLocation != null &&
+                parkingLocation.trim().isNotEmpty) {
+              TokenStorage.saveParkingLocation(parkingLocation)
                   .catchError((_) {});
-              String? parkingLocation;
-              if (typedSession != null &&
-                  typedSession.parkingLocation.isNotEmpty) {
-                parkingLocation = typedSession.parkingLocation;
-              } else if (sessionJson is Map<String, dynamic>) {
-                final rawLocation = sessionJson['parkingLocation'];
-                if (rawLocation != null) {
-                  parkingLocation = rawLocation.toString();
-                }
-              }
-              if (parkingLocation != null &&
-                  parkingLocation.trim().isNotEmpty) {
-                TokenStorage.saveParkingLocation(parkingLocation)
-                    .catchError((_) {});
-              }
             }
           }
 
@@ -140,9 +165,10 @@ class _AssignedSessionSheetLoaderState
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
 
           final queueIds = sessionIdsFromAssignedQueue(assignedState.sessions);
-          final showAcceptAll = queueIds.length > 1 &&
-              effectiveSessionId != null &&
-              _isInTransitParkFlow(context, effectiveSessionId);
+          // Show "Accept all" whenever multiple assignments are queued (including after
+          // returning to home — in-transit-only gating hid this for the rest of the queue).
+          final showAcceptAll =
+              queueIds.length > 1 && effectiveSessionId != null;
 
           // Fallback: start vibration if the widget becomes visible with a
           // session but the notification handler didn't trigger it yet
