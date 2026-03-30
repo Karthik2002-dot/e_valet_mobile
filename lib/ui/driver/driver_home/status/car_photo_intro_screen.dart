@@ -20,6 +20,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.da
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 
 /// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
 /// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
@@ -45,7 +46,8 @@ class CarPhotoIntroScreen extends StatefulWidget {
   State<CarPhotoIntroScreen> createState() => _CarPhotoIntroScreenState();
 }
 
-class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
+class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
+    with WidgetsBindingObserver {
   static const Duration _pendingSessionPollInterval = Duration(minutes: 5);
 
   /// 0 = Lottie, 1 = camera (only Car Photo flow now)
@@ -62,6 +64,8 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    ParkFlowSignals.beginCarPhotoParkFlow();
     _cameraBloc = CarCameraBloc();
     _selectedTab = 1;
     _scanPhase = 0;
@@ -168,6 +172,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       }
       if (!mounted) return;
       final isFromScan = imagePath != null && imagePath.isNotEmpty;
+      _cameraBloc.add(const DisposeCameraRequested());
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PreviewCarScreen(
@@ -179,9 +184,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           ),
         ),
       );
-      // When user returns from preview (e.g. Retake), reset camera so it shows again.
+      // After dispose-before-preview, controller is gone — full re-init for Retake.
       if (mounted && isFromScan && _selectedTab == 1) {
-        _cameraBloc.add(const ValidationReset());
+        _cameraBloc.add(const InitializeCameraRequested());
       }
     } catch (e) {
       debugPrint('[CarPhotoIntro] _navigateToPreview error: $e');
@@ -245,7 +250,27 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _cameraBloc.add(const DisposeCameraRequested());
+      return;
+    }
+    if (state == AppLifecycleState.resumed &&
+        _selectedTab == 1 &&
+        _scanPhase == 1) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) {
+          _cameraBloc.add(const InitializeCameraRequested());
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    ParkFlowSignals.endCarPhotoParkFlow();
     _lottieTimer?.cancel();
     _pendingSessionPollTimer?.cancel();
     _cameraBloc.close();

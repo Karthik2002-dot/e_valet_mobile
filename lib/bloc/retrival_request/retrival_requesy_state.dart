@@ -37,8 +37,14 @@ class RetrivalRequestError extends RetrivalRequestState {
 class RetrivalRequestAccepted extends RetrivalRequestState {
   final String message;
 
-  const RetrivalRequestAccepted(this.message);
+  /// Session ids successfully accepted (single-accept or bulk). Used for in-transit Hive.
+  final List<String> acceptedIds;
+
+  const RetrivalRequestAccepted(
+    this.message, {
+    this.acceptedIds = const [],
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, acceptedIds];
 }

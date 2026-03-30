@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/assigned_sessions_background/assigned_sessions_background_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_available_drivers_state.dart';
@@ -12,8 +14,50 @@ import 'package:niloufer_valet_mobile/models/driver/session/pass_available_drive
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
+
+/// FIFO order matches [assignedState.sessions].
+List<String> sessionIdsFromAssignedQueue(List<dynamic> sessions) {
+  final out = <String>[];
+  for (final s in sessions) {
+    final id = sessionIdOfQueueEntry(s);
+    if (id != null) out.add(id);
+  }
+  return out;
+}
+
+/// Session id for one queue entry (same rules as [AssignedSessionsBackgroundBloc]).
+String? sessionIdOfQueueEntry(dynamic s) {
+  if (s is AssignedSession) {
+    final x = s.id.trim();
+    return x.isNotEmpty ? x : null;
+  }
+  if (s is Map<String, dynamic>) {
+    final raw = (s['sessionId'] ?? s['id'])?.toString().trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+  }
+  return null;
+}
+
+/// Next retrieval row to show: first FIFO item not in collect-keys-in-transit ack.
+/// When the head is acked (in-transit accept done) but other assignments remain, this surfaces them.
+dynamic firstQueueEntryVisibleForRetrievalSheet(List<dynamic> sessions) {
+  for (final s in sessions) {
+    final id = sessionIdOfQueueEntry(s);
+    if (id == null || id.isEmpty) continue;
+    if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return s;
+  }
+  return null;
+}
+
+/// Display key for the row actually shown (skips acked head rows).
+String firstQueueVisibleDisplayKey(List<dynamic> sessions) {
+  final v = firstQueueEntryVisibleForRetrievalSheet(sessions);
+  if (v == null) return '';
+  return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession([v]);
+}
 
 class AssignedSessionSheetLoader extends StatefulWidget {
   const AssignedSessionSheetLoader({super.key});
@@ -48,10 +92,15 @@ class _AssignedSessionSheetLoaderState
             !previous.hasSessions) {
           return true;
         }
-        return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
+        // Rebuild when queue ids change OR first row display (photo) changes.
+        if (AssignedSessionsBackgroundBloc.orderedSessionIdsSignature(
                 previous.sessions) !=
-            AssignedSessionsBackgroundBloc.displayKeyOfFirstSession(
-                current.sessions);
+            AssignedSessionsBackgroundBloc.orderedSessionIdsSignature(
+                current.sessions)) {
+          return true;
+        }
+        return firstQueueVisibleDisplayKey(previous.sessions) !=
+            firstQueueVisibleDisplayKey(current.sessions);
       },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
@@ -59,58 +108,67 @@ class _AssignedSessionSheetLoaderState
             VibrationController.stop();
             return const SizedBox.shrink();
           }
-          final rawSession = assignedState.sessions.first;
+          final rawSession =
+              firstQueueEntryVisibleForRetrievalSheet(assignedState.sessions);
+          if (rawSession == null) {
+            VibrationController.stop();
+            return const SizedBox.shrink();
+          }
 
           AssignedSession? typedSession;
           String? sessionId;
           dynamic sessionJson;
 
-          if (rawSession != null) {
-            if (rawSession is AssignedSession) {
-              typedSession = rawSession;
-              sessionId = rawSession.id;
-              sessionJson = rawSession.toJson();
-            } else if (rawSession is Map<String, dynamic>) {
-              final rawId =
-                  (rawSession['sessionId'] ?? rawSession['id'])?.toString();
-              sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
-              sessionJson = rawSession;
-              try {
-                typedSession = AssignedSession.fromJson(rawSession);
-                if (sessionId == null && typedSession.id.isNotEmpty) {
-                  sessionId = typedSession.id;
-                }
-              } catch (_) {}
-            }
+          if (rawSession is AssignedSession) {
+            typedSession = rawSession;
+            sessionId = rawSession.id;
+            sessionJson = rawSession.toJson();
+          } else if (rawSession is Map<String, dynamic>) {
+            final rawId =
+                (rawSession['sessionId'] ?? rawSession['id'])?.toString();
+            sessionId = (rawId != null && rawId.isNotEmpty) ? rawId : null;
+            sessionJson = rawSession;
+            try {
+              typedSession = AssignedSession.fromJson(rawSession);
+              if (sessionId == null && typedSession.id.isNotEmpty) {
+                sessionId = typedSession.id;
+              }
+            } catch (_) {}
+          }
 
-            if (sessionId != null) {
-              TokenStorage.saveSessionIdFromGetApi(sessionId)
-                  .catchError((_) {});
+          if (sessionId != null) {
+            TokenStorage.saveSessionIdFromGetApi(sessionId)
+                .catchError((_) {});
+          }
+          if (sessionJson != null) {
+            TokenStorage.saveAssignedSessionData(sessionJson)
+                .catchError((_) {});
+            String? parkingLocation;
+            if (typedSession != null &&
+                typedSession.parkingLocation.isNotEmpty) {
+              parkingLocation = typedSession.parkingLocation;
+            } else if (sessionJson is Map<String, dynamic>) {
+              final rawLocation = sessionJson['parkingLocation'];
+              if (rawLocation != null) {
+                parkingLocation = rawLocation.toString();
+              }
             }
-            if (sessionJson != null) {
-              TokenStorage.saveAssignedSessionData(sessionJson)
+            if (parkingLocation != null &&
+                parkingLocation.trim().isNotEmpty) {
+              TokenStorage.saveParkingLocation(parkingLocation)
                   .catchError((_) {});
-              String? parkingLocation;
-              if (typedSession != null &&
-                  typedSession.parkingLocation.isNotEmpty) {
-                parkingLocation = typedSession.parkingLocation;
-              } else if (sessionJson is Map<String, dynamic>) {
-                final rawLocation = sessionJson['parkingLocation'];
-                if (rawLocation != null) {
-                  parkingLocation = rawLocation.toString();
-                }
-              }
-              if (parkingLocation != null &&
-                  parkingLocation.trim().isNotEmpty) {
-                TokenStorage.saveParkingLocation(parkingLocation)
-                    .catchError((_) {});
-              }
             }
           }
 
           final effectiveSessionId = sessionId ?? typedSession?.id;
           final canAccept =
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
+
+          final queueIds = sessionIdsFromAssignedQueue(assignedState.sessions);
+          // Show "Accept all" whenever multiple assignments are queued (including after
+          // returning to home — in-transit-only gating hid this for the rest of the queue).
+          final showAcceptAll =
+              queueIds.length > 1 && effectiveSessionId != null;
 
           // Fallback: start vibration if the widget becomes visible with a
           // session but the notification handler didn't trigger it yet
@@ -158,8 +216,25 @@ class _AssignedSessionSheetLoaderState
                             if (mounted) {
                               setState(() => _isAcceptLoading = false);
                             }
-                            Navigator.of(context).pop();
-                            _navigateToConfirmArrival(context);
+                            final ids = state.acceptedIds.isNotEmpty
+                                ? state.acceptedIds
+                                : (effectiveSessionId != null
+                                    ? [effectiveSessionId]
+                                    : <String>[]);
+                            final skipRetrievalNext = ids.isNotEmpty &&
+                                _isInTransitParkFlow(context, ids.first);
+                            if (skipRetrievalNext) {
+                              for (final sid in ids) {
+                                TokenStorage.saveCollectKeysInTransitAckSync(
+                                    sid);
+                              }
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            } else {
+                              Navigator.of(context).pop();
+                              _navigateToConfirmArrival(context);
+                            }
                           } else if (state is RetrivalRequestError) {
                             SnackBars.showErrorSnackBar(context, state.message);
                             if (mounted) {
@@ -202,6 +277,26 @@ class _AssignedSessionSheetLoaderState
                               : null,
                           isLoading: false,
                           isAcceptLoading: _isAcceptLoading,
+                          showAcceptAll: showAcceptAll,
+                          queueCount: queueIds.length,
+                          onAcceptAll: showAcceptAll
+                              ? () {
+                                  if (_isAcceptLoading) return;
+                                  VibrationController.stop();
+                                  setState(() {
+                                    _isAcceptLoading = true;
+                                    _acceptTriggeredAt = DateTime.now();
+                                  });
+                                  if (blocContext.mounted) {
+                                    blocContext
+                                        .read<RetrivalRequestBloc>()
+                                        .add(AcceptAllRetrivalRequests(
+                                            queueIds));
+                                  } else if (mounted) {
+                                    setState(() => _isAcceptLoading = false);
+                                  }
+                                }
+                              : null,
                           onAccept: canAccept
                               ? () {
                                   if (_isAcceptLoading) return;
@@ -212,8 +307,11 @@ class _AssignedSessionSheetLoaderState
                                   });
                                   if (blocContext.mounted) {
                                     blocContext.read<RetrivalRequestBloc>().add(
-                                        AcceptRetrivalRequest(
-                                            effectiveSessionId));
+                                          AcceptRetrivalRequest(
+                                            effectiveSessionId,
+                                            assignedSession: typedSession,
+                                          ),
+                                        );
                                   } else if (mounted) {
                                     setState(() => _isAcceptLoading = false);
                                   }
@@ -263,6 +361,34 @@ class _AssignedSessionSheetLoaderState
         );
       },
     );
+  }
+
+  /// Park / camera flow: after accept API succeeds, skip Confirm Arrival and
+  /// return to the previous screen only (Hive flags that for [driver_home] too).
+  bool _isInTransitParkFlow(BuildContext context, String retrievalSessionId) {
+    try {
+      // User is on car photo / camera stack — retrieval must not stack Confirm Arrival
+      // on top (popping would return here incorrectly).
+      if (ParkFlowSignals.isCarPhotoParkFlowActive) {
+        return true;
+      }
+      final hiveParking = TokenStorage.getSessionIdSync();
+      if (hiveParking != null &&
+          hiveParking.isNotEmpty &&
+          hiveParking == retrievalSessionId) {
+        return true;
+      }
+      final menu = context.read<DriverMenuBloc>().state;
+      if (menu is! DriverHomeLoaded || menu.pendingSessions == null) {
+        return false;
+      }
+      final pending = menu.pendingSessions!;
+      if (!pending.hasCheckedInSession) return false;
+      final checked = pending.checkedInSession;
+      return checked != null && checked.sessionId == retrievalSessionId;
+    } catch (_) {
+      return false;
+    }
   }
 
   List<PassAvailableDriver> _driversFromState(PassAvailableDriversState state) {

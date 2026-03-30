@@ -16,6 +16,11 @@ class RetrievalRequestSheet extends StatelessWidget {
   final bool isAcceptLoading;
   final VoidCallback? onAccept;
 
+  /// When multiple sessions are queued (e.g. in-transit park), call accept API for each.
+  final bool showAcceptAll;
+  final int queueCount;
+  final VoidCallback? onAcceptAll;
+
   // Pass-to-driver section
   final List<PassAvailableDriver> availableDrivers;
   final bool isDriversLoading;
@@ -29,6 +34,9 @@ class RetrievalRequestSheet extends StatelessWidget {
     this.isLoading = false,
     this.isAcceptLoading = false,
     this.onAccept,
+    this.showAcceptAll = false,
+    this.queueCount = 0,
+    this.onAcceptAll,
     this.availableDrivers = const [],
     this.isDriversLoading = false,
     this.passingDriverId,
@@ -145,10 +153,49 @@ class RetrievalRequestSheet extends StatelessWidget {
                   ),
                 ),
 
-                // Accept / Collect Keys button
+                // Accept all (queue) — POST accept for every assigned session id
+                if (session != null &&
+                    showAcceptAll &&
+                    onAcceptAll != null &&
+                    queueCount > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: SizedBox(
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed:
+                            isAcceptLoading ? null : onAcceptAll,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                              color: AppColors.black, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: TextComponent(
+                            labelText:
+                                '${t.getByKey('acceptAllRetrievals', TextConstants.acceptAllRetrievals)} ($queueCount)',
+                            fontSize: screenWidth * 0.042,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Accept / Collect Keys button (current / first in queue)
                 if (session != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 20),
+                    padding: EdgeInsets.only(
+                        top: (showAcceptAll &&
+                                onAcceptAll != null &&
+                                queueCount > 1)
+                            ? 10
+                            : 8,
+                        bottom: 20),
                     child: SizedBox(
                       height: 55,
                       child: ElevatedButton(
