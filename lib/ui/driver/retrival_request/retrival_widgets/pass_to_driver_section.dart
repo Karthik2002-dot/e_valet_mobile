@@ -21,21 +21,7 @@ class PassToDriverSection extends StatelessWidget {
         const Divider(color: AppColors.divider, height: 24),
 
         // Section header
-        Row(
-          children: [
-            const Icon(Icons.swap_horiz_rounded,
-                size: 18, color: AppColors.mutedText),
-            const SizedBox(width: 6),
-            Text(
-              'Pass to Another Driver',
-              style: TextStyle(
-                fontSize: screenWidth * 0.038,
-                fontWeight: FontWeight.w600,
-                color: AppColors.mutedText,
-              ),
-            ),
-          ],
-        ),
+
         const SizedBox(height: 10),
         SizedBox(
           height: 55,
@@ -57,7 +43,7 @@ class PassToDriverSection extends StatelessWidget {
                     color: AppColors.black,
                   ),
             label: Text(
-              isPassing ? 'Passing...' : 'Pass',
+              isPassing ? 'Passing...' : 'Pass To Another Driver',
               style: TextStyle(
                 fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.w600,
