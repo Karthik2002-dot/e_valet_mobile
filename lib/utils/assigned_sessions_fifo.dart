@@ -28,7 +28,8 @@ DateTime? _assignedAtOfDynamic(dynamic s) {
 int compareAssignedSessionsFifo(dynamic a, dynamic b) {
   final da = _assignedAtOfDynamic(a);
   final db = _assignedAtOfDynamic(b);
-  if (da == null && db == null) return _idOfDynamic(a).compareTo(_idOfDynamic(b));
+  if (da == null && db == null)
+    return _idOfDynamic(a).compareTo(_idOfDynamic(b));
   if (da == null) return 1;
   if (db == null) return -1;
   final c = da.compareTo(db);

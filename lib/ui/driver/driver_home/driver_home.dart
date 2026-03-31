@@ -70,6 +70,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   bool _pendingShowSheetWhenMenuLoaded = false;
 
   bool _isShowingAssignedSheet = false;
+  BuildContext? _assignedSheetContext;
 
   // Store bloc references to avoid context issues in timer callbacks
   AssignedSessionsBackgroundBloc? _assignedBloc;
@@ -125,33 +126,33 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       // It should close only when our backend/API state indicates no sessions.
       isDismissible: false,
       enableDrag: false,
-      builder: (BuildContext modalContext) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: assignedSessionsBloc),
-          BlocProvider.value(value: driverMenuBloc),
-        ],
-        child: const PopScope(
-          canPop: false,
-          child: AssignedSessionSheetLoader(),
-        ),
-      ),
+      builder: (BuildContext modalContext) {
+        _assignedSheetContext = modalContext;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: assignedSessionsBloc),
+            BlocProvider.value(value: driverMenuBloc),
+          ],
+          child: const PopScope(
+            canPop: false,
+            child: AssignedSessionSheetLoader(),
+          ),
+        );
+      },
     ).then((_) {
+      _assignedSheetContext = null;
       _isShowingAssignedSheet = false;
     });
   }
 
   void _closeAssignedSessionSheetIfOpen(BuildContext context) {
     if (!_isShowingAssignedSheet) return;
-    // Try root navigator first since modal sheets may be attached there.
-    final rootNavigator = Navigator.of(context, rootNavigator: true);
-    if (rootNavigator.canPop()) {
-      rootNavigator.pop();
-      return;
-    }
-    // Fallback to local navigator.
-    final localNavigator = Navigator.of(context);
-    if (localNavigator.canPop()) {
-      localNavigator.pop();
+    final sheetContext = _assignedSheetContext;
+    if (sheetContext != null && sheetContext.mounted) {
+      final sheetNavigator = Navigator.of(sheetContext);
+      if (sheetNavigator.canPop()) {
+        sheetNavigator.pop();
+      }
     }
   }
 
@@ -304,6 +305,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _webSocketBloc = null;
     _driverFlowContext = null;
     _driverMenuBloc = null;
+    _assignedSheetContext = null;
     _assignedSessionsPollingStarted = false;
     _pendingSessionsPollTimer?.cancel();
     _pendingSessionsPollTimer = null;
@@ -436,8 +438,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   AssignedSession? _firstAssignedDeferredNeedingConfirm(BuildContext context) {
     final defOrder = TokenStorage.collectKeysInTransitOrderedIdsSync();
     if (defOrder.isEmpty) return null;
-    final assignedState =
-        context.read<AssignedSessionsBackgroundBloc>().state;
+    final assignedState = context.read<AssignedSessionsBackgroundBloc>().state;
     if (assignedState is! AssignedSessionsBackgroundData ||
         !assignedState.hasSessions) {
       return null;
@@ -446,8 +447,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       final s = _findAssignedSessionById(assignedState.sessions, id);
       if (s == null) continue;
       final st = s.retrievalLifecycleStatus;
-      if (st == 'ARRIVED' &&
-          _canResumeDeferredRetrievalConfirm(context, id)) {
+      if (st == 'ARRIVED' && _canResumeDeferredRetrievalConfirm(context, id)) {
         return s;
       }
     }
@@ -455,8 +455,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       final s = _findAssignedSessionById(assignedState.sessions, id);
       if (s == null) continue;
       final st = s.retrievalLifecycleStatus;
-      if (st == 'ACCEPTED' &&
-          _canResumeDeferredRetrievalConfirm(context, id)) {
+      if (st == 'ACCEPTED' && _canResumeDeferredRetrievalConfirm(context, id)) {
         return s;
       }
     }
@@ -516,8 +515,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
         final pendingTarget = target;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          final routeIsCurrent =
-              ModalRoute.of(context)?.isCurrent == true;
+          final routeIsCurrent = ModalRoute.of(context)?.isCurrent == true;
           if (!routeIsCurrent) return;
           if (!mounted) return;
           _hasNavigatedForStatus = true;
@@ -540,8 +538,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
         final sessionToOpen = assignedOnlyTarget;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          final routeIsCurrent =
-              ModalRoute.of(context)?.isCurrent == true;
+          final routeIsCurrent = ModalRoute.of(context)?.isCurrent == true;
           if (!routeIsCurrent) return;
           if (!mounted) return;
           _hasNavigatedForStatus = true;
@@ -564,8 +561,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
           _hasNavigatedForStatus = true;
           _closeAssignedSessionSheetIfOpen(context);
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                ModalRoute.of(context)?.isCurrent == true) {
+            if (mounted && ModalRoute.of(context)?.isCurrent == true) {
               final reparkingSession = pending.reparkingSession;
               if (reparkingSession != null) {
                 Navigator.of(context).push(
@@ -580,19 +576,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               }
             }
           });
-        } else if (!_hasShownSessionDialog &&
-            pending.hasCheckedInSession) {
+        } else if (!_hasShownSessionDialog && pending.hasCheckedInSession) {
           scheduledDriverFlowNavigation = true;
           _hasShownSessionDialog = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                ModalRoute.of(context)?.isCurrent == true) {
+            if (mounted && ModalRoute.of(context)?.isCurrent == true) {
               final checkedInSession = pending.checkedInSession;
               if (checkedInSession != null) {
                 SessionIncompleteDialog.show(
                   context,
-                  cardNumber:
-                      checkedInSession.cardNumber.toString(),
+                  cardNumber: checkedInSession.cardNumber.toString(),
                   onContinue: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(

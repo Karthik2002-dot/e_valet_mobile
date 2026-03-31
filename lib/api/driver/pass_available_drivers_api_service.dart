@@ -48,11 +48,10 @@ class PassAvailableDriversApiService {
   }
 
   /// POST /sessions/{sessionId}/pass
-  /// Body: { "driverUserId": "<targetDriverUserId>" }
   /// Response: { "sessionId", "newAssignmentId", "assignedTo", "assignedAt", "message" }
   static Future<String> passSessionToDriver({
     required String sessionId,
-    required String driverUserId,
+    String? driverUserId,
   }) async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
@@ -70,14 +69,21 @@ class PassAvailableDriversApiService {
     try {
       final response = await base.post(
         '/sessions/$sessionId/pass',
-        data: <String, dynamic>{'driverUserId': driverUserId},
+        data: (driverUserId != null && driverUserId.isNotEmpty)
+            ? <String, dynamic>{'driverUserId': driverUserId}
+            : null,
       );
 
       final data = response.data as Map<String, dynamic>?;
       return (data?['message'] as String?) ?? 'Request passed successfully.';
-    } on ApiException {
+    } on ApiException catch (e) {
+      print('[PASS API] ApiException');
+      print('[PASS API] Status: ${e.statusCode ?? 'N/A'}');
+      print('[PASS API] Code: ${e.code}');
+      print('[PASS API] Message: ${e.message}');
       rethrow;
     } catch (e) {
+      print('[PASS API] Unexpected error: $e');
       throw ApiException(
         'Failed to pass session: $e',
         code: 'pass_session_error',
