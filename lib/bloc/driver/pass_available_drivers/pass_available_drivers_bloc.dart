@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/driver/pass_available_drivers_api_service.dart';
-import 'package:niloufer_valet_mobile/models/driver/session/pass_available_driver.dart';
 import 'pass_available_drivers_event.dart';
 import 'pass_available_drivers_state.dart';
 
@@ -22,6 +21,7 @@ class PassAvailableDriversBloc
       );
       emit(PassAvailableDriversLoaded(drivers));
     } catch (e) {
+      print('[PASS BLOC] Fetch drivers error: $e');
       final msg = e is Exception ? e.toString() : 'Failed to load drivers';
       emit(PassAvailableDriversError(msg));
     }
@@ -31,30 +31,18 @@ class PassAvailableDriversBloc
     PassSessionToDriver event,
     Emitter<PassAvailableDriversState> emit,
   ) async {
-    // Keep the current driver list visible while the call is in-flight
-    final currentDrivers = _currentDrivers();
-    emit(PassingSessionToDriver(
-      driverId: event.driverId,
-      drivers: currentDrivers,
-    ));
+    emit(const PassingSessionToDriver(drivers: []));
 
     try {
       final message = await PassAvailableDriversApiService.passSessionToDriver(
         sessionId: event.sessionId,
-        driverUserId: event.driverId,
       );
       emit(SessionPassedToDriver(message));
     } catch (e) {
+      print('[PASS BLOC] Pass error: $e');
       final msg = e is Exception ? e.toString() : 'Failed to pass session';
-      emit(PassToDriverError(message: msg, drivers: currentDrivers));
+      emit(const PassAvailableDriversLoaded([]));
+      emit(PassToDriverError(message: msg, drivers: const []));
     }
-  }
-
-  List<PassAvailableDriver> _currentDrivers() {
-    final s = state;
-    if (s is PassAvailableDriversLoaded) return s.drivers;
-    if (s is PassingSessionToDriver) return s.drivers;
-    if (s is PassToDriverError) return s.drivers;
-    return [];
   }
 }

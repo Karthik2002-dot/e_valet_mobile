@@ -52,6 +52,7 @@ class TokenStorage {
   static const String _currentLocationKey = 'current_location';
   static const String _currentLatitudeKey = 'current_latitude';
   static const String _currentLongitudeKey = 'current_longitude';
+
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
       'collect_keys_in_transit_session_id';
@@ -507,7 +508,8 @@ class TokenStorage {
       _box.put(_collectKeysInTransitSessionIdsKey, list);
       _box.delete(_collectKeysInTransitSessionIdKey);
     } catch (e) {
-      print('[TokenStorage] Error saving collect-keys-in-transit ack (sync): $e');
+      print(
+          '[TokenStorage] Error saving collect-keys-in-transit ack (sync): $e');
     }
   }
 
@@ -590,8 +592,7 @@ class TokenStorage {
       if (!Hive.isBoxOpen(_boxName)) return;
       final box = Hive.box(_boxName);
       final nowMs = DateTime.now().millisecondsSinceEpoch;
-      final until =
-          nowMs + _retrievalConfirmFlowCooldown.inMilliseconds;
+      final until = nowMs + _retrievalConfirmFlowCooldown.inMilliseconds;
       final raw = box.get(_retrievalConfirmFlowCooldownUntilKey);
       final map = <String, int>{};
       if (raw is Map) {
@@ -618,8 +619,7 @@ class TokenStorage {
     if (t.isEmpty) return false;
     try {
       if (!Hive.isBoxOpen(_boxName)) return false;
-      final raw =
-          Hive.box(_boxName).get(_retrievalConfirmFlowCooldownUntilKey);
+      final raw = Hive.box(_boxName).get(_retrievalConfirmFlowCooldownUntilKey);
       if (raw is! Map) return false;
       final v = raw[t];
       final until = v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;

@@ -10,7 +10,6 @@ import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_blo
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_event.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_requesy_state.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
-import 'package:niloufer_valet_mobile/models/driver/session/pass_available_driver.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
@@ -71,9 +70,6 @@ class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
   bool _isAcceptLoading = false;
   DateTime? _acceptTriggeredAt;
-
-  /// The session ID for which we last fetched available pass-drivers.
-  String? _lastFetchedSessionId;
 
   @override
   void dispose() {
@@ -137,8 +133,7 @@ class _AssignedSessionSheetLoaderState
           }
 
           if (sessionId != null) {
-            TokenStorage.saveSessionIdFromGetApi(sessionId)
-                .catchError((_) {});
+            TokenStorage.saveSessionIdFromGetApi(sessionId).catchError((_) {});
           }
           if (sessionJson != null) {
             TokenStorage.saveAssignedSessionData(sessionJson)
@@ -153,8 +148,7 @@ class _AssignedSessionSheetLoaderState
                 parkingLocation = rawLocation.toString();
               }
             }
-            if (parkingLocation != null &&
-                parkingLocation.trim().isNotEmpty) {
+            if (parkingLocation != null && parkingLocation.trim().isNotEmpty) {
               TokenStorage.saveParkingLocation(parkingLocation)
                   .catchError((_) {});
             }
@@ -188,19 +182,6 @@ class _AssignedSessionSheetLoaderState
               ],
               child: Builder(
                 builder: (blocContext) {
-                  // Fetch available pass-drivers once per unique session
-                  if (effectiveSessionId != null &&
-                      effectiveSessionId != _lastFetchedSessionId) {
-                    _lastFetchedSessionId = effectiveSessionId;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (blocContext.mounted) {
-                        blocContext.read<PassAvailableDriversBloc>().add(
-                              FetchPassAvailableDrivers(effectiveSessionId),
-                            );
-                      }
-                    });
-                  }
-
                   return MultiBlocListener(
                     listeners: [
                       // RetrivalRequest listener (accept flow)
@@ -249,10 +230,14 @@ class _AssignedSessionSheetLoaderState
                           PassAvailableDriversState>(
                         listener: (context, state) {
                           if (state is SessionPassedToDriver) {
+                            print(
+                                '[PASS UI] Pass success received, closing bottom sheet.');
                             SnackBars.showSuccessSnackBar(
                                 context, state.message);
                             // Close the bottom sheet — session has been passed
-                            Navigator.of(context).pop();
+                            if (Navigator.of(context).canPop()) {
+                              Navigator.of(context).pop();
+                            }
                           } else if (state is PassToDriverError) {
                             SnackBars.showErrorSnackBar(context, state.message);
                           }
@@ -262,13 +247,7 @@ class _AssignedSessionSheetLoaderState
                     child: BlocBuilder<PassAvailableDriversBloc,
                         PassAvailableDriversState>(
                       builder: (context, passState) {
-                        final drivers = _driversFromState(passState);
-                        final isDriversLoading =
-                            passState is PassAvailableDriversLoading;
-                        final passingDriverId =
-                            passState is PassingSessionToDriver
-                                ? passState.driverId
-                                : null;
+                        final isPassing = passState is PassingSessionToDriver;
 
                         return RetrievalRequestSheet(
                           session: typedSession,
@@ -288,10 +267,8 @@ class _AssignedSessionSheetLoaderState
                                     _acceptTriggeredAt = DateTime.now();
                                   });
                                   if (blocContext.mounted) {
-                                    blocContext
-                                        .read<RetrivalRequestBloc>()
-                                        .add(AcceptAllRetrivalRequests(
-                                            queueIds));
+                                    blocContext.read<RetrivalRequestBloc>().add(
+                                        AcceptAllRetrivalRequests(queueIds));
                                   } else if (mounted) {
                                     setState(() => _isAcceptLoading = false);
                                   }
@@ -324,20 +301,17 @@ class _AssignedSessionSheetLoaderState
                                       );
                                     }
                                   : null),
-                          // Pass-to-driver params
-                          availableDrivers: drivers,
-                          isDriversLoading: isDriversLoading,
-                          passingDriverId: passingDriverId,
-                          onPassToDriver: (effectiveSessionId != null &&
-                                  passingDriverId == null &&
-                                  !_isAcceptLoading)
-                              ? (PassAvailableDriver driver) {
+                          // Pass (no driver selection UI)
+                          isPassing: isPassing,
+                          onPass: (effectiveSessionId != null && !isPassing)
+                              ? () {
+                                  print(
+                                      '[PASS UI] Pass button tapped for session: $effectiveSessionId');
                                   VibrationController.stop();
-                                  context
+                                  blocContext
                                       .read<PassAvailableDriversBloc>()
                                       .add(PassSessionToDriver(
                                         sessionId: effectiveSessionId,
-                                        driverId: driver.userId,
                                       ));
                                 }
                               : null,
@@ -389,13 +363,6 @@ class _AssignedSessionSheetLoaderState
     } catch (_) {
       return false;
     }
-  }
-
-  List<PassAvailableDriver> _driversFromState(PassAvailableDriversState state) {
-    if (state is PassAvailableDriversLoaded) return state.drivers;
-    if (state is PassingSessionToDriver) return state.drivers;
-    if (state is PassToDriverError) return state.drivers;
-    return [];
   }
 
   void _navigateToConfirmArrival(BuildContext context) async {

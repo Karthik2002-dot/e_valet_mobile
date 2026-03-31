@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
-import 'package:niloufer_valet_mobile/models/driver/session/pass_available_driver.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -22,10 +21,8 @@ class RetrievalRequestSheet extends StatelessWidget {
   final VoidCallback? onAcceptAll;
 
   // Pass-to-driver section
-  final List<PassAvailableDriver> availableDrivers;
-  final bool isDriversLoading;
-  final String? passingDriverId;
-  final void Function(PassAvailableDriver driver)? onPassToDriver;
+  final bool isPassing;
+  final VoidCallback? onPass;
 
   const RetrievalRequestSheet({
     super.key,
@@ -37,10 +34,8 @@ class RetrievalRequestSheet extends StatelessWidget {
     this.showAcceptAll = false,
     this.queueCount = 0,
     this.onAcceptAll,
-    this.availableDrivers = const [],
-    this.isDriversLoading = false,
-    this.passingDriverId,
-    this.onPassToDriver,
+    this.isPassing = false,
+    this.onPass,
   });
 
   @override
@@ -142,10 +137,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                           const SizedBox(height: 4),
                           PassToDriverSection(
                             screenWidth: screenWidth,
-                            isDriversLoading: isDriversLoading,
-                            drivers: availableDrivers,
-                            passingDriverId: passingDriverId,
-                            onPassToDriver: onPassToDriver,
+                            isPassing: isPassing,
+                            onPass: onPass,
                           ),
                         ],
                       ],
@@ -163,8 +156,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                     child: SizedBox(
                       height: 50,
                       child: OutlinedButton(
-                        onPressed:
-                            isAcceptLoading ? null : onAcceptAll,
+                        onPressed: isAcceptLoading ? null : onAcceptAll,
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                               color: AppColors.black, width: 1.5),

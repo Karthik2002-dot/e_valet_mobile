@@ -34,18 +34,14 @@ class PassAvailableDriversError extends PassAvailableDriversState {
   List<Object?> get props => [message];
 }
 
-/// A "pass" API call is in-flight for [driverId]; drivers list still available.
+/// A "pass" API call is in-flight.
 class PassingSessionToDriver extends PassAvailableDriversState {
-  final String driverId;
   final List<PassAvailableDriver> drivers;
 
-  const PassingSessionToDriver({
-    required this.driverId,
-    required this.drivers,
-  });
+  const PassingSessionToDriver({required this.drivers});
 
   @override
-  List<Object?> get props => [driverId, drivers];
+  List<Object?> get props => [drivers];
 }
 
 class SessionPassedToDriver extends PassAvailableDriversState {

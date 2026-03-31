@@ -18,13 +18,11 @@ class FetchPassAvailableDrivers extends PassAvailableDriversEvent {
 
 class PassSessionToDriver extends PassAvailableDriversEvent {
   final String sessionId;
-  final String driverId;
 
   const PassSessionToDriver({
     required this.sessionId,
-    required this.driverId,
   });
 
   @override
-  List<Object?> get props => [sessionId, driverId];
+  List<Object?> get props => [sessionId];
 }
