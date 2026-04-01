@@ -42,24 +42,42 @@ String? sessionIdOfQueueEntry(dynamic s) {
 
 /// Next retrieval row to show: first FIFO item not in collect-keys-in-transit ack.
 /// When the head is acked (in-transit accept done) but other assignments remain, this surfaces them.
-dynamic firstQueueEntryVisibleForRetrievalSheet(List<dynamic> sessions) {
+dynamic firstQueueEntryVisibleForRetrievalSheet(
+  List<dynamic> sessions, {
+  String? excludedSessionId,
+}) {
+  final excluded = excludedSessionId?.trim() ?? '';
   for (final s in sessions) {
     final id = sessionIdOfQueueEntry(s);
     if (id == null || id.isEmpty) continue;
+    if (excluded.isNotEmpty && id.trim() == excluded) continue;
     if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return s;
   }
   return null;
 }
 
 /// Display key for the row actually shown (skips acked head rows).
-String firstQueueVisibleDisplayKey(List<dynamic> sessions) {
-  final v = firstQueueEntryVisibleForRetrievalSheet(sessions);
+String firstQueueVisibleDisplayKey(
+  List<dynamic> sessions, {
+  String? excludedSessionId,
+}) {
+  final v = firstQueueEntryVisibleForRetrievalSheet(
+    sessions,
+    excludedSessionId: excludedSessionId,
+  );
   if (v == null) return '';
   return AssignedSessionsBackgroundBloc.displayKeyOfFirstSession([v]);
 }
 
 class AssignedSessionSheetLoader extends StatefulWidget {
-  const AssignedSessionSheetLoader({super.key});
+  final bool keepCurrentFlowOnAccept;
+  final String? excludedSessionId;
+
+  const AssignedSessionSheetLoader({
+    super.key,
+    this.keepCurrentFlowOnAccept = false,
+    this.excludedSessionId,
+  });
 
   @override
   State<AssignedSessionSheetLoader> createState() =>
@@ -95,8 +113,14 @@ class _AssignedSessionSheetLoaderState
                 current.sessions)) {
           return true;
         }
-        return firstQueueVisibleDisplayKey(previous.sessions) !=
-            firstQueueVisibleDisplayKey(current.sessions);
+        return firstQueueVisibleDisplayKey(
+              previous.sessions,
+              excludedSessionId: widget.excludedSessionId,
+            ) !=
+            firstQueueVisibleDisplayKey(
+              current.sessions,
+              excludedSessionId: widget.excludedSessionId,
+            );
       },
       builder: (context, assignedState) {
         if (assignedState is AssignedSessionsBackgroundData) {
@@ -104,8 +128,10 @@ class _AssignedSessionSheetLoaderState
             VibrationController.stop();
             return const SizedBox.shrink();
           }
-          final rawSession =
-              firstQueueEntryVisibleForRetrievalSheet(assignedState.sessions);
+          final rawSession = firstQueueEntryVisibleForRetrievalSheet(
+            assignedState.sessions,
+            excludedSessionId: widget.excludedSessionId,
+          );
           if (rawSession == null) {
             VibrationController.stop();
             return const SizedBox.shrink();
@@ -204,7 +230,9 @@ class _AssignedSessionSheetLoaderState
                                     : <String>[]);
                             final skipRetrievalNext = ids.isNotEmpty &&
                                 _isInTransitParkFlow(context, ids.first);
-                            if (skipRetrievalNext) {
+                            final shouldKeepCurrentFlow = skipRetrievalNext ||
+                                widget.keepCurrentFlowOnAccept;
+                            if (shouldKeepCurrentFlow) {
                               for (final sid in ids) {
                                 TokenStorage.saveCollectKeysInTransitAckSync(
                                     sid);

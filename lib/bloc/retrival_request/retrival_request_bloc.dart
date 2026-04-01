@@ -46,9 +46,15 @@ class RetrivalRequestBloc
 
   static bool _isAlreadyAcceptedCase(String raw) {
     final msg = raw.toUpperCase();
-    return (msg.contains('ACCEPTED') && msg.contains('EXPECTED ASSIGNED')) ||
-        (msg.contains('RETRIEVING') && msg.contains('EXPECTED ASSIGNED')) ||
-        (msg.contains('ARRIVED') && msg.contains('EXPECTED ASSIGNED'));
+    final hasAssignedExpectation = msg.contains('EXPECTED ASSIGNED') ||
+        (msg.contains('EXPECTED') && msg.contains('ASSIGNED'));
+    final hasTerminalOrAcceptedStatus = msg.contains('ACCEPTED') ||
+        msg.contains('RETRIEVING') ||
+        msg.contains('ARRIVED');
+    final hasAlreadyAcceptedPhrase = msg.contains('ALREADY ACCEPT');
+
+    return (hasAssignedExpectation && hasTerminalOrAcceptedStatus) ||
+        hasAlreadyAcceptedPhrase;
   }
 
   Future<({double lat, double lon, double acc})> _getLocationForAccept() async {
@@ -107,14 +113,15 @@ class RetrivalRequestBloc
       ));
     } catch (e) {
       final errorMsg = _messageOf(e);
-      print('❌ Accept API failed: $errorMsg');
-
       if (_isAlreadyAcceptedCase(errorMsg)) {
+        print(
+            '[Accept Request] Already accepted on backend, treating as success: $errorMsg');
         emit(RetrivalRequestAccepted(
           'Retrieval already accepted — continuing',
           acceptedIds: [event.sessionId],
         ));
       } else {
+        print('❌ Accept API failed: $errorMsg');
         emit(RetrivalRequestError(errorMsg));
       }
     }

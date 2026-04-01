@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
 import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_flow_tracker.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
@@ -112,6 +113,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _isShowingAssignedSheet = true;
     final assignedSessionsBloc = context.read<AssignedSessionsBackgroundBloc>();
     final driverMenuBloc = context.read<DriverMenuBloc>();
+    final keepCurrentFlowOnAccept = ModalRoute.of(context)?.isCurrent != true;
+    String? excludedSessionId;
+    if (keepCurrentFlowOnAccept) {
+      excludedSessionId = _lastPushedConfirmArrivalSessionId ??
+          ConfirmArrivalFlowTracker.activeSessionId;
+      if ((excludedSessionId == null || excludedSessionId.trim().isEmpty) &&
+          ParkFlowSignals.isCarPhotoParkFlowActive) {
+        excludedSessionId = TokenStorage.getSessionIdSync();
+      }
+    }
 
     showModalBottomSheet(
       context: context,
@@ -132,9 +143,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             BlocProvider.value(value: assignedSessionsBloc),
             BlocProvider.value(value: driverMenuBloc),
           ],
-          child: const PopScope(
+          child: PopScope(
             canPop: false,
-            child: AssignedSessionSheetLoader(),
+            child: AssignedSessionSheetLoader(
+              keepCurrentFlowOnAccept: keepCurrentFlowOnAccept,
+              excludedSessionId: excludedSessionId,
+            ),
           ),
         );
       },
@@ -399,6 +413,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return pending.sessions.first;
   }
 
+  bool _shouldDeferRetrievalSheetForTopPendingTask(
+    BuildContext context,
+    PendingSessionsResponse? pending,
+  ) {
+    if (pending == null || pending.sessions.isEmpty) return false;
+    final top = pending.sessions.first;
+    if (top.isReparking || top.isCheckedIn) return true;
+    if (top.isArrived || top.isAccepted) {
+      return _pendingSessionNeedsConfirmArrivalNavigation(context, top);
+    }
+    return false;
+  }
+
   AssignedSession? _findAssignedSessionById(List<dynamic> sessions, String id) {
     final aid = id.trim();
     if (aid.isEmpty) return null;
@@ -427,6 +454,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return null;
     }
     for (final id in defOrder) {
+      if (TokenStorage.shouldSuppressAutoConfirmArrivalForSessionSync(id)) {
+        continue;
+      }
       final s = _findAssignedSessionById(assignedState.sessions, id);
       if (s == null) continue;
       final st = s.retrievalLifecycleStatus;
@@ -435,6 +465,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       }
     }
     for (final id in defOrder) {
+      if (TokenStorage.shouldSuppressAutoConfirmArrivalForSessionSync(id)) {
+        continue;
+      }
       final s = _findAssignedSessionById(assignedState.sessions, id);
       if (s == null) continue;
       final st = s.retrievalLifecycleStatus;
@@ -449,6 +482,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   /// [didPopNext] can re-run the same logic after a route pop (listener alone may not fire).
   void _tryResumeDriverFlowFromHome(BuildContext context) {
     if (!mounted) return;
+    // Avoid resolving/closing flows while another driver route (e.g. Confirm Arrival,
+    // Handover, camera) is on top. Running this underneath can close a newly shown
+    // retrieval sheet within 1-2s and make it appear to "flash" then disappear.
+    if (ModalRoute.of(context)?.isCurrent != true) return;
     final menuState = context.read<DriverMenuBloc>().state;
     if (menuState is! DriverHomeLoaded) return;
 
@@ -535,7 +572,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               }
             });
           }
-        } else {
+        } else if ((target.isArrived || target.isAccepted) &&
+            _pendingSessionNeedsConfirmArrivalNavigation(context, target)) {
           scheduledDriverFlowNavigation = true;
           _closeAssignedSessionSheetIfOpen(context);
           final pendingTarget = target;
@@ -558,6 +596,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               ),
             );
           });
+        } else {
+          // Top API row is not actionable for confirm-arrival navigation
+          // (e.g. transient stale status); avoid reopening stale retrieval UI.
         }
       } else if (assignedOnlyTarget != null) {
         scheduledDriverFlowNavigation = true;
@@ -619,6 +660,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     }
 
     final pendingSessions = driverMenuState.pendingSessions;
+    // If top pending task should be resumed directly (parking or confirm-arrival),
+    // don't flash retrieval sheet for 1-2s during refresh races on home.
+    // Keep showing the sheet on non-home routes (Confirm Arrival/Handover) so
+    // collect-keys in-transit behavior continues to work.
+    final isHomeCurrent = ModalRoute.of(blocContext)?.isCurrent == true;
+    if (isHomeCurrent &&
+        _shouldDeferRetrievalSheetForTopPendingTask(
+            blocContext, pendingSessions)) {
+      return;
+    }
 
     // Reparking: only block retrieval for the **same** session as this assignment.
     // Otherwise a different REPARKING row was hiding the sheet on camera/preview.
