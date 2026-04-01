@@ -29,7 +29,6 @@ import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dar
 import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
 import 'package:niloufer_valet_mobile/utils/session_converter.dart';
-import 'package:niloufer_valet_mobile/utils/pending_sessions_fifo.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
 
@@ -369,30 +368,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return _canResumeDeferredRetrievalConfirm(context, s.sessionId);
   }
 
-  /// Next Confirm Arrival target from **GET /sessions/pending** only: FIFO by
-  /// [PendingSession.assignedAt]/[createdAt], then status priority ARRIVED → ACCEPTED.
-  /// Each 5s poll refreshes pending; [_tryResumeDriverFlowFromHome] re-runs on each
-  /// [DriverHomeLoaded] so status changes redirect to the right UI one session at a time.
-  PendingSession? _firstPendingSessionForConfirmArrival(
-    BuildContext context,
-    PendingSessionsResponse pending,
-  ) {
-    final sorted = pendingSessionsFifoSorted(pending.sessions);
-    for (final s in sorted) {
-      if (s.isArrived &&
-          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
-        return s;
-      }
-    }
-    for (final s in sorted) {
-      if (s.isAccepted &&
-          _pendingSessionNeedsConfirmArrivalNavigation(context, s)) {
-        return s;
-      }
-    }
-    return null;
-  }
-
   /// Same session id as assigned retrieval still needs Confirm Arrival (including deferred after park).
   bool _pendingNeedsConfirmForAssignedRetrieval(
     BuildContext context,
@@ -414,6 +389,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       }
     }
     return false;
+  }
+
+  /// Strict API order: always use the first pending session as priority.
+  PendingSession? _firstPendingSessionInApiOrderForDriverFlow(
+    PendingSessionsResponse pending,
+  ) {
+    if (pending.sessions.isEmpty) return null;
+    return pending.sessions.first;
   }
 
   AssignedSession? _findAssignedSessionById(List<dynamic> sessions, String id) {
@@ -462,7 +445,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return null;
   }
 
-  /// Confirm Arrival / repark / checked-in / retrieval sheet — single place so
+  /// Repark / checked-in / Confirm Arrival / retrieval sheet — single place so
   /// [didPopNext] can re-run the same logic after a route pop (listener alone may not fire).
   void _tryResumeDriverFlowFromHome(BuildContext context) {
     if (!mounted) return;
@@ -479,59 +462,103 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
     var scheduledDriverFlowNavigation = false;
 
-    PendingSession? nextPendingConfirm;
-    if (menuState.pendingSessions != null) {
-      nextPendingConfirm = _firstPendingSessionForConfirmArrival(
-        context,
-        menuState.pendingSessions!,
+    final pending = menuState.pendingSessions;
+    PendingSession? nextPendingInApiOrder;
+    if (pending != null) {
+      nextPendingInApiOrder = _firstPendingSessionInApiOrderForDriverFlow(
+        pending,
       );
-    }
-    // If the next pending row is a different session than what we last opened,
-    // clear the stuck guard (RouteAware.didPopNext only runs when this observer
-    // is on MaterialApp.navigatorObservers).
-    if (_hasNavigatedForStatus &&
-        nextPendingConfirm != null &&
-        nextPendingConfirm.sessionId.trim() !=
-            (_lastPushedConfirmArrivalSessionId ?? '').trim()) {
-      _hasNavigatedForStatus = false;
+      // If the next pending row is a different session than what we last opened,
+      // clear the stuck guard (RouteAware.didPopNext only runs when this observer
+      // is on MaterialApp.navigatorObservers).
+      if (_hasNavigatedForStatus &&
+          nextPendingInApiOrder != null &&
+          nextPendingInApiOrder.sessionId.trim() !=
+              (_lastPushedConfirmArrivalSessionId ?? '').trim()) {
+        _hasNavigatedForStatus = false;
+      }
     }
 
-    if (!_hasNavigatedForStatus) {
+    if (!scheduledDriverFlowNavigation && !_hasNavigatedForStatus) {
       PendingSession? target;
       AssignedSession? assignedOnlyTarget;
 
-      if (menuState.pendingSessions != null) {
-        target = nextPendingConfirm;
-        if (target == null) {
-          assignedOnlyTarget = _firstAssignedDeferredNeedingConfirm(context);
-        }
+      if (pending != null) {
+        target = nextPendingInApiOrder;
       } else {
         assignedOnlyTarget = _firstAssignedDeferredNeedingConfirm(context);
       }
 
       if (target != null) {
-        scheduledDriverFlowNavigation = true;
-        _closeAssignedSessionSheetIfOpen(context);
-        final pendingTarget = target;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          final routeIsCurrent = ModalRoute.of(context)?.isCurrent == true;
-          if (!routeIsCurrent) return;
-          if (!mounted) return;
+        if (target.isReparking) {
+          scheduledDriverFlowNavigation = true;
           _hasNavigatedForStatus = true;
-          _lastPushedConfirmArrivalSessionId = pendingTarget.sessionId.trim();
-          final assignedSession =
-              SessionConverter.pendingToAssigned(pendingTarget);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ConfirmArrivalScreen(
-                session: assignedSession,
-                preventBackNavigation: true,
-                showHandoverOnLoad: pendingTarget.isArrived,
+          _closeAssignedSessionSheetIfOpen(context);
+          final reparkingSession = target;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CarPhotoIntroScreen(
+                    cameViaTagNumber: false,
+                    sessionId: reparkingSession.sessionId,
+                    isReparking: true,
+                  ),
+                ),
+              );
+            }
+          });
+        } else if (target.isCheckedIn) {
+          // Keep first API task in focus; do not jump to retrieval while this is first.
+          scheduledDriverFlowNavigation = true;
+          _hasNavigatedForStatus = true;
+          _closeAssignedSessionSheetIfOpen(context);
+          if (!_hasShownSessionDialog) {
+            _hasShownSessionDialog = true;
+            final checkedInSession = target;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+                SessionIncompleteDialog.show(
+                  context,
+                  cardNumber: checkedInSession.cardNumber.toString(),
+                  onContinue: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CarPhotoIntroScreen(
+                          cameViaTagNumber: false,
+                          sessionId: checkedInSession.sessionId,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }
+            });
+          }
+        } else {
+          scheduledDriverFlowNavigation = true;
+          _closeAssignedSessionSheetIfOpen(context);
+          final pendingTarget = target;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final routeIsCurrent = ModalRoute.of(context)?.isCurrent == true;
+            if (!routeIsCurrent) return;
+            if (!mounted) return;
+            _hasNavigatedForStatus = true;
+            _lastPushedConfirmArrivalSessionId = pendingTarget.sessionId.trim();
+            final assignedSession =
+                SessionConverter.pendingToAssigned(pendingTarget);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ConfirmArrivalScreen(
+                  session: assignedSession,
+                  preventBackNavigation: true,
+                  showHandoverOnLoad: pendingTarget.isArrived,
+                ),
               ),
-            ),
-          );
-        });
+            );
+          });
+        }
       } else if (assignedOnlyTarget != null) {
         scheduledDriverFlowNavigation = true;
         _closeAssignedSessionSheetIfOpen(context);
@@ -554,53 +581,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             ),
           );
         });
-      } else if (menuState.pendingSessions != null) {
-        final pending = menuState.pendingSessions!;
-        if (pending.hasReparkingSession) {
-          scheduledDriverFlowNavigation = true;
-          _hasNavigatedForStatus = true;
-          _closeAssignedSessionSheetIfOpen(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-              final reparkingSession = pending.reparkingSession;
-              if (reparkingSession != null) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CarPhotoIntroScreen(
-                      cameViaTagNumber: false,
-                      sessionId: reparkingSession.sessionId,
-                      isReparking: true,
-                    ),
-                  ),
-                );
-              }
-            }
-          });
-        } else if (!_hasShownSessionDialog && pending.hasCheckedInSession) {
-          scheduledDriverFlowNavigation = true;
-          _hasShownSessionDialog = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-              final checkedInSession = pending.checkedInSession;
-              if (checkedInSession != null) {
-                SessionIncompleteDialog.show(
-                  context,
-                  cardNumber: checkedInSession.cardNumber.toString(),
-                  onContinue: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CarPhotoIntroScreen(
-                          cameViaTagNumber: false,
-                          sessionId: checkedInSession.sessionId,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }
-            }
-          });
-        }
       }
     }
 

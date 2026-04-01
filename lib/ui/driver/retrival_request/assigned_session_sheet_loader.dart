@@ -248,6 +248,7 @@ class _AssignedSessionSheetLoaderState
                         PassAvailableDriversState>(
                       builder: (context, passState) {
                         final isPassing = passState is PassingSessionToDriver;
+                        final actionsLocked = _isAcceptLoading || isPassing;
 
                         return RetrievalRequestSheet(
                           session: typedSession,
@@ -260,7 +261,7 @@ class _AssignedSessionSheetLoaderState
                           queueCount: queueIds.length,
                           onAcceptAll: showAcceptAll
                               ? () {
-                                  if (_isAcceptLoading) return;
+                                  if (actionsLocked) return;
                                   VibrationController.stop();
                                   setState(() {
                                     _isAcceptLoading = true;
@@ -276,7 +277,7 @@ class _AssignedSessionSheetLoaderState
                               : null,
                           onAccept: canAccept
                               ? () {
-                                  if (_isAcceptLoading) return;
+                                  if (actionsLocked) return;
                                   VibrationController.stop();
                                   setState(() {
                                     _isAcceptLoading = true;
@@ -303,7 +304,7 @@ class _AssignedSessionSheetLoaderState
                                   : null),
                           // Pass (no driver selection UI)
                           isPassing: isPassing,
-                          onPass: (effectiveSessionId != null && !isPassing)
+                          onPass: (effectiveSessionId != null && !actionsLocked)
                               ? () {
                                   print(
                                       '[PASS UI] Pass button tapped for session: $effectiveSessionId');

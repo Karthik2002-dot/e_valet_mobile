@@ -4,12 +4,14 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 class PassToDriverSection extends StatelessWidget {
   final double screenWidth;
   final bool isPassing;
+  final bool isDisabled;
   final VoidCallback? onPass;
 
   const PassToDriverSection({
     super.key,
     required this.screenWidth,
     required this.isPassing,
+    this.isDisabled = false,
     required this.onPass,
   });
 
@@ -26,7 +28,7 @@ class PassToDriverSection extends StatelessWidget {
         SizedBox(
           height: 55,
           child: ElevatedButton.icon(
-            onPressed: isPassing ? null : onPass,
+            onPressed: (isPassing || isDisabled) ? null : onPass,
             icon: isPassing
                 ? SizedBox(
                     width: 16,

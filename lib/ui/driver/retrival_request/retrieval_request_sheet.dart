@@ -48,6 +48,7 @@ class RetrievalRequestSheet extends StatelessWidget {
     const horizontalPadding = 16.0;
     const verticalPadding = 12.0;
     final maxSheetHeight = screenHeight * 0.88;
+    final isActionLocked = isAcceptLoading || isPassing;
 
     return SafeArea(
       child: Align(
@@ -138,6 +139,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                           PassToDriverSection(
                             screenWidth: screenWidth,
                             isPassing: isPassing,
+                            isDisabled: isActionLocked,
                             onPass: onPass,
                           ),
                         ],
@@ -156,7 +158,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                     child: SizedBox(
                       height: 50,
                       child: OutlinedButton(
-                        onPressed: isAcceptLoading ? null : onAcceptAll,
+                        onPressed: isActionLocked ? null : onAcceptAll,
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                               color: AppColors.black, width: 1.5),
@@ -191,7 +193,7 @@ class RetrievalRequestSheet extends StatelessWidget {
                     child: SizedBox(
                       height: 55,
                       child: ElevatedButton(
-                        onPressed: isAcceptLoading
+                        onPressed: isActionLocked
                             ? null
                             : (onAccept ?? () => Navigator.of(context).pop()),
                         style: ElevatedButton.styleFrom(
