@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/car_details_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_flow_tracker.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
@@ -72,6 +73,11 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
       GlobalKey<HandoverButtonsSectionState>();
 
+  bool _isNotAssignedToRetrievalError(String message) {
+    final msg = message.toLowerCase();
+    return msg.contains('not assigned') && msg.contains('retrieval request');
+  }
+
   static int _confirmArrivalDisableSecondsFromEnv() {
     final v = dotenv.env['CONFIRM_ARRIVAL_DISABLE_SECONDS'];
     if (v == null || v.isEmpty) return 10;
@@ -87,6 +93,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   @override
   void initState() {
     super.initState();
+    ConfirmArrivalFlowTracker.setActiveSession(widget.session.id);
     _showHandoverButtons = widget.showHandoverOnLoad;
     final triggeredAt = widget.acceptTriggeredAt;
     final totalSeconds = widget.disableConfirmArrivalForSeconds ??
@@ -316,6 +323,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
     _enableConfirmArrivalTimer?.cancel();
     _cancelOperatorOverridePolling();
     _userHandoverRequestInFlight = false;
+    ConfirmArrivalFlowTracker.clearIfMatches(widget.session.id);
     super.dispose();
   }
 
@@ -364,7 +372,14 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
               'ConfirmArrival bloc: ConfirmHandoverError session=${widget.session.id} ${state.message}',
               name: 'ConfirmArrival',
             );
-            SnackBars.showErrorSnackBar(context, state.message);
+            if (_isNotAssignedToRetrievalError(state.message)) {
+              // Assignment moved away; leave stale screen instead of allowing
+              // repeated handover retries on a session this valet no longer owns.
+              SnackBars.showSuccessSnackBar(context, state.message);
+              _safePopAfterSnackBar(reason: 'handover_not_assigned_anymore');
+            } else {
+              SnackBars.showErrorSnackBar(context, state.message);
+            }
           }
         },
         child: BlocBuilder<ConfirmArrivalBloc, ConfirmArrivalState>(
