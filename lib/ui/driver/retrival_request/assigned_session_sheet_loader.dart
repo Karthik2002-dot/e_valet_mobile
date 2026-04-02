@@ -17,16 +17,6 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.da
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
 
-/// FIFO order matches [assignedState.sessions].
-List<String> sessionIdsFromAssignedQueue(List<dynamic> sessions) {
-  final out = <String>[];
-  for (final s in sessions) {
-    final id = sessionIdOfQueueEntry(s);
-    if (id != null) out.add(id);
-  }
-  return out;
-}
-
 /// Session id for one queue entry (same rules as [AssignedSessionsBackgroundBloc]).
 String? sessionIdOfQueueEntry(dynamic s) {
   if (s is AssignedSession) {
@@ -88,6 +78,7 @@ class _AssignedSessionSheetLoaderState
     extends State<AssignedSessionSheetLoader> {
   bool _isAcceptLoading = false;
   DateTime? _acceptTriggeredAt;
+  String? _passErrorMessage;
 
   @override
   void dispose() {
@@ -184,12 +175,6 @@ class _AssignedSessionSheetLoaderState
           final canAccept =
               effectiveSessionId != null && effectiveSessionId.isNotEmpty;
 
-          final queueIds = sessionIdsFromAssignedQueue(assignedState.sessions);
-          // Show "Accept all" whenever multiple assignments are queued (including after
-          // returning to home — in-transit-only gating hid this for the rest of the queue).
-          final showAcceptAll =
-              queueIds.length > 1 && effectiveSessionId != null;
-
           // Fallback: start vibration if the widget becomes visible with a
           // session but the notification handler didn't trigger it yet
           // (e.g. user opened the app manually after a background notification).
@@ -258,6 +243,9 @@ class _AssignedSessionSheetLoaderState
                           PassAvailableDriversState>(
                         listener: (context, state) {
                           if (state is SessionPassedToDriver) {
+                            if (mounted) {
+                              setState(() => _passErrorMessage = null);
+                            }
                             print(
                                 '[PASS UI] Pass success received, closing bottom sheet.');
                             SnackBars.showSuccessSnackBar(
@@ -268,6 +256,9 @@ class _AssignedSessionSheetLoaderState
                             }
                           } else if (state is PassToDriverError) {
                             SnackBars.showErrorSnackBar(context, state.message);
+                            if (mounted) {
+                              setState(() => _passErrorMessage = state.message);
+                            }
                           }
                         },
                       ),
@@ -285,24 +276,7 @@ class _AssignedSessionSheetLoaderState
                               : null,
                           isLoading: false,
                           isAcceptLoading: _isAcceptLoading,
-                          showAcceptAll: showAcceptAll,
-                          queueCount: queueIds.length,
-                          onAcceptAll: showAcceptAll
-                              ? () {
-                                  if (actionsLocked) return;
-                                  VibrationController.stop();
-                                  setState(() {
-                                    _isAcceptLoading = true;
-                                    _acceptTriggeredAt = DateTime.now();
-                                  });
-                                  if (blocContext.mounted) {
-                                    blocContext.read<RetrivalRequestBloc>().add(
-                                        AcceptAllRetrivalRequests(queueIds));
-                                  } else if (mounted) {
-                                    setState(() => _isAcceptLoading = false);
-                                  }
-                                }
-                              : null,
+                          passErrorMessage: _passErrorMessage,
                           onAccept: canAccept
                               ? () {
                                   if (actionsLocked) return;
@@ -334,6 +308,10 @@ class _AssignedSessionSheetLoaderState
                           isPassing: isPassing,
                           onPass: (effectiveSessionId != null && !actionsLocked)
                               ? () {
+                                  // Clear any previous pass error once user retries.
+                                  if (mounted) {
+                                    setState(() => _passErrorMessage = null);
+                                  }
                                   print(
                                       '[PASS UI] Pass button tapped for session: $effectiveSessionId');
                                   VibrationController.stop();
