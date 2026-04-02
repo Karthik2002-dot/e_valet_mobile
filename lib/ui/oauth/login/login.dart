@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
+import 'package:niloufer_valet_mobile/bloc/oauth/login/login_event.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
@@ -24,6 +25,8 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/outlet_selection_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/login/location_too_far_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,6 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _loginIdFocusNode = FocusNode();
   final FocusNode _pinFocusNode = FocusNode();
 
+  bool _outletDialogShowing = false;
+
   @override
   void dispose() {
     _loginIdController.dispose();
@@ -47,29 +52,51 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _navigateToDriverHome(BuildContext context) {
-    // Navigate to driver home screen - permissions will be requested there
-    if (context.mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const DriverHomeScreen(),
-        ),
-      );
-      // Dispatch event to refresh driver status after navigation
-      context.read<DriverStatusBloc>().add(const DriverStatusStarted());
-    }
+  void _showOutletDialog(
+    BuildContext context,
+    LoginSuccessNeedsOutletSelection state,
+  ) {
+    if (_outletDialogShowing) return;
+    _outletDialogShowing = true;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: context.read<LoginBloc>(),
+          // BlocBuilder updates the loading spinner inside the dialog.
+          // Navigation and full dismissal are handled by the outer BlocListener
+          // via pushAndRemoveUntil, which clears the entire stack including the
+          // dialog route — so we do NOT pop() from here.
+          child: BlocBuilder<LoginBloc, LoginState>(
+            builder: (ctx, s) {
+              final isLoading = s is LoginOutletSelectionLoading;
+              return OutletSelectionDialog(
+                outlets: state.outlets,
+                isLoading: isLoading,
+                onOutletSelected: isLoading
+                    ? (_) {}
+                    : (outlet) {
+                        ctx.read<LoginBloc>().add(OutletSelected(outlet));
+                      },
+              );
+            },
+          ),
+        );
+      },
+    ).whenComplete(() {
+      _outletDialogShowing = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get FirebaseMessagingService from Provider
     final firebaseMessagingService = Provider.of<FirebaseMessagingService>(
       context,
       listen: false,
     );
 
-    // Get WebSocketBloc from context
     final webSocketBloc = context.read<WebSocketBloc>();
 
     return BlocProvider(
@@ -79,41 +106,49 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
-          if (state is LoginSuccess) {
+          if (state is LoginSuccessNeedsOutletSelection) {
+            _showOutletDialog(context, state);
+          } else if (state is LoginSuccess) {
             final roles =
                 state.profile.roles.map((r) => r.toLowerCase()).toList();
 
-            // Priority: scanner → operator/admin → driver
+            // pushAndRemoveUntil clears ALL routes (including any open dialog)
+            // before pushing the destination. This prevents the dialog's own
+            // pop() from popping the freshly pushed screen.
             if (roles.any((r) => r.contains('scanner'))) {
-              Navigator.pushReplacement(
-                context,
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                   builder: (_) => const ScannerHomeScreen(),
                 ),
+                (route) => false,
               );
             } else if (roles
                 .any((r) => r.contains('operator') || r.contains('admin'))) {
-              Navigator.pushReplacement(
-                context,
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                   builder: (_) => const OperatorDashboardScreen(),
                 ),
+                (route) => false,
               );
             } else if (roles.any((r) => r.contains('driver'))) {
-              _navigateToDriverHome(context);
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const DriverHomeScreen(),
+                ),
+                (route) => false,
+              );
+              context
+                  .read<DriverStatusBloc>()
+                  .add(const DriverStatusStarted());
             } else {
-              // Unknown role - show error
               SnackBars.showErrorSnackBar(
                 context,
                 'Your account does not have the required permissions to access this application. Please contact your administrator.',
               );
             }
           } else if (state is LoginSuccessClockInTooFar) {
-            // Driver logged in but clock-in failed (too far from outlet).
-            // Provide DriverMenuBloc so app bar overflow menu (profile/logout) works.
             if (!context.mounted) return;
-            Navigator.pushReplacement(
-              context,
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => BlocProvider<DriverMenuBloc>(
                   create: (_) => DriverMenuBloc(),
@@ -179,6 +214,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+              (route) => false,
+            );
+          } else if (state is LoginSuccessLocationTooFar) {
+            if (!context.mounted) return;
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => LocationTooFarScreen(
+                  outletName: state.outletName,
+                  distanceMeters: state.distanceMeters,
+                  allowedRadiusMeters: state.allowedRadiusMeters,
+                ),
+              ),
+              (route) => false,
             );
           } else if (state is LoginFailure) {
             final t = context.read<AppTranslationsNotifier>();
@@ -196,12 +244,11 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: HitTestBehavior.translucent,
           onTap: () => FocusScope.of(context).unfocus(),
           child: Scaffold(
-            backgroundColor: AppColors.white, // Light beige background
+            backgroundColor: AppColors.white,
             appBar: const CustomAppBar(),
             body: SafeArea(
               child: Column(
                 children: [
-                  // Main content
                   Expanded(
                     child: Center(
                       child: LoginForm(
@@ -212,7 +259,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  // Footer
                   const Footer(),
                 ],
               ),
