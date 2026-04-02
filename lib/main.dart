@@ -49,6 +49,13 @@ void main() async {
   await TokenStorage.init();
   await VersionService.init();
 
+  // Restore the outlet ID that the user selected on their last login so
+  // ApiConfig.outletId and authorizedHeaders stay consistent across restarts.
+  final savedOutletId = await TokenStorage.getSelectedOutletId();
+  if (savedOutletId != null) {
+    dotenv.env['OUTLET_ID'] = savedOutletId.toString();
+  }
+
   // Initialize Background Sync
   await BackgroundSyncService.init();
 

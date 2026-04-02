@@ -52,6 +52,8 @@ class TokenStorage {
   static const String _currentLocationKey = 'current_location';
   static const String _currentLatitudeKey = 'current_latitude';
   static const String _currentLongitudeKey = 'current_longitude';
+  static const String _selectedOutletIdKey = 'selected_outlet_id';
+  static const String _selectedOutletNameKey = 'selected_outlet_name';
 
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
@@ -487,6 +489,56 @@ class TokenStorage {
     }
   }
 
+  // Selected Outlet management
+  static Future<void> saveSelectedOutlet({
+    required int outletId,
+    required String outletName,
+  }) async {
+    try {
+      await _box.put(_selectedOutletIdKey, outletId);
+      await _box.put(_selectedOutletNameKey, outletName);
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving selected outlet: $e');
+      rethrow;
+    }
+  }
+
+  static Future<int?> getSelectedOutletId() async {
+    try {
+      return _box.get(_selectedOutletIdKey) as int?;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving selected outlet id: $e');
+      return null;
+    }
+  }
+
+  static int? getSelectedOutletIdSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      return Hive.box(_boxName).get(_selectedOutletIdKey) as int?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> getSelectedOutletName() async {
+    try {
+      return _box.get(_selectedOutletNameKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error retrieving selected outlet name: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearSelectedOutlet() async {
+    try {
+      await _box.delete(_selectedOutletIdKey);
+      await _box.delete(_selectedOutletNameKey);
+    } catch (e) {
+      print('[TokenStorage] ❌ Error clearing selected outlet: $e');
+    }
+  }
+
   /// After Collect Keys (accept API): FIFO-ordered retrieval **session ids**
   /// deferred until Confirm Arrival / handover completes. While active park
   /// flow runs, Confirm Arrival is not auto-opened for these ids; after park,
@@ -659,6 +711,7 @@ class TokenStorage {
     await clearPhoneNumber();
     await clearResetToken();
     await clearSessionId();
+    await clearSelectedOutlet();
   }
 
   static Future<bool> hasValidTokens() async {
