@@ -57,7 +57,10 @@ class _ProfileView extends StatelessWidget {
                     }
 
                     if (state is ProfileLoaded) {
-                      return ProfileContent(profile: state.profile);
+                      return ProfileContent(
+                        profile: state.profile,
+                        loggedInOutletDisplay: state.loggedInOutletDisplay,
+                      );
                     }
 
                     // Fallback – shouldn't normally reach here

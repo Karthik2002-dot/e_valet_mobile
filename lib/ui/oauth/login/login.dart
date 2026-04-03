@@ -26,7 +26,10 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/outlet_selection_dialog.dart';
-import 'package:niloufer_valet_mobile/ui/oauth/login/location_too_far_screen.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_event.dart';
+import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_state.dart';
+import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -90,6 +93,78 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  bool _profileHasScannerRole(Profile profile) {
+    return profile.roles.any((r) => r.toLowerCase().contains('scanner'));
+  }
+
+  /// Driver or operator/admin: same overflow menu as driver too-far; operator help/guidelines when [operatorStyleMenus].
+  Widget _driverTooFarWithMenu({
+    required String message,
+    required bool operatorStyleMenus,
+  }) {
+    return BlocProvider<DriverMenuBloc>(
+      create: (_) => DriverMenuBloc(),
+      child: BlocListener<DriverMenuBloc, DriverMenuState>(
+        listener: (ctx, menuState) {
+          if (menuState is DriverMenuLogoutSuccess) {
+            SnackBars.showSuccessSnackBar(
+                ctx, menuState.response.message);
+            Navigator.of(ctx).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (__) => const LoginScreen(),
+              ),
+              (route) => false,
+            );
+            ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+          } else if (menuState is DriverMenuLogoutFailure) {
+            SnackBars.showErrorSnackBar(ctx, menuState.message);
+            Navigator.of(ctx).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (__) => const LoginScreen(),
+              ),
+              (route) => false,
+            );
+            ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+          } else if (menuState is DriverMenuAction) {
+            switch (menuState.action) {
+              case DriverMenuActionType.profile:
+                Navigator.of(ctx).push(
+                  MaterialPageRoute(
+                    builder: (__) => const ProfileScreen(),
+                  ),
+                );
+                ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+                break;
+              case DriverMenuActionType.guidelines:
+                Navigator.of(ctx).push(
+                  MaterialPageRoute(
+                    builder: (__) => GuidelinesScreen(
+                      isOperatorGuidelines: operatorStyleMenus,
+                    ),
+                  ),
+                );
+                ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+                break;
+              case DriverMenuActionType.help:
+                Navigator.of(ctx).push(
+                  MaterialPageRoute(
+                    builder: (__) => HelpScreen(
+                      isFromOperator: operatorStyleMenus,
+                    ),
+                  ),
+                );
+                ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+                break;
+              case DriverMenuActionType.logout:
+                break;
+            }
+          }
+        },
+        child: ClockInTooFarScreen(message: message),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final firebaseMessagingService = Provider.of<FirebaseMessagingService>(
@@ -137,9 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 (route) => false,
               );
-              context
-                  .read<DriverStatusBloc>()
-                  .add(const DriverStatusStarted());
+              context.read<DriverStatusBloc>().add(const DriverStatusStarted());
             } else {
               SnackBars.showErrorSnackBar(
                 context,
@@ -150,81 +223,72 @@ class _LoginScreenState extends State<LoginScreen> {
             if (!context.mounted) return;
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (_) => BlocProvider<DriverMenuBloc>(
-                  create: (_) => DriverMenuBloc(),
-                  child: BlocListener<DriverMenuBloc, DriverMenuState>(
-                    listener: (ctx, menuState) {
-                      if (menuState is DriverMenuLogoutSuccess) {
-                        SnackBars.showSuccessSnackBar(
-                            ctx, menuState.response.message);
-                        Navigator.of(ctx).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (__) => const LoginScreen(),
-                          ),
-                          (route) => false,
-                        );
-                        ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
-                      } else if (menuState is DriverMenuLogoutFailure) {
-                        SnackBars.showErrorSnackBar(ctx, menuState.message);
-                        Navigator.of(ctx).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (__) => const LoginScreen(),
-                          ),
-                          (route) => false,
-                        );
-                        ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
-                      } else if (menuState is DriverMenuAction) {
-                        switch (menuState.action) {
-                          case DriverMenuActionType.profile:
-                            Navigator.of(ctx).push(
-                              MaterialPageRoute(
-                                builder: (__) => const ProfileScreen(),
-                              ),
-                            );
-                            ctx
-                                .read<DriverMenuBloc>()
-                                .add(const DriverMenuReset());
-                            break;
-                          case DriverMenuActionType.guidelines:
-                            Navigator.of(ctx).push(
-                              MaterialPageRoute(
-                                builder: (__) => const GuidelinesScreen(),
-                              ),
-                            );
-                            ctx
-                                .read<DriverMenuBloc>()
-                                .add(const DriverMenuReset());
-                            break;
-                          case DriverMenuActionType.help:
-                            Navigator.of(ctx).push(
-                              MaterialPageRoute(
-                                builder: (__) => const HelpScreen(),
-                              ),
-                            );
-                            ctx
-                                .read<DriverMenuBloc>()
-                                .add(const DriverMenuReset());
-                            break;
-                          case DriverMenuActionType.logout:
-                            break;
-                        }
-                      }
-                    },
-                    child: ClockInTooFarScreen(message: state.message),
-                  ),
+                builder: (_) => _driverTooFarWithMenu(
+                  message: state.message,
+                  operatorStyleMenus: false,
                 ),
               ),
               (route) => false,
             );
           } else if (state is LoginSuccessLocationTooFar) {
             if (!context.mounted) return;
+            final profile = state.profile;
+            final useScannerShell = _profileHasScannerRole(profile);
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (_) => LocationTooFarScreen(
-                  outletName: state.outletName,
-                  distanceMeters: state.distanceMeters,
-                  allowedRadiusMeters: state.allowedRadiusMeters,
-                ),
+                builder: (_) => useScannerShell
+                    ? BlocProvider<ScannerMenuBloc>(
+                        create: (_) => ScannerMenuBloc(),
+                        child: BlocListener<ScannerMenuBloc, ScannerMenuState>(
+                          listener: (ctx, menuState) {
+                            if (menuState is ScannerMenuLogoutSuccess) {
+                              SnackBars.showSuccessSnackBar(
+                                  ctx, menuState.response.message);
+                              Navigator.of(ctx).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (__) => const LoginScreen(),
+                                ),
+                                (route) => false,
+                              );
+                              ctx
+                                  .read<ScannerMenuBloc>()
+                                  .add(const ScannerMenuReset());
+                            } else if (menuState is ScannerMenuLogoutFailure) {
+                              SnackBars.showErrorSnackBar(
+                                  ctx, menuState.message);
+                              Navigator.of(ctx).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (__) => const LoginScreen(),
+                                ),
+                                (route) => false,
+                              );
+                              ctx
+                                  .read<ScannerMenuBloc>()
+                                  .add(const ScannerMenuReset());
+                            } else if (menuState is ScannerMenuAction) {
+                              if (menuState.action ==
+                                  ScannerMenuActionType.profile) {
+                                Navigator.of(ctx).push(
+                                  MaterialPageRoute(
+                                    builder: (__) => const ProfileScreen(),
+                                  ),
+                                );
+                                ctx
+                                    .read<ScannerMenuBloc>()
+                                    .add(const ScannerMenuReset());
+                              }
+                            }
+                          },
+                          child: ClockInTooFarScreen(
+                            scannerMode: true,
+                            message: state.userFacingMessage,
+                          ),
+                        ),
+                      )
+                    : _driverTooFarWithMenu(
+                        message: state.userFacingMessage,
+                        operatorStyleMenus: true,
+                      ),
               ),
               (route) => false,
             );

@@ -13,9 +13,13 @@ import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 class ProfileContent extends StatelessWidget {
   final ProfileResponse profile;
 
+  /// Outlet the user is signed in for, when stored after outlet selection.
+  final String? loggedInOutletDisplay;
+
   const ProfileContent({
     super.key,
     required this.profile,
+    this.loggedInOutletDisplay,
   });
 
   @override
@@ -115,6 +119,17 @@ class ProfileContent extends StatelessWidget {
                         label: t.get(TextConstants.usernameLabel),
                         value: user.username,
                       ),
+                      if (loggedInOutletDisplay != null &&
+                          loggedInOutletDisplay!.isNotEmpty) ...[
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.01,
+                        ),
+                        ProfileInfoRow(
+                          icon: Icons.storefront_outlined,
+                          label: t.get(TextConstants.profileOutletLabel),
+                          value: loggedInOutletDisplay!,
+                        ),
+                      ],
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.01,
                       ),

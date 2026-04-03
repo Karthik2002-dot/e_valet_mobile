@@ -169,6 +169,8 @@ class TextConstants {
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
+  /// Selected outlet from login (operator/scanner/driver session).
+  static const String profileOutletLabel = 'Outlet';
   static const String usernameLabel = 'Username';
   static const String joinedLabel = 'Joined';
   static const String resetPassword = 'Reset Password';

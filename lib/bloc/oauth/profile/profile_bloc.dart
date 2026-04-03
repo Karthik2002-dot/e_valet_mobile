@@ -3,6 +3,7 @@ import 'package:niloufer_valet_mobile/api/oauth/profile_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/profile/profile_event.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/profile/profile_state.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(const ProfileInitial()) {
@@ -17,7 +18,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     try {
       final profile = await ProfileApiService.getProfile();
-      emit(ProfileLoaded(profile));
+      final outletName = await TokenStorage.getSelectedOutletName();
+      final outletId = await TokenStorage.getSelectedOutletId();
+      final String? loggedInOutletDisplay;
+      if (outletName != null && outletName.trim().isNotEmpty) {
+        loggedInOutletDisplay = outletName.trim();
+      } else if (outletId != null) {
+        loggedInOutletDisplay = '#$outletId';
+      } else {
+        loggedInOutletDisplay = null;
+      }
+      emit(ProfileLoaded(
+        profile,
+        loggedInOutletDisplay: loggedInOutletDisplay,
+      ));
     } on ApiException catch (e) {
       emit(ProfileError(e.message));
     } catch (_) {

@@ -73,16 +73,44 @@ class LoginSuccessLocationTooFar extends LoginState {
   final double distanceMeters;
   final double allowedRadiusMeters;
 
+  /// When the API returns HTTP error with a "too far" message (no JSON body).
+  final String? detailMessage;
+
   const LoginSuccessLocationTooFar({
     required this.profile,
     required this.outletName,
     required this.distanceMeters,
     required this.allowedRadiusMeters,
+    this.detailMessage,
   });
 
   @override
   List<Object?> get props =>
-      [profile, outletName, distanceMeters, allowedRadiusMeters];
+      [profile, outletName, distanceMeters, allowedRadiusMeters, detailMessage];
+
+  /// Text for [ClockInTooFarScreen]: API detail line if present, else distance/outlet summary.
+  String get userFacingMessage {
+    final trimmed = detailMessage?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+
+    final buf = StringBuffer();
+    if (outletName.isNotEmpty) {
+      buf.write('Outlet: $outletName');
+    }
+    if (distanceMeters > 0 || allowedRadiusMeters > 0) {
+      if (buf.isNotEmpty) buf.write('\n\n');
+      String fmt(double m) => m >= 1000
+          ? '${(m / 1000).toStringAsFixed(1)} km'
+          : '${m.toStringAsFixed(0)} m';
+      buf.write('Your distance: ${fmt(distanceMeters)}\n');
+      buf.write('Allowed radius: ${fmt(allowedRadiusMeters)}');
+    }
+    final s = buf.toString();
+    if (s.isEmpty) {
+      return 'You are outside the allowed area for this outlet.';
+    }
+    return s;
+  }
 }
 
 class LoginFailure extends LoginState {
