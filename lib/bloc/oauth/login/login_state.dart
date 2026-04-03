@@ -73,16 +73,20 @@ class LoginSuccessLocationTooFar extends LoginState {
   final double distanceMeters;
   final double allowedRadiusMeters;
 
+  /// When the API returns HTTP error with a "too far" message (no JSON body).
+  final String? detailMessage;
+
   const LoginSuccessLocationTooFar({
     required this.profile,
     required this.outletName,
     required this.distanceMeters,
     required this.allowedRadiusMeters,
+    this.detailMessage,
   });
 
   @override
   List<Object?> get props =>
-      [profile, outletName, distanceMeters, allowedRadiusMeters];
+      [profile, outletName, distanceMeters, allowedRadiusMeters, detailMessage];
 }
 
 class LoginFailure extends LoginState {

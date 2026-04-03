@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/models/driver/status/clock_in_request.dart
 import 'package:niloufer_valet_mobile/models/oauth/phone_password_login_request.dart';
 import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 import 'package:niloufer_valet_mobile/models/outlet/verify_location_request.dart';
+import 'package:niloufer_valet_mobile/models/outlet/verify_location_response.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
@@ -204,7 +205,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           longitude: longitude,
           accuracy: accuracy,
         );
-        if (clockInError != null && _isClockInTooFarError(clockInError)) {
+        if (clockInError != null && _isLocationTooFarMessage(clockInError)) {
           emit(LoginSuccessClockInTooFar(
             profile: profile,
             message: clockInError,
@@ -218,10 +219,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           longitude: longitude,
           accuracy: accuracy,
         );
-        final verifyResponse = await OutletApiService.verifyLocation(
-          outlet.id,
-          verifyRequest,
-        );
+        late final VerifyLocationResponse verifyResponse;
+        try {
+          verifyResponse = await OutletApiService.verifyLocation(
+            outlet.id,
+            verifyRequest,
+          );
+        } on ApiException catch (e) {
+          // Backend may return 4xx with a message instead of 200 + withinBounds: false.
+          if (_isLocationTooFarMessage(e.message)) {
+            emit(LoginSuccessLocationTooFar(
+              profile: profile,
+              outletName: outlet.name,
+              distanceMeters: 0,
+              allowedRadiusMeters: 0,
+              detailMessage: e.message,
+            ));
+            return;
+          }
+          rethrow;
+        }
 
         if (!verifyResponse.withinBounds) {
           emit(LoginSuccessLocationTooFar(
@@ -282,7 +299,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  bool _isClockInTooFarError(String message) {
+  bool _isLocationTooFarMessage(String message) {
     final lower = message.toLowerCase();
     return lower.contains('too far') ||
         (lower.contains('distance') && lower.contains('allowed'));

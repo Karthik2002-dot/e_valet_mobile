@@ -224,6 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   outletName: state.outletName,
                   distanceMeters: state.distanceMeters,
                   allowedRadiusMeters: state.allowedRadiusMeters,
+                  detailMessage: state.detailMessage,
                 ),
               ),
               (route) => false,

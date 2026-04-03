@@ -10,12 +10,14 @@ class LocationTooFarScreen extends StatelessWidget {
   final String outletName;
   final double distanceMeters;
   final double allowedRadiusMeters;
+  final String? detailMessage;
 
   const LocationTooFarScreen({
     super.key,
     required this.outletName,
     required this.distanceMeters,
     required this.allowedRadiusMeters,
+    this.detailMessage,
   });
 
   String _formatDistance(double meters) {
@@ -95,22 +97,37 @@ class LocationTooFarScreen extends StatelessWidget {
                         ],
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _InfoRow(
                             label: 'Outlet',
                             value: outletName,
                           ),
-                          SizedBox(height: screenHeight * 0.012),
-                          _InfoRow(
-                            label: 'Your distance',
-                            value: _formatDistance(distanceMeters),
-                            valueColor: AppColors.error,
-                          ),
-                          SizedBox(height: screenHeight * 0.012),
-                          _InfoRow(
-                            label: 'Allowed radius',
-                            value: _formatDistance(allowedRadiusMeters),
-                          ),
+                          if (detailMessage != null) ...[
+                            SizedBox(height: screenHeight * 0.018),
+                            Text(
+                              detailMessage!,
+                              style: TextStyle(
+                                fontSize: isTablet ? 13 : 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.black,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                          if (distanceMeters > 0 || allowedRadiusMeters > 0) ...[
+                            SizedBox(height: screenHeight * 0.012),
+                            _InfoRow(
+                              label: 'Your distance',
+                              value: _formatDistance(distanceMeters),
+                              valueColor: AppColors.error,
+                            ),
+                            SizedBox(height: screenHeight * 0.012),
+                            _InfoRow(
+                              label: 'Allowed radius',
+                              value: _formatDistance(allowedRadiusMeters),
+                            ),
+                          ],
                         ],
                       ),
                     ),
