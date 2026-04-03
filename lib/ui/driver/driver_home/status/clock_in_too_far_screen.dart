@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
-import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 
-/// Shown when login succeeds but clock-in fails because the driver is too far from the outlet.
-/// Displays the API message (e.g. distance / allowed) and a button to continue to driver home (offline).
+/// Shown when login succeeds but clock-in / verify-location fails because the user is too far from the outlet.
 class ClockInTooFarScreen extends StatelessWidget {
   final String message;
+
+  /// When true, app bar uses [ScannerMenuBloc] (profile + logout only). Otherwise [DriverMenuBloc].
+  final bool scannerMode;
 
   const ClockInTooFarScreen({
     super.key,
     required this.message,
+    this.scannerMode = false,
   });
 
   @override
@@ -31,8 +31,14 @@ class ClockInTooFarScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.lightBeigeBackground,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         showLanguageIcon: true,
+        actions: scannerMode
+            ? [
+                const OverflowMenu(scannerMode: true),
+                SizedBox(width: screenWidth * 0.04),
+              ]
+            : null,
       ),
       body: SafeArea(
         child: Column(
