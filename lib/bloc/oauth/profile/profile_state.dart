@@ -19,10 +19,16 @@ class ProfileLoading extends ProfileState {
 class ProfileLoaded extends ProfileState {
   final ProfileResponse profile;
 
-  const ProfileLoaded(this.profile);
+  /// Outlet name (or id fallback) from [TokenStorage] after login selection.
+  final String? loggedInOutletDisplay;
+
+  const ProfileLoaded(
+    this.profile, {
+    this.loggedInOutletDisplay,
+  });
 
   @override
-  List<Object?> get props => [profile];
+  List<Object?> get props => [profile, loggedInOutletDisplay];
 }
 
 class ProfileError extends ProfileState {
