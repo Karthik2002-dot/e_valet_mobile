@@ -136,14 +136,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     final outlet = event.outlet;
 
     try {
-      // Persist selected outlet to Hive and update dotenv in-memory so
-      // ApiConfig.outletId and authorizedHeaders reflect the choice immediately.
-      await TokenStorage.saveSelectedOutlet(
-        outletId: outlet.id,
-        outletName: outlet.name,
-      );
-      dotenv.env['OUTLET_ID'] = outlet.id.toString();
-
       // Get the user's current location (shared by both driver and operator/scanner paths)
       double latitude;
       double longitude;
@@ -176,19 +168,68 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         accuracy = 0.0;
       }
 
-      // Connect WebSocket with the chosen outlet
       final userId = profile.user.id;
+
+      if (_pendingIsDriver) {
+        // Driver: require successful clock-in (HTTP 2xx) before persisting outlet,
+        // connecting WebSocket, or completing login. Avoids "logged in" when API errors.
+        final clockInError = await _clockInAfterLogin(
+          outletId: outlet.id,
+          latitude: latitude,
+          longitude: longitude,
+          accuracy: accuracy,
+        );
+        if (clockInError != null) {
+          if (_isLocationTooFarMessage(clockInError)) {
+            emit(LoginSuccessClockInTooFar(
+              profile: profile,
+              message: clockInError,
+            ));
+          } else {
+            emit(LoginFailure(clockInError));
+          }
+          return;
+        }
+
+        await TokenStorage.saveSelectedOutlet(
+          outletId: outlet.id,
+          outletName: outlet.name,
+        );
+        dotenv.env['OUTLET_ID'] = outlet.id.toString();
+
+        try {
+          if (webSocketBloc != null) {
+            await WebSocketHelper.connectAfterLogin(
+              webSocketBloc: webSocketBloc!,
+              outletId: null,
+              operatorId: null,
+              driverId: userId,
+              initialDelay: const Duration(milliseconds: 500),
+            );
+            log('WebSocket connection initiated after outlet selection');
+          }
+        } catch (e) {
+          log('Failed to connect WebSocket after outlet selection: $e');
+        }
+
+        emit(LoginSuccess(profile));
+        return;
+      }
+
+      // Operator / Scanner: persist outlet and connect before verify-location
+      await TokenStorage.saveSelectedOutlet(
+        outletId: outlet.id,
+        outletName: outlet.name,
+      );
+      dotenv.env['OUTLET_ID'] = outlet.id.toString();
+
       try {
         if (webSocketBloc != null) {
-          String? outletId;
-          if (_pendingIsOperator || _pendingIsScanner) {
-            outletId = outlet.id.toString();
-          }
           await WebSocketHelper.connectAfterLogin(
             webSocketBloc: webSocketBloc!,
-            outletId: outletId,
+            outletId: outlet.id.toString(),
             operatorId: _pendingIsOperator ? userId : null,
-            driverId: _pendingIsDriver ? userId : null,
+            driverId: null,
             initialDelay: const Duration(milliseconds: 500),
           );
           log('WebSocket connection initiated after outlet selection');
@@ -197,58 +238,41 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         log('Failed to connect WebSocket after outlet selection: $e');
       }
 
-      if (_pendingIsDriver) {
-        // Driver: clock-in API enforces location check server-side
-        final clockInError = await _clockInAfterLogin(
-          outletId: outlet.id,
-          latitude: latitude,
-          longitude: longitude,
-          accuracy: accuracy,
+      // Operator / Scanner: verify location via dedicated endpoint
+      final verifyRequest = VerifyLocationRequest(
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: accuracy,
+      );
+      late final VerifyLocationResponse verifyResponse;
+      try {
+        verifyResponse = await OutletApiService.verifyLocation(
+          outlet.id,
+          verifyRequest,
         );
-        if (clockInError != null && _isLocationTooFarMessage(clockInError)) {
-          emit(LoginSuccessClockInTooFar(
-            profile: profile,
-            message: clockInError,
-          ));
-          return;
-        }
-      } else {
-        // Operator / Scanner: verify location via dedicated endpoint
-        final verifyRequest = VerifyLocationRequest(
-          latitude: latitude,
-          longitude: longitude,
-          accuracy: accuracy,
-        );
-        late final VerifyLocationResponse verifyResponse;
-        try {
-          verifyResponse = await OutletApiService.verifyLocation(
-            outlet.id,
-            verifyRequest,
-          );
-        } on ApiException catch (e) {
-          // Backend may return 4xx with a message instead of 200 + withinBounds: false.
-          if (_isLocationTooFarMessage(e.message)) {
-            emit(LoginSuccessLocationTooFar(
-              profile: profile,
-              outletName: outlet.name,
-              distanceMeters: 0,
-              allowedRadiusMeters: 0,
-              detailMessage: e.message,
-            ));
-            return;
-          }
-          rethrow;
-        }
-
-        if (!verifyResponse.withinBounds) {
+      } on ApiException catch (e) {
+        // Backend may return 4xx with a message instead of 200 + withinBounds: false.
+        if (_isLocationTooFarMessage(e.message)) {
           emit(LoginSuccessLocationTooFar(
             profile: profile,
-            outletName: verifyResponse.outletName,
-            distanceMeters: verifyResponse.distanceMeters,
-            allowedRadiusMeters: verifyResponse.allowedRadiusMeters,
+            outletName: outlet.name,
+            distanceMeters: 0,
+            allowedRadiusMeters: 0,
+            detailMessage: e.message,
           ));
           return;
         }
+        rethrow;
+      }
+
+      if (!verifyResponse.withinBounds) {
+        emit(LoginSuccessLocationTooFar(
+          profile: profile,
+          outletName: verifyResponse.outletName,
+          distanceMeters: verifyResponse.distanceMeters,
+          allowedRadiusMeters: verifyResponse.allowedRadiusMeters,
+        ));
+        return;
       }
 
       emit(LoginSuccess(profile));
@@ -295,7 +319,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       return e.message;
     } catch (e) {
       log('Failed to clock in after outlet selection: $e');
-      return null;
+      return 'Clock-in failed. Please try again.';
     }
   }
 

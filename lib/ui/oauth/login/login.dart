@@ -293,6 +293,11 @@ class _LoginScreenState extends State<LoginScreen> {
               (route) => false,
             );
           } else if (state is LoginFailure) {
+            // Dismiss outlet dialog so the error is visible (e.g. clock-in failed).
+            final nav = Navigator.of(context);
+            if (nav.canPop()) {
+              nav.pop();
+            }
             final t = context.read<AppTranslationsNotifier>();
             String displayMessage = state.message;
             if (state.message == TextConstants.validationPhoneRequired) {
