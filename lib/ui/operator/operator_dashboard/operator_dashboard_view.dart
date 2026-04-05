@@ -8,12 +8,17 @@ import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_content.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drawer/operator_drawer.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/operator_grouping_screen.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_overtime/operator_overtime_screen.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
 import 'operator_screen_router.dart';
 
 class OperatorDashboardView extends StatefulWidget {
@@ -33,6 +38,9 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
+  /// Auto mode state lifted here so it persists when user switches tabs and comes back.
+  bool _isAutoMode = true;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +50,20 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       outletId: _outletId,
     );
     _dashboardBloc.add(FetchDashboardKpis(outletId: _outletId));
+
+    _ensureAutoAssignEnabled();
+  }
+
+  Future<void> _ensureAutoAssignEnabled() async {
+    try {
+      // Force auto-assign enabled server-side as well (UI toggle is hidden).
+      await OperatorAutoAssignApiService.patchAutoAssignSettings(
+        outletId: _outletId,
+        enabled: true,
+      );
+    } catch (e) {
+      // Keep UI behavior as auto mode even if backend update fails.
+    }
   }
 
   @override
@@ -51,14 +73,50 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   }
 
   void _onMenuItemSelected(int index) {
-    if (index == 5) {
+    if (index == 8) {
       // Logout
       context.read<OperatorMenuBloc>().add(const OperatorMenuLogoutRequested());
     } else if (index == 4) {
+      // Over Time – open separate screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorOverTimeScreen(
+            onNavigateToTab: (tabIndex) {
+              setState(() => _selectedIndex = tabIndex);
+            },
+          ),
+        ),
+      );
+    } else if (index == 5) {
       // Profile – navigate to profile screen
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const ProfileScreen(),
+        ),
+      );
+    } else if (index == 6) {
+      // Help – shared screen for driver and operator
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const HelpScreen(isFromOperator: true),
+        ),
+      );
+    } else if (index == 7) {
+      // Operator guidelines – show only Operator Responsibilities
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const GuidelinesScreen(isOperatorGuidelines: true),
+        ),
+      );
+    } else if (index == 9) {
+      // Grouping – open separate screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OperatorGroupingScreen(
+            onNavigateToTab: (tabIndex) {
+              setState(() => _selectedIndex = tabIndex);
+            },
+          ),
         ),
       );
     } else {
@@ -101,6 +159,8 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
     return OperatorScreenRouter.getScreen(
       _selectedIndex,
       DashboardContent(
+        isAutoMode: _isAutoMode,
+        onAutoModeChanged: null,
         onRefreshReady: (refresh) {
           print('Dashboard refresh callback registered'); // Debug log
           _dashboardRefresh = refresh;
@@ -125,6 +185,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
           _selectedIndex = index;
         });
       },
+      isAutoMode: _isAutoMode,
     );
   }
 

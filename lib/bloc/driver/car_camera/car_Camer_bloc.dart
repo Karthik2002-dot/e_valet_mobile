@@ -22,14 +22,29 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     on<DisposeCameraRequested>(_onDisposeCameraRequested);
   }
 
+  /// Release native camera without clearing [_isInitializing] (used mid–re-init).
+  Future<void> _releaseCameraOnly() async {
+    try {
+      await _cameraController?.dispose();
+    } catch (_) {
+      // Native teardown can race with Flutter engine / surface; never crash the app.
+    }
+    _cameraController = null;
+    _isFlashOn = false;
+  }
+
+  /// Full teardown: stop preview before app background / bloc close so no frames
+  /// reach Flutter after the engine detaches (avoids FlutterJNI / ImageReader crashes).
+  Future<void> _disposeCameraResources() async {
+    _isInitializing = false;
+    await _releaseCameraOnly();
+  }
+
   Future<void> _onDisposeCameraRequested(
     DisposeCameraRequested event,
     Emitter<CarCameraState> emit,
   ) async {
-    if (_isInitializing) return;
-    await _cameraController?.dispose();
-    _cameraController = null;
-    _isFlashOn = false;
+    await _disposeCameraResources();
     emit(const CarCameraInitial());
   }
 
@@ -68,12 +83,8 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
     _isInitializing = true;
 
     try {
-      // Dispose existing camera controller if any
-      await _cameraController?.dispose();
-      _cameraController = null;
-
-      // Reset flash state
-      _isFlashOn = false;
+      // Dispose existing camera controller if any (keep _isInitializing true)
+      await _releaseCameraOnly();
 
       // Emit initial state to show loading
       emit(const CarCameraInitial());
@@ -179,7 +190,7 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
         } catch (e) {
           if (initRetryCount < maxInitRetries - 1) {
             // Dispose and recreate controller before retry
-            await _cameraController?.dispose();
+            await _releaseCameraOnly();
             _cameraController = CameraController(
               camera,
               ResolutionPreset.medium,
@@ -212,8 +223,7 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
       ));
     } catch (e) {
       // Clean up on error
-      await _cameraController?.dispose();
-      _cameraController = null;
+      await _disposeCameraResources();
 
       // Extract error message, handling null check operator errors
       String errorMessage = e.toString();
@@ -412,7 +422,9 @@ class CarCameraBloc extends Bloc<CarCameraEvent, CarCameraState> {
   //   }
   // }
 
-  void dispose() {
-    _cameraController?.dispose();
+  @override
+  Future<void> close() async {
+    await _disposeCameraResources();
+    return super.close();
   }
 }

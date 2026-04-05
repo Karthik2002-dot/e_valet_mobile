@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/digital_key_rack_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -12,11 +16,15 @@ class ParkedCarContentView extends StatefulWidget {
   final String searchQuery;
   final Function(int cardNumber, String sessionId)? onManualRequest;
 
+  /// When false (e.g. auto mode enabled), manual request button is disabled.
+  final bool manualRequestEnabled;
+
   const ParkedCarContentView({
     super.key,
     required this.digitalKeyRack,
     required this.searchQuery,
     this.onManualRequest,
+    this.manualRequestEnabled = true,
   });
 
   @override
@@ -49,6 +57,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final occupiedSlots = widget.digitalKeyRack.keyRack.length;
     final filteredItems = _getFilteredAndSortedItems();
     final screenWidth = MediaQuery.of(context).size.width;
@@ -62,7 +71,8 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           // Show search results info if searching
           if (widget.searchQuery.isNotEmpty) ...[
             TextComponent(
-              labelText: 'Showing results for "${widget.searchQuery}"',
+              labelText:
+                  t.get(TextConstants.showingResultsFor(widget.searchQuery)),
               color: AppColors.grey,
               fontSize: screenWidth * 0.013,
               fontWeight: FontWeight.w500,
@@ -71,7 +81,9 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
           ],
           LayoutBuilder(
             builder: (context, constraints) {
-              const crossAxisCount = 4;
+              // iOS only: 2 columns on narrow screens so each card has more width (avoids overflow). Android/others: always 4.
+              final crossAxisCount =
+                  (Platform.isIOS && screenWidth < 600) ? 2 : 4;
               final spacing = screenWidth * 0.02;
               final runSpacing = screenHeight * 0.02;
               final itemWidth =
@@ -87,6 +99,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
                       child: ParkedCarCard(
                         item: filteredItems[i],
                         onManualRequest: widget.onManualRequest,
+                        manualRequestEnabled: widget.manualRequestEnabled,
                         isHighlighted: widget.searchQuery.isNotEmpty &&
                             filteredItems[i]
                                 .cardNumber
@@ -116,7 +129,7 @@ class _ParkedCarContentViewState extends State<ParkedCarContentView> {
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
                 TextComponent(
-                  labelText: TextConstants.noCarsParked,
+                  labelText: t.get(TextConstants.noCarsParked),
                   fontSize: MediaQuery.of(context).size.width * 0.018,
                   color: AppColors.grey,
                 ),

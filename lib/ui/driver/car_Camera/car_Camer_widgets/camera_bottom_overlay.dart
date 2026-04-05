@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
@@ -67,6 +70,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
@@ -97,7 +101,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
           children: [
             // Parking Location Input Header
             TextComponent(
-              labelText: 'Parking Location',
+              labelText: t.getByKey(
+                  'parkingLocationLabel', TextConstants.parkingLocationLabel),
               color: AppColors.black,
               fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.w600,
@@ -123,7 +128,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                   fontSize: screenWidth * 0.04,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Enter parking location...',
+                  hintText: t.getByKey('enterParkingLocationHint',
+                      TextConstants.enterParkingLocationHint),
                   hintStyle: TextStyle(
                     color: AppColors.grey.withOpacity(0.6),
                     fontSize: screenWidth * 0.04,
@@ -155,7 +161,9 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                             _parkingLocationController.text.trim();
                         if (parkingLocation.isEmpty) {
                           SnackBars.showErrorSnackBar(
-                              context, 'Please enter parking location');
+                              context,
+                              t.getByKey('pleaseEnterParkingLocation',
+                                  TextConstants.pleaseEnterParkingLocation));
                           return;
                         }
                         if (widget.onSubmit != null) {
@@ -184,7 +192,8 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         ),
                       )
                     : TextComponent(
-                        labelText: 'Submit',
+                        labelText: t.getByKey(
+                            'submitButton', TextConstants.submitButton),
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.w600,
                       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_bloc.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_event.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/login/login_state.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/password_text_field.dart';
@@ -35,6 +37,7 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final t = context.watch<AppTranslationsNotifier>();
         final maxCardWidth = math.min(constraints.maxWidth * 0.9, 600.0);
         final iconSize = math.min(maxCardWidth * 0.2, 120.0);
         final titleFontSize = math.min(maxCardWidth * 0.06, 28.0);
@@ -65,7 +68,8 @@ class LoginForm extends StatelessWidget {
                   ),
                   const SizedBox(height: verticalSpacing),
                   TextComponent(
-                    labelText: TextConstants.loginPrompt,
+                    labelText:
+                        t.getByKey('loginPrompt', TextConstants.loginPrompt),
                     fontSize: titleFontSize,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
@@ -73,14 +77,19 @@ class LoginForm extends StatelessWidget {
                   ),
                   const SizedBox(height: verticalSpacing),
                   PhoneNumberField(
-                    labelText: TextConstants.phoneNumberLabel,
-                    hintText: TextConstants.phoneNumberHint,
+                    labelText: t.getByKey(
+                        'phoneNumberLabel', TextConstants.phoneNumberLabel),
+                    hintText: t.getByKey(
+                        'phoneNumberHint', TextConstants.phoneNumberHint),
                     controller: loginIdController,
                     focusNode: loginIdFocusNode,
                     textInputAction: TextInputAction.next,
                     initialCountryCode: 'IN',
                     disableCountryPicker: true,
                     onSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(pinFocusNode);
+                    },
+                    onComplete: () {
                       FocusScope.of(context).requestFocus(pinFocusNode);
                     },
                     onChanged: (value) =>
@@ -92,8 +101,10 @@ class LoginForm extends StatelessWidget {
                     focusNode: pinFocusNode,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleLogin(context),
-                    labelText: TextConstants.passwordLabel,
-                    hintText: TextConstants.passwordHint,
+                    labelText: t.getByKey(
+                        'passwordLabel', TextConstants.passwordLabel),
+                    hintText:
+                        t.getByKey('passwordHint', TextConstants.passwordHint),
                     onChanged: (value) =>
                         context.read<LoginBloc>().add(PinChanged(value)),
                   ),
@@ -111,8 +122,10 @@ class LoginForm extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButtonComponent(
                           labelText: isLoading
-                              ? TextConstants.loginButtonLoading
-                              : TextConstants.loginButton,
+                              ? t.getByKey('loginButtonLoading',
+                                  TextConstants.loginButtonLoading)
+                              : t.getByKey(
+                                  'loginButton', TextConstants.loginButton),
                           onPressed: handlePress,
                           elevatedButtonBackgroundColor: AppColors.accent,
                           radius: 8,
@@ -145,7 +158,8 @@ class LoginForm extends StatelessWidget {
                     children: [
                       const Spacer(),
                       TextButtonComponent(
-                        labelText: TextConstants.forgotPassword,
+                        labelText: t.getByKey(
+                            'forgotPassword', TextConstants.forgotPassword),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(

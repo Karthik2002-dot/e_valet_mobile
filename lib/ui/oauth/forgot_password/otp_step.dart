@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/password_reset_otp/password_reset_otp_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/password_reset_otp/password_reset_otp_event.dart';
 import 'package:niloufer_valet_mobile/api/oauth/otp_api_service.dart';
@@ -98,9 +100,10 @@ class _OtpStepState extends State<OtpStep> {
       }
     } catch (_) {
       if (mounted) {
+        final t = context.read<AppTranslationsNotifier>();
         SnackBars.showErrorSnackBar(
           context,
-          TextConstants.genericError,
+          t.get(TextConstants.genericError),
         );
       }
     } finally {
@@ -114,12 +117,13 @@ class _OtpStepState extends State<OtpStep> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final canResend = _remainingSeconds == 0 && !_isResending;
 
     return Column(
       children: [
         TextComponent(
-          labelText: TextConstants.otpSentTo(widget.phoneNumber),
+          labelText: t.get(TextConstants.otpSentTo(widget.phoneNumber)),
           fontSize: widget.size.width * 0.04,
           fontWeight: FontWeight.w400,
           color: AppColors.grey,
@@ -153,8 +157,8 @@ class _OtpStepState extends State<OtpStep> {
             onTap: _handleResendOtp,
             child: TextComponent(
               labelText: _isResending
-                  ? TextConstants.resendingOtp
-                  : TextConstants.resendOtp,
+                  ? t.get(TextConstants.resendingOtp)
+                  : t.get(TextConstants.resendOtp),
               fontSize: widget.size.width * 0.04,
               fontWeight: FontWeight.w500,
               color: AppColors.primary,
@@ -176,8 +180,8 @@ class _OtpStepState extends State<OtpStep> {
             opacity: widget.isVerifying ? 0.5 : 1.0,
             child: ElevatedButtonComponent(
               labelText: widget.isVerifying
-                  ? TextConstants.verifyingOtp
-                  : TextConstants.verifyOtp,
+                  ? t.get(TextConstants.verifyingOtp)
+                  : t.get(TextConstants.verifyOtp),
               onPressed: widget.isVerifying
                   ? () {}
                   : () {

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_event.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
@@ -13,9 +15,13 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 class ManualRequestWidget extends StatefulWidget {
   final VoidCallback onRequestCreated;
 
+  /// Auto mode state (kept for compatibility; does not disable manual request).
+  final bool isAutoMode;
+
   const ManualRequestWidget({
     super.key,
     required this.onRequestCreated,
+    this.isAutoMode = false,
   });
 
   @override
@@ -32,16 +38,18 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
   }
 
   void _handleManualRequest() {
+    final t = context.read<AppTranslationsNotifier>();
     final cardNumberText = _cardNumberController.text.trim();
     if (cardNumberText.isEmpty) {
-      SnackBars.showErrorSnackBar(context, TextConstants.pleaseEnterCardNumber);
+      SnackBars.showErrorSnackBar(
+          context, t.get(TextConstants.pleaseEnterCardNumber));
       return;
     }
 
     final cardNumber = int.tryParse(cardNumberText);
     if (cardNumber == null) {
       SnackBars.showErrorSnackBar(
-          context, TextConstants.pleaseEnterValidCardNumber);
+          context, t.get(TextConstants.pleaseEnterValidCardNumber));
       return;
     }
 
@@ -68,7 +76,10 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
       },
       child: BlocBuilder<OperatorDashboardBloc, OperatorDashboardState>(
         builder: (context, state) {
+          final t = context.watch<AppTranslationsNotifier>();
           final isLoading = state is ManualRequestInProgress;
+
+          final isDisabled = isLoading;
 
           return Padding(
             padding: EdgeInsets.symmetric(
@@ -85,9 +96,10 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],
-                    enabled: !isLoading,
+                    enabled: !isDisabled,
                     decoration: InputDecoration(
-                      hintText: 'Enter Card Number',
+                      hintText: t.getByKey(
+                          'tagNumberHint', TextConstants.tagNumberHint),
                       hintStyle: const TextStyle(
                         color: AppColors.black,
                         fontSize: 14,
@@ -121,7 +133,8 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
                       fontSize: 14,
                       color: AppColors.black,
                     ),
-                    onFieldSubmitted: (_) => _handleManualRequest(),
+                    onFieldSubmitted:
+                        isDisabled ? null : (_) => _handleManualRequest(),
                   ),
                 ),
 
@@ -129,14 +142,14 @@ class _ManualRequestWidgetState extends State<ManualRequestWidget> {
 
                 // Manual Request button
                 ElevatedButtonComponent(
-                  onPressed: isLoading ? () {} : _handleManualRequest,
+                  onPressed: isDisabled ? () {} : _handleManualRequest,
                   labelText: isLoading
-                      ? TextConstants.processingText
-                      : TextConstants.manualRequest,
+                      ? t.get(TextConstants.processingText)
+                      : t.get(TextConstants.manualRequest),
                   fontColor: AppColors.black,
                   fontSize: MediaQuery.of(context).size.width * 0.015,
                   elevatedButtonBackgroundColor:
-                      isLoading ? AppColors.grey : AppColors.primary,
+                      isDisabled ? AppColors.grey : AppColors.primary,
                   padding: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width * 0.03,
                     vertical: MediaQuery.of(context).size.height * 0.015,

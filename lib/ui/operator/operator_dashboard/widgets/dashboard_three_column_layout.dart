@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -11,6 +13,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
+  final bool autoAssignEnabled;
   final bool isLoading;
   final Set<String> highlightedRequestIds;
 
@@ -19,12 +22,14 @@ class DashboardThreeColumnLayout extends StatelessWidget {
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.onAssignmentComplete,
+    required this.autoAssignEnabled,
     this.isLoading = false,
     this.highlightedRequestIds = const <String>{},
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,11 +38,12 @@ class DashboardThreeColumnLayout extends StatelessWidget {
           availableDrivers: availableDrivers,
           retrievalRequests: retrievalRequests,
           isLoading: isLoading,
+          autoAssignEnabled: autoAssignEnabled,
         ),
         const SizedBox(height: 12),
         // --- Retrieval Requests (two columns) ---
         TextComponent(
-          labelText: TextConstants.retrievalRequests,
+          labelText: t.get(TextConstants.retrievalRequests),
           color: AppColors.black,
           fontSize: MediaQuery.of(context).size.height * 0.015,
         ),
@@ -52,6 +58,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   retrievalRequests: retrievalRequests,
                   availableDrivers: availableDrivers,
                   onAssignmentComplete: onAssignmentComplete,
+                  autoAssignEnabled: autoAssignEnabled,
                   isLoading: isLoading,
                   isLeftColumn: true,
                   highlightedRequestIds: highlightedRequestIds,
@@ -64,6 +71,7 @@ class DashboardThreeColumnLayout extends StatelessWidget {
                   retrievalRequests: retrievalRequests,
                   availableDrivers: availableDrivers,
                   onAssignmentComplete: onAssignmentComplete,
+                  autoAssignEnabled: autoAssignEnabled,
                   isLoading: isLoading,
                   isLeftColumn: false,
                   highlightedRequestIds: highlightedRequestIds,

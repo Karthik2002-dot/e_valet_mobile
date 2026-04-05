@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrival_widgets/pass_to_driver_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrival_widgets/session_card.dart';
 
 class RetrievalRequestSheet extends StatelessWidget {
@@ -12,6 +15,11 @@ class RetrievalRequestSheet extends StatelessWidget {
   final bool isAcceptLoading;
   final VoidCallback? onAccept;
 
+  // Pass-to-driver section
+  final bool isPassing;
+  final VoidCallback? onPass;
+  final String? passErrorMessage;
+
   const RetrievalRequestSheet({
     super.key,
     this.session,
@@ -19,18 +27,22 @@ class RetrievalRequestSheet extends StatelessWidget {
     this.isLoading = false,
     this.isAcceptLoading = false,
     this.onAccept,
+    this.isPassing = false,
+    this.onPass,
+    this.passErrorMessage,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    // Sheet fixed to bottom with padding; max height so it never overflows on small screens
     const horizontalPadding = 16.0;
     const verticalPadding = 12.0;
     final maxSheetHeight = screenHeight * 0.88;
+    final isActionLocked = isAcceptLoading || isPassing;
 
     return SafeArea(
       child: Align(
@@ -57,28 +69,31 @@ class RetrievalRequestSheet extends StatelessWidget {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Scrollable content so button always stays inside the sheet
+                // Scrollable content — shrinks to fit; scrolls when content
+                // exceeds the maxHeight cap on the parent Container.
                 Flexible(
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Container(
-                          width: screenWidth * 0.16,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            color: AppColors.greyLight,
-                            borderRadius: BorderRadius.circular(2),
+                        // Drag handle (centred)
+                        Center(
+                          child: Container(
+                            width: screenWidth * 0.16,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.greyLight,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
                         TextComponent(
-                          labelText: TextConstants.retrievalRequest,
+                          labelText: t.get(TextConstants.retrievalRequest),
                           fontSize: screenWidth * 0.045,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
@@ -103,26 +118,50 @@ class RetrievalRequestSheet extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: TextComponent(
-                              labelText:
-                                  TextConstants.noActiveRetrievalRequests,
+                              labelText: t
+                                  .get(TextConstants.noActiveRetrievalRequests),
                               textAlign: TextAlign.center,
                               fontSize: screenWidth * 0.04,
                               color: AppColors.mutedText,
                             ),
                           ),
                         ],
+
+                        // Pass-to-driver section — only shown when a session is active
+                        if (session != null) ...[
+                          const SizedBox(height: 4),
+                          PassToDriverSection(
+                            screenWidth: screenWidth,
+                            isPassing: isPassing,
+                            isDisabled: isActionLocked,
+                            onPass: onPass,
+                          ),
+                          if (passErrorMessage != null &&
+                              passErrorMessage!.trim().isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 10, bottom: 4),
+                              child: TextComponent(
+                                labelText: passErrorMessage!,
+                                fontSize: screenWidth * 0.035,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.error,
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+
+                // Accept / Collect Keys button (current / first in queue)
                 if (session != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8, bottom: 20),
                     child: SizedBox(
                       height: 55,
                       child: ElevatedButton(
-                        onPressed: isAcceptLoading
+                        onPressed: isActionLocked
                             ? null
                             : (onAccept ?? () => Navigator.of(context).pop()),
                         style: ElevatedButton.styleFrom(
@@ -149,7 +188,8 @@ class RetrievalRequestSheet extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextComponent(
-                                      labelText: TextConstants.acceptRequest,
+                                      labelText: t.getByKey('acceptRequest',
+                                          TextConstants.acceptRequest),
                                       fontSize: screenWidth * 0.05,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.black,

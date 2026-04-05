@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -20,13 +22,14 @@ class DriverOfflineContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: screenHeight * 0.05),
         // Offline message
         TextComponent(
-          labelText: TextConstants.pleaseTurnOnlineToPark,
+          labelText: t.get(TextConstants.pleaseTurnOnlineToPark),
           fontSize: isDesktop
               ? screenWidth * 0.018
               : isTablet
@@ -58,7 +61,7 @@ class DriverOfflineContent extends StatelessWidget {
             horizontal: screenWidth * 0.1,
           ),
           child: TextComponent(
-            labelText: TextConstants.cannotParkCarOffline,
+            labelText: t.get(TextConstants.cannotParkCarOffline),
             fontSize: isDesktop
                 ? screenWidth * 0.012
                 : isTablet

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -49,6 +51,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -74,7 +77,8 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
             color: AppColors.black,
           ),
           decoration: InputDecoration(
-            hintText: widget.hintText ?? TextConstants.defaultPasswordHint,
+            hintText:
+                widget.hintText ?? t.get(TextConstants.defaultPasswordHint),
             hintStyle: TextStyle(
               fontSize: 14,
               color: AppColors.grey.withOpacity(0.6),

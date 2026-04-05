@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -22,6 +24,7 @@ class DriverStatusCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocBuilder<DriverStatusBloc, DriverStatusState>(
       builder: (context, statusState) {
         // Get online status from API, fallback to prop if not loaded yet.
@@ -59,7 +62,7 @@ class DriverStatusCardWidget extends StatelessWidget {
                       ),
                       SizedBox(width: screenWidth * 0.02),
                       TextComponent(
-                        labelText: TextConstants.statusLabel,
+                        labelText: t.get(TextConstants.statusLabel),
                         fontSize: isDesktop
                             ? screenWidth * 0.014
                             : isTablet
@@ -72,8 +75,8 @@ class DriverStatusCardWidget extends StatelessWidget {
                   ),
                   TextComponent(
                     labelText: onlineStatus
-                        ? TextConstants.statusOnline
-                        : TextConstants.statusOffline,
+                        ? t.get(TextConstants.statusOnline)
+                        : t.get(TextConstants.statusOffline),
                     fontSize: isDesktop
                         ? screenWidth * 0.014
                         : isTablet

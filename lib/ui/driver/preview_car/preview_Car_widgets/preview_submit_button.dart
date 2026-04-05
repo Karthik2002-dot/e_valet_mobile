@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -25,6 +27,7 @@ class PreviewSubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -59,8 +62,9 @@ class PreviewSubmitButton extends StatelessWidget {
                   TextComponent(
                     labelText: overrideLabel ??
                         (isReparking
-                            ? TextConstants.submitRePark
-                            : TextConstants.submitButton),
+                            ? t.get(TextConstants.submitRePark)
+                            : t.getByKey(
+                                'submitButton', TextConstants.submitButton)),
                     fontSize: textSize,
                     color: AppColors.white,
                   ),

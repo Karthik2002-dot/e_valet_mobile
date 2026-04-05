@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -80,6 +84,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return GestureDetector(
       onTap: () {
         // Dismiss keyboard when tapping outside
@@ -112,27 +117,39 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                         widget.onNavigateToTab?.call(0);
                       },
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextComponent(
-                          labelText: TextConstants.valetDashboardTitle,
-                          color: AppColors.black,
-                          fontSize: MediaQuery.of(context).size.width * 0.03,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        const SizedBox(height: 4),
-                        TextComponent(
-                          labelText: TextConstants.valetDashboardDescription,
-                          color: AppColors.grey,
-                          fontSize: MediaQuery.of(context).size.width * 0.02,
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextComponent(
+                            labelText: t.getByKey('valetDashboardTitle',
+                                TextConstants.valetDashboardTitle),
+                            color: AppColors.black,
+                            fontSize: MediaQuery.of(context).size.width *
+                                (Platform.isIOS ? 0.026 : 0.03),
+                            fontWeight: FontWeight.bold,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          TextComponent(
+                            labelText: t.getByKey('valetDashboardDescription',
+                                TextConstants.valetDashboardDescription),
+                            color: AppColors.grey,
+                            fontSize: MediaQuery.of(context).size.width *
+                                (Platform.isIOS ? 0.018 : 0.02),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.width *
+                          (Platform.isIOS ? 0.32 : 0.4),
                       child: TextField(
                         controller: _searchController,
                         onChanged: (value) {
@@ -141,7 +158,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           });
                         },
                         decoration: InputDecoration(
-                          hintText: TextConstants.searchByNameOrPhone,
+                          hintText: t.getByKey('searchByNameOrCardNumber',
+                              TextConstants.searchByNameOrCardNumber),
                           hintStyle: TextStyle(
                             color: AppColors.grey,
                             fontSize: MediaQuery.of(context).size.width * 0.02,
@@ -212,7 +230,7 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                           children: [
                             TextComponent(
                               labelText:
-                                  '${TextConstants.errorLabel}: ${state.message}',
+                                  '${t.get(TextConstants.errorLabel)}: ${state.message}',
                               color: AppColors.error,
                               textAlign: TextAlign.center,
                             ),
@@ -223,8 +241,8 @@ class _OperatorDriversScreenState extends State<OperatorDriversScreen> {
                                   FetchValetKpis(outletId: _outletId),
                                 );
                               },
-                              child: const TextComponent(
-                                labelText: TextConstants.retryButton,
+                              child: TextComponent(
+                                labelText: t.get(TextConstants.retryButton),
                               ),
                             ),
                           ],

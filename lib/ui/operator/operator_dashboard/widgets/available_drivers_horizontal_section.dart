@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/available_drivers.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
@@ -15,20 +17,25 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final bool isLoading;
 
+  /// When true (auto mode), drag is disabled.
+  final bool autoAssignEnabled;
+
   const AvailableDriversHorizontalSection({
     super.key,
     required this.availableDrivers,
     required this.retrievalRequests,
     this.isLoading = false,
+    this.autoAssignEnabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextComponent(
-          labelText: TextConstants.availableValets,
+          labelText: t.get(TextConstants.availableValets),
           color: AppColors.black,
           fontSize: MediaQuery.of(context).size.height * 0.015,
         ),
@@ -38,7 +45,7 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.05,
                 child: _buildSkeleton(context),
               )
-            : _buildContent(context),
+            : _buildContent(context, t),
       ],
     );
   }
@@ -120,7 +127,7 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
         driver.name == recommendedDriverName;
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, AppTranslationsNotifier t) {
     var freeDrivers = availableDrivers.drivers
         .where((driver) => driver.status.toLowerCase() == 'free')
         .toList();
@@ -177,7 +184,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: TextConstants.noAvailableDrivers,
+              labelText: t.getByKey('noAvailableDriversAtTheMoment',
+                  TextConstants.noAvailableDrivers),
               fontSize: 14,
               color: AppColors.grey,
             ),
@@ -211,6 +219,8 @@ class AvailableDriversHorizontalSection extends StatelessWidget {
                   ),
                   recommendedCardNumber: recommendedCardNumber,
                   compact: true,
+                  // Manual drag-and-drop assignment is disabled on dashboard.
+                  dragEnabled: false,
                 ),
               ),
             ],

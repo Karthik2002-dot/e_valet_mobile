@@ -5,12 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_dashboard_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_available_drivers_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_retrieval_requests_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_digital_key_rack_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/parked_car/operator_digital_key_rack_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_cancel_assignment_api_service.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assigned_to.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/assign_retrieval_request.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/manual_retrieval_request.dart';
+import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_dashboard_kpis_response.dart';
@@ -34,6 +37,7 @@ class OperatorDashboardBloc
     on<FetchDashboardKpis>(_onFetchDashboardKpis);
     on<RefreshDashboardKpisSilently>(_onRefreshDashboardKpisSilently);
     on<AssignDriverToRetrieval>(_onAssignDriverToRetrieval);
+    on<CancelRetrievalAssignment>(_onCancelRetrievalAssignment);
     on<CreateManualRetrievalRequest>(_onCreateManualRetrievalRequest);
     on<NewParkingEvent>(_onNewParkingEvent);
 
@@ -305,6 +309,66 @@ class OperatorDashboardBloc
       }
     } catch (e) {
       emit(AssignmentError(e.toString()));
+      if (previousLoaded != null) {
+        emit(previousLoaded);
+      }
+    }
+  }
+
+  Future<void> _onCancelRetrievalAssignment(
+    CancelRetrievalAssignment event,
+    Emitter<OperatorDashboardState> emit,
+  ) async {
+    final previousLoaded = state is OperatorDashboardLoaded
+        ? state as OperatorDashboardLoaded
+        : null;
+
+    emit(const CancelAssignmentInProgress());
+
+    try {
+      final apiService = OperatorCancelAssignmentApiService();
+      final response = await apiService.cancelAssignment(
+        sessionId: event.sessionId,
+      );
+
+      emit(CancelAssignmentSuccess(response));
+      if (previousLoaded != null) {
+        final updatedRequests = previousLoaded.retrievalRequests.requests
+            .map((r) => r.sessionId == response.sessionId
+                ? r.copyWith(
+                    status: response.status,
+                    assignedTo: AssignedTo(
+                      userId: '',
+                      name: '',
+                      phone: '',
+                    ),
+                  )
+                : r)
+            .toList();
+        emit(previousLoaded.copyWith(
+          retrievalRequests: RetrievalRequestsResponse(
+            requests: updatedRequests,
+          ),
+        ));
+      }
+      // Delay the background refresh so the UI can process the optimistic
+      // state first, avoiding a race where the refresh overwrites it and
+      // causes flicker (session briefly showing as assigned again).
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (!isClosed) {
+          add(RefreshDashboardKpisSilently(
+            outletId: outletId,
+            refreshKpis: true,
+            refreshDrivers: true,
+            refreshRequests: true,
+          ));
+        }
+      });
+    } catch (e) {
+      emit(CancelAssignmentError(
+        sessionId: event.sessionId,
+        message: e.toString(),
+      ));
       if (previousLoaded != null) {
         emit(previousLoaded);
       }

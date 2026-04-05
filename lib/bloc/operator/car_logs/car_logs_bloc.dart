@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_car_logs_api_service.dart';
-import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_update_session_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/car_logs/operator_car_logs_api_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/car_logs/operator_update_session_api_service.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_logs_kpis_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/car_logs_response.dart';
 import 'car_logs_event.dart';

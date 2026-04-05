@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/key_rack_item.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/utils/time_utils.dart';
@@ -9,6 +14,10 @@ class ParkedCarCard extends StatelessWidget {
   final KeyRackItem item;
   final VoidCallback? onTap;
   final Function(int cardNumber, String sessionId)? onManualRequest;
+
+  /// When false (e.g. auto mode enabled), manual request button is disabled.
+  final bool manualRequestEnabled;
+
   final bool isHighlighted;
 
   const ParkedCarCard({
@@ -16,11 +25,13 @@ class ParkedCarCard extends StatelessWidget {
     required this.item,
     this.onTap,
     this.onManualRequest,
+    this.manualRequestEnabled = true,
     this.isHighlighted = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -85,42 +96,51 @@ class ParkedCarCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Card Number and Parked Duration (same row)
+                  // Card Number (first line)
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.credit_card,
-                            size: screenWidth * 0.018,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: screenWidth * 0.004),
-                          TextComponent(
-                            labelText: 'Card #${item.cardNumber}',
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.02,
-                            color: AppColors.black,
-                          ),
-                        ],
+                      Icon(
+                        Icons.credit_card,
+                        size: screenWidth * (Platform.isIOS ? 0.016 : 0.018),
+                        color: AppColors.primary,
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.timer_outlined,
-                            size: screenWidth * 0.018,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: screenWidth * 0.003),
-                          TextComponent(
-                            labelText: item.duration,
-                            fontSize: screenWidth * 0.02,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ],
+                      SizedBox(width: screenWidth * 0.004),
+                      Flexible(
+                        child: TextComponent(
+                          labelText:
+                              TextConstants.cardNumberWithHash(item.cardNumber),
+                          fontWeight: FontWeight.bold,
+                          fontSize:
+                              screenWidth * (Platform.isIOS ? 0.018 : 0.02),
+                          color: AppColors.black,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.004),
+                  // Parked Duration / Time (next line)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: screenWidth * (Platform.isIOS ? 0.016 : 0.018),
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: screenWidth * 0.003),
+                      Flexible(
+                        child: TextComponent(
+                          labelText: item.duration,
+                          fontSize:
+                              screenWidth * (Platform.isIOS ? 0.018 : 0.02),
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -165,7 +185,8 @@ class ParkedCarCard extends StatelessWidget {
                         SizedBox(width: screenWidth * 0.004),
                         Expanded(
                           child: TextComponent(
-                            labelText: 'Parked by ${item.parkedByName}',
+                            labelText: t.get(TextConstants.parkedByWithName(
+                                item.parkedByName!)),
                             fontSize: screenWidth * 0.018,
                             color: AppColors.black,
                             maxLines: 2,
@@ -190,8 +211,8 @@ class ParkedCarCard extends StatelessWidget {
                       SizedBox(width: screenWidth * 0.004),
                       Expanded(
                         child: TextComponent(
-                          labelText: TimeUtils.formatUtcToIstFullDateTime(
-                              item.parkedAt),
+                          labelText: t.get(TimeUtils.formatUtcToIstFullDateTime(
+                              item.parkedAt)),
                           fontSize: screenWidth * 0.015,
                           color: AppColors.grey,
                           maxLines: 2,
@@ -200,24 +221,29 @@ class ParkedCarCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Manual Request Button
+                  // Manual Request Button (disabled when auto mode is on)
                   if (onManualRequest != null) ...[
                     SizedBox(height: screenHeight * 0.008),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () => onManualRequest!(
-                          item.cardNumber,
-                          item.sessionId,
-                        ),
+                        onPressed: manualRequestEnabled
+                            ? () => onManualRequest!(
+                                  item.cardNumber,
+                                  item.sessionId,
+                                )
+                            : null,
                         label: TextComponent(
-                          labelText: 'Manual Request',
+                          labelText:
+                              t.get(TextConstants.manualRequestButtonLabel),
                           fontSize: screenWidth * 0.015,
                           color: AppColors.white,
                           fontWeight: FontWeight.w600,
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: manualRequestEnabled
+                              ? AppColors.primary
+                              : AppColors.grey,
                           foregroundColor: AppColors.white,
                           padding: EdgeInsets.symmetric(
                             vertical: screenHeight * 0.008,

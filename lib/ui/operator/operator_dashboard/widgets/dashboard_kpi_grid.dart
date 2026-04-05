@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/widgets/kpi_card.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_dashboard_kpis_response.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -17,11 +19,12 @@ class DashboardKpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Row(
       children: [
         Expanded(
           child: KpiCard(
-            title: TextConstants.availableTags,
+            title: t.get(TextConstants.availableTags),
             value:
                 '${kpis.availableTags.available}/${kpis.availableTags.total}',
           ),
@@ -31,7 +34,7 @@ class DashboardKpiGrid extends StatelessWidget {
           child: GestureDetector(
             onTap: onAvailableValetsTap,
             child: KpiCard(
-              title: TextConstants.availableValets,
+              title: t.get(TextConstants.availableValets),
               value:
                   '${kpis.availableValets.available}/${kpis.availableValets.total}',
             ),
@@ -40,7 +43,7 @@ class DashboardKpiGrid extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: KpiCard(
-            title: TextConstants.vehiclesInTransit,
+            title: t.get(TextConstants.vehiclesInTransit),
             value: kpis.vehiclesInTransit.toString(),
           ),
         ),
@@ -49,7 +52,7 @@ class DashboardKpiGrid extends StatelessWidget {
           child: GestureDetector(
             onTap: onTotalVehiclesParkedTap,
             child: KpiCard(
-              title: TextConstants.totalVehiclesParked,
+              title: t.get(TextConstants.totalVehiclesParked),
               value: kpis.totalVehiclesParked.toString(),
             ),
           ),

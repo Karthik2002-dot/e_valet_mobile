@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_manual_retrieval_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/operator/operator_dashboard/operator_dashboard_bloc.dart';
@@ -18,10 +20,14 @@ class OperatorParkedCarScreen extends StatefulWidget {
   final Function(VoidCallback)? onRefreshReady;
   final Function(int)? onNavigateToTab;
 
+  /// When true (auto mode enabled), manual request button is disabled.
+  final bool isAutoMode;
+
   const OperatorParkedCarScreen({
     super.key,
     this.onRefreshReady,
     this.onNavigateToTab,
+    this.isAutoMode = false,
   });
 
   @override
@@ -117,6 +123,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return SafeArea(
       child: Stack(
         children: [
@@ -164,7 +171,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                   children: [
                                     TextComponent(
                                       labelText:
-                                          '${TextConstants.parkedCarTitle} (${state.digitalKeyRack.keyRack.length})',
+                                          '${t.get(TextConstants.parkedCarTitle)} (${state.digitalKeyRack.keyRack.length})',
                                       color: AppColors.black,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
@@ -173,8 +180,9 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     TextComponent(
-                                      labelText:
-                                          TextConstants.parkedCarDescription,
+                                      labelText: t.getByKey(
+                                          'parkedCarDescription',
+                                          TextConstants.parkedCarDescription),
                                       color: AppColors.grey,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
@@ -198,7 +206,9 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                       });
                                     },
                                     decoration: InputDecoration(
-                                      hintText: 'Search by card number...',
+                                      hintText: t.getByKey(
+                                          'searchByCardNumberHint',
+                                          TextConstants.searchByCardNumberHint),
                                       hintStyle: TextStyle(
                                         color: AppColors.grey,
                                         fontSize:
@@ -272,6 +282,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                           digitalKeyRack: state.digitalKeyRack,
                           searchQuery: _searchQuery,
                           onManualRequest: _handleManualRequest,
+                          manualRequestEnabled: true,
                         ),
                       ],
                     ),
@@ -292,7 +303,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.02),
                       TextComponent(
-                        labelText: 'Failed to load slots data',
+                        labelText: t.get(TextConstants.failedToLoadSlotsData),
                         fontSize: MediaQuery.of(context).size.width * 0.02,
                         color: AppColors.error,
                       ),
@@ -329,7 +340,8 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                         ),
                         const SizedBox(height: 16),
                         TextComponent(
-                          labelText: 'Creating manual retrieval request...',
+                          labelText: t.get(
+                              TextConstants.creatingManualRetrievalRequest),
                           fontSize: 14,
                           color: AppColors.black,
                         ),

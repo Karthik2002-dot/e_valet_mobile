@@ -15,10 +15,23 @@ class FetchRetrivalRequests extends RetrivalRequestEvent {
 class AcceptRetrivalRequest extends RetrivalRequestEvent {
   final String sessionId;
 
-  const AcceptRetrivalRequest(this.sessionId);
+  /// Optional; used for logging / future use. Accept API is always attempted.
+  final AssignedSession? assignedSession;
+
+  const AcceptRetrivalRequest(this.sessionId, {this.assignedSession});
 
   @override
-  List<Object?> get props => [sessionId];
+  List<Object?> get props => [sessionId, assignedSession];
+}
+
+/// Multiple assignments: call POST accept for every session id (FIFO order).
+class AcceptAllRetrivalRequests extends RetrivalRequestEvent {
+  final List<String> sessionIds;
+
+  const AcceptAllRetrivalRequests(this.sessionIds);
+
+  @override
+  List<Object?> get props => [sessionIds];
 }
 
 class UpdateAssignedSessions extends RetrivalRequestEvent {

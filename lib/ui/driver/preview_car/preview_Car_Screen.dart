@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
@@ -13,6 +15,10 @@ import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
@@ -49,6 +55,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
 
   /// Prevents multiple rapid taps from triggering duplicate submissions
   bool _isProcessing = false;
+
+  bool _hasNavigatedAfterSuccess = false;
 
   @override
   void initState() {
@@ -114,6 +122,53 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     }
   }
 
+  Future<void> _handlePostParkNavigation(BuildContext context) async {
+    if (_hasNavigatedAfterSuccess) return;
+    _hasNavigatedAfterSuccess = true;
+
+    PendingSessionsResponse? pending;
+    try {
+      pending = await SessionsPendingApiService.getPendingSessions();
+    } catch (_) {
+      // If pending session API fails, keep normal success flow.
+      pending = null;
+    }
+
+    if (!context.mounted) return;
+
+    final hasPending = pending != null && pending.sessions.isNotEmpty;
+
+    if (hasPending) {
+      // Mirror CarSuccessScreen cleanup: otherwise the pending-session watchdog in
+      // DriverOnlineContent can interpret the old id as "cancelled" and pop the
+      // user back to Home right after they tap Park Vehicle again.
+      try {
+        await TokenStorage.clearSessionId();
+        await TokenStorage.clearSessionIdFromGetApi();
+      } catch (_) {}
+
+      // Skip success screen; DriverHome already contains the single source of truth
+      // for "pending session → correct screen" navigation.
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
+    // Normal flow: show success screen, then it returns to home automatically.
+    final isLocationBased =
+        widget.parkingLocation != null && widget.parkingLocation!.isNotEmpty;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CarSuccessScreen(
+          imagePath: isLocationBased ? null : widget.imagePath,
+          isLocationBasedParking: isLocationBased,
+        ),
+      ),
+    );
+  }
+
   void _showEditDetailsDialog() {
     final screenWidth = MediaQuery.of(context).size.width;
     final locationController = TextEditingController(
@@ -126,9 +181,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final t = context.watch<AppTranslationsNotifier>();
         return AlertDialog(
           title: TextComponent(
-            labelText: 'Edit details',
+            labelText: t.get(TextConstants.editDetails),
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.w600,
           ),
@@ -138,7 +194,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextComponent(
-                  labelText: 'Parking Location',
+                  labelText: t.getByKey('parkingLocationLabel',
+                      TextConstants.parkingLocationLabel),
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -149,7 +206,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   autofocus: true,
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: 'Enter parking location...',
+                    hintText: t.getByKey('parkingLocationHint',
+                        TextConstants.parkingLocationHint),
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -173,7 +231,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 ),
                 SizedBox(height: 16),
                 TextComponent(
-                  labelText: 'Vehicle Number',
+                  labelText: t.get(TextConstants.vehicleNumberLabel),
                   fontSize: screenWidth * 0.035,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
@@ -188,7 +246,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   ],
                   style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
-                    hintText: 'Enter vehicle number...',
+                    hintText: t.get(TextConstants.enterVehicleNumberHint),
                     hintStyle: TextStyle(
                       color: AppColors.grey.withOpacity(0.6),
                       fontSize: screenWidth * 0.04,
@@ -216,7 +274,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: TextComponent(
-                labelText: 'Cancel',
+                labelText: t.get(TextConstants.cancel),
                 fontSize: screenWidth * 0.038,
                 color: AppColors.grey,
               ),
@@ -235,7 +293,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 } else {
                   SnackBars.showErrorSnackBar(
                     context,
-                    'Parking location cannot be empty',
+                    t.get(TextConstants.parkingLocationCannotBeEmpty),
                   );
                 }
               },
@@ -244,7 +302,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                 foregroundColor: AppColors.white,
               ),
               child: TextComponent(
-                labelText: 'Save',
+                labelText: t.get(TextConstants.saveButton),
                 fontSize: screenWidth * 0.038,
                 color: AppColors.white,
               ),
@@ -265,18 +323,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
       child: BlocListener<PreviewCarBloc, PreviewCarState>(
         listener: (context, state) {
           if (state is PreviewCarSuccess) {
-            // Navigate to success screen
-            // If parking was done via location input, show car.png with golden background
-            final isLocationBased = widget.parkingLocation != null &&
-                widget.parkingLocation!.isNotEmpty;
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => CarSuccessScreen(
-                  imagePath: isLocationBased ? null : widget.imagePath,
-                  isLocationBasedParking: isLocationBased,
-                ),
-              ),
-            );
+            _handlePostParkNavigation(context);
           } else if (state is PreviewCarError) {
             setState(() => _isProcessing = false);
             SnackBars.showErrorSnackBar(
@@ -287,6 +334,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
         },
         child: BlocBuilder<PreviewCarBloc, PreviewCarState>(
           builder: (context, state) {
+            final t = context.watch<AppTranslationsNotifier>();
             final isSubmitting = state is PreviewCarSubmitting || _isProcessing;
 
             final horizontalPadding = screenWidth * 0.04;
@@ -342,10 +390,12 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                       ),
                                     ),
                                     child: TextFieldComponent(
-                                      labelText:
-                                          TextConstants.parkingLocationLabel,
-                                      hintText:
-                                          TextConstants.parkingLocationHint,
+                                      labelText: t.getByKey(
+                                          'parkingLocationLabel',
+                                          TextConstants.parkingLocationLabel),
+                                      hintText: t.getByKey(
+                                          'parkingLocationHint',
+                                          TextConstants.parkingLocationHint),
                                       controller: _parkingLocationController,
                                       keyboardType: TextInputType.text,
                                       textInputAction: TextInputAction.done,
@@ -366,8 +416,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     isEnabled: _parkingLocationController.text
                                         .trim()
                                         .isNotEmpty,
-                                    overrideLabel:
-                                        TextConstants.previewDoneButton,
+                                    overrideLabel: t.getByKey(
+                                        'previewDoneButton',
+                                        TextConstants.previewDoneButton),
                                   ),
                                 ],
                               ),
@@ -484,7 +535,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 SizedBox(
                                                     width: screenWidth * 0.02),
                                                 TextComponent(
-                                                  labelText: 'Vehicle Number',
+                                                  labelText: t.get(TextConstants
+                                                      .vehicleNumberLabel),
                                                   fontSize: screenWidth * 0.035,
                                                   fontWeight: FontWeight.w600,
                                                   color: AppColors.black,
@@ -503,8 +555,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                           SizedBox(
                                               height: screenHeight * 0.025),
                                           TextComponent(
-                                            labelText:
-                                                'After the vehicle is successfully parked, please press the button below to confirm.',
+                                            labelText: t.get(TextConstants
+                                                .afterVehicleParkedConfirmInstruction),
                                             fontSize: screenWidth * 0.045,
                                             color: AppColors.black,
                                             height: 1.35,
@@ -547,7 +599,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                         ),
                                                       )
                                                     : TextComponent(
-                                                        labelText: 'OK',
+                                                        labelText: t.get(
+                                                            TextConstants
+                                                                .okButton),
                                                         fontSize:
                                                             screenWidth * 0.16,
                                                         fontWeight:

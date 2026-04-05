@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -187,6 +191,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
   }
 
   Widget _buildSkeletonLayout(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -211,14 +216,15 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextComponent(
-                      labelText: TextConstants.carLogsTitle,
+                      labelText: t.get(TextConstants.carLogsTitle),
                       color: AppColors.black,
                       fontSize: MediaQuery.of(context).size.width * 0.03,
                       fontWeight: FontWeight.bold,
                     ),
                     const SizedBox(height: 4),
                     TextComponent(
-                      labelText: TextConstants.carLogsDescription,
+                      labelText: t.getByKey('carLogsDescription',
+                          TextConstants.carLogsDescription),
                       color: AppColors.grey,
                       fontSize: MediaQuery.of(context).size.width * 0.02,
                     ),
@@ -260,6 +266,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           SafeArea(
             child: BlocBuilder<CarLogsBloc, CarLogsState>(
               builder: (context, state) {
+                final t = context.watch<AppTranslationsNotifier>();
                 if (state is CarLogsLoading) {
                   return _buildSkeletonLayout(context);
                 } else if (state is CarLogsLoaded) {
@@ -296,32 +303,42 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                   widget.onNavigateToTab?.call(0);
                                 },
                               ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextComponent(
-                                    labelText:
-                                        '${TextConstants.carLogsTitle} (${state.carLogsResponse.total})',
-                                    color: AppColors.black,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.03,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  TextComponent(
-                                    labelText: TextConstants.carLogsDescription,
-                                    color: AppColors.grey,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.02,
-                                  ),
-                                ],
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextComponent(
+                                      labelText:
+                                          '${t.get(TextConstants.carLogsTitle)} (${state.carLogsResponse.total})',
+                                      color: AppColors.black,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              (Platform.isIOS ? 0.026 : 0.03),
+                                      fontWeight: FontWeight.bold,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TextComponent(
+                                      labelText: t.getByKey(
+                                          'carLogsDescription',
+                                          TextConstants.carLogsDescription),
+                                      color: AppColors.grey,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              (Platform.isIOS ? 0.018 : 0.02),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const Spacer(),
+                              const SizedBox(width: 8),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.4,
+                                width: MediaQuery.of(context).size.width *
+                                    (Platform.isIOS ? 0.32 : 0.4),
                                 child: TextField(
                                   controller: _searchController,
                                   focusNode: _searchFocusNode,
@@ -336,7 +353,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     }
                                   },
                                   decoration: InputDecoration(
-                                    hintText: TextConstants.carLogsSearchHint,
+                                    hintText: t.getByKey('carLogsSearchHint',
+                                        TextConstants.carLogsSearchHint),
                                     hintStyle: TextStyle(
                                       color: AppColors.grey,
                                       fontSize:
@@ -407,7 +425,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                             Expanded(
                               child: Center(
                                 child: TextComponent(
-                                  labelText: TextConstants.carLogsNoDataMessage,
+                                  labelText:
+                                      t.get(TextConstants.carLogsNoDataMessage),
                                   color: AppColors.grey,
                                 ),
                               ),
@@ -435,7 +454,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                           ),
                                   ),
                                   _buildPaginationControls(
-                                      state.carLogsResponse.logs),
+                                      context, state.carLogsResponse.logs),
                                 ],
                               ),
                             ),
@@ -456,7 +475,7 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextComponent(
-                            labelText: TextConstants.carLogsErrorMessage,
+                            labelText: t.get(TextConstants.carLogsErrorMessage),
                             color: AppColors.error,
                           ),
                           const SizedBox(height: 8),
@@ -476,8 +495,8 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
                                     _searchQuery.isEmpty ? null : _searchQuery,
                               ));
                             },
-                            child: const TextComponent(
-                              labelText: 'Retry',
+                            child: TextComponent(
+                              labelText: t.get(TextConstants.retryButton),
                             ),
                           ),
                         ],
@@ -503,6 +522,19 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     );
   }
 
+  /// When user searches by card number (numeric), show only logs that exactly
+  /// match that card number. Otherwise show all results from the API.
+  List<CarLog> _filterLogsForExactSearch(List<CarLog> logs) {
+    final query = _searchQuery.trim();
+    if (query.isEmpty) return logs;
+
+    // If search looks like a card number (digits only), show only exact matches
+    final isCardNumberSearch = int.tryParse(query) != null;
+    if (!isCardNumberSearch) return logs;
+
+    return logs.where((log) => log.tagNumber.toString() == query).toList();
+  }
+
   List<CarLog> _sortLogs(List<CarLog> logs) {
     if (_sortColumn.isEmpty || _sortDirection == SortDirection.none) {
       return logs;
@@ -515,31 +547,35 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
       dynamic bValue;
 
       switch (_sortColumn) {
-        case 'Tag Number':
+        case TextConstants.carLogsTagNumber:
           aValue = a.tagNumber;
           bValue = b.tagNumber;
           break;
-        case 'Car Status':
+        case TextConstants.carLogsCarStatus:
           aValue = a.displayStatus;
           bValue = b.displayStatus;
           break;
-        case 'Duration':
+        case TextConstants.carLogsDuration:
           aValue = a.duration;
           bValue = b.duration;
           break;
-        case 'Park Location':
+        case TextConstants.carLogsParkLocation:
           aValue = a.parkingLocation;
           bValue = b.parkingLocation;
           break;
-        case 'Parked At':
+        case TextConstants.carLogsParkedAt:
           aValue = DateTime.tryParse(a.parkedAt) ?? DateTime.now();
           bValue = DateTime.tryParse(b.parkedAt) ?? DateTime.now();
           break;
-        case 'Parked By':
+        case TextConstants.carLogsParkedBy:
           aValue = a.parkedBy.name;
           bValue = b.parkedBy.name;
           break;
-        case 'Handover At':
+        case TextConstants.carLogsHandoveredBy:
+          aValue = a.handoveredBy.name;
+          bValue = b.handoveredBy.name;
+          break;
+        case TextConstants.carLogsHandoverAt:
           aValue = a.handoveredAt.isEmpty
               ? null
               : DateTime.tryParse(a.handoveredAt) ?? DateTime(0);
@@ -609,8 +645,11 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
     }
   }
 
-  Widget _buildPaginationControls(List<CarLog> logs) {
+  Widget _buildPaginationControls(BuildContext context, List<CarLog> logs) {
+    final t = context.watch<AppTranslationsNotifier>();
     final totalPages = _getTotalPages();
+    final pageInfoText =
+        '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems';
 
     // Simplified bar when only one page (total from API reflects search)
     if (totalPages <= 1) {
@@ -625,104 +664,110 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
               onPageSizeChanged: _changePageSize,
             ),
             const Spacer(),
-            TextComponent(
-              labelText:
-                  '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.grey,
+            Flexible(
+              child: TextComponent(
+                labelText: pageInfoText,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.grey,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
       );
     }
 
+    final paginationRow = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Page size dropdown
+        PageSizeDropdownWidget(
+          itemsPerPage: _itemsPerPage,
+          pageSizeOptions: _pageSizeOptions,
+          onPageSizeChanged: _changePageSize,
+        ),
+        const SizedBox(width: 8),
+        // First page button (<<) - only show if not on first page
+        if (_currentPage > 1)
+          IconButton(
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationFirst),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToFirstPage,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
+            ),
+          ),
+        // Previous page button (<) - only show if not on first page
+        if (_currentPage > 1)
+          IconButton(
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationPrev),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToPreviousPage,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
+            ),
+          ),
+        if (_currentPage > 1) const SizedBox(width: 8),
+        ..._buildPageNumbers(totalPages),
+        if (_currentPage < totalPages) const SizedBox(width: 8),
+        if (_currentPage < totalPages)
+          IconButton(
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationNext),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToNextPage,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
+            ),
+          ),
+        if (_currentPage < totalPages)
+          IconButton(
+            icon: TextComponent(
+              labelText: t.get(TextConstants.paginationLast),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            onPressed: _goToLastPage,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
+            ),
+          ),
+        const SizedBox(width: 8),
+        TextComponent(
+          labelText: pageInfoText,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.grey,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Page size dropdown
-          PageSizeDropdownWidget(
-            itemsPerPage: _itemsPerPage,
-            pageSizeOptions: _pageSizeOptions,
-            onPageSizeChanged: _changePageSize,
-          ),
-
-          const Spacer(),
-
-          // First page button (<<) - only show if not on first page
-          if (_currentPage > 1)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '<<',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToFirstPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          // Previous page button (<) - only show if not on first page
-          if (_currentPage > 1)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '<',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToPreviousPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          // Add spacing between navigation buttons and page numbers
-          if (_currentPage > 1) const SizedBox(width: 20),
-
-          // Page numbers
-          ..._buildPageNumbers(totalPages),
-
-          // Add spacing between page numbers and navigation buttons
-          if (_currentPage < totalPages) const SizedBox(width: 20),
-
-          // Next page button (>) - only show if not on last page
-          if (_currentPage < totalPages)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '>',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToNextPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          // Last page button (>>) - only show if not on last page
-          if (_currentPage < totalPages)
-            IconButton(
-              icon: const TextComponent(
-                labelText: '>>',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              onPressed: _goToLastPage,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-            ),
-
-          const Spacer(),
-
-          // Page info
-          TextComponent(
-            labelText:
-                '${(_currentPage - 1) * _itemsPerPage + 1}-${_currentPage * _itemsPerPage > _totalItems ? _totalItems : _currentPage * _itemsPerPage} of $_totalItems',
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: AppColors.grey,
-          ),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: paginationRow,
       ),
     );
   }

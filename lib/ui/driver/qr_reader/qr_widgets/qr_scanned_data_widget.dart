@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -21,6 +23,7 @@ class QrScannedDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.03),
       margin: EdgeInsets.only(bottom: screenHeight * 0.01),
@@ -36,7 +39,7 @@ class QrScannedDataWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextComponent(
-            labelText: TextConstants.scannedDataLabel,
+            labelText: t.get(TextConstants.scannedDataLabel),
             fontSize: isDesktop
                 ? screenWidth * 0.012
                 : isTablet

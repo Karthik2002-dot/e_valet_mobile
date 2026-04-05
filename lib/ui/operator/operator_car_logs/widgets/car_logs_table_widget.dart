@@ -30,18 +30,22 @@ class CarLogsTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
+        final viewportWidth = constraints.maxWidth;
+        // Use minimum table width on all platforms so data is fully visible via horizontal scroll (same as iOS)
+        const minTableWidth = 820.0;
+        final tableWidth =
+            viewportWidth < minTableWidth ? minTableWidth : viewportWidth;
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: availableWidth),
+            constraints: BoxConstraints(minWidth: tableWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header row
                 TableHeaderRowWidget(
-                  availableWidth: availableWidth,
+                  availableWidth: tableWidth,
                   sortColumn: sortColumn,
                   sortDirection: sortDirection,
                   onHeaderTap: onHeaderTap,
@@ -54,7 +58,7 @@ class CarLogsTableWidget extends StatelessWidget {
                   return TableDataRowWidget(
                     log: log,
                     index: index,
-                    availableWidth: availableWidth,
+                    availableWidth: tableWidth,
                     onTap: onRowTap != null ? () => onRowTap!(log) : null,
                   );
                 }).toList(),

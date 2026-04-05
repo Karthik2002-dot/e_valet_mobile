@@ -3,14 +3,16 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class OperatorDrawerItem extends StatelessWidget {
-  final String asset;
+  final String? asset;
+  final IconData? iconData;
   final String title;
   final bool isSelected;
   final VoidCallback? onTap;
 
   const OperatorDrawerItem({
     super.key,
-    required this.asset,
+    this.asset,
+    this.iconData,
     required this.title,
     this.isSelected = false,
     this.onTap,
@@ -59,12 +61,19 @@ class OperatorDrawerItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Image.asset(
-              asset,
-              width: 35,
-              height: 35,
-              color: isSelected ? AppColors.black : AppColors.white,
-            ),
+            if (iconData != null)
+              Icon(
+                iconData,
+                size: 35,
+                color: isSelected ? AppColors.black : AppColors.white,
+              )
+            else if (asset != null)
+              Image.asset(
+                asset!,
+                width: 35,
+                height: 35,
+                color: isSelected ? AppColors.black : AppColors.white,
+              ),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.02,
             ),

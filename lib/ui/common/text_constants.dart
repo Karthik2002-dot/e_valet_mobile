@@ -5,8 +5,39 @@ class TextConstants {
   static const slots = 'Slots';
   static const parkedCar = 'Parked Car';
   static const valets = 'Valets';
+  static const driversGroup = 'Drivers Group';
   static const carLogs = 'Car Logs';
   static const profile = 'Profile';
+  static const guidelines = 'Guidelines';
+  static const help = 'Help';
+  static const overTime = 'Over Time';
+  static const String hours = 'Hours';
+  static const String minutes = 'Minutes';
+  static const String hourUnit = 'hour';
+  static const String hoursUnit = 'hours';
+  static const String minuteUnit = 'minute';
+  static const String minutesUnit = 'minutes';
+  static const String overtimeDescription =
+      'Enter overtime duration for each valet';
+  static const String overtimeNote =
+      'Note: The number you enter will be considered in minutes.';
+  static const String overtimeInputHint = 'Enter numbers only';
+  static const String overtimeEnterNumbers =
+      'Please enter a value (numbers only)';
+  static const String overtimeConfirmTitle = 'Confirm Overtime';
+  static const String overtimeGranted = 'Overtime granted';
+  static const String overtimeExpiresAt = 'Overtime till';
+
+  /// Template for overtime confirmation popup.
+  ///
+  /// Important: this must contain `{valetName}` and `{minutes}` placeholders,
+  /// because `OvertimeConfirmDialog` replaces `{minutes}` with a formatted
+  /// "hours + minutes" string while still submitting raw minutes to backend.
+  static String overtimeConfirmMessage(String valetName, int minutes) =>
+      'You have extended the {valetName} time {minutes} more.';
+  static const String overtimeNoAvailableDrivers =
+      'No available drivers for now';
+  static const String operatorResponsibilities = 'Operator Responsibilities';
   static const logout = 'Logout';
 
   static const emptyText = '';
@@ -15,6 +46,10 @@ class TextConstants {
 
   // QR Scanner
   static const orEnterKey = 'Or Enter Key';
+  static const String scanQr = 'Scan QR';
+  static const String scanCardLabel = 'Scan Card';
+  static const String scanWhatsAppQrInstruction =
+      'Scan the WhatsApp QR code from the customer valet card';
 
   // Manual Request
   static const pleaseEnterCardNumber = 'Please enter a card number';
@@ -39,6 +74,8 @@ class TextConstants {
   // Validation Messages
   static const String validationEmailRequired = 'Please enter your email';
   static const String validationEmailInvalid = 'Please enter a valid email';
+  static const String validationPhoneRequired =
+      'Please enter your Phone Number';
   static const String validationPasswordRequired = 'Please enter your password';
   static String validationPasswordMinLength(int minLength) =>
       'Password must be at least $minLength characters';
@@ -99,7 +136,9 @@ class TextConstants {
   static const String driverHomeTitle = 'Driver Home';
   static const String driverFallbackName = 'Driver';
   static const String userFallbackName = 'User';
+  static const String hiGreeting = 'Hi';
   static String readyToParkMessage(String driverName) => 'Hi $driverName,';
+  static const String requestedAt = 'Requested at';
   static const String scanKeyTagInstruction =
       'Scan the key tag to start the parking process.';
   static const String parkVehicle = 'Park Vehicle';
@@ -130,11 +169,23 @@ class TextConstants {
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
+  /// Selected outlet from login (operator/scanner/driver session).
+  static const String profileOutletLabel = 'Outlet';
   static const String usernameLabel = 'Username';
   static const String joinedLabel = 'Joined';
   static const String resetPassword = 'Reset Password';
   static const String profileMenuTitle = 'Profile';
+  static const String guidelinesMenuTitle = 'Guidelines';
+  static const String helpMenuTitle = 'Help';
   static const String logoutMenuTitle = 'Logout';
+
+  // Help screen
+  static const String helpContactSupport = 'Contact & Support';
+  static const String helpCommonIssues = 'Common Issues';
+  static const String helpLoadingContacts = 'Loading contacts...';
+  static const String helpNoContacts = 'No support contacts available';
+  static const String helpFailedToLoad = 'Failed to load support contacts';
+  static const String helpSupportTeam = 'Support Team';
 
   // Change Password Dialog
   static const String passwordChangedSuccess = 'Password changed successfully';
@@ -196,6 +247,9 @@ class TextConstants {
   // Camera Screen
   static const String captureCarInstruction =
       'Capture the car clearly with location\nlandmarks';
+  static const String captureAPhotoOfTheCar = 'Capture a photo of the car';
+  static const String captureTheCarClearlyWithLocationLandmarks =
+      'Capture the car clearly with location landmarks';
   static const String photoMode = 'PHOTO MODE';
   static const String cameraNotAvailable = 'No camera available on this device';
   static const String errorInitializingCamera = 'Error initializing camera';
@@ -223,9 +277,11 @@ class TextConstants {
   static const String parkedBy = 'Parked By';
   static const String unknown = 'Unknown';
   static const String retrievalRequest = 'Retrieval Request';
+  static const String retrievalRequested = 'Retrieval Requested';
   static const String noActiveRetrievalRequests =
       'No active retrieval requests';
   static const String acceptRequest = 'Collect Keys';
+  static const String acceptAllRetrievals = 'Accept all';
 
   // Handover Related
   static const String confirmHandover = 'Confirm Handover';
@@ -243,8 +299,13 @@ class TextConstants {
   static const String proceedToRepark = 'Proceed to Re-Park';
   static const String cancel = 'Cancel';
 
+  // Operator Override (when operator marks Parked/Completed from dashboard)
+  static const String transactionCompletedByOperator =
+      'Transaction completed by operator. Returning to home.';
+
   // Arrival Related
   static const String slideToConfirmArrival = 'Confirm Arrival';
+  static const String disabledRemainingSeconds = 'Seconds remaining:';
   static const String slideToConfirmHandover = 'Confirm Handover';
   static const String slideToCustomerMissing = 'Customer Missing';
   static const String locateCarUsingPhoto = 'LOCATE CAR USING THE PHOTO';
@@ -280,11 +341,14 @@ class TextConstants {
   static const String validationEnterTagNumber = 'Please enter the tag number';
   static const String validationEnterValidNumber =
       'Please enter a valid number';
+  static const String validationScanCustomerCardOnly =
+      'The card you are trying to scan is a valet card. Please scan the customer card.';
   static const String tagSubmissionError =
       'The QR code you scanned or the tag number you entered is invalid or already used. Please kindly check the QR code or tag number.';
 
   // Dashboard (Operator)
   static const String dashboardOverview = 'Dashboard Overview';
+  static const String autoToggleLabel = 'Auto Mode';
   static const String retryButton = 'Retry';
   static const String availableTags = 'Available Tags';
   static const String availableValets = 'Available Valets';
@@ -310,11 +374,12 @@ class TextConstants {
   static const String carLogsParkLocation = 'Park Location';
   static const String carLogsParkedBy = 'Parked By';
   static const String carLogsParkedAt = 'Parked At';
+  static const String carLogsHandoveredBy = 'Handovered By';
   static const String carLogsHandoverAt = 'Handover At';
 
   // Car Logs Search and Messages
   static const String carLogsSearchHint =
-      'Search by card numnber, or parked by...';
+      'Search by card number, or parked by...';
   static const String carLogsNoDataMessage = 'No car logs available';
   static const String carLogsErrorMessage = 'Error loading car logs';
 
@@ -342,6 +407,7 @@ class TextConstants {
   static const String noCarsParked = 'No Cars Parked';
 
   // QR Reader
+  static const String cameraError = 'Camera error';
   static const String cameraErrorReinitializing =
       'Camera error. Reinitializing...';
 
@@ -373,6 +439,8 @@ class TextConstants {
   static const String onBreakValets = 'On Break';
   static const String offlineValets = 'Offline';
   static const String searchByNameOrPhone = 'Search By Name Or Phone...';
+  static const String searchByNameOrCardNumber =
+      'Search by name or card number';
 
   // Valet Status Labels
   static const String statusAvailable = 'Available';
@@ -380,6 +448,7 @@ class TextConstants {
   static const String statusOnBreak = 'On Break';
   static const String statusOffline = 'Offline';
   static const headerOnBreak = 'On Break';
+  static const onBreakScreen = 'On Break';
   static const statusLabel = 'Status';
   static const statusOnline = 'Online';
   static const statusValueOnline = 'online';
@@ -389,6 +458,9 @@ class TextConstants {
   static const String carsPickedUpLabel = 'Cars Picked Up : ';
   static const String carsHandedOverLabel = 'Cars Hand overed : ';
   static const String onBreakDurationLabel = 'On-Break Duration : ';
+  static const String clockInAtLabel = 'Clock In : ';
+  static const String clockOutAtLabel = 'Clock Out : ';
+  static const String lastActivityLabel = 'Last Activity : ';
   static const String minsLabel = ' mins';
   static const String noValetsFound = 'No valets found';
 
@@ -397,13 +469,20 @@ class TextConstants {
   static const String confirm = 'Confirm';
   static const String parkedByLabel = 'Parked By ';
   static const String assignedToLabel = 'Assigned To ';
+  static const String cancelAssignmentTitle = 'Cancel assignment?';
+  static const String cancelAssignmentMessage =
+      'This session will go back to the retrieval queue.';
+  static const String cancelAssignmentConfirm = 'Yes, cancel assignment';
+  static const String cancelAssignmentSuccess =
+      'Assignment cancelled. Session is back in retrieval queue.';
+  static const String cancelAssignmentFailed = 'Failed to cancel assignment';
   static const String recommendedBy = 'Recommended - Parked this vehicle';
   static const String recommendedFor = 'Recommended for';
   static String recommendedForCard(int cardNumber) =>
       'Recommended for $cardNumber';
 
   static const String sessionContinue =
-      'Your session has been not completed please click on continue to proceed';
+      'Your session is not completed. Please click Continue to proceed.';
   static const String continueLabel = 'Continue';
 
   // Car Log Details Popup
@@ -420,4 +499,67 @@ class TextConstants {
   static const String mandatoryUpdateDialogSubtitle =
       'Please update to continue using the app.';
   static const String mandatoryUpdateDialogUpdateNow = 'Update Now';
+  static const String language = 'Language';
+  static const String failedToChangeLanguage =
+      'Failed to change language. Please try again.';
+  static const String failedToLoadImageText = 'Failed to load image';
+
+  // Permissions Screen
+  static const String exitButton = 'Exit';
+  static const String openSettings = 'Open settings';
+  static const String permissionsRequiredToContinue =
+      'Permissions required to continue';
+  static const String permissionsDescription =
+      'We need the following permissions to verify your device and provide valet services.';
+  static const String permissionLocationTitle = 'Location';
+  static const String permissionCameraTitle = 'Camera';
+  static const String permissionNotificationsTitle = 'Notifications';
+  static const String permissionLocationDescription =
+      'Permission to use your location for valet pickup and drop-off.';
+  static const String permissionCameraDescription =
+      'Permission to scan QR codes and capture vehicle photos.';
+  static const String permissionNotificationsDescription =
+      'Permission to send push notifications for retrieval requests.';
+  static const String accountNoPermissionsMessage =
+      'Your account does not have the required permissions to access this app.';
+  static const String permissionDeniedTapSettings =
+      'Denied multiple times. Tap to open Settings.';
+
+  // Version Check
+  static const String checkingForUpdates = 'Checking for updates...';
+
+  // Preview / Edit Details
+  static const String editDetails = 'Edit details';
+  static const String enterParkingLocationHint = 'Enter parking location...';
+  static const String enterVehicleNumberHint = 'Enter vehicle number...';
+  static const String saveButton = 'Save';
+  static const String parkingLocationCannotBeEmpty =
+      'Parking location cannot be empty';
+  static const String afterVehicleParkedConfirmInstruction =
+      'After the vehicle is successfully parked, please press the button below to confirm.';
+  static const String okButton = 'OK';
+
+  // Parked Car / Search
+  static const String searchByCardNumberHint = 'Search by card number...';
+  static String showingResultsFor(String query) =>
+      'Showing results for "$query"';
+  static String cardNumberWithHash(int cardNumber) => 'Card #$cardNumber';
+  static String parkedByWithName(String name) => 'Parked by $name';
+  static const String manualRequestButtonLabel = 'Manual Request';
+  static const String failedToLoadSlotsData = 'Failed to load slots data';
+  static const String creatingManualRetrievalRequest =
+      'Creating manual retrieval request...';
+
+  // Call / Contact
+  static const String callButton = 'Call';
+
+  // Pagination
+  static const String paginationFirst = '<<';
+  static const String paginationPrev = '<';
+  static const String paginationNext = '>';
+  static const String paginationLast = '>>';
+
+  // Scanner home
+  static const String scannerTapScanHint =
+      'Tap Scan to read the QR code from the valet card';
 }

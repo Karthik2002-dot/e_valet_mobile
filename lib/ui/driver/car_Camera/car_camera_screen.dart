@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -36,11 +39,15 @@ class CarCameraScreen extends StatefulWidget {
 
 class _CarCameraScreenState extends State<CarCameraScreen>
     with WidgetsBindingObserver, RouteAware {
+  static const Duration _pendingSessionPollInterval = Duration(minutes: 5);
+
   late CarCameraBloc _cameraBloc;
   bool _isInitializing = false;
   bool _isCapturing = false;
   RouteObserver<ModalRoute>? _routeObserver;
   Orientation? _currentOrientation;
+  Timer? _pendingSessionPollTimer;
+  bool _isHandlingCancellation = false;
 
   @override
   void initState() {
@@ -55,6 +62,46 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    _startPendingSessionPolling();
+  }
+
+  void _startPendingSessionPolling() {
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer = Timer.periodic(_pendingSessionPollInterval, (_) {
+      _checkPendingSessionCancellation();
+    });
+    _checkPendingSessionCancellation();
+  }
+
+  Future<void> _checkPendingSessionCancellation() async {
+    if (!mounted || _isHandlingCancellation) return;
+    final sessionId = await TokenStorage.getSessionId();
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    try {
+      final pending = await SessionsPendingApiService.getPendingSessions();
+      final stillExists = pending.sessions.any((s) => s.sessionId == sessionId);
+      if (!stillExists) {
+        await _redirectToHomeOnCancellation();
+      }
+    } catch (_) {
+      // Ignore transient errors and retry on next poll tick.
+    }
+  }
+
+  Future<void> _redirectToHomeOnCancellation() async {
+    if (_isHandlingCancellation) return;
+    _isHandlingCancellation = true;
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer = null;
+    await TokenStorage.clearSessionId();
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
+      _isHandlingCancellation = false;
+    });
   }
 
   @override
@@ -90,6 +137,13 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Stop native preview before the Activity/engine can detach; otherwise camera
+    // frames may hit FlutterRenderer after FlutterJNI is gone (fatal on Android).
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _cameraBloc.add(const DisposeCameraRequested());
+      return;
+    }
     if (state == AppLifecycleState.resumed && !_isInitializing) {
       // Add delay when app resumes to ensure camera service is ready
       // This is especially important after app is cleared and reopened
@@ -105,7 +159,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   void dispose() {
     _routeObserver?.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
-    _cameraBloc.dispose();
+    _pendingSessionPollTimer?.cancel();
+    _cameraBloc.close();
     // Reset preferred orientations when leaving camera screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -164,7 +219,9 @@ class _CarCameraScreenState extends State<CarCameraScreen>
       child: BlocListener<CarCameraBloc, CarCameraState>(
         listener: (context, state) {
           if (state is CarCameraValidationSuccess) {
-            // Navigate to preview screen on successful validation
+            // Stop camera before leaving the route so native frames cannot hit
+            // FlutterRenderer after the surface/engine tears down.
+            context.read<CarCameraBloc>().add(const DisposeCameraRequested());
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -425,6 +482,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
       // Navigate directly to preview screen with parking location
       if (mounted) {
+        context.read<CarCameraBloc>().add(const DisposeCameraRequested());
         Navigator.push(
           context,
           MaterialPageRoute(

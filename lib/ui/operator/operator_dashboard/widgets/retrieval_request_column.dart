@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -14,6 +16,7 @@ class RetrievalRequestColumn extends StatefulWidget {
   final RetrievalRequestsResponse retrievalRequests;
   final OperatorAvailableDriversResponse availableDrivers;
   final VoidCallback onAssignmentComplete;
+  final bool autoAssignEnabled;
   final bool isLoading;
   final bool isLeftColumn;
   final Set<String> highlightedRequestIds;
@@ -23,6 +26,7 @@ class RetrievalRequestColumn extends StatefulWidget {
     required this.retrievalRequests,
     required this.availableDrivers,
     required this.onAssignmentComplete,
+    required this.autoAssignEnabled,
     this.isLoading = false,
     this.isLeftColumn = true,
     this.highlightedRequestIds = const <String>{},
@@ -34,6 +38,8 @@ class RetrievalRequestColumn extends StatefulWidget {
 
 class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
   final ScrollController _scrollController = ScrollController();
+  // Keep drag/drop implementation in codebase, but disabled on dashboard.
+  static const bool _manualDragDropEnabled = false;
 
   static int _statusOrder(String status) {
     switch (status.toUpperCase()) {
@@ -58,6 +64,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     if (widget.isLoading) {
       return _buildSkeleton(context);
     }
@@ -84,11 +91,31 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
     if (columnRequests.isEmpty) {
       return Center(
         child: TextComponent(
-          labelText: TextConstants.noPendingRetrievalRequests,
+          labelText: t.get(TextConstants.noPendingRetrievalRequests),
           fontSize: 14,
           color: AppColors.grey,
         ),
       );
+    }
+
+    final list = ListView.builder(
+      controller: _scrollController,
+      itemCount: columnRequests.length,
+      itemBuilder: (context, index) {
+        final request = columnRequests[index];
+        return RetrievalRequestCard(
+          request: request,
+          availableDrivers: widget.availableDrivers.drivers,
+          onAssignmentComplete: widget.onAssignmentComplete,
+          autoAssignEnabled: widget.autoAssignEnabled,
+          isHighlighted:
+              widget.highlightedRequestIds.contains(request.sessionId),
+        );
+      },
+    );
+
+    if (!_manualDragDropEnabled) {
+      return list;
     }
 
     return DragTarget<Object>(
@@ -96,20 +123,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
         _handleAutoScroll(context, details.offset);
       },
       builder: (context, candidateData, rejectedData) {
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: columnRequests.length,
-          itemBuilder: (context, index) {
-            final request = columnRequests[index];
-            return RetrievalRequestCard(
-              request: request,
-              availableDrivers: widget.availableDrivers.drivers,
-              onAssignmentComplete: widget.onAssignmentComplete,
-              isHighlighted:
-                  widget.highlightedRequestIds.contains(request.sessionId),
-            );
-          },
-        );
+        return list;
       },
     );
   }
@@ -158,6 +172,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
   }
 
   Widget _buildEmpty(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -165,7 +180,7 @@ class _RetrievalRequestColumnState extends State<RetrievalRequestColumn> {
           Icon(Icons.check_circle_outline, size: 48, color: AppColors.grey),
           const SizedBox(height: 8),
           TextComponent(
-            labelText: TextConstants.noPendingRetrievalRequests,
+            labelText: t.get(TextConstants.noPendingRetrievalRequests),
             fontSize: 14,
             color: AppColors.grey,
           ),

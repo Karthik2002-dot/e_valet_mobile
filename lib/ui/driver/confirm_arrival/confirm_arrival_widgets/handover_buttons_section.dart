@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -202,13 +204,14 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildActionButton(
-          label: TextConstants.slideToConfirmHandover,
+          label: t.get(TextConstants.slideToConfirmHandover),
           icon: Icons.handshake,
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.black,
@@ -219,7 +222,7 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
         SizedBox(height: screenHeight * 0.02),
         _buildActionButton(
           key: _customerMissingKey,
-          label: TextConstants.slideToCustomerMissing,
+          label: t.get(TextConstants.slideToCustomerMissing),
           icon: Icons.warning,
           backgroundColor: AppColors.error,
           foregroundColor: AppColors.white,

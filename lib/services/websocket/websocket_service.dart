@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 /// WebSocket service for managing Socket.IO connections
 class WebSocketService {
@@ -12,7 +12,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   /// Socket instance
-  IO.Socket? _socket;
+  io.Socket? _socket;
 
   /// Connection status stream
   final StreamController<bool> _connectionController =
@@ -26,7 +26,7 @@ class WebSocketService {
   final Map<String, StreamController<dynamic>> _eventControllers = {};
 
   /// Get the socket instance
-  IO.Socket? get socket => _socket;
+  io.Socket? get socket => _socket;
 
   /// Check if socket is connected
   bool get isConnected => _socket?.connected ?? false;
@@ -60,7 +60,7 @@ class WebSocketService {
       print('Connecting to WebSocket: $url');
 
       // Build socket options
-      final optionBuilder = IO.OptionBuilder()
+      final optionBuilder = io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
           .setReconnectionAttempts(reconnectionAttempts)
@@ -99,7 +99,7 @@ class WebSocketService {
       }
 
       // Configure socket
-      _socket = IO.io(url, optionBuilder.build());
+      _socket = io.io(url, optionBuilder.build());
 
       // Setup default event listeners
       _setupDefaultListeners();

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -27,7 +29,11 @@ class SlideToConfirmButton extends StatelessWidget {
     this.useBigStyle = false,
   });
 
-  Widget _leadingWidget(double screenHeight, double screenWidth) {
+  Widget _leadingWidget(
+    AppTranslationsNotifier t,
+    double screenHeight,
+    double screenWidth,
+  ) {
     final showCountdown = !enabled && disabledRemainingSeconds > 0;
     if (showCountdown) {
       final size = useBigStyle ? 44.0 : 36.0;
@@ -57,6 +63,7 @@ class SlideToConfirmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -86,10 +93,11 @@ class SlideToConfirmButton extends StatelessWidget {
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _leadingWidget(screenHeight, screenWidth),
+                _leadingWidget(t, screenHeight, screenWidth),
                 SizedBox(width: useBigStyle ? 16 : 10),
                 TextComponent(
-                  labelText: TextConstants.slideToConfirmArrival,
+                  labelText: t.getByKey('slideToConfirmArrival',
+                      TextConstants.slideToConfirmArrival),
                   fontSize:
                       useBigStyle ? screenWidth * 0.06 : screenHeight * 0.025,
                   fontWeight: FontWeight.w600,

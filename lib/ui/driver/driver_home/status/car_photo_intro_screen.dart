@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:camera/camera.dart';
 import 'package:lottie/lottie.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -15,7 +18,9 @@ import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_Screen.d
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camer_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 
 /// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
 /// When [sessionId] is provided (e.g. from pending session / card), it is saved so submit uses it; [isReparking] is passed to the Park API.
@@ -41,39 +46,104 @@ class CarPhotoIntroScreen extends StatefulWidget {
   State<CarPhotoIntroScreen> createState() => _CarPhotoIntroScreenState();
 }
 
-class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
+class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
+    with WidgetsBindingObserver {
+  static const Duration _pendingSessionPollInterval = Duration(minutes: 5);
+
   /// 0 = Lottie, 1 = camera (only Car Photo flow now)
   int _selectedTab = 1;
 
   /// 0 = Lottie (2 sec), 1 = camera in same area (only when on Scan tab)
   int _scanPhase = 0;
   Timer? _lottieTimer;
+  Timer? _pendingSessionPollTimer;
   late CarCameraBloc _cameraBloc;
   bool _isCapturing = false;
+  bool _isHandlingCancellation = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    ParkFlowSignals.beginCarPhotoParkFlow();
     _cameraBloc = CarCameraBloc();
-    // Third screen shows only Car Photo (camera); both QR and tag flows go to Scan.
     _selectedTab = 1;
     _scanPhase = 0;
-    _startLottieTimer();
     if (widget.sessionId != null && widget.sessionId!.isNotEmpty) {
       TokenStorage.saveSessionId(widget.sessionId!).catchError((e) {
         debugPrint('[CarPhotoIntro] Failed to save sessionId: $e');
       });
     }
+    // Show car photo intro (Lottie) only once per login session; when user comes back
+    // (e.g. another card in same session) skip animation and show camera. Flags cleared on logout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _initCarPhotoIntro();
+    });
+    _startPendingSessionPolling();
+  }
+
+  void _startPendingSessionPolling() {
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer = Timer.periodic(_pendingSessionPollInterval, (_) {
+      _checkPendingSessionCancellation();
+    });
+    _checkPendingSessionCancellation();
+  }
+
+  Future<void> _checkPendingSessionCancellation() async {
+    if (!mounted || _isHandlingCancellation) return;
+    final sessionId = await TokenStorage.getSessionId();
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    try {
+      final pending = await SessionsPendingApiService.getPendingSessions();
+      final stillExists = pending.sessions.any((s) => s.sessionId == sessionId);
+      if (!stillExists) {
+        await _redirectToHomeOnCancellation();
+      }
+    } catch (_) {
+      // Ignore transient errors and retry on next poll tick.
+    }
+  }
+
+  Future<void> _redirectToHomeOnCancellation() async {
+    if (_isHandlingCancellation) return;
+    _isHandlingCancellation = true;
+    _pendingSessionPollTimer?.cancel();
+    _pendingSessionPollTimer = null;
+    await TokenStorage.clearSessionId();
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
+      _isHandlingCancellation = false;
+    });
+  }
+
+  Future<void> _initCarPhotoIntro() async {
+    final alreadyShown =
+        await SessionManager.hasShownCarPhotoIntroThisSession();
+    if (!mounted) return;
+    if (alreadyShown) {
+      setState(() => _scanPhase = 1);
+      _cameraBloc.add(const InitializeCameraRequested());
+      return;
+    }
+    _startLottieTimer();
   }
 
   void _startLottieTimer() {
     _lottieTimer?.cancel();
+    // Mark intro as shown immediately so it is only visible once per login even if user leaves before 2s
+    SessionManager.markCarPhotoIntroShown();
     _lottieTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       _lottieTimer = null;
       setState(() {
         _scanPhase = 1;
       });
+      if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _cameraBloc.add(const InitializeCameraRequested());
       });
@@ -102,6 +172,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
       }
       if (!mounted) return;
       final isFromScan = imagePath != null && imagePath.isNotEmpty;
+      _cameraBloc.add(const DisposeCameraRequested());
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PreviewCarScreen(
@@ -113,9 +184,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
           ),
         ),
       );
-      // When user returns from preview (e.g. Retake), reset camera so it shows again.
+      // After dispose-before-preview, controller is gone — full re-init for Retake.
       if (mounted && isFromScan && _selectedTab == 1) {
-        _cameraBloc.add(const ValidationReset());
+        _cameraBloc.add(const InitializeCameraRequested());
       }
     } catch (e) {
       debugPrint('[CarPhotoIntro] _navigateToPreview error: $e');
@@ -179,14 +250,36 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _cameraBloc.add(const DisposeCameraRequested());
+      return;
+    }
+    if (state == AppLifecycleState.resumed &&
+        _selectedTab == 1 &&
+        _scanPhase == 1) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) {
+          _cameraBloc.add(const InitializeCameraRequested());
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    ParkFlowSignals.endCarPhotoParkFlow();
     _lottieTimer?.cancel();
+    _pendingSessionPollTimer?.cancel();
     _cameraBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final w = MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
 
@@ -209,7 +302,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                 if (!didPop && mounted) {
                   SnackBars.showErrorSnackBar(
                     context,
-                    TextConstants.pleaseCompleteParkingProcess,
+                    t.get(TextConstants.pleaseCompleteParkingProcess),
                   );
                 }
               },
@@ -221,7 +314,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: h * 0.016),
-                      _buildHeaderAboveTabs(w, h),
+                      _buildHeaderAboveTabs(t, w, h),
                       SizedBox(height: h * 0.016),
                       Expanded(
                         child: _buildScanTabContent(w, h),
@@ -238,7 +331,11 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
   }
 
   /// Same style as driver_qr_scanner_content: title + "what to do" hint above the tabs.
-  Widget _buildHeaderAboveTabs(double w, double h) {
+  Widget _buildHeaderAboveTabs(
+    AppTranslationsNotifier t,
+    double w,
+    double h,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -250,14 +347,16 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextComponent(
-            labelText: TextConstants.vehicleDetailsTitle,
+            labelText: t.getByKey(
+                'vehicleDetailsTitle', TextConstants.vehicleDetailsTitle),
             fontSize: w * 0.045,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),
           SizedBox(height: h * 0.006),
           TextComponent(
-            labelText: TextConstants.vehicleDetailsParkingPhotoHint,
+            labelText: t.getByKey('vehicleDetailsParkingPhotoHint',
+                TextConstants.vehicleDetailsParkingPhotoHint),
             fontSize: w * 0.032,
             fontWeight: FontWeight.w400,
             color: AppColors.black,
@@ -298,7 +397,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen> {
                     child: Lottie.asset(
                       'assets/jsons/Carphoto.json',
                       fit: BoxFit.contain,
-                      repeat: true,
+                      repeat: false,
                     ),
                   ),
                 ),

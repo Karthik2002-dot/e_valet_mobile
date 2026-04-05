@@ -1,3 +1,5 @@
+import 'package:niloufer_valet_mobile/models/operator/operator_overtime/grant_overtime_response.dart';
+
 class ValetResponse {
   final String userId;
   final String name;
@@ -7,7 +9,9 @@ class ValetResponse {
   final int carsHandedOver;
   final int onBreakDurationMinutes;
   final String clockInAt;
+  final String clockOutAt;
   final String lastActivity;
+  final List<GrantOvertimeResponse> overtimeGrants;
 
   ValetResponse({
     required this.userId,
@@ -18,7 +22,9 @@ class ValetResponse {
     required this.carsHandedOver,
     required this.onBreakDurationMinutes,
     required this.clockInAt,
+    required this.clockOutAt,
     required this.lastActivity,
+    required this.overtimeGrants,
   });
 
   factory ValetResponse.fromJson(Map<String, dynamic> json) {
@@ -31,7 +37,16 @@ class ValetResponse {
       carsHandedOver: json['carsHandedOver'] ?? 0,
       onBreakDurationMinutes: json['onBreakDurationMinutes'] ?? 0,
       clockInAt: json['clockInAt'] ?? '',
+      clockOutAt: json['clockOutAt'] ?? '',
       lastActivity: json['lastActivity'] ?? '',
+      overtimeGrants: (json['overtimeGrants'] as List<dynamic>?)
+              ?.map(
+                (e) => GrantOvertimeResponse.fromJson(
+                  e as Map<String, dynamic>?,
+                ),
+              )
+              .toList() ??
+          [],
     );
   }
 
@@ -45,7 +60,9 @@ class ValetResponse {
       'carsHandedOver': carsHandedOver,
       'onBreakDurationMinutes': onBreakDurationMinutes,
       'clockInAt': clockInAt,
+      'clockOutAt': clockOutAt,
       'lastActivity': lastActivity,
+      'overtimeGrants': overtimeGrants.map((g) => g.toJson()).toList(),
     };
   }
 }

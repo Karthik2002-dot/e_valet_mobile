@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/qr/qr_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -25,6 +27,7 @@ class QrStatusOverlayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final isSuccess = state.qrData != null;
 
     // Brighter colors for better visibility
@@ -87,8 +90,8 @@ class QrStatusOverlayWidget extends StatelessWidget {
               Flexible(
                 child: TextComponent(
                   labelText: isSuccess
-                      ? TextConstants.scannedSuccess
-                      : (state.errorMessage ?? TextConstants.errorLabel),
+                      ? t.get(TextConstants.scannedSuccess)
+                      : (state.errorMessage ?? t.get(TextConstants.errorLabel)),
                   fontSize: isDesktop
                       ? screenWidth * 0.012
                       : isTablet
@@ -132,7 +135,7 @@ class QrStatusOverlayWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextComponent(
-                    labelText: TextConstants.cardLabel,
+                    labelText: t.get(TextConstants.cardLabel),
                     fontSize: isDesktop
                         ? screenWidth * 0.016
                         : isTablet
@@ -174,7 +177,7 @@ class QrStatusOverlayWidget extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: TextComponent(
-                labelText: TextConstants.rescanButton,
+                labelText: t.get(TextConstants.rescanButton),
                 fontSize: isDesktop
                     ? screenWidth * 0.011
                     : isTablet

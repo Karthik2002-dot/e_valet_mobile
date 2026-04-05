@@ -19,12 +19,14 @@ import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_serv
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
 import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
 
 void main() async {
@@ -46,6 +48,13 @@ void main() async {
   await OfflineParkingService.init();
   await TokenStorage.init();
   await VersionService.init();
+
+  // Restore the outlet ID that the user selected on their last login so
+  // ApiConfig.outletId and authorizedHeaders stay consistent across restarts.
+  final savedOutletId = await TokenStorage.getSelectedOutletId();
+  if (savedOutletId != null) {
+    dotenv.env['OUTLET_ID'] = savedOutletId.toString();
+  }
 
   // Initialize Background Sync
   await BackgroundSyncService.init();
@@ -85,6 +94,10 @@ class MyApp extends StatelessWidget {
         Provider<FirebaseMessagingService>.value(
           value: firebaseMessagingService,
         ),
+        // In-memory translations; load() runs on create and when user changes language
+        ChangeNotifierProvider(
+          create: (_) => AppTranslationsNotifier()..load(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -95,6 +108,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<SplashBloc>(
             create: (context) => SplashBloc(
               webSocketBloc: context.read<WebSocketBloc>(),
+              appTranslationsNotifier: context.read<AppTranslationsNotifier>(),
             ),
           ),
           BlocProvider<DriverStatusBloc>(
@@ -109,11 +123,13 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: dotenv.env['APP_NAME'] ?? 'Cafe Niloufer E-Valet',
           navigatorKey: FirebaseMessagingService.navigatorKey,
+          navigatorObservers: [DriverHomeRouteObserver()],
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
           builder: (context, child) {
             return BlocListener<ConnectivityBloc, ConnectivityState>(
               listener: (context, state) {
+                final t = context.read<AppTranslationsNotifier>();
                 final messenger = ScaffoldMessenger.of(context);
                 if (state is ConnectivityOffline) {
                   messenger.clearMaterialBanners();
@@ -121,7 +137,7 @@ class MyApp extends StatelessWidget {
                     MaterialBanner(
                       backgroundColor: AppColors.error,
                       content: TextComponent(
-                        labelText: TextConstants.noInternetConnection,
+                        labelText: t.get(TextConstants.noInternetConnection),
                         color: AppColors.white,
                         textAlign: TextAlign.center,
                       ),

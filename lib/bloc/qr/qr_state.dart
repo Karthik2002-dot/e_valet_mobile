@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/models/driver/qr/qr_data.dart';
 class QrState extends Equatable {
   final String? scannedCode;
   final QrData? qrData;
+  final int? customerCardNumber; // For WhatsApp QR codes
   final bool isProcessing;
   final String? successMessage;
   final String? errorMessage;
@@ -13,6 +14,7 @@ class QrState extends Equatable {
   const QrState({
     this.scannedCode,
     this.qrData,
+    this.customerCardNumber,
     this.isProcessing = false,
     this.successMessage,
     this.errorMessage,
@@ -23,6 +25,7 @@ class QrState extends Equatable {
   QrState copyWith({
     String? scannedCode,
     QrData? qrData,
+    int? customerCardNumber,
     bool? isProcessing,
     String? successMessage,
     String? errorMessage,
@@ -32,6 +35,7 @@ class QrState extends Equatable {
     return QrState(
       scannedCode: scannedCode ?? this.scannedCode,
       qrData: qrData ?? this.qrData,
+      customerCardNumber: customerCardNumber ?? this.customerCardNumber,
       isProcessing: isProcessing ?? this.isProcessing,
       successMessage: successMessage,
       errorMessage: errorMessage,
@@ -44,6 +48,7 @@ class QrState extends Equatable {
   List<Object?> get props => [
         scannedCode,
         qrData,
+        customerCardNumber,
         isProcessing,
         successMessage,
         errorMessage,

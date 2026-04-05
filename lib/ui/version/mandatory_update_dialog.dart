@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -35,6 +37,7 @@ class MandatoryUpdateDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Dialog(
       backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
@@ -66,7 +69,7 @@ class MandatoryUpdateDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextComponent(
-              labelText: TextConstants.mandatoryUpdateDialogTitle,
+              labelText: t.get(TextConstants.mandatoryUpdateDialogTitle),
               textAlign: TextAlign.center,
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -74,7 +77,7 @@ class MandatoryUpdateDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TextComponent(
-              labelText: TextConstants.mandatoryUpdateDialogSubtitle,
+              labelText: t.get(TextConstants.mandatoryUpdateDialogSubtitle),
               textAlign: TextAlign.center,
               fontSize: 15,
               fontWeight: FontWeight.w400,
@@ -95,7 +98,8 @@ class MandatoryUpdateDialog extends StatelessWidget {
                   ),
                 ),
                 child: TextComponent(
-                  labelText: TextConstants.mandatoryUpdateDialogUpdateNow,
+                  labelText:
+                      t.get(TextConstants.mandatoryUpdateDialogUpdateNow),
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),

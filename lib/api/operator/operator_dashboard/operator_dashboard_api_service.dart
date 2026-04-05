@@ -8,7 +8,6 @@ class OperatorDashboardApiService {
   OperatorDashboardApiService._();
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
-  static String get _apiKey => ApiConfig.authApiKey;
 
   static Future<OperatorDashboardKpisResponse> getDashboardKpis({
     required String outletId,

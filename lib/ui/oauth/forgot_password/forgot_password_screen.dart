@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/forgot_password/forgot_password_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/forgot_password/forgot_password_event.dart';
 import 'package:niloufer_valet_mobile/bloc/oauth/forgot_password/forgot_password_state.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/elevated_button.dart';
@@ -40,6 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider(
       create: (context) => ForgotPasswordBloc(),
       child: BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
@@ -111,8 +114,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   ),
                                   // "Forgot Password" text
                                   TextComponent(
-                                    labelText:
-                                        TextConstants.forgotPasswordTitle,
+                                    labelText: t.getByKey('forgotPasswordTitle',
+                                        TextConstants.forgotPasswordTitle),
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.06,
@@ -126,8 +129,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   ),
                                   // Description text
                                   TextComponent(
-                                    labelText:
-                                        TextConstants.forgotPasswordDescription,
+                                    labelText: t.getByKey(
+                                        'forgotPasswordDescription',
+                                        TextConstants
+                                            .forgotPasswordDescription),
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.04,
@@ -144,9 +149,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       ForgotPasswordState>(
                                     builder: (context, state) {
                                       return PhoneNumberField(
-                                        labelText:
-                                            TextConstants.phoneNumberLabel,
-                                        hintText: TextConstants.phoneNumberHint,
+                                        labelText: t.getByKey(
+                                            'phoneNumberLabel',
+                                            TextConstants.phoneNumberLabel),
+                                        hintText: t.getByKey('phoneNumberHint',
+                                            TextConstants.phoneNumberHint),
                                         controller: _phoneController,
                                         focusNode: _phoneFocusNode,
                                         initialCountryCode: 'IN',
@@ -195,10 +202,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                   isButtonEnabled ? 1.0 : 0.5,
                                               child: ElevatedButtonComponent(
                                                 labelText: isLoading
-                                                    ? TextConstants
-                                                        .sendResetInstructionsLoading
-                                                    : TextConstants
-                                                        .sendResetInstructions,
+                                                    ? t.getByKey(
+                                                        'sendResetInstructionsLoading',
+                                                        TextConstants
+                                                            .sendResetInstructionsLoading)
+                                                    : t.getByKey(
+                                                        'sendResetInstructions',
+                                                        TextConstants
+                                                            .sendResetInstructions),
                                                 onPressed: handlePress,
                                                 elevatedButtonBackgroundColor:
                                                     AppColors.accent, // Orange

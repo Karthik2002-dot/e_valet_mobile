@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -16,6 +18,7 @@ class PreviewImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -81,7 +84,8 @@ class PreviewImageCard extends StatelessWidget {
                   size: screenWidth * 0.05,
                 ),
                 label: TextComponent(
-                  labelText: TextConstants.retakeButton,
+                  labelText:
+                      t.getByKey('retakeButton', TextConstants.retakeButton),
                   fontSize: screenWidth * 0.04,
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,

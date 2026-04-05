@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
@@ -78,7 +77,7 @@ class WebSocketHelper {
       } catch (e) {
         print('Error waiting for WebSocket connection: $e');
         connectionSubscription.cancel();
-        timeoutTimer?.cancel();
+        timeoutTimer.cancel();
       }
 
       // Small delay before joining rooms

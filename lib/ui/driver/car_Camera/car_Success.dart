@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class CarSuccessScreen extends StatefulWidget {
   final String? imagePath;
@@ -30,6 +33,12 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
   @override
   void initState() {
     super.initState();
+    // After a successful park, the previous "pending session" id must be cleared.
+    // Otherwise, the pending-session watchdog in `DriverOnlineContent` will detect
+    // it as "cancelled" on the next Park attempt and pop the user back to Home.
+    TokenStorage.clearSessionId();
+    TokenStorage.clearSessionIdFromGetApi();
+    // Deferred retrieval ids stay in Hive until Confirm Arrival / handover completes.
     _autoReturnTimer = Timer(_autoReturnDuration, _navigateToHome);
   }
 
@@ -54,6 +63,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -76,7 +86,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                   bottom: screenHeight * 0.04,
                 ),
                 child: TextComponent(
-                  labelText: TextConstants.successfullyParked,
+                  labelText: t.get(TextConstants.successfullyParked),
                   color: AppColors.white,
                   fontSize: screenWidth * 0.055,
                   fontWeight: FontWeight.w500,
@@ -164,7 +174,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                             ),
                           )
                         : TextComponent(
-                            labelText: TextConstants.returnToHome,
+                            labelText: t.get(TextConstants.returnToHome),
                             color: AppColors.black,
                             fontSize: screenWidth * 0.06,
                             fontWeight: FontWeight.w600,

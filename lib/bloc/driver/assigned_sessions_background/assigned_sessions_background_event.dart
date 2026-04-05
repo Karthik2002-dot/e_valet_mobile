@@ -30,3 +30,15 @@ class SetSessionsFromPending extends AssignedSessionsBackgroundEvent {
 
   const SetSessionsFromPending(this.sessions);
 }
+
+/// Received when WebSocket emits retrieval:cancelled.
+class RetrievalCancelledReceived extends AssignedSessionsBackgroundEvent {
+  const RetrievalCancelledReceived();
+}
+
+/// Received when WebSocket emits retrieval:assigned with session data.
+class SessionsReceivedFromSocket extends AssignedSessionsBackgroundEvent {
+  final dynamic data;
+
+  const SessionsReceivedFromSocket(this.data);
+}

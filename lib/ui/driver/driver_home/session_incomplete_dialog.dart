@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -27,6 +29,7 @@ class SessionIncompleteDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -68,7 +71,8 @@ class SessionIncompleteDialog extends StatelessWidget {
 
               // Message Text
               TextComponent(
-                labelText: TextConstants.sessionContinue,
+                labelText: t.getByKey(
+                    'sessionContinue', TextConstants.sessionContinue),
                 fontSize: screenWidth * 0.04,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
@@ -79,7 +83,8 @@ class SessionIncompleteDialog extends StatelessWidget {
               ),
 
               TextComponent(
-                labelText: '${TextConstants.cardNumberLabel}: $cardNumber',
+                labelText:
+                    '${t.get(TextConstants.cardNumberLabel)}: $cardNumber',
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
@@ -110,7 +115,8 @@ class SessionIncompleteDialog extends StatelessWidget {
                     ),
                   ),
                   child: TextComponent(
-                    labelText: TextConstants.continueLabel,
+                    labelText: t.getByKey(
+                        'continueLabel', TextConstants.continueLabel),
                     fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,

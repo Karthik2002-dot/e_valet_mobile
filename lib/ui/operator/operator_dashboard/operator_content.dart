@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -17,13 +19,20 @@ import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/operator_available_drivers_response.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_dashboard/retrieval_requests_response.dart';
 import 'package:niloufer_valet_mobile/services/notification/text_to_speech_service.dart';
+import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_auto_assign_api_service.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_qr_dialog.dart';
 
 class DashboardContent extends StatefulWidget {
+  final bool isAutoMode;
+  final void Function(bool)? onAutoModeChanged;
   final void Function(VoidCallback)? onRefreshReady;
   final void Function(int)? onNavigateToTab;
 
   const DashboardContent({
     super.key,
+    this.isAutoMode = false,
+    this.onAutoModeChanged,
     this.onRefreshReady,
     this.onNavigateToTab,
   });
@@ -33,6 +42,10 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
+  // Auto mode is forced ON; hide the toggle.
+  static const bool _showAutoModeToggle = false;
+  static const bool _showManualRequest = false;
+
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
   final TextToSpeechService _ttsService = TextToSpeechService();
@@ -44,9 +57,16 @@ class _DashboardContentState extends State<DashboardContent> {
   final Duration _highlightDuration = const Duration(seconds: 30);
   bool _isSpeaking = false;
   bool _hasLoadedOnce = false;
+  bool _isUpdatingAutoMode = false;
 
   /// Cache of last loaded state so assignment states don't show a blank screen.
   OperatorDashboardLoaded? _lastLoadedState;
+
+  /// Periodic timer for silent background refresh of retrieval requests every 30 seconds.
+  Timer? _retrievalRequestsRefreshTimer;
+
+  static const Duration _retrievalRequestsRefreshInterval =
+      Duration(seconds: 30);
 
   @override
   void initState() {
@@ -68,10 +88,52 @@ class _DashboardContentState extends State<DashboardContent> {
       ),
     );
 
+    // Start periodic silent refresh when auto mode is on (state comes from parent so it persists across tab switches)
+    if (widget.isAutoMode) {
+      _startRetrievalRequestsRefreshTimer();
+    }
+
     // Expose silent refresh method to parent
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshReady?.call(_silentRefresh);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isAutoMode != widget.isAutoMode) {
+      if (widget.isAutoMode) {
+        _startRetrievalRequestsRefreshTimer();
+      } else {
+        _stopRetrievalRequestsRefreshTimer();
+      }
+    }
+  }
+
+  /// Silent background refresh of retrieval requests only (no loading indicator).
+  void _silentRefreshRetrievalRequests() {
+    _dashboardBloc.add(
+      RefreshDashboardKpisSilently(
+        outletId: _outletId,
+        refreshKpis: false,
+        refreshDrivers: false,
+        refreshRequests: true,
+      ),
+    );
+  }
+
+  void _startRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = Timer.periodic(
+      _retrievalRequestsRefreshInterval,
+      (_) => _silentRefreshRetrievalRequests(),
+    );
+  }
+
+  void _stopRetrievalRequestsRefreshTimer() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
   }
 
   void _silentRefresh() {
@@ -83,6 +145,12 @@ class _DashboardContentState extends State<DashboardContent> {
         refreshRequests: true,
       ),
     );
+  }
+
+  Future<void> _openScanDialogAndRefresh() async {
+    final success = await ScannerQrDialog.show(context);
+    if (!mounted) return;
+    if (success) _silentRefresh();
   }
 
   void _handleRetrievalRequestUpdates(
@@ -194,6 +262,8 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void dispose() {
+    _retrievalRequestsRefreshTimer?.cancel();
+    _retrievalRequestsRefreshTimer = null;
     for (final timer in _highlightTimers.values) {
       timer.cancel();
     }
@@ -205,6 +275,7 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return BlocProvider.value(
       value: _dashboardBloc,
       child: SafeArea(
@@ -213,10 +284,83 @@ class _DashboardContentState extends State<DashboardContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextComponent(
-                labelText: TextConstants.dashboardOverview,
-                color: AppColors.black,
-                fontSize: MediaQuery.of(context).size.height * 0.015,
+              Row(
+                children: [
+                  TextComponent(
+                    labelText: t.get(TextConstants.dashboardOverview),
+                    color: AppColors.black,
+                    fontSize: MediaQuery.of(context).size.height * 0.015,
+                  ),
+                  const Spacer(),
+                  if (_showAutoModeToggle)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextComponent(
+                          labelText: t.getByKey(
+                              'autoToggleLabel', TextConstants.autoToggleLabel),
+                          color: AppColors.black,
+                          fontSize: MediaQuery.of(context).size.height * 0.015,
+                        ),
+                        const SizedBox(width: 8),
+                        Switch(
+                          value: widget.isAutoMode,
+                          onChanged: _isUpdatingAutoMode
+                              ? null
+                              : (value) async {
+                                  final previousValue = widget.isAutoMode;
+
+                                  if (value) {
+                                    _startRetrievalRequestsRefreshTimer();
+                                  } else {
+                                    _stopRetrievalRequestsRefreshTimer();
+                                  }
+                                  widget.onAutoModeChanged?.call(value);
+
+                                  setState(() => _isUpdatingAutoMode = true);
+                                  try {
+                                    final res =
+                                        await OperatorAutoAssignApiService
+                                            .patchAutoAssignSettings(
+                                      outletId: _outletId,
+                                      enabled: value,
+                                    );
+
+                                    if (!mounted) return;
+                                    if (res.autoAssignEnabled != value) {
+                                      if (res.autoAssignEnabled) {
+                                        _startRetrievalRequestsRefreshTimer();
+                                      } else {
+                                        _stopRetrievalRequestsRefreshTimer();
+                                      }
+                                      widget.onAutoModeChanged
+                                          ?.call(res.autoAssignEnabled);
+                                    }
+                                  } catch (e) {
+                                    if (!mounted) return;
+
+                                    SnackBars.showErrorSnackBar(
+                                      context,
+                                      'Failed to update auto mode',
+                                    );
+
+                                    if (previousValue) {
+                                      _startRetrievalRequestsRefreshTimer();
+                                    } else {
+                                      _stopRetrievalRequestsRefreshTimer();
+                                    }
+                                    widget.onAutoModeChanged
+                                        ?.call(previousValue);
+                                  } finally {
+                                    if (!mounted) return;
+                                    setState(() => _isUpdatingAutoMode = false);
+                                  }
+                                },
+                          activeColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                ],
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -230,9 +374,16 @@ class _DashboardContentState extends State<DashboardContent> {
                   builder: (context, state) {
                     final isLoading = state is OperatorDashboardLoading;
                     final isLoaded = state is OperatorDashboardLoaded;
-                    final isAssignmentState = state is AssignmentInProgress ||
-                        state is AssignmentSuccess ||
-                        state is AssignmentError;
+                    final isTransientActionState =
+                        state is AssignmentInProgress ||
+                            state is AssignmentSuccess ||
+                            state is AssignmentError ||
+                            state is CancelAssignmentInProgress ||
+                            state is CancelAssignmentSuccess ||
+                            state is CancelAssignmentError ||
+                            state is ManualRequestInProgress ||
+                            state is ManualRequestSuccess ||
+                            state is ManualRequestError;
 
                     if (isLoaded) {
                       _lastLoadedState = state;
@@ -264,6 +415,7 @@ class _DashboardContentState extends State<DashboardContent> {
                               availableDrivers:
                                   OperatorAvailableDriversResponse(drivers: []),
                               onAssignmentComplete: () {},
+                              autoAssignEnabled: widget.isAutoMode,
                               isLoading: true,
                               highlightedRequestIds: const <String>{},
                             ),
@@ -271,7 +423,7 @@ class _DashboardContentState extends State<DashboardContent> {
                         ],
                       );
                     } else if (isLoaded ||
-                        (isAssignmentState && _lastLoadedState != null)) {
+                        (isTransientActionState && _lastLoadedState != null)) {
                       final data = isLoaded ? state : _lastLoadedState!;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,6 +454,7 @@ class _DashboardContentState extends State<DashboardContent> {
                                   ),
                                 );
                               },
+                              autoAssignEnabled: widget.isAutoMode,
                               isLoading: false,
                               highlightedRequestIds: _highlightedRequestIds,
                             ),
@@ -315,7 +468,7 @@ class _DashboardContentState extends State<DashboardContent> {
                           children: [
                             TextComponent(
                               labelText:
-                                  '${TextConstants.errorLabel}: ${state.message}',
+                                  '${t.get(TextConstants.errorLabel)}: ${state.message}',
                               color: AppColors.error,
                               textAlign: TextAlign.center,
                             ),
@@ -328,8 +481,8 @@ class _DashboardContentState extends State<DashboardContent> {
                                   ),
                                 );
                               },
-                              child: const TextComponent(
-                                labelText: TextConstants.retryButton,
+                              child: TextComponent(
+                                labelText: t.get(TextConstants.retryButton),
                               ),
                             ),
                           ],
@@ -340,16 +493,63 @@ class _DashboardContentState extends State<DashboardContent> {
                   },
                 ),
               ),
-              ManualRequestWidget(
-                onRequestCreated: () {
-                  // Refresh the dashboard
-                  _dashboardBloc.add(
-                    FetchDashboardKpis(
-                      outletId: _outletId,
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.height * 0.02,
+                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Material(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: _openScanDialogAndRefresh,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.03,
+                          vertical: MediaQuery.of(context).size.height * 0.018,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.qr_code_scanner,
+                              color: AppColors.white,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 10),
+                            TextComponent(
+                              labelText: t.getByKey(
+                                'scanCardLabel',
+                                TextConstants.scanCardLabel,
+                              ),
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize:
+                                  MediaQuery.of(context).size.height * 0.016,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
+              if (_showManualRequest)
+                ManualRequestWidget(
+                  onRequestCreated: () {
+                    // Refresh the dashboard
+                    _dashboardBloc.add(
+                      FetchDashboardKpis(
+                        outletId: _outletId,
+                      ),
+                    );
+                  },
+                  isAutoMode: widget.isAutoMode,
+                ),
             ],
           ),
         ),

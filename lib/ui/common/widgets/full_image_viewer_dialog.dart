@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -26,6 +28,7 @@ class FullImageViewerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     return Dialog(
       backgroundColor: AppColors.transparent,
       insetPadding: EdgeInsets.symmetric(
@@ -77,7 +80,7 @@ class FullImageViewerDialog extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         TextComponent(
-                          labelText: 'Failed to load image',
+                          labelText: t.get(TextConstants.failedToLoadImageText),
                           color: AppColors.white,
                           fontSize: 16,
                         ),

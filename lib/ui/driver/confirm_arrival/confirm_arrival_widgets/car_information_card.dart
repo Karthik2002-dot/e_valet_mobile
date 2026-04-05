@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/full_image_viewer_dialog.dart';
@@ -20,6 +22,7 @@ class CarInformationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -57,7 +60,7 @@ class CarInformationCard extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     TextComponent(
-                      labelText: TextConstants.cardNumber,
+                      labelText: t.get(TextConstants.cardNumber),
                       fontSize:
                           compact ? screenWidth * 0.028 : screenWidth * 0.035,
                       color: AppColors.grey,
@@ -129,15 +132,15 @@ class CarInformationCard extends StatelessWidget {
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     TextComponent(
-                      labelText: TextConstants.parkedByLabel,
+                      labelText: t.get(TextConstants.parkedByLabel),
                       fontSize:
                           compact ? screenWidth * 0.028 : screenWidth * 0.035,
                       color: AppColors.grey,
                     ),
                     if (!compact) SizedBox(height: screenHeight * 0.01),
                     TextComponent(
-                      labelText:
-                          session.parkedBy?.name ?? TextConstants.unknown,
+                      labelText: session.parkedBy?.name ??
+                          t.get(TextConstants.unknown),
                       fontSize:
                           compact ? screenWidth * 0.032 : screenWidth * 0.04,
                       fontWeight: FontWeight.w500,
@@ -187,56 +190,59 @@ class CarInformationCard extends StatelessWidget {
                 ),
                 child: session.photoUrl != null
                     ? Image.network(
-                      session.photoUrl!,
-                      width: double.infinity,
-                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          height:
-                              compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                          color: AppColors.white,
-                          child: Center(
-                            child: ColorFiltered(
-                              colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 255, // Red channel inverted
-                                0, -1, 0, 0, 255, // Green channel inverted
-                                0, 0, -1, 0, 255, // Blue channel inverted
-                                0, 0, 0, 1, 0, // Alpha channel unchanged
-                              ]),
-                              child: Image.asset(
-                                'assets/images/cars.png',
-                                fit: BoxFit.contain,
-                                width: screenWidth * 0.4,
-                                height: screenHeight * 0.4,
+                        session.photoUrl!,
+                        width: double.infinity,
+                        height:
+                            compact ? screenWidth * 0.45 : screenWidth * 0.6,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: double.infinity,
+                            height: compact
+                                ? screenWidth * 0.45
+                                : screenWidth * 0.6,
+                            color: AppColors.white,
+                            child: Center(
+                              child: ColorFiltered(
+                                colorFilter: const ColorFilter.matrix([
+                                  -1, 0, 0, 0, 255, // Red channel inverted
+                                  0, -1, 0, 0, 255, // Green channel inverted
+                                  0, 0, -1, 0, 255, // Blue channel inverted
+                                  0, 0, 0, 1, 0, // Alpha channel unchanged
+                                ]),
+                                child: Image.asset(
+                                  'assets/images/cars.png',
+                                  fit: BoxFit.contain,
+                                  width: screenWidth * 0.4,
+                                  height: screenHeight * 0.4,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: compact ? screenWidth * 0.45 : screenWidth * 0.6,
-                      color: AppColors.white,
-                      child: Center(
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.matrix([
-                            -1, 0, 0, 0, 255, // Red channel inverted
-                            0, -1, 0, 0, 255, // Green channel inverted
-                            0, 0, -1, 0, 255, // Blue channel inverted
-                            0, 0, 0, 1, 0, // Alpha channel unchanged
-                          ]),
-                          child: Image.asset(
-                            'assets/images/cars.png',
-                            fit: BoxFit.contain,
-                            width: screenWidth * 0.4,
-                            height: screenHeight * 0.4,
+                          );
+                        },
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height:
+                            compact ? screenWidth * 0.45 : screenWidth * 0.6,
+                        color: AppColors.white,
+                        child: Center(
+                          child: ColorFiltered(
+                            colorFilter: const ColorFilter.matrix([
+                              -1, 0, 0, 0, 255, // Red channel inverted
+                              0, -1, 0, 0, 255, // Green channel inverted
+                              0, 0, -1, 0, 255, // Blue channel inverted
+                              0, 0, 0, 1, 0, // Alpha channel unchanged
+                            ]),
+                            child: Image.asset(
+                              'assets/images/cars.png',
+                              fit: BoxFit.contain,
+                              width: screenWidth * 0.4,
+                              height: screenHeight * 0.4,
+                            ),
                           ),
                         ),
                       ),
-                    ),
               ),
             ),
           ),
@@ -282,13 +288,13 @@ class CarImageSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: session.photoUrl != null
               ? Image.network(
-                session.photoUrl!,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _placeholder(context),
-              )
+                  session.photoUrl!,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _placeholder(context),
+                )
               : _placeholder(context),
         ),
       ),
