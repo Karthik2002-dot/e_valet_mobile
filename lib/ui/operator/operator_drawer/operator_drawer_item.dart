@@ -8,6 +8,10 @@ class OperatorDrawerItem extends StatelessWidget {
   final String title;
   final bool isSelected;
   final VoidCallback? onTap;
+  final double fontSize;
+  final double rowHeight;
+  final double iconSize;
+  final double verticalMargin;
 
   const OperatorDrawerItem({
     super.key,
@@ -16,6 +20,10 @@ class OperatorDrawerItem extends StatelessWidget {
     required this.title,
     this.isSelected = false,
     this.onTap,
+    this.fontSize = 22,
+    this.rowHeight = 44,
+    this.iconSize = 35,
+    this.verticalMargin = 8,
   });
 
   @override
@@ -23,7 +31,7 @@ class OperatorDrawerItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        margin: EdgeInsets.symmetric(vertical: verticalMargin),
         child: Row(
           children: [
             Expanded(
@@ -35,7 +43,7 @@ class OperatorDrawerItem extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Container(
-                          height: 44,
+                          height: rowHeight,
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: const BorderRadius.only(
@@ -47,13 +55,13 @@ class OperatorDrawerItem extends StatelessWidget {
                       ),
                     ),
                   Container(
-                    height: 44,
+                    height: rowHeight,
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
                     child: TextComponent(
                       labelText: title,
                       color: isSelected ? AppColors.black : AppColors.white,
-                      fontSize: 22,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -64,14 +72,14 @@ class OperatorDrawerItem extends StatelessWidget {
             if (iconData != null)
               Icon(
                 iconData,
-                size: 35,
+                size: iconSize,
                 color: isSelected ? AppColors.black : AppColors.white,
               )
             else if (asset != null)
               Image.asset(
                 asset!,
-                width: 35,
-                height: 35,
+                width: iconSize,
+                height: iconSize,
                 color: isSelected ? AppColors.black : AppColors.white,
               ),
             SizedBox(

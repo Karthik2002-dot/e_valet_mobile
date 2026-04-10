@@ -17,13 +17,23 @@ class OperatorDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final itemFontSize = isIOS ? 19.0 : 22.0;
+    final itemRowHeight = isIOS ? 40.0 : 44.0;
+    final itemIconSize = isIOS ? 30.0 : 35.0;
+    final itemVerticalMargin = isIOS ? 6.0 : 8.0;
+
     return Drawer(
       child: Container(
         color: AppColors.primary,
-        padding: const EdgeInsets.symmetric(vertical: 24),
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+              0,
+              24,
+              0,
+              16,
+            ),
             children: [
               Center(
                 child: Image.asset(
@@ -36,6 +46,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/dashboard.png',
                 title: t.get(TextConstants.dashboard),
                 isSelected: selectedIndex == 0,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(0);
@@ -45,6 +59,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/slots.png',
                 title: t.get(TextConstants.parkedCar),
                 isSelected: selectedIndex == 1,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(1);
@@ -54,6 +72,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/drivers.png',
                 title: t.get(TextConstants.valets),
                 isSelected: selectedIndex == 2,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(2);
@@ -63,6 +85,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/cars.png',
                 title: t.get(TextConstants.carLogs),
                 isSelected: selectedIndex == 3,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(3);
@@ -72,6 +98,10 @@ class OperatorDrawer extends StatelessWidget {
                 iconData: Icons.groups,
                 title: t.getByKey('driversGroup', TextConstants.driversGroup),
                 isSelected: selectedIndex == 9,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(9);
@@ -81,12 +111,16 @@ class OperatorDrawer extends StatelessWidget {
                 iconData: Icons.schedule,
                 title: t.getByKey('overtime', TextConstants.overTime),
                 isSelected: selectedIndex == 4,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(4);
                 },
               ),
-              const Spacer(),
+              const SizedBox(height: 24),
               Divider(
                 color: AppColors.black,
                 thickness: 2,
@@ -97,6 +131,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/profile.png',
                 title: t.get(TextConstants.profile),
                 isSelected: selectedIndex == 5,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(5);
@@ -106,6 +144,10 @@ class OperatorDrawer extends StatelessWidget {
                 iconData: Icons.support_agent,
                 title: t.getByKey('help', TextConstants.help),
                 isSelected: selectedIndex == 6,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(6);
@@ -115,6 +157,10 @@ class OperatorDrawer extends StatelessWidget {
                 iconData: Icons.menu_book_outlined,
                 title: t.get(TextConstants.guidelines),
                 isSelected: selectedIndex == 7,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(7);
@@ -124,6 +170,10 @@ class OperatorDrawer extends StatelessWidget {
                 asset: 'assets/images/logout.png',
                 title: t.get(TextConstants.logout),
                 isSelected: selectedIndex == 8,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(8);
