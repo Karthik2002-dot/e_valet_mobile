@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -33,17 +34,13 @@ class PermissionsScreen extends StatefulWidget {
   State<PermissionsScreen> createState() => _PermissionsScreenState();
 }
 
-const List<Permission> _requiredPermissions = [
-  Permission.location,
-  Permission.camera,
-  Permission.notification,
-];
-
 class _PermissionsScreenState extends State<PermissionsScreen>
     with WidgetsBindingObserver {
   Map<Permission, PermissionStatusType> _statuses = {};
   bool _loading = true;
   bool _autoRequestDone = false;
+
+  bool get _isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   void initState() {
@@ -73,7 +70,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
         _statuses = map;
         _loading = false;
       });
-      // After first load, auto-request any permission that is not granted (once per visit)
+      // After first load, auto-request any permission that is not granted (once per visit).
+      // On iOS, avoid auto-requesting camera: we show an explainer first and only request
+      // after the user taps "Continue" (Apple HIG / App Review guidance).
       if (!_autoRequestDone &&
           map.values.any((s) => s != PermissionStatusType.granted)) {
         WidgetsBinding.instance
@@ -87,8 +86,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     if (!mounted) return;
     setState(() => _autoRequestDone = true);
 
-    for (final permission in _requiredPermissions) {
+    for (final permission in PermissionsService.permissionScreenPermissions) {
       if (!mounted) return;
+      if (_isIOS && permission == Permission.camera) continue;
       final current = _statuses[permission];
       if (current == PermissionStatusType.granted) continue;
 
@@ -99,28 +99,78 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     }
   }
 
-  bool get _allGranted =>
-      !_loading &&
-      _statuses.isNotEmpty &&
-      _statuses.values.every((s) => s == PermissionStatusType.granted);
+  bool get _allGranted {
+    if (_loading || _statuses.isEmpty) return false;
+    return PermissionsService.requiredPermissions
+        .every((p) => _statuses[p] == PermissionStatusType.granted);
+  }
 
   /// First required permission that is not granted (in order: Location, Camera, Notifications).
   Permission? get _firstMissingPermission {
     if (_loading || _statuses.isEmpty) return null;
-    for (final p in _requiredPermissions) {
+    for (final p in PermissionsService.requiredPermissions) {
       if (_statuses[p] != PermissionStatusType.granted) return p;
     }
     return null;
   }
 
   static String _permissionButtonLabel(Permission permission) {
+    // On iOS, avoid "Allow" wording for camera in the custom UI.
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    if (isIOS && permission == Permission.camera) return 'Continue';
     if (permission == Permission.location) return 'Allow Location';
-    if (permission == Permission.camera) return 'Allow Camera';
+    if (permission == Permission.camera) return 'Camera';
     if (permission == Permission.notification) return 'Allow Notifications';
     return 'Allow permission';
   }
 
+  Future<void> _showIOSCameraExplainerThenRequest() async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.transparent,
+      isScrollControlled: false,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: const [
+                TextComponent(
+                  labelText:
+                      'Camera access is required to continue. Tap Continue to show the iOS permission prompt.',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+                SizedBox(height: 16),
+                _IOSContinueButton(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _onPermissionTap(Permission permission) async {
+    if (_isIOS && permission == Permission.camera) {
+      await _showIOSCameraExplainerThenRequest();
+      if (!mounted) return;
+      final status = await PermissionsService.request(permission);
+      if (!mounted) return;
+      setState(() => _statuses[permission] = status);
+      if (status == PermissionStatusType.permanentlyDenied) {
+        _showOpenSettingsDialog();
+      }
+      return;
+    }
     final status = await PermissionsService.request(permission);
     if (!mounted) return;
     setState(() => _statuses[permission] = status);
@@ -447,6 +497,33 @@ class _PermissionRow extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IOSContinueButton extends StatelessWidget {
+  const _IOSContinueButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: FilledButton(
+        onPressed: () => Navigator.of(context).pop(),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.qrSuccessColor,
+          foregroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const TextComponent(
+          labelText: 'Continue',
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
