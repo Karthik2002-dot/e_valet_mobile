@@ -11,6 +11,7 @@ class DriverHomeContent extends StatefulWidget {
   final String driverName;
   final bool isOnBreak;
   final bool isOnline;
+  final int retrievePendingCount;
   final VoidCallback? onBreakEnd;
 
   /// When this notifier's value changes, we reset so home (two cards) is shown.
@@ -21,6 +22,7 @@ class DriverHomeContent extends StatefulWidget {
     required this.driverName,
     required this.isOnBreak,
     required this.isOnline,
+    this.retrievePendingCount = 0,
     this.onBreakEnd,
     this.homeResetNotifier,
   });
@@ -146,6 +148,8 @@ class _DriverHomeContentState extends State<DriverHomeContent>
                               child: DriverOnlineContent(
                                 key: _onlineContentKey,
                                 driverName: widget.driverName,
+                                retrievePendingCount:
+                                    widget.retrievePendingCount,
                                 screenWidth: screenWidth,
                                 screenHeight: screenHeight,
                                 isTablet: isTablet,
