@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niloufer_valet_mobile/models/driver/pre_break/pre_break_info_response.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/driver_status.dart';
 
 abstract class DriverStatusState extends Equatable {
@@ -32,6 +33,32 @@ class DriverStatusError extends DriverStatusState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class DriverBreakToggleLoading extends DriverStatusState {
+  final DriverStatus? previousStatus;
+  final bool requestedOnBreakState;
+
+  const DriverBreakToggleLoading({
+    this.previousStatus,
+    required this.requestedOnBreakState,
+  });
+
+  @override
+  List<Object?> get props => [previousStatus, requestedOnBreakState];
+}
+
+class DriverBreakBlockedByPendingWork extends DriverStatusState {
+  final DriverStatus? previousStatus;
+  final PreBreakInfoResponse preBreakInfo;
+
+  const DriverBreakBlockedByPendingWork({
+    required this.preBreakInfo,
+    this.previousStatus,
+  });
+
+  @override
+  List<Object?> get props => [previousStatus, preBreakInfo];
 }
 
 class DriverBreakStartSuccess extends DriverStatusState {

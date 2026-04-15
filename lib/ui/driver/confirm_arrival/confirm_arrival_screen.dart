@@ -3,8 +3,10 @@ import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:niloufer_valet_mobile/api/driver/initiate_repark_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/assigned_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/api/operator/operator_dashboard/operator_assign_retrieval_api_service.dart';
@@ -18,12 +20,15 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/car_details_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_flow_tracker.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/car_information_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/handover_buttons_section.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_widgets/slide_to_confirm_button.dart';
-import 'package:niloufer_valet_mobile/ui/driver/customer_missing/customer_missing_dialog.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/re-park/initiate_repark_request.dart';
+import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class ConfirmArrivalScreen extends StatefulWidget {
@@ -70,8 +75,6 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
 
   /// After Confirm Arrival API success, Customer Missing button is disabled until this time (duration from CUSTOMER_MISSING_DISABLE_SECONDS in .env).
   DateTime? _customerMissingDisabledUntil;
-  final GlobalKey<HandoverButtonsSectionState> _handoverButtonsKey =
-      GlobalKey<HandoverButtonsSectionState>();
 
   bool _isNotAssignedToRetrievalError(String message) {
     final msg = message.toLowerCase();
@@ -255,6 +258,58 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
     _operatorOverridePollTimer = null;
   }
 
+  Future<void> _handleCustomerMissingTap() async {
+    try {
+      LocationPermission permission = await LocationService.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await LocationService.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw ApiException(
+          'Location permission is required to initiate repark.',
+          code: 'location_permission_denied',
+        );
+      }
+
+      final position = await LocationService.getCurrentLocation();
+
+      final request = InitiateReparkRequest(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy: position.accuracy,
+      );
+
+      final response = await InitiateReparkApiService.initiateRepark(
+        sessionId: widget.session.id,
+        request: request,
+      );
+
+      if (!mounted) return;
+      SnackBars.showSuccessSnackBar(context, response.message);
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => CarPhotoIntroScreen(
+            cameViaTagNumber: false,
+            sessionId: widget.session.id,
+            isReparking: true,
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      SnackBars.showErrorSnackBar(context, e.message);
+    } catch (e) {
+      if (!mounted) return;
+      SnackBars.showErrorSnackBar(
+        context,
+        'Failed to initiate repark. Please try again.',
+      );
+    }
+  }
+
   /// Pop once on the next frame after snackbar schedules; cancels operator polling
   /// first to avoid a race with [_checkOperatorOverride] (double pop → blank screen).
   void _safePopAfterSnackBar({required String reason}) {
@@ -430,7 +485,6 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                       ),
                       child: _showHandoverButtons
                           ? HandoverButtonsSection(
-                              key: _handoverButtonsKey,
                               isLoading: isLoading,
                               customerMissingDisabledUntil:
                                   _customerMissingDisabledUntil,
@@ -447,14 +501,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
                                     );
                               },
                               onCustomerMissing: () {
-                                return CustomerMissingDialog.show(
-                                  context,
-                                  sessionId: widget.session.id,
-                                  onCancel: () {
-                                    _handoverButtonsKey.currentState
-                                        ?.resetCustomerMissingButton();
-                                  },
-                                );
+                                return _handleCustomerMissingTap();
                               },
                             )
                           : Column(

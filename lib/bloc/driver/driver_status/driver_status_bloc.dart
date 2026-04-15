@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/api/driver/pre_break_info_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
@@ -68,8 +69,11 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
         ? (state as DriverStatusLoaded).status
         : null;
 
-    // Emit loading state to disable toggle during API call
-    emit(const DriverStatusLoading());
+    // Emit action loading state so UI can block interactions during this user action.
+    emit(DriverBreakToggleLoading(
+      previousStatus: previousState,
+      requestedOnBreakState: event.isOnBreak,
+    ));
 
     // Get stored location or fetch new one
     try {
@@ -101,6 +105,19 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
       }
 
       if (event.isOnBreak) {
+        // Before starting break, ensure driver has no pending/parked responsibilities.
+        final preBreakInfo = await PreBreakInfoApiService.getPreBreakInfo();
+        if (preBreakInfo.hasBlockingData) {
+          emit(DriverBreakBlockedByPendingWork(
+            preBreakInfo: preBreakInfo,
+            previousStatus: previousState,
+          ));
+          if (previousState != null) {
+            emit(DriverStatusLoaded(previousState));
+          }
+          return;
+        }
+
         // Start break
         final breakStartRequest = BreakStartRequest(
           latitude: latitude,

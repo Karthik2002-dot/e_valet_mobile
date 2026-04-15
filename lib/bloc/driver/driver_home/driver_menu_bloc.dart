@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:niloufer_valet_mobile/api/driver/pre_break_info_api_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
@@ -36,6 +37,23 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
     DriverLogoutPressed event,
     Emitter<DriverMenuState> emit,
   ) async {
+    emit(const DriverMenuLogoutPrecheckLoading());
+    try {
+      final preBreakInfo = await PreBreakInfoApiService.getPreBreakInfo();
+      if (preBreakInfo.hasBlockingData) {
+        emit(DriverMenuLogoutBlockedByPendingWork(preBreakInfo));
+        return;
+      }
+    } on ApiException catch (e) {
+      emit(DriverMenuLogoutFailure(e.message));
+      return;
+    } catch (_) {
+      emit(const DriverMenuLogoutFailure(
+        'Unable to validate pending assignments. Please try again.',
+      ));
+      return;
+    }
+
     emit(const DriverMenuLogoutLoading());
 
     // Automatically clock out (go offline) in background before logout
