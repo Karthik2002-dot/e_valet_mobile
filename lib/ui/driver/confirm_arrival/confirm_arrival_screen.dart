@@ -79,12 +79,16 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   }
 
   static int _confirmArrivalDisableSecondsFromEnv() {
+    final fromStorage = TokenStorage.getConfirmArrivalDisableSecondsSync();
+    if (fromStorage != null && fromStorage > 0) return fromStorage;
     final v = dotenv.env['CONFIRM_ARRIVAL_DISABLE_SECONDS'];
     if (v == null || v.isEmpty) return 10;
     return int.tryParse(v.trim()) ?? 10;
   }
 
   static int _customerMissingDisableSecondsFromEnv() {
+    final fromStorage = TokenStorage.getCustomerMissingDisableSecondsSync();
+    if (fromStorage != null && fromStorage > 0) return fromStorage;
     final v = dotenv.env['CUSTOMER_MISSING_DISABLE_SECONDS'];
     if (v == null || v.isEmpty) return 60;
     return int.tryParse(v.trim()) ?? 60;

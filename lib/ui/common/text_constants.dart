@@ -280,7 +280,7 @@ class TextConstants {
   static const String retrievalRequested = 'Retrieval Requested';
   static const String noActiveRetrievalRequests =
       'No active retrieval requests';
-  static const String acceptRequest = 'Collect Keys';
+  static const String acceptRequest = 'Okay';
   static const String acceptAllRetrievals = 'Accept all';
 
   // Handover Related
