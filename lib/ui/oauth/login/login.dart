@@ -32,7 +32,14 @@ import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_sta
 import 'package:niloufer_valet_mobile/models/oauth/profile.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    this.initialSuccessMessage,
+  });
+
+  /// Optional one-time message to show when landing on login (e.g. after
+  /// deactivating an account). Kept nullable so other flows are unchanged.
+  final String? initialSuccessMessage;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -45,6 +52,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _pinFocusNode = FocusNode();
 
   bool _outletDialogShowing = false;
+  bool _initialMessageShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_initialMessageShown) return;
+      final msg = widget.initialSuccessMessage;
+      if (msg == null || msg.trim().isEmpty) return;
+      _initialMessageShown = true;
+      SnackBars.showSuccessSnackBar(context, msg.trim());
+    });
+  }
 
   @override
   void dispose() {

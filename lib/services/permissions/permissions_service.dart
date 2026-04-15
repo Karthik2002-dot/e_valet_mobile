@@ -1,4 +1,6 @@
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 /// Result of checking a single permission.
 enum PermissionStatusType {
@@ -21,11 +23,20 @@ class PermissionsService {
     _permissionsCompletedOnce = true;
   }
 
-  static const List<Permission> _requiredPermissions = [
-    Permission.location,
-    Permission.camera,
-    Permission.notification,
-  ];
+  static bool get _notificationIsOptional =>
+      !kIsWeb &&
+      defaultTargetPlatform ==
+          TargetPlatform.iOS; // iOS-only: notifications should be optional.
+
+  /// Permissions required to use the app.
+  /// On iOS, notifications are optional (app must still work if denied).
+  static List<Permission> get requiredPermissions => _notificationIsOptional
+      ? const [Permission.location, Permission.camera]
+      : const [Permission.location, Permission.camera, Permission.notification];
+
+  /// Permissions shown/requested on the permissions screen (includes optional ones).
+  static List<Permission> get permissionScreenPermissions =>
+      const [Permission.location, Permission.camera, Permission.notification];
 
   /// Maps [Permission] to a stable key for storage/UI.
   static String permissionKey(Permission p) {
@@ -46,7 +57,7 @@ class PermissionsService {
   static Future<Map<Permission, PermissionStatusType>>
       checkAllPermissions() async {
     final map = <Permission, PermissionStatusType>{};
-    for (final p in _requiredPermissions) {
+    for (final p in permissionScreenPermissions) {
       final status = await p.status;
       map[p] = _fromStatus(status);
     }
@@ -56,7 +67,8 @@ class PermissionsService {
   /// True if all three permissions are granted.
   static Future<bool> areAllGranted() async {
     final map = await checkAllPermissions();
-    return map.values.every((s) => s == PermissionStatusType.granted);
+    return requiredPermissions
+        .every((p) => map[p] == PermissionStatusType.granted);
   }
 
   /// Request location. Returns new status. Caller should open app settings if permanently denied.
