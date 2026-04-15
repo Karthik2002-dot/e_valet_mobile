@@ -29,10 +29,14 @@ class DriverBreakToggleWidget extends StatelessWidget {
         // Get break status from API, fallback to false if not loaded yet
         final isOnBreak = statusState is DriverStatusLoaded
             ? statusState.status.isOnBreak
+            : statusState is DriverBreakToggleLoading
+                ? statusState.previousStatus?.isOnBreak ?? false
             : false;
 
         // Check if we're in a loading state (updating break status)
-        final isLoading = statusState is DriverStatusLoading;
+        final isLoading =
+            statusState is DriverStatusLoading ||
+            statusState is DriverBreakToggleLoading;
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -78,11 +82,9 @@ class DriverBreakToggleWidget extends StatelessWidget {
                     child: Switch(
                       value: isOnBreak,
                       onChanged: (value) {
-                        // Only call API, don't update local state immediately
-                        // The toggle will update automatically when API succeeds
-                        context
-                            .read<DriverStatusBloc>()
-                            .add(DriverBreakToggled(value));
+                        context.read<DriverStatusBloc>().add(
+                              DriverBreakToggled(value),
+                            );
                       },
                       activeColor: AppColors.white,
                       inactiveThumbColor: AppColors.grey,

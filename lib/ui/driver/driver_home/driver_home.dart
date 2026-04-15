@@ -23,6 +23,7 @@ import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/car_photo_intro_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_view.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/session_incomplete_dialog.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/widgets/pre_break_info_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/assigned_session_sheet_loader.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
@@ -696,6 +697,22 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _presentAssignedSessionSheet(blocContext);
   }
 
+  Widget _buildActionBlockingLoader() {
+    return Positioned.fill(
+      child: AbsorbPointer(
+        absorbing: true,
+        child: Container(
+          color: AppColors.black.withOpacity(0.45),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -811,6 +828,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     );
                     // Reset state
                     context.read<DriverMenuBloc>().add(const DriverMenuReset());
+                  } else if (state is DriverMenuLogoutBlockedByPendingWork) {
+                    PreBreakInfoDialog.show(
+                      context,
+                      title: 'Cannot Logout',
+                      actionLabel: 'logout',
+                      info: state.preBreakInfo,
+                    );
                   } else if (state is DriverMenuAction) {
                     switch (state.action) {
                       case DriverMenuActionType.profile:
@@ -859,23 +883,53 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     SnackBars.showSuccessSnackBar(context, state.message);
                   } else if (state is DriverBreakEndSuccess) {
                     SnackBars.showSuccessSnackBar(context, state.message);
+                  } else if (state is DriverBreakBlockedByPendingWork) {
+                    PreBreakInfoDialog.show(
+                      context,
+                      title: 'Cannot Start Break',
+                      actionLabel: 'start break',
+                      info: state.preBreakInfo,
+                    );
                   } else if (state is DriverStatusError) {
                     SnackBars.showErrorSnackBar(context, state.message);
                   }
                 },
               ),
             ],
-            child: GestureDetector(
-              onTap: () {
-                try {
-                  final assignedBloc =
-                      context.read<AssignedSessionsBackgroundBloc>();
-                  assignedBloc.add(const RefreshAssignedSessions());
-                } catch (e) {
-                  print('Manual WebSocket refresh failed: $e');
-                }
+            child: BlocBuilder<DriverMenuBloc, DriverMenuState>(
+              builder: (context, menuState) {
+                return BlocBuilder<DriverStatusBloc, DriverStatusState>(
+                  builder: (context, statusState) {
+                    final isLogoutActionInProgress =
+                        menuState is DriverMenuLogoutPrecheckLoading ||
+                        menuState is DriverMenuLogoutLoading;
+                    final isBreakActionInProgress =
+                        statusState is DriverBreakToggleLoading;
+                    final shouldBlockActions =
+                        isLogoutActionInProgress || isBreakActionInProgress;
+
+                    return Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            try {
+                              final assignedBloc = context
+                                  .read<AssignedSessionsBackgroundBloc>();
+                              assignedBloc.add(const RefreshAssignedSessions());
+                            } catch (e) {
+                              print('Manual WebSocket refresh failed: $e');
+                            }
+                          },
+                          child: DriverHomeView(
+                            homeResetNotifier: _homeResetNotifier,
+                          ),
+                        ),
+                        if (shouldBlockActions) _buildActionBlockingLoader(),
+                      ],
+                    );
+                  },
+                );
               },
-              child: DriverHomeView(homeResetNotifier: _homeResetNotifier),
             ),
           );
         },
