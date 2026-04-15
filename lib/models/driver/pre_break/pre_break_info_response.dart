@@ -103,18 +103,28 @@ class PreBreakInfoResponse extends Equatable {
     );
   }
 
+  bool _isOwnSessionStillBlocking(PreBreakSessionInfo session) {
+    final passedTo = session.passedToDriverUserId?.trim() ?? '';
+    // Once explicitly passed to another driver, this session should no longer
+    // block break/logout for the current driver.
+    return passedTo.isEmpty;
+  }
+
+  List<PreBreakSessionInfo> get _blockingOwnParkedSessions =>
+      ownParkedSessions.where(_isOwnSessionStillBlocking).toList(growable: false);
+
   bool get hasBlockingData =>
       hasPendingAssignments ||
-      ownParkedSessions.isNotEmpty ||
+      _blockingOwnParkedSessions.isNotEmpty ||
       passedToMeSessions.isNotEmpty;
 
   int get parkedSessionsCount =>
-      ownParkedSessions.length + passedToMeSessions.length;
+      _blockingOwnParkedSessions.length + passedToMeSessions.length;
 
   List<int> get blockingCardNumbers {
     final seen = <int>{};
     final cards = <int>[];
-    for (final s in [...ownParkedSessions, ...passedToMeSessions]) {
+    for (final s in [..._blockingOwnParkedSessions, ...passedToMeSessions]) {
       if (s.cardNumber <= 0 || seen.contains(s.cardNumber)) continue;
       seen.add(s.cardNumber);
       cards.add(s.cardNumber);

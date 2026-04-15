@@ -834,7 +834,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       title: 'Cannot Logout',
                       actionLabel: 'logout',
                       info: state.preBreakInfo,
-                    );
+                    ).then((selectedDriver) {
+                      if (!context.mounted || selectedDriver == null) return;
+                      context
+                          .read<DriverMenuBloc>()
+                          .add(const DriverLogoutPressed());
+                    });
                   } else if (state is DriverMenuAction) {
                     switch (state.action) {
                       case DriverMenuActionType.profile:
@@ -889,7 +894,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       title: 'Cannot Start Break',
                       actionLabel: 'start break',
                       info: state.preBreakInfo,
-                    );
+                    ).then((selectedDriver) {
+                      if (!context.mounted || selectedDriver == null) return;
+                      context
+                          .read<DriverStatusBloc>()
+                          .add(const DriverBreakToggled(true));
+                    });
                   } else if (state is DriverStatusError) {
                     SnackBars.showErrorSnackBar(context, state.message);
                   }

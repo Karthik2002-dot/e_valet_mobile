@@ -132,7 +132,10 @@ class _LoginScreenState extends State<LoginScreen> {
               title: 'Cannot Logout',
               actionLabel: 'logout',
               info: menuState.preBreakInfo,
-            );
+            ).then((selectedDriver) {
+              if (!ctx.mounted || selectedDriver == null) return;
+              ctx.read<DriverMenuBloc>().add(const DriverLogoutPressed());
+            });
           } else if (menuState is DriverMenuAction) {
             switch (menuState.action) {
               case DriverMenuActionType.profile:
