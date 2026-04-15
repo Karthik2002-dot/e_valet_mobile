@@ -80,6 +80,16 @@ class _AssignedSessionSheetLoaderState
   DateTime? _acceptTriggeredAt;
   String? _passErrorMessage;
 
+  void _closeSheetAfterFrame(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) {
+        navigator.pop();
+      }
+    });
+  }
+
   @override
   void dispose() {
     VibrationController.stop();
@@ -125,6 +135,7 @@ class _AssignedSessionSheetLoaderState
           );
           if (rawSession == null) {
             VibrationController.stop();
+            _closeSheetAfterFrame(context);
             return const SizedBox.shrink();
           }
 

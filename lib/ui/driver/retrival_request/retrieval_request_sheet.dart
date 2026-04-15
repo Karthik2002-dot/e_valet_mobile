@@ -127,28 +127,28 @@ class RetrievalRequestSheet extends StatelessWidget {
                           ),
                         ],
 
-                        // Pass-to-driver section — only shown when a session is active
-                        if (session != null) ...[
-                          const SizedBox(height: 4),
-                          PassToDriverSection(
-                            screenWidth: screenWidth,
-                            isPassing: isPassing,
-                            isDisabled: isActionLocked,
-                            onPass: onPass,
-                          ),
-                          if (passErrorMessage != null &&
-                              passErrorMessage!.trim().isNotEmpty)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 10, bottom: 4),
-                              child: TextComponent(
-                                labelText: passErrorMessage!,
-                                fontSize: screenWidth * 0.035,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.error,
-                              ),
-                            ),
-                        ],
+                        // // Pass-to-driver section — only shown when a session is active
+                        // if (session != null) ...[
+                        //   const SizedBox(height: 4),
+                        //   PassToDriverSection(
+                        //     screenWidth: screenWidth,
+                        //     isPassing: isPassing,
+                        //     isDisabled: isActionLocked,
+                        //     onPass: onPass,
+                        //   ),
+                        //   if (passErrorMessage != null &&
+                        //       passErrorMessage!.trim().isNotEmpty)
+                        //     Padding(
+                        //       padding:
+                        //           const EdgeInsets.only(top: 10, bottom: 4),
+                        //       child: TextComponent(
+                        //         labelText: passErrorMessage!,
+                        //         fontSize: screenWidth * 0.035,
+                        //         fontWeight: FontWeight.w600,
+                        //         color: AppColors.error,
+                        //       ),
+                        //     ),
+                        // ],
                       ],
                     ),
                   ),

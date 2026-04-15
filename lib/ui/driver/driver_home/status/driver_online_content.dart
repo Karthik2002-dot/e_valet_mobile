@@ -18,6 +18,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 
 class DriverOnlineContent extends StatefulWidget {
   final String driverName;
+  final int retrievePendingCount;
   final double screenWidth;
   final double screenHeight;
   final bool isTablet;
@@ -28,6 +29,7 @@ class DriverOnlineContent extends StatefulWidget {
   const DriverOnlineContent({
     super.key,
     required this.driverName,
+    this.retrievePendingCount = 0,
     required this.screenWidth,
     required this.screenHeight,
     required this.isTablet,
@@ -176,6 +178,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                   DriverActionCard(
                     imagePath: 'assets/images/retrive.png',
                     buttonLabel: t.get(TextConstants.retrieveVehicle),
+                    notificationCount: widget.retrievePendingCount,
                     onTap: null,
                     screenWidth: widget.screenWidth,
                     screenHeight: widget.screenHeight,
