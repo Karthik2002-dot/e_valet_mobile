@@ -54,6 +54,10 @@ class TokenStorage {
   static const String _currentLongitudeKey = 'current_longitude';
   static const String _selectedOutletIdKey = 'selected_outlet_id';
   static const String _selectedOutletNameKey = 'selected_outlet_name';
+  static const String _confirmArrivalDisableSecondsKey =
+      'confirm_arrival_disable_seconds';
+  static const String _customerMissingDisableSecondsKey =
+      'customer_missing_disable_seconds';
 
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
@@ -539,6 +543,66 @@ class TokenStorage {
     }
   }
 
+  // Button config management
+  static Future<void> saveButtonConfig({
+    required int confirmArrivalDisableSeconds,
+    required int customerMissingDisableSeconds,
+  }) async {
+    try {
+      await _box.put(
+          _confirmArrivalDisableSecondsKey, confirmArrivalDisableSeconds);
+      await _box.put(
+          _customerMissingDisableSecondsKey, customerMissingDisableSeconds);
+    } catch (e) {
+      print('[TokenStorage] ❌ Error saving button config: $e');
+      rethrow;
+    }
+  }
+
+  static Future<int?> getConfirmArrivalDisableSeconds() async {
+    try {
+      final value = _box.get(_confirmArrivalDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading confirm arrival config: $e');
+      return null;
+    }
+  }
+
+  static int? getConfirmArrivalDisableSecondsSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_confirmArrivalDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<int?> getCustomerMissingDisableSeconds() async {
+    try {
+      final value = _box.get(_customerMissingDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading customer missing config: $e');
+      return null;
+    }
+  }
+
+  static int? getCustomerMissingDisableSecondsSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_customerMissingDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// After Collect Keys (accept API): FIFO-ordered retrieval **session ids**
   /// deferred until Confirm Arrival / handover completes. While active park
   /// flow runs, Confirm Arrival is not auto-opened for these ids; after park,
@@ -712,6 +776,8 @@ class TokenStorage {
     await clearResetToken();
     await clearSessionId();
     await clearSelectedOutlet();
+    await _box.delete(_confirmArrivalDisableSecondsKey);
+    await _box.delete(_customerMissingDisableSecondsKey);
   }
 
   static Future<bool> hasValidTokens() async {
