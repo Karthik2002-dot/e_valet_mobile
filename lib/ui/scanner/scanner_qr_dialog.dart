@@ -138,7 +138,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                             MobileScanner(
                               controller: _controller,
                               onDetect: _onDetect,
-                              errorBuilder: (context, error) => Center(
+                              errorBuilder: (context, error, child) => Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
