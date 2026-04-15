@@ -1,0 +1,39 @@
+import 'package:niloufer_valet_mobile/api/core/api_config.dart';
+import 'package:niloufer_valet_mobile/api/core/base_dio_service.dart';
+import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/models/driver/pre_break/pre_break_info_response.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+
+class PreBreakInfoApiService {
+  PreBreakInfoApiService._();
+
+  static String get _baseUrl => ApiConfig.valetBaseUrl;
+
+  static Future<PreBreakInfoResponse> getPreBreakInfo() async {
+    final accessToken = await TokenStorage.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      throw ApiException(
+        'Access token not found. Please login again.',
+        code: 'no_token',
+      );
+    }
+
+    final base = BaseDioService(
+      _baseUrl,
+      ApiConfig.authorizedHeaders(accessToken),
+    );
+
+    try {
+      final response = await base.get('/drivers/pre-break/info');
+      final data = response.data as Map<String, dynamic>;
+      return PreBreakInfoResponse.fromJson(data);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException(
+        'Failed to fetch pre-break info. Please try again.',
+        code: 'unknown_error',
+      );
+    }
+  }
+}

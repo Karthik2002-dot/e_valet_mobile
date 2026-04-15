@@ -22,6 +22,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_state.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/clock_in_too_far_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/widgets/pre_break_info_dialog.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_dashboard/operator_dashboard.dart';
 import 'package:niloufer_valet_mobile/ui/scanner/scanner_home.dart';
@@ -147,6 +148,16 @@ class _LoginScreenState extends State<LoginScreen> {
               (route) => false,
             );
             ctx.read<DriverMenuBloc>().add(const DriverMenuReset());
+          } else if (menuState is DriverMenuLogoutBlockedByPendingWork) {
+            PreBreakInfoDialog.show(
+              ctx,
+              title: 'Cannot Logout',
+              actionLabel: 'logout',
+              info: menuState.preBreakInfo,
+            ).then((selectedDriver) {
+              if (!ctx.mounted || selectedDriver == null) return;
+              ctx.read<DriverMenuBloc>().add(const DriverLogoutPressed());
+            });
           } else if (menuState is DriverMenuAction) {
             switch (menuState.action) {
               case DriverMenuActionType.profile:

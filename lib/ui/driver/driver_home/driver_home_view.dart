@@ -29,6 +29,8 @@ class DriverHomeView extends StatelessWidget {
         }
 
         final driverName = menuState.driverName;
+        final retrievePendingCount =
+            menuState.pendingSessions?.retrievalTasksCount ?? 0;
 
         // Get online status and break status from DriverStatusBloc, fallback to menu state
         return BlocBuilder<DriverStatusBloc, DriverStatusState>(
@@ -44,6 +46,7 @@ class DriverHomeView extends StatelessWidget {
               driverName: driverName,
               isOnBreak: isOnBreak,
               isOnline: isOnline,
+              retrievePendingCount: retrievePendingCount,
               onBreakEnd: () {
                 context
                     .read<DriverStatusBloc>()
