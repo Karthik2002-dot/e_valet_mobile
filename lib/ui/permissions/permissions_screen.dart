@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -115,9 +116,11 @@ class _PermissionsScreenState extends State<PermissionsScreen>
   }
 
   static String _permissionButtonLabel(Permission permission) {
-    // On iOS, avoid "Allow" wording for camera in the custom UI.
+    // Keep iOS pre-permission CTA neutral per App Review guidance.
     final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
-    if (isIOS && permission == Permission.camera) return 'Continue';
+    if (isIOS) return 'Continue';
+
+    // Keep Android wording same as before.
     if (permission == Permission.location) return 'Allow Location';
     if (permission == Permission.camera) return 'Camera';
     if (permission == Permission.notification) return 'Allow Notifications';
