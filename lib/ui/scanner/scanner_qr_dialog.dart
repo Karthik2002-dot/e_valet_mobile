@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_event.dart';
@@ -138,7 +137,7 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                             MobileScanner(
                               controller: _controller,
                               onDetect: _onDetect,
-                              errorBuilder: (context, error) => Center(
+                              errorBuilder: (context, error, child) => Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
