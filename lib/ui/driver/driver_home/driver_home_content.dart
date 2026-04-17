@@ -101,6 +101,7 @@ class _DriverHomeContentState extends State<DriverHomeContent>
         // Use CustomAppBar with language icon and menu
         appBar: CustomAppBar(
           showLanguageIcon: true,
+          showOverflowMenu: true,
           logoSize: logoSize,
           iconSize: iconSize,
         ),

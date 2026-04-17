@@ -717,7 +717,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => DriverMenuBloc()),
         BlocProvider(
             create: (context) => AssignedSessionsBackgroundBloc(
                   webSocketBloc: context.read<WebSocketBloc>(),

@@ -308,7 +308,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
               },
               child: Scaffold(
                 backgroundColor: AppColors.lightBeigeBackground,
-                appBar: const CustomAppBar(),
+                appBar: const CustomAppBar(showOverflowMenu: true),
                 body: SafeArea(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

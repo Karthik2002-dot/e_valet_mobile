@@ -18,7 +18,7 @@ class CarDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightBeigeBackground,
-      appBar: const CustomAppBar(),
+      appBar: const CustomAppBar(showOverflowMenu: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
