@@ -18,7 +18,7 @@ class OperatorDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
-    final itemFontSize = isIOS ? 19.0 : 22.0;
+    final itemFontSize = isIOS ? 16.0 : 18.0;
     final itemRowHeight = isIOS ? 40.0 : 44.0;
     final itemIconSize = isIOS ? 30.0 : 35.0;
     final itemVerticalMargin = isIOS ? 6.0 : 8.0;
@@ -92,6 +92,19 @@ class OperatorDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).pop();
                   onItemSelected?.call(3);
+                },
+              ),
+              OperatorDrawerItem(
+                iconData: Icons.credit_card,
+                title: t.get(TextConstants.cards),
+                isSelected: selectedIndex == 10,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(10);
                 },
               ),
               OperatorDrawerItem(

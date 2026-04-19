@@ -35,6 +35,7 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
   VoidCallback? _dashboardRefresh;
   VoidCallback? _slotsRefresh;
   VoidCallback? _driversRefresh;
+  VoidCallback? _cardsRefresh;
   late OperatorDashboardBloc _dashboardBloc;
   final String _outletId = dotenv.env['OUTLET_ID'] ?? '1';
 
@@ -146,6 +147,9 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
             'Calling drivers refresh, callback is: ${_driversRefresh != null ? "set" : "null"}'); // Debug log
         _driversRefresh?.call();
         break;
+      case 10:
+        _cardsRefresh?.call();
+        break;
       default:
         // For other tabs (Car Logs), increment refresh key to recreate the widget
         print('Incrementing refresh key for tab $_selectedIndex'); // Debug log
@@ -179,6 +183,9 @@ class _OperatorDashboardViewState extends State<OperatorDashboardView> {
       onDriversRefreshReady: (refresh) {
         print('Drivers refresh callback registered'); // Debug log
         _driversRefresh = refresh;
+      },
+      onCardsRefreshReady: (refresh) {
+        _cardsRefresh = refresh;
       },
       onNavigateToTab: (int index) {
         setState(() {

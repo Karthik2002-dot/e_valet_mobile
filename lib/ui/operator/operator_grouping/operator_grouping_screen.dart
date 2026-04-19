@@ -261,7 +261,7 @@ class _OperatorGroupingScreenState extends State<OperatorGroupingScreen> {
       return;
     }
 
-    if (index >= 0 && index <= 3) {
+    if ((index >= 0 && index <= 3) || index == 10) {
       if (widget.onNavigateToTab != null) {
         widget.onNavigateToTab?.call(index);
         Navigator.of(context).popUntil((route) => route.isFirst);
