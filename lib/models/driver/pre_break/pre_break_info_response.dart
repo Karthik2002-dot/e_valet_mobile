@@ -35,6 +35,45 @@ class PreBreakSessionInfo extends Equatable {
       ];
 }
 
+class PreBreakActiveRetrievalInfo extends Equatable {
+  final String sessionId;
+  final int assignmentId;
+  final int cardNumber;
+  final String? vehicleNumber;
+  final String? parkingLocation;
+  final dynamic status;
+
+  const PreBreakActiveRetrievalInfo({
+    required this.sessionId,
+    required this.assignmentId,
+    required this.cardNumber,
+    this.vehicleNumber,
+    this.parkingLocation,
+    this.status,
+  });
+
+  factory PreBreakActiveRetrievalInfo.fromJson(Map<String, dynamic> json) {
+    return PreBreakActiveRetrievalInfo(
+      sessionId: (json['sessionId'] ?? '').toString(),
+      assignmentId: json['assignmentId'] as int? ?? 0,
+      cardNumber: json['cardNumber'] as int? ?? 0,
+      vehicleNumber: json['vehicleNumber']?.toString(),
+      parkingLocation: json['parkingLocation']?.toString(),
+      status: json['status'],
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        sessionId,
+        assignmentId,
+        cardNumber,
+        vehicleNumber,
+        parkingLocation,
+        status,
+      ];
+}
+
 class PreBreakDriverInfo extends Equatable {
   final String driverUserId;
   final String name;
@@ -57,6 +96,7 @@ class PreBreakDriverInfo extends Equatable {
 
 class PreBreakInfoResponse extends Equatable {
   final bool hasPendingAssignments;
+  final List<PreBreakActiveRetrievalInfo> activeRetrievals;
   final List<PreBreakSessionInfo> ownParkedSessions;
   final List<PreBreakSessionInfo> passedToMeSessions;
   final List<PreBreakDriverInfo> groupDrivers;
@@ -64,6 +104,7 @@ class PreBreakInfoResponse extends Equatable {
 
   const PreBreakInfoResponse({
     required this.hasPendingAssignments,
+    required this.activeRetrievals,
     required this.ownParkedSessions,
     required this.passedToMeSessions,
     required this.groupDrivers,
@@ -84,6 +125,10 @@ class PreBreakInfoResponse extends Equatable {
 
     return PreBreakInfoResponse(
       hasPendingAssignments: json['hasPendingAssignments'] as bool? ?? false,
+      activeRetrievals: parseList(
+        json['activeRetrievals'],
+        PreBreakActiveRetrievalInfo.fromJson,
+      ),
       ownParkedSessions: parseList(
         json['ownParkedSessions'],
         PreBreakSessionInfo.fromJson,
@@ -115,6 +160,7 @@ class PreBreakInfoResponse extends Equatable {
 
   bool get hasBlockingData =>
       hasPendingAssignments ||
+      activeRetrievals.isNotEmpty ||
       _blockingOwnParkedSessions.isNotEmpty ||
       passedToMeSessions.isNotEmpty;
 
@@ -124,6 +170,11 @@ class PreBreakInfoResponse extends Equatable {
   List<int> get blockingCardNumbers {
     final seen = <int>{};
     final cards = <int>[];
+    for (final c in activeRetrievals.map((e) => e.cardNumber)) {
+      if (c <= 0 || seen.contains(c)) continue;
+      seen.add(c);
+      cards.add(c);
+    }
     for (final s in [..._blockingOwnParkedSessions, ...passedToMeSessions]) {
       if (s.cardNumber <= 0 || seen.contains(s.cardNumber)) continue;
       seen.add(s.cardNumber);
@@ -148,6 +199,7 @@ class PreBreakInfoResponse extends Equatable {
   @override
   List<Object?> get props => [
         hasPendingAssignments,
+        activeRetrievals,
         ownParkedSessions,
         passedToMeSessions,
         groupDrivers,

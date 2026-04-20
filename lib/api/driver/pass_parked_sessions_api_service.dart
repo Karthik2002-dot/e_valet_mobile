@@ -75,7 +75,7 @@ class PassParkedSessionsApiService {
       return cleanedSessionIds.length;
     } on ApiException {
       rethrow;
-    } catch (_) {
+    } catch (e) {
       throw ApiException(
         'Failed to pass parked sessions. Please try again.',
         code: 'unknown_error',
