@@ -273,7 +273,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
 
             return Scaffold(
               backgroundColor: AppColors.black,
-              appBar: const CustomAppBar(),
+              appBar: const CustomAppBar(showOverflowMenu: true),
               body: LayoutBuilder(
                 builder: (context, constraints) {
                   // Calculate approximate input container height based on its content

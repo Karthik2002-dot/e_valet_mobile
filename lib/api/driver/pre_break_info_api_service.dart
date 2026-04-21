@@ -10,8 +10,11 @@ class PreBreakInfoApiService {
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
   static Future<PreBreakInfoResponse> getPreBreakInfo() async {
+    final startedAt = DateTime.now();
+    print('🟣 PREBREAK GET start: GET $_baseUrl/drivers/pre-break/info');
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
+      print('🟣 PREBREAK GET abort: no access token');
       throw ApiException(
         'Access token not found. Please login again.',
         code: 'no_token',
@@ -26,10 +29,27 @@ class PreBreakInfoApiService {
     try {
       final response = await base.get('/drivers/pre-break/info');
       final data = response.data as Map<String, dynamic>;
-      return PreBreakInfoResponse.fromJson(data);
-    } on ApiException {
+      final parsed = PreBreakInfoResponse.fromJson(data);
+      final ms = DateTime.now().difference(startedAt).inMilliseconds;
+      print(
+        '🟣 PREBREAK GET ok (${ms}ms): '
+        'hasPendingAssignments=${parsed.hasPendingAssignments}, '
+        'activeRetrievals=${parsed.activeRetrievals.length}, '
+        'ownParkedSessions=${parsed.ownParkedSessions.length}, '
+        'passedToMeSessions=${parsed.passedToMeSessions.length}, '
+        'availableDrivers=${parsed.availableDrivers.length}, '
+        'hasBlockingData=${parsed.hasBlockingData}',
+      );
+      return parsed;
+    } on ApiException catch (e) {
+      final ms = DateTime.now().difference(startedAt).inMilliseconds;
+      print(
+        '🟣 PREBREAK GET ApiException (${ms}ms): code=${e.code} message=${e.message}',
+      );
       rethrow;
-    } catch (_) {
+    } catch (e) {
+      final ms = DateTime.now().difference(startedAt).inMilliseconds;
+      print('🟣 PREBREAK GET unknown error (${ms}ms): $e');
       throw ApiException(
         'Failed to fetch pre-break info. Please try again.',
         code: 'unknown_error',

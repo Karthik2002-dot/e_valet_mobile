@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -76,6 +77,10 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: backgroundColor,
+        appBar: CustomAppBar(
+          showOverflowMenu: true,
+          backgroundColor: backgroundColor,
+        ),
         body: SafeArea(
           child: Column(
             children: [

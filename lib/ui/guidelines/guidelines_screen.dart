@@ -26,6 +26,7 @@ class GuidelinesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
+        showOverflowMenu: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: AppColors.white,

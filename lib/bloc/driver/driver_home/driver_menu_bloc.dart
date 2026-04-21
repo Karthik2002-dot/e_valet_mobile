@@ -47,7 +47,7 @@ class DriverMenuBloc extends Bloc<DriverMenuEvent, DriverMenuState> {
     } on ApiException catch (e) {
       emit(DriverMenuLogoutFailure(e.message));
       return;
-    } catch (_) {
+    } catch (e) {
       emit(const DriverMenuLogoutFailure(
         'Unable to validate pending assignments. Please try again.',
       ));

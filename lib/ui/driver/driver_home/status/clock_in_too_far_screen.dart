@@ -33,6 +33,7 @@ class ClockInTooFarScreen extends StatelessWidget {
       backgroundColor: AppColors.lightBeigeBackground,
       appBar: CustomAppBar(
         showLanguageIcon: true,
+        showOverflowMenu: true,
         actions: scannerMode
             ? [
                 const OverflowMenu(scannerMode: true),
