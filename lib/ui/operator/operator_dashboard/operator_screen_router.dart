@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_drivers/operator_drivers_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_car_logs/operator_car_logs_screen.dart';
+import 'package:niloufer_valet_mobile/ui/operator/operator_cards/operator_cards_screen.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_parked_car/operator_parked_car_screen.dart';
 
 class OperatorScreenRouter {
@@ -10,6 +11,7 @@ class OperatorScreenRouter {
     int refreshKey, {
     Function(VoidCallback)? onSlotsRefreshReady,
     Function(VoidCallback)? onDriversRefreshReady,
+    Function(VoidCallback)? onCardsRefreshReady,
     Function(int)? onNavigateToTab,
     bool isAutoMode = false,
   }) {
@@ -32,6 +34,12 @@ class OperatorScreenRouter {
       case 3:
         return OperatorCarLogsScreen(
           key: ValueKey(refreshKey),
+          onNavigateToTab: onNavigateToTab,
+        );
+      case 10:
+        return OperatorCardsScreen(
+          key: ValueKey(refreshKey),
+          onRefreshReady: onCardsRefreshReady,
           onNavigateToTab: onNavigateToTab,
         );
       default:

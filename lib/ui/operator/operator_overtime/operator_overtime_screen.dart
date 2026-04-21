@@ -128,7 +128,7 @@ class _OperatorOverTimeScreenState extends State<OperatorOverTimeScreen> {
       return;
     }
 
-    if (index >= 0 && index <= 3) {
+    if ((index >= 0 && index <= 3) || index == 10) {
       // Switch operator dashboard tab (pop entire overlay stack, same as back to dashboard)
       if (widget.onNavigateToTab != null) {
         widget.onNavigateToTab?.call(index);

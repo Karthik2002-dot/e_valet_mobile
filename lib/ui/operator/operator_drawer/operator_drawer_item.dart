@@ -20,7 +20,7 @@ class OperatorDrawerItem extends StatelessWidget {
     required this.title,
     this.isSelected = false,
     this.onTap,
-    this.fontSize = 22,
+    this.fontSize = 18,
     this.rowHeight = 44,
     this.iconSize = 35,
     this.verticalMargin = 8,
