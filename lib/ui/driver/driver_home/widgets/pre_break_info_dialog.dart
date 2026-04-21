@@ -168,11 +168,6 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
     final selectedDriver = _selectedDriver;
     if (selectedDriver == null) return;
 
-    print(
-      '🟡 PREBREAK DIALOG selectDriver tapped: selectedDriverUserId=${selectedDriver.driverUserId} '
-      'name="${selectedDriver.name}" sessionsToPass=${_sessionIdsToPass.length} activeRetrievalsToPass=${_activeRetrievalSessionIds.length}',
-    );
-
     setState(() => _isSubmitting = true);
     try {
       final passedParkedCount = await PassParkedSessionsApiService.passParkedSessions(
@@ -185,25 +180,17 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
       int passedActiveRetrievalsCount = 0;
       final retrievalIds = _activeRetrievalSessionIds;
       if (retrievalIds.isNotEmpty) {
-        print(
-          '🟡 PREBREAK DIALOG passing active retrieval sessions: count=${retrievalIds.length} ids=$retrievalIds',
-        );
         for (final sessionId in retrievalIds) {
           final message = await PassAvailableDriversApiService.passSessionToDriver(
             sessionId: sessionId,
             driverUserId: selectedDriver.driverUserId,
           );
           passedActiveRetrievalsCount++;
-          print(
-            '🟡 PREBREAK DIALOG active retrieval passed: sessionId=$sessionId message="$message"',
-          );
         }
       }
 
       if (!mounted) return;
-      print(
-        '🟡 PREBREAK DIALOG pass success: parked=$passedParkedCount activeRetrievals=$passedActiveRetrievalsCount. Closing dialog.',
-      );
+
       SnackBars.showSuccessSnackBar(
         context,
         'Work passed successfully.',
