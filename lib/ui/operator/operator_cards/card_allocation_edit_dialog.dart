@@ -83,11 +83,28 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
     });
 
     try {
-      await CardAssignmentsApiService.submitCardAssignments(
-        outletId: widget.outletId,
-        driverUserId: widget.driverUserId,
-        cardIds: parsed.numbers,
-      );
+      final initialSet = widget.initialCardNumbers.toSet();
+      final editedSet = parsed.numbers.toSet();
+
+      final removedCards = initialSet.difference(editedSet).toList()..sort();
+      for (final cardNumber in removedCards) {
+        await CardAssignmentsApiService.unassignCardNumber(
+          outletId: widget.outletId,
+          cardNumber: cardNumber,
+        );
+      }
+
+      final hasAnyCardsAfterEdit = parsed.numbers.isNotEmpty;
+      final addedCards = editedSet.difference(initialSet);
+      final hasChanged = removedCards.isNotEmpty || addedCards.isNotEmpty;
+      if (hasAnyCardsAfterEdit && hasChanged) {
+        await CardAssignmentsApiService.submitCardAssignments(
+          outletId: widget.outletId,
+          driverUserId: widget.driverUserId,
+          cardIds: parsed.numbers,
+        );
+      }
+
       if (!mounted) return;
       Navigator.of(context).pop<List<int>>(parsed.numbers);
     } on ApiException catch (e) {

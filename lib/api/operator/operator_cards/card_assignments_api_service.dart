@@ -4,7 +4,7 @@ import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/operator/operator_cards/card_assignments_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
-/// GET/POST /api/v1/operators/card-assignments
+/// GET/POST/DELETE /api/v1/operators/card-assignments
 class CardAssignmentsApiService {
   CardAssignmentsApiService._();
 
@@ -69,6 +69,31 @@ class CardAssignmentsApiService {
         'driverUserId': driverUserId,
         'outletId': outletIdNum,
       },
+    );
+  }
+
+  /// Unassigns a single physical card number from its current driver.
+  /// Endpoint: DELETE /operators/card-assignments/{cardNumber}?outletId=...
+  static Future<void> unassignCardNumber({
+    required String outletId,
+    required int cardNumber,
+  }) async {
+    final accessToken = await TokenStorage.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      throw ApiException(
+        'Access token not found. Please login again.',
+        code: 'no_token',
+      );
+    }
+
+    final base = BaseDioService(
+      ApiConfig.valetBaseUrl,
+      ApiConfig.authorizedHeaders(accessToken),
+    );
+
+    await base.delete(
+      '/operators/card-assignments/$cardNumber',
+      queryParameters: {'outletId': outletId},
     );
   }
 }
