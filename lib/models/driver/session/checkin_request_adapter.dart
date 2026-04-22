@@ -14,7 +14,6 @@ class CheckinRequestAdapter extends TypeAdapter<CheckinRequest> {
     return CheckinRequest(
       outletId: fields[0] as int,
       cardNumber: fields[1] as int,
-      isManualRequest: fields[2] as bool,
     );
   }
 
@@ -26,7 +25,6 @@ class CheckinRequestAdapter extends TypeAdapter<CheckinRequest> {
       ..write(obj.outletId)
       ..writeByte(1)
       ..write(obj.cardNumber)
-      ..writeByte(2)
-      ..write(obj.isManualRequest);
+      ..writeByte(2);
   }
 }

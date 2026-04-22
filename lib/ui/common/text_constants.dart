@@ -10,7 +10,7 @@ class TextConstants {
   static const cards = 'Cards';
   /// Explains why operators assign card counts per driver on the Cards tab.
   static const String cardsAllocationDescription =
-      'Assign physical card numbers each driver may use (e.g. 11, 12, 61, 89). Drivers must only use cards you list for them.';
+      'Assign physical car numbers.';
   /// Row hint when no numbers assigned yet.
   static const String cardsNoNumbersAssigned = 'No card numbers assigned';
   static const String cardsEditAllocationTitle = 'Assigned card numbers';

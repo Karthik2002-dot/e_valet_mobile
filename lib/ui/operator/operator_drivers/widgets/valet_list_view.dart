@@ -104,6 +104,7 @@ class ValetListView extends StatelessWidget {
         if (state is ValetListLoaded) {
           // First, filter by status based on selected KPI card
           List filteredValets = state.response.valets;
+          String digitsOnly(String input) => input.replaceAll(RegExp(r'\D'), '');
 
           // Apply status filter
           switch (statusFilter) {
@@ -131,9 +132,12 @@ class ValetListView extends StatelessWidget {
           final query = searchQuery.trim().toLowerCase();
           if (query.isNotEmpty) {
             if (RegExp(r'^\d+$').hasMatch(query)) {
-              // If query is all digits, match userId exactly
+              // If query is digits, allow searching by phone without country code.
               filteredValets = filteredValets
-                  .where((valet) => valet.userId.toLowerCase() == query)
+                  .where((valet) =>
+                      valet.userId.toLowerCase() == query ||
+                      digitsOnly(valet.phone).endsWith(query) ||
+                      digitsOnly(valet.phone).contains(query))
                   .toList();
             } else {
               filteredValets = filteredValets.where((valet) {
