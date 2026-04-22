@@ -388,6 +388,8 @@ class TextConstants {
   static const String carLogsParkLocation = 'Park Location';
   static const String carLogsParkedBy = 'Parked By';
   static const String carLogsParkedAt = 'Parked At';
+  static const String carLogsRequestedMode = 'Requested Mode';
+  static const String carLogsRequestedAt = 'Requested At';
   static const String carLogsHandoveredBy = 'Handovered By';
   static const String carLogsHandoverAt = 'Handover At';
 

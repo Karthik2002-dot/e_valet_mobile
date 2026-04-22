@@ -571,6 +571,23 @@ class _OperatorCarLogsScreenState extends State<OperatorCarLogsScreen> {
           aValue = a.parkedBy.name;
           bValue = b.parkedBy.name;
           break;
+        case TextConstants.carLogsRequestedMode:
+          aValue = a.requestedMode;
+          bValue = b.requestedMode;
+          break;
+        case TextConstants.carLogsRequestedAt:
+          aValue = a.requestedAt.isEmpty
+              ? null
+              : DateTime.tryParse(a.requestedAt) ?? DateTime(0);
+          bValue = b.requestedAt.isEmpty
+              ? null
+              : DateTime.tryParse(b.requestedAt) ?? DateTime(0);
+          if (aValue == null && bValue == null) return 0;
+          if (aValue == null)
+            return _sortDirection == SortDirection.ascending ? 1 : -1;
+          if (bValue == null)
+            return _sortDirection == SortDirection.ascending ? -1 : 1;
+          break;
         case TextConstants.carLogsHandoveredBy:
           aValue = a.handoveredBy.name;
           bValue = b.handoveredBy.name;

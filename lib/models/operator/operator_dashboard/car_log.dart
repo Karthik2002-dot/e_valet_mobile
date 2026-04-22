@@ -3,6 +3,8 @@ class CarLog {
   final int tagNumber;
   final String duration;
   final String parkedAt;
+  final String requestedAt;
+  final String requestedMode;
   final String handoveredAt;
   final String displayStatus;
   final ParkedBy parkedBy;
@@ -14,6 +16,8 @@ class CarLog {
     required this.tagNumber,
     required this.duration,
     required this.parkedAt,
+    required this.requestedAt,
+    required this.requestedMode,
     required this.handoveredAt,
     required this.displayStatus,
     required this.parkedBy,
@@ -27,6 +31,8 @@ class CarLog {
       tagNumber: (json['tagNumber'] as num?)?.toInt() ?? 0,
       duration: json['duration'] as String? ?? '',
       parkedAt: json['parkedAt'] as String? ?? '',
+      requestedAt: json['requestedAt'] as String? ?? '',
+      requestedMode: json['requestedMode'] as String? ?? '',
       handoveredAt: json['handoveredAt'] as String? ?? '',
       displayStatus: json['displayStatus'] as String? ?? '',
       parkedBy:
@@ -43,6 +49,8 @@ class CarLog {
       'tagNumber': tagNumber,
       'duration': duration,
       'parkedAt': parkedAt,
+      'requestedAt': requestedAt,
+      'requestedMode': requestedMode,
       'handoveredAt': handoveredAt,
       'displayStatus': displayStatus,
       'parkedBy': parkedBy.toJson(),

@@ -190,6 +190,24 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
+                    padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          color: AppColors.black,
+                          onPressed: () => widget.onNavigateToTab?.call(0),
+                        ),
+                        TextComponent(
+                          labelText: t.get(TextConstants.cards),
+                          color: AppColors.black,
+                          fontSize: width * 0.04,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
                     padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 8),
                     child: TextComponent(
                       labelText:

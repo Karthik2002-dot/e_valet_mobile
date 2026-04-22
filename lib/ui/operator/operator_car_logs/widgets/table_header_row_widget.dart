@@ -97,6 +97,24 @@ class TableHeaderRowWidget extends StatelessWidget {
           Expanded(
             flex: 16,
             child: SortableHeaderCellWidget(
+              text: t.get(TextConstants.carLogsRequestedMode),
+              isActive: sortColumn == TextConstants.carLogsRequestedMode,
+              sortIcon: getSortIcon(TextConstants.carLogsRequestedMode),
+              onTap: () => onHeaderTap(TextConstants.carLogsRequestedMode),
+            ),
+          ),
+          Expanded(
+            flex: 16,
+            child: SortableHeaderCellWidget(
+              text: t.get(TextConstants.carLogsRequestedAt),
+              isActive: sortColumn == TextConstants.carLogsRequestedAt,
+              sortIcon: getSortIcon(TextConstants.carLogsRequestedAt),
+              onTap: () => onHeaderTap(TextConstants.carLogsRequestedAt),
+            ),
+          ),
+          Expanded(
+            flex: 16,
+            child: SortableHeaderCellWidget(
               text: t.getByKey(
                   'carLogsHandoveredBy', TextConstants.carLogsHandoveredBy),
               isActive: sortColumn == TextConstants.carLogsHandoveredBy,
