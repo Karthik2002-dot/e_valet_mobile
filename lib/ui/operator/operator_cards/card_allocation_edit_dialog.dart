@@ -125,10 +125,15 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
+    final titleSize = (width * 0.04).clamp(15.0, 20.0);
+    final bodySize = (width * 0.034).clamp(13.0, 16.0);
+    final errorSize = (width * 0.03).clamp(12.0, 14.0);
+    final buttonSize = (width * 0.033).clamp(12.0, 15.0);
 
     return AlertDialog(
       title: TextComponent(
         labelText: widget.title,
+        fontSize: titleSize,
         fontWeight: FontWeight.w700,
         color: AppColors.black,
       ),
@@ -139,6 +144,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
           children: [
             TextComponent(
               labelText: widget.driverName,
+              fontSize: bodySize,
               fontWeight: FontWeight.w600,
               color: AppColors.black,
               maxLines: 2,
@@ -183,7 +189,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
               const SizedBox(height: 10),
               TextComponent(
                 labelText: _parseError!,
-                fontSize: 13,
+                fontSize: errorSize,
                 color: AppColors.error,
                 fontWeight: FontWeight.w600,
               ),
@@ -192,7 +198,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
               const SizedBox(height: 10),
               TextComponent(
                 labelText: _apiError!,
-                fontSize: 13,
+                fontSize: errorSize,
                 color: AppColors.error,
                 fontWeight: FontWeight.w600,
               ),
@@ -214,6 +220,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
           ),
           child: TextComponent(
             labelText: widget.cancelLabel,
+            fontSize: buttonSize,
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
           ),
@@ -240,6 +247,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
                 )
               : TextComponent(
                   labelText: widget.saveLabel,
+                  fontSize: buttonSize,
                   color: AppColors.white,
                   fontWeight: FontWeight.w700,
                 ),

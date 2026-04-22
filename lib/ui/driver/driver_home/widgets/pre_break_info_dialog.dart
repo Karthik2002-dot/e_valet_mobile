@@ -91,14 +91,6 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
                       fontWeight: FontWeight.w700,
                       color: AppColors.black,
                     ),
-                    const Spacer(),
-                    if (r.assignmentId > 0)
-                      TextComponent(
-                        labelText: 'A${r.assignmentId}',
-                        fontSize: screenWidth * 0.03,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.grey,
-                      ),
                   ],
                 ),
                 if (vehicle.isNotEmpty) ...[
@@ -170,7 +162,8 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      final passedParkedCount = await PassParkedSessionsApiService.passParkedSessions(
+      final passedParkedCount =
+          await PassParkedSessionsApiService.passParkedSessions(
         sessionIds: _sessionIdsToPass,
         passedToDriverUserId: selectedDriver.driverUserId,
       );
@@ -181,7 +174,8 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
       final retrievalIds = _activeRetrievalSessionIds;
       if (retrievalIds.isNotEmpty) {
         for (final sessionId in retrievalIds) {
-          final message = await PassAvailableDriversApiService.passSessionToDriver(
+          final message =
+              await PassAvailableDriversApiService.passSessionToDriver(
             sessionId: sessionId,
             driverUserId: selectedDriver.driverUserId,
           );
@@ -418,8 +412,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
                   width: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.black),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.black),
                   ),
                 )
               : const TextComponent(

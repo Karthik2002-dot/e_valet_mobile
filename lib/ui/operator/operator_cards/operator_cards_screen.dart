@@ -10,7 +10,6 @@ import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_cards/card_allocation_edit_dialog.dart';
-import 'package:niloufer_valet_mobile/utils/valet_utils.dart';
 
 /// Operator tab: list all drivers and assign **physical card numbers**
 /// (e.g. 11, 12, 61) each driver may use.
@@ -35,19 +34,25 @@ List<ValetResponse> _filteredValets(
 ) {
   final q = query.toLowerCase().trim();
   if (q.isEmpty) return all;
+  String digitsOnly(String input) => input.replaceAll(RegExp(r'\D'), '');
+
   if (RegExp(r'^\d+$').hasMatch(q)) {
     final asInt = int.tryParse(q);
-    final byId =
-        all.where((v) => v.userId.toLowerCase() == q).toList();
+    final byId = all.where((v) => v.userId.toLowerCase() == q).toList();
     final byCard = asInt == null
         ? <ValetResponse>[]
         : all.where((v) {
             final cards = cardNumbersByDriverId[v.userId] ?? [];
             return cards.contains(asInt);
           }).toList();
+    final byPhone = all.where((v) {
+      final phoneDigits = digitsOnly(v.phone);
+      // Match by local number input without requiring country code (e.g. +91).
+      return phoneDigits.endsWith(q) || phoneDigits.contains(q);
+    }).toList();
     final seen = <String>{};
     final merged = <ValetResponse>[];
-    for (final v in [...byId, ...byCard]) {
+    for (final v in [...byId, ...byCard, ...byPhone]) {
       if (seen.add(v.userId)) merged.add(v);
     }
     return merged;
@@ -56,6 +61,7 @@ List<ValetResponse> _filteredValets(
       .where((v) =>
           v.name.toLowerCase().contains(q) ||
           v.phone.toLowerCase().contains(q) ||
+          digitsOnly(v.phone).contains(digitsOnly(q)) ||
           v.userId.toLowerCase().contains(q))
       .toList();
 }
@@ -137,8 +143,7 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
             return const ColoredBox(
               color: AppColors.white,
               child: Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             );
           }
@@ -161,8 +166,8 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                       ),
                       const SizedBox(height: 16),
                       TextButton(
-                        onPressed: () => _cardsBloc
-                            .add(const OperatorCardsLoadRequested()),
+                        onPressed: () =>
+                            _cardsBloc.add(const OperatorCardsLoadRequested()),
                         child: TextComponent(
                           labelText: t.get(TextConstants.retryButton),
                           color: AppColors.primary,
@@ -190,77 +195,89 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 0),
+                    padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 8),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
                           color: AppColors.black,
                           onPressed: () => widget.onNavigateToTab?.call(0),
                         ),
-                        TextComponent(
-                          labelText: t.get(TextConstants.cards),
-                          color: AppColors.black,
-                          fontSize: width * 0.04,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextComponent(
+                                labelText: 'Cards Allotment',
+                                color: AppColors.black,
+                                fontSize: (width * 0.042).clamp(16.0, 22.0),
+                                fontWeight: FontWeight.bold,
+                              ),
+                              const SizedBox(height: 2),
+                              TextComponent(
+                                labelText: 'Assign cards to each valet',
+                                color: AppColors.grey,
+                                fontSize: (width * 0.03).clamp(12.0, 14.0),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: width * 0.4,
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: t.getByKey(
+                                'searchByNameOrCardNumber',
+                                TextConstants.searchByNameOrCardNumber,
+                              ),
+                              hintStyle: TextStyle(
+                                color: AppColors.grey,
+                                fontSize: width * 0.02,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.search,
+                                color: AppColors.primary,
+                              ),
+                              suffixIcon: ready.searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear,
+                                        color: AppColors.grey,
+                                      ),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        FocusScope.of(context).unfocus();
+                                      },
+                                    )
+                                  : null,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.grey.withOpacity(0.35),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.grey.withOpacity(0.35),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 8),
-                    child: TextComponent(
-                      labelText:
-                          t.get(TextConstants.cardsAllocationDescription),
-                      color: AppColors.grey,
-                      fontSize: width * 0.032,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontal),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: t.getByKey(
-                          'searchByNameOrCardNumber',
-                          TextConstants.searchByNameOrCardNumber,
-                        ),
-                        hintStyle: TextStyle(
-                          color: AppColors.grey,
-                          fontSize: width * 0.032,
-                        ),
-                        prefixIcon: const Icon(Icons.search,
-                            color: AppColors.primary),
-                        suffixIcon: ready.searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear,
-                                    color: AppColors.grey),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  FocusScope.of(context).unfocus();
-                                },
-                              )
-                            : null,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.grey.withOpacity(0.35),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.grey.withOpacity(0.35),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 12),
                   if (ready.isRefreshing)
                     const LinearProgressIndicator(
                       minHeight: 2,
@@ -282,8 +299,8 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                               physics: const AlwaysScrollableScrollPhysics(),
                               children: [
                                 SizedBox(
-                                  height: MediaQuery.sizeOf(context).height *
-                                      0.15,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 0.15,
                                 ),
                                 Center(
                                   child: TextComponent(
@@ -324,14 +341,10 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                                   ),
                                   valet: v,
                                   hasNumbers: nums.isNotEmpty,
-                                  numbersPreview:
-                                      _formatNumbersPreview(nums),
+                                  numbersPreview: _formatNumbersPreview(nums),
                                   countLabel: countLabel,
-                                  emptyNumbersLabel:
-                                      t.get(TextConstants.cardsNoNumbersAssigned),
-                                  statusLabel: t.get(
-                                    ValetUtils.getStatusLabel(v.status),
-                                  ),
+                                  emptyNumbersLabel: t.get(
+                                      TextConstants.cardsNoNumbersAssigned),
                                   onEdit: () => _editAllocation(v),
                                 );
                               },
@@ -354,7 +367,6 @@ class _DriverCardAllocationTile extends StatelessWidget {
   final String numbersPreview;
   final String countLabel;
   final String emptyNumbersLabel;
-  final String statusLabel;
   final VoidCallback onEdit;
 
   const _DriverCardAllocationTile({
@@ -364,15 +376,17 @@ class _DriverCardAllocationTile extends StatelessWidget {
     required this.numbersPreview,
     required this.countLabel,
     required this.emptyNumbersLabel,
-    required this.statusLabel,
     required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    final initial = valet.name.trim().isNotEmpty
-        ? valet.name.trim()[0].toUpperCase()
-        : '?';
+    final initial =
+        valet.name.trim().isNotEmpty ? valet.name.trim()[0].toUpperCase() : '?';
+    final width = MediaQuery.sizeOf(context).width;
+    final nameSize = (width * 0.04).clamp(16.0, 20.0);
+    final subTextSize = (width * 0.034).clamp(13.0, 16.0);
+    final countSize = (width * 0.038).clamp(15.0, 19.0);
 
     return InkWell(
       onTap: onEdit,
@@ -399,27 +413,25 @@ class _DriverCardAllocationTile extends StatelessWidget {
                     labelText: valet.name,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black,
-                    fontSize: 15,
+                    fontSize: nameSize,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   TextComponent(
-                    labelText: '${valet.phone} · $statusLabel',
+                    labelText: valet.phone,
                     color: AppColors.grey,
-                    fontSize: 12,
+                    fontSize: subTextSize,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   TextComponent(
-                    labelText:
-                        hasNumbers ? numbersPreview : emptyNumbersLabel,
+                    labelText: hasNumbers ? numbersPreview : emptyNumbersLabel,
                     color: hasNumbers ? AppColors.primary : AppColors.grey,
-                    fontSize: 11,
+                    fontSize: subTextSize,
                     fontWeight: FontWeight.w500,
-                    fontStyle:
-                        hasNumbers ? FontStyle.normal : FontStyle.italic,
+                    fontStyle: hasNumbers ? FontStyle.normal : FontStyle.italic,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -440,7 +452,7 @@ class _DriverCardAllocationTile extends StatelessWidget {
                       labelText: countLabel,
                       fontWeight: FontWeight.w700,
                       color: AppColors.black,
-                      fontSize: 14,
+                      fontSize: countSize,
                     ),
                   ],
                 ),
