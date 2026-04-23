@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
@@ -113,6 +114,10 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<DriverStatusBloc>(
             create: (context) => DriverStatusBloc(),
+          ),
+          // Provide globally so the app-bar overflow menu works on any driver route.
+          BlocProvider<DriverMenuBloc>(
+            create: (context) => DriverMenuBloc(),
           ),
           // Add ConnectivityBloc
           BlocProvider<ConnectivityBloc>(

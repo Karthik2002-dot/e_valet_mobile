@@ -7,6 +7,10 @@ import 'package:niloufer_valet_mobile/bloc/scanner/scanner_menu/scanner_menu_eve
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_cards/my_cards_screen.dart';
+import 'package:niloufer_valet_mobile/ui/guidelines/guidelines_screen.dart';
+import 'package:niloufer_valet_mobile/ui/help_support/help_screen.dart';
+import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 /// App bar overflow menu. When [scannerMode] is true, shows only Profile and
@@ -50,23 +54,37 @@ class OverflowMenu extends StatelessWidget {
             title: t.get(TextConstants.profileMenuTitle),
             icon: Icons.person_outline,
             onTap: () {
-              context.read<DriverMenuBloc>().add(const DriverProfilePressed());
+              // Navigate from the current screen so back returns here.
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
             },
           ),
           PullDownMenuItem(
             title: t.get(TextConstants.helpMenuTitle),
             icon: Icons.support_agent,
             onTap: () {
-              context.read<DriverMenuBloc>().add(const DriverHelpPressed());
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const HelpScreen()),
+              );
             },
           ),
           PullDownMenuItem(
             title: t.get(TextConstants.guidelinesMenuTitle),
             icon: Icons.menu_book_outlined,
             onTap: () {
-              context
-                  .read<DriverMenuBloc>()
-                  .add(const DriverGuidelinesPressed());
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GuidelinesScreen()),
+              );
+            },
+          ),
+          PullDownMenuItem(
+            title: t.get(TextConstants.cards),
+            icon: Icons.credit_card,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MyCardsScreen()),
+              );
             },
           ),
           const PullDownMenuDivider(),
@@ -74,6 +92,7 @@ class OverflowMenu extends StatelessWidget {
             title: t.get(TextConstants.logoutMenuTitle),
             icon: Icons.logout,
             onTap: () {
+              // Logout stays bloc-driven because it handles pre-check + clock-out + token clear.
               context.read<DriverMenuBloc>().add(const DriverLogoutPressed());
             },
           ),

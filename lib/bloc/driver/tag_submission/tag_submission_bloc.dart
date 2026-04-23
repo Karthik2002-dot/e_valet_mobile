@@ -23,7 +23,6 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
       final request = CheckinRequest(
         outletId: event.qrData.outletId,
         cardNumber: event.qrData.cardNumber,
-        isManualRequest: false,
       );
 
       final response = await SessionApiService.checkin(request);
@@ -57,7 +56,6 @@ class TagSubmissionBloc extends Bloc<TagSubmissionEvent, TagSubmissionState> {
       final request = CheckinRequest(
         outletId: event.outletId,
         cardNumber: event.cardNumber,
-        isManualRequest: false,
       );
 
       final response = await SessionApiService.checkin(request);

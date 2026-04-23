@@ -450,7 +450,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
             // Layout: 40% image, 30% data, 30% button (flex 4 : 3 : 3)
             final scaffoldContent = Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
-              appBar: const CustomAppBar(),
+              appBar: const CustomAppBar(showOverflowMenu: true),
               body: Column(
                 children: [
                   SizedBox(height: screenHeight * 0.01),

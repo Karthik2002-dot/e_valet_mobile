@@ -18,10 +18,10 @@ class OperatorDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
-    final itemFontSize = isIOS ? 19.0 : 22.0;
+    final itemFontSize = isIOS ? 16.0 : 18.0;
     final itemRowHeight = isIOS ? 40.0 : 44.0;
     final itemIconSize = isIOS ? 30.0 : 35.0;
-    final itemVerticalMargin = isIOS ? 6.0 : 8.0;
+    final itemVerticalMargin = isIOS ? 3.0 : 4.0;
 
     return Drawer(
       child: Container(
@@ -38,10 +38,10 @@ class OperatorDrawer extends StatelessWidget {
               Center(
                 child: Image.asset(
                   'assets/images/niloufer.logo.png',
-                  width: 140,
+                  width: 112,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               OperatorDrawerItem(
                 asset: 'assets/images/dashboard.png',
                 title: t.get(TextConstants.dashboard),
@@ -95,6 +95,19 @@ class OperatorDrawer extends StatelessWidget {
                 },
               ),
               OperatorDrawerItem(
+                iconData: Icons.credit_card,
+                title: t.get(TextConstants.cards),
+                isSelected: selectedIndex == 10,
+                fontSize: itemFontSize,
+                rowHeight: itemRowHeight,
+                iconSize: itemIconSize,
+                verticalMargin: itemVerticalMargin,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onItemSelected?.call(10);
+                },
+              ),
+              OperatorDrawerItem(
                 iconData: Icons.groups,
                 title: t.getByKey('driversGroup', TextConstants.driversGroup),
                 isSelected: selectedIndex == 9,
@@ -120,7 +133,7 @@ class OperatorDrawer extends StatelessWidget {
                   onItemSelected?.call(4);
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Divider(
                 color: AppColors.black,
                 thickness: 2,

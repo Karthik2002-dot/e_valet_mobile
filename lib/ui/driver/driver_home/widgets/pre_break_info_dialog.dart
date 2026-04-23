@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/api/driver/pass_available_drivers_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/pass_parked_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/pre_break/pre_break_info_response.dart';
@@ -35,6 +36,104 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
   String? _selectedDriverUserId;
   bool _isSubmitting = false;
 
+  List<String> get _activeRetrievalSessionIds {
+    final merged = <String>{
+      ...widget.info.activeRetrievals
+          .map((e) => e.sessionId.trim())
+          .where((e) => e.isNotEmpty),
+    };
+    return merged.toList(growable: false);
+  }
+
+  Widget _buildActiveRetrievalRow(
+    BuildContext context,
+    PreBreakActiveRetrievalInfo r,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final location = (r.parkingLocation ?? '').trim();
+    final vehicle = (r.vehicleNumber ?? '').trim();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.greyLight),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.local_shipping_outlined,
+              color: AppColors.black,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    TextComponent(
+                      labelText: 'Card #${r.cardNumber}',
+                      fontSize: screenWidth * 0.034,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.black,
+                    ),
+                  ],
+                ),
+                if (vehicle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  TextComponent(
+                    labelText: vehicle,
+                    fontSize: screenWidth * 0.032,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black,
+                    maxLines: 1,
+                  ),
+                ],
+                if (location.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppColors.grey,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: TextComponent(
+                          labelText: location,
+                          fontSize: screenWidth * 0.03,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.black,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   PreBreakDriverInfo? get _selectedDriver {
     final selectedId = _selectedDriverUserId;
     if (selectedId == null || selectedId.isEmpty) return null;
@@ -63,23 +162,43 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      final passedCount = await PassParkedSessionsApiService.passParkedSessions(
+      final passedParkedCount =
+          await PassParkedSessionsApiService.passParkedSessions(
         sessionIds: _sessionIdsToPass,
         passedToDriverUserId: selectedDriver.driverUserId,
       );
+
+      // Also pass active retrieval sessions (if any) to selected driver.
+      // These typically block logout as "active retrievals" / "pending assignments".
+      int passedActiveRetrievalsCount = 0;
+      final retrievalIds = _activeRetrievalSessionIds;
+      if (retrievalIds.isNotEmpty) {
+        for (final sessionId in retrievalIds) {
+          final message =
+              await PassAvailableDriversApiService.passSessionToDriver(
+            sessionId: sessionId,
+            driverUserId: selectedDriver.driverUserId,
+          );
+          passedActiveRetrievalsCount++;
+        }
+      }
+
       if (!mounted) return;
+
       SnackBars.showSuccessSnackBar(
         context,
-        passedCount > 0
-            ? '$passedCount session(s) passed successfully.'
-            : 'Sessions passed successfully.',
+        'Work passed successfully.',
       );
       Navigator.of(context).pop(selectedDriver);
     } on ApiException catch (e) {
       if (!mounted) return;
+      print(
+        '🟡 PREBREAK DIALOG passParkedSessions ApiException: code=${e.code} message=${e.message}',
+      );
       SnackBars.showErrorSnackBar(context, e.message);
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      print('🟡 PREBREAK DIALOG passParkedSessions unknown error: $e');
       SnackBars.showErrorSnackBar(
         context,
         'Failed to pass parked sessions. Please try again.',
@@ -96,6 +215,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
     final screenWidth = MediaQuery.of(context).size.width;
     final cards = widget.info.blockingCardNumbers;
     final availableDrivers = widget.info.availableDrivers;
+    final activeRetrievals = widget.info.activeRetrievals;
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
@@ -136,6 +256,19 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (activeRetrievals.isNotEmpty) ...[
+                TextComponent(
+                  labelText: 'Active retrievals',
+                  fontSize: screenWidth * 0.036,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                ),
+                const SizedBox(height: 8),
+                ...activeRetrievals
+                    .map((r) => _buildActiveRetrievalRow(context, r))
+                    .toList(growable: false),
+                const SizedBox(height: 4),
+              ],
               if (cards.isNotEmpty) ...[
                 TextComponent(
                   labelText: 'Card numbers',
@@ -279,8 +412,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
                   width: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.black),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.black),
                   ),
                 )
               : const TextComponent(

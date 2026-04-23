@@ -76,6 +76,7 @@ class _HelpScreenState extends State<HelpScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
+        showOverflowMenu: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: AppColors.white,

@@ -7,6 +7,20 @@ class TextConstants {
   static const valets = 'Valets';
   static const driversGroup = 'Drivers Group';
   static const carLogs = 'Car Logs';
+  static const cards = 'Cards';
+  /// Explains why operators assign card counts per driver on the Cards tab.
+  static const String cardsAllocationDescription =
+      'Assign physical car numbers.';
+  /// Row hint when no numbers assigned yet.
+  static const String cardsNoNumbersAssigned = 'No card numbers assigned';
+  static const String cardsEditAllocationTitle = 'Assigned card numbers';
+  static const String cardsAllocationHint =
+      'Example: 11, 12, 13, 14, 15, 61, 21, 89, 16…';
+  static const String cardsAllocationHelper =
+      'Separate numbers with commas or spaces. You can paste multiple lines.';
+  static const String cardsSaveAllocation = 'Save';
+  static const String cardSingular = 'card';
+  static const String cardsPlural = 'cards';
   static const profile = 'Profile';
   static const guidelines = 'Guidelines';
   static const help = 'Help';
@@ -374,6 +388,8 @@ class TextConstants {
   static const String carLogsParkLocation = 'Park Location';
   static const String carLogsParkedBy = 'Parked By';
   static const String carLogsParkedAt = 'Parked At';
+  static const String carLogsRequestedMode = 'Requested Mode';
+  static const String carLogsRequestedAt = 'Requested At';
   static const String carLogsHandoveredBy = 'Handovered By';
   static const String carLogsHandoverAt = 'Handover At';
 

@@ -10,6 +10,7 @@ class PreBreakInfoApiService {
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
   static Future<PreBreakInfoResponse> getPreBreakInfo() async {
+    final startedAt = DateTime.now();
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       throw ApiException(
@@ -26,10 +27,18 @@ class PreBreakInfoApiService {
     try {
       final response = await base.get('/drivers/pre-break/info');
       final data = response.data as Map<String, dynamic>;
-      return PreBreakInfoResponse.fromJson(data);
-    } on ApiException {
+      final parsed = PreBreakInfoResponse.fromJson(data);
+
+      return parsed;
+    } on ApiException catch (e) {
+      final ms = DateTime.now().difference(startedAt).inMilliseconds;
+      print(
+        '🟣 PREBREAK GET ApiException (${ms}ms): code=${e.code} message=${e.message}',
+      );
       rethrow;
-    } catch (_) {
+    } catch (e) {
+      final ms = DateTime.now().difference(startedAt).inMilliseconds;
+      print('🟣 PREBREAK GET unknown error (${ms}ms): $e');
       throw ApiException(
         'Failed to fetch pre-break info. Please try again.',
         code: 'unknown_error',

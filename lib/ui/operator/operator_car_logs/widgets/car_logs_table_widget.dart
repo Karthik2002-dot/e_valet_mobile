@@ -32,7 +32,7 @@ class CarLogsTableWidget extends StatelessWidget {
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
         // Use minimum table width on all platforms so data is fully visible via horizontal scroll (same as iOS)
-        const minTableWidth = 820.0;
+        const minTableWidth = 1060.0;
         final tableWidth =
             viewportWidth < minTableWidth ? minTableWidth : viewportWidth;
 

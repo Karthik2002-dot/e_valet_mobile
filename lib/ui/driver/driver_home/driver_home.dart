@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_ev
 import 'package:niloufer_valet_mobile/bloc/driver/driver_status/driver_status_state.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_state.dart';
+import 'package:niloufer_valet_mobile/api/driver/pre_break_info_api_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -717,7 +718,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => DriverMenuBloc()),
         BlocProvider(
             create: (context) => AssignedSessionsBackgroundBloc(
                   webSocketBloc: context.read<WebSocketBloc>(),
@@ -834,11 +834,34 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       title: 'Cannot Logout',
                       actionLabel: 'logout',
                       info: state.preBreakInfo,
-                    ).then((selectedDriver) {
+                    ).then((selectedDriver) async {
+
                       if (!context.mounted || selectedDriver == null) return;
-                      context
-                          .read<DriverMenuBloc>()
-                          .add(const DriverLogoutPressed());
+                      // After passing sessions, re-check pending work before retrying logout.
+                      // This avoids a confusing "popup loop" when other blockers (active retrievals /
+                      // pending assignments) still exist.
+                      try {
+                        final latest = await PreBreakInfoApiService.getPreBreakInfo();
+                        if (!context.mounted) return;
+                        if (latest.hasBlockingData) {
+                          SnackBars.showErrorSnackBar(
+                            context,
+                            'Logout is still blocked. Please finish active retrievals / pending assignments first.',
+                          );
+                          PreBreakInfoDialog.show(
+                            context,
+                            title: 'Cannot Logout',
+                            actionLabel: 'logout',
+                            info: latest,
+                          );
+                          return;
+                        }
+                      } catch (e) {
+                        // If we fail to re-check, fall back to previous behavior.
+                        print('🟢 LOGOUT FLOW recheck failed, retrying logout anyway: $e');
+                      }
+
+                      context.read<DriverMenuBloc>().add(const DriverLogoutPressed());
                     });
                   } else if (state is DriverMenuAction) {
                     switch (state.action) {

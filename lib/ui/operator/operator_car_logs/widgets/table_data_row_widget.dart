@@ -48,6 +48,18 @@ class TableDataRowWidget extends StatelessWidget {
             ),
             Expanded(
               flex: 16,
+              child: DataCellWidget(text: log.requestedMode),
+            ),
+            Expanded(
+              flex: 16,
+              child: DataCellWidget(
+                text: log.requestedAt.isEmpty
+                    ? ''
+                    : TimeUtils.formatUtcToIstFullDateTime(log.requestedAt),
+              ),
+            ),
+            Expanded(
+              flex: 16,
               child: DataCellWidget(text: log.handoveredBy.name),
             ),
             Expanded(

@@ -350,7 +350,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               canPop: false,
               child: Scaffold(
                 backgroundColor: AppColors.lightBeigeBackground,
-                appBar: const CustomAppBar(),
+                appBar: const CustomAppBar(showOverflowMenu: true),
                 resizeToAvoidBottomInset: true,
                 body: isPhotoFlow
                     ? Column(

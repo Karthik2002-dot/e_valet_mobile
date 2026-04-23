@@ -43,6 +43,7 @@ class ScannerQrDialog extends StatefulWidget {
 
 class _ScannerQrDialogState extends State<ScannerQrDialog> {
   final MobileScannerController _controller = MobileScannerController();
+  bool _isTorchOn = false;
 
   @override
   void dispose() {
@@ -56,6 +57,23 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
     final value = barcodes.first.rawValue;
     if (value == null || value.isEmpty) return;
     context.read<ScannerQrBloc>().add(ScannerQrCodeDetected(value));
+  }
+
+  Future<void> _toggleTorch() async {
+    try {
+      await _controller.toggleTorch();
+      if (!mounted) return;
+      setState(() {
+        _isTorchOn = !_isTorchOn;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      final t = context.read<AppTranslationsNotifier>();
+      SnackBars.showErrorSnackBar(
+        widget.parentContext,
+        t.get(TextConstants.errorTogglingFlash),
+      );
+    }
   }
 
   @override
@@ -109,11 +127,25 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: AppColors.black),
-                        onPressed: isProcessing
-                            ? null
-                            : () => Navigator.of(context).pop(false),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _isTorchOn ? Icons.flash_on : Icons.flash_off,
+                              color: _isTorchOn
+                                  ? AppColors.primary
+                                  : AppColors.black,
+                            ),
+                            onPressed: isProcessing ? null : _toggleTorch,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: AppColors.black),
+                            onPressed: isProcessing
+                                ? null
+                                : () => Navigator.of(context).pop(false),
+                          ),
+                        ],
                       ),
                     ],
                   ),

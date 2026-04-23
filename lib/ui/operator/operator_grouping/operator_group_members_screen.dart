@@ -102,7 +102,7 @@ class _OperatorGroupMembersScreenState
       return;
     }
 
-    if (index >= 0 && index <= 3) {
+    if ((index >= 0 && index <= 3) || index == 10) {
       if (widget.onNavigateToTab != null) {
         Navigator.of(context).popUntil((route) => route.isFirst);
         widget.onNavigateToTab?.call(index);
