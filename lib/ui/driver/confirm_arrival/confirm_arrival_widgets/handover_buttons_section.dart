@@ -14,6 +14,7 @@ class HandoverButtonsSection extends StatefulWidget {
 
   /// When set, Customer Missing button is disabled until this time; countdown shown in place of icon.
   final DateTime? customerMissingDisabledUntil;
+  final DateTime? confirmHandoverDisabledUntil;
 
   const HandoverButtonsSection({
     super.key,
@@ -21,6 +22,7 @@ class HandoverButtonsSection extends StatefulWidget {
     required this.onConfirmHandover,
     this.onCustomerMissing,
     this.customerMissingDisabledUntil,
+    this.confirmHandoverDisabledUntil,
   });
 
   @override
@@ -32,6 +34,8 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
   bool _isCustomerMissingLoading = false;
   int _customerMissingRemainingSeconds = 0;
   Timer? _customerMissingCountdownTimer;
+  int _confirmHandoverRemainingSeconds = 0;
+  Timer? _confirmHandoverCountdownTimer;
 
   void resetCustomerMissingButton() {
     setState(() {
@@ -72,10 +76,38 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
     );
   }
 
+  void _startConfirmHandoverCountdownIfNeeded() {
+    _confirmHandoverCountdownTimer?.cancel();
+    final until = widget.confirmHandoverDisabledUntil;
+    final remaining = _remainingSeconds(until);
+    if (remaining <= 0) {
+      if (_confirmHandoverRemainingSeconds != 0) {
+        setState(() => _confirmHandoverRemainingSeconds = 0);
+      }
+      return;
+    }
+    setState(() => _confirmHandoverRemainingSeconds = remaining);
+    _confirmHandoverCountdownTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        if (!mounted) return;
+        final r = _remainingSeconds(widget.confirmHandoverDisabledUntil);
+        if (r <= 0) {
+          _confirmHandoverCountdownTimer?.cancel();
+          _confirmHandoverCountdownTimer = null;
+          setState(() => _confirmHandoverRemainingSeconds = 0);
+          return;
+        }
+        setState(() => _confirmHandoverRemainingSeconds = r);
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _startCountdownIfNeeded();
+    _startConfirmHandoverCountdownIfNeeded();
   }
 
   @override
@@ -85,11 +117,16 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
         widget.customerMissingDisabledUntil) {
       _startCountdownIfNeeded();
     }
+    if (oldWidget.confirmHandoverDisabledUntil !=
+        widget.confirmHandoverDisabledUntil) {
+      _startConfirmHandoverCountdownIfNeeded();
+    }
   }
 
   @override
   void dispose() {
     _customerMissingCountdownTimer?.cancel();
+    _confirmHandoverCountdownTimer?.cancel();
     super.dispose();
   }
 
@@ -215,9 +252,11 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
           icon: Icons.handshake,
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.black,
-          isLoading: widget.isLoading,
+          // When countdown is active, show countdown instead of spinner.
+          isLoading: widget.isLoading && _confirmHandoverRemainingSeconds <= 0,
           onPressed: widget.onConfirmHandover,
           bigStyle: true,
+          countdownSeconds: _confirmHandoverRemainingSeconds,
         ),
         SizedBox(height: screenHeight * 0.02),
         _buildActionButton(

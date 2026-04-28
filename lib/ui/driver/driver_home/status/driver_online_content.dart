@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/tag_submission/tag_submission_
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_action_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_vehicle_details_screen.dart';
+import 'package:niloufer_valet_mobile/ui/driver/retrival_request/pending_retrieval_requests_screen.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
@@ -179,7 +180,14 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
                     imagePath: 'assets/images/retrive.png',
                     buttonLabel: t.get(TextConstants.retrieveVehicle),
                     notificationCount: widget.retrievePendingCount,
-                    onTap: null,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const PendingRetrievalRequestsScreen(),
+                        ),
+                      );
+                    },
                     screenWidth: widget.screenWidth,
                     screenHeight: widget.screenHeight,
                     isTablet: widget.isTablet,

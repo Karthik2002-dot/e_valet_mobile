@@ -1,10 +1,12 @@
 class ButtonConfig {
   final int confirmArrivalDisableSeconds;
   final int customerMissingDisableSeconds;
+  final int confirmHandoverDisableSeconds;
 
   const ButtonConfig({
     required this.confirmArrivalDisableSeconds,
     required this.customerMissingDisableSeconds,
+    required this.confirmHandoverDisableSeconds,
   });
 
   factory ButtonConfig.fromJson(Map<String, dynamic> json) {
@@ -18,6 +20,8 @@ class ButtonConfig {
           toInt(json['confirmArrivalDisableSeconds'], 10),
       customerMissingDisableSeconds:
           toInt(json['customerMissingDisableSeconds'], 60),
+      confirmHandoverDisableSeconds:
+          toInt(json['confirmHandoverDisableSeconds'], 10),
     );
   }
 }

@@ -100,6 +100,30 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   bool _pendingSessionsPollingStarted = false;
   static const int _pendingSessionsPollIntervalSeconds = 5;
 
+  bool _isDriverHomeRouteCurrent() {
+    final ctx = _driverFlowContext;
+    if (ctx == null || !ctx.mounted) return false;
+    return ModalRoute.of(ctx)?.isCurrent == true;
+  }
+
+  void _startPendingSessionsPollingIfNeeded() {
+    if (_pendingSessionsPollingStarted) return;
+    _pendingSessionsPollingStarted = true;
+    _pendingSessionsPollTimer = Timer.periodic(
+      const Duration(seconds: _pendingSessionsPollIntervalSeconds),
+      (_) {
+        if (!mounted || !_isDriverHomeRouteCurrent()) return;
+        _refreshPendingSessions();
+      },
+    );
+  }
+
+  void _stopPendingSessionsPolling() {
+    _pendingSessionsPollTimer?.cancel();
+    _pendingSessionsPollTimer = null;
+    _pendingSessionsPollingStarted = false;
+  }
+
   void _refreshPendingSessions() {
     try {
       final bloc = _driverMenuBloc;
@@ -274,6 +298,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPopNext() {
     super.didPopNext();
+    _startPendingSessionsPollingIfNeeded();
     // When user returns to driver home (e.g. from Car Camera or Confirm Arrival), reset so home (two cards) is shown, not Vehicle details.
     _homeResetNotifier.value++;
     // Reset so we can navigate to Confirm Arrival again if operator changed status while we were away
@@ -300,7 +325,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPush() {
     super.didPush();
-    // Builder widget in build() will handle refresh
+    _startPendingSessionsPollingIfNeeded();
+  }
+
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    _stopPendingSessionsPolling();
   }
 
   @override
@@ -322,9 +353,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _driverMenuBloc = null;
     _assignedSheetContext = null;
     _assignedSessionsPollingStarted = false;
-    _pendingSessionsPollTimer?.cancel();
-    _pendingSessionsPollTimer = null;
-    _pendingSessionsPollingStarted = false;
+    _stopPendingSessionsPolling();
     _hasShownSessionDialog = false;
     _hasNavigatedForStatus = false;
     _lastPushedConfirmArrivalSessionId = null;
@@ -746,13 +775,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             // navigation (Confirm Arrival, etc.). Each refresh emits [DriverHomeLoaded] and
             // [_tryResumeDriverFlowFromHome] runs for the next FIFO row that needs action.
             if (!_pendingSessionsPollingStarted) {
-              _pendingSessionsPollingStarted = true;
-              _pendingSessionsPollTimer = Timer.periodic(
-                const Duration(seconds: _pendingSessionsPollIntervalSeconds),
-                (_) {
-                  if (mounted) _refreshPendingSessions();
-                },
-              );
+              _startPendingSessionsPollingIfNeeded();
             }
 
             // When opened from retrieval notification tap, refresh session/pending API first
