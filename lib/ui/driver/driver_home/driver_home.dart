@@ -92,38 +92,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   /// Last session id we auto-opened Confirm Arrival for (detect stuck guard if route observer misses didPopNext).
   String? _lastPushedConfirmArrivalSessionId;
 
-  // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
-  bool _assignedSessionsPollingStarted = false;
-
-  // Poll pending sessions every 5s so operator override (e.g. ARRIVED in Car Logs) is detected
-  Timer? _pendingSessionsPollTimer;
-  bool _pendingSessionsPollingStarted = false;
-  static const int _pendingSessionsPollIntervalSeconds = 5;
-
-  bool _isDriverHomeRouteCurrent() {
-    final ctx = _driverFlowContext;
-    if (ctx == null || !ctx.mounted) return false;
-    return ModalRoute.of(ctx)?.isCurrent == true;
-  }
-
-  void _startPendingSessionsPollingIfNeeded() {
-    if (_pendingSessionsPollingStarted) return;
-    _pendingSessionsPollingStarted = true;
-    _pendingSessionsPollTimer = Timer.periodic(
-      const Duration(seconds: _pendingSessionsPollIntervalSeconds),
-      (_) {
-        if (!mounted || !_isDriverHomeRouteCurrent()) return;
-        _refreshPendingSessions();
-      },
-    );
-  }
-
-  void _stopPendingSessionsPolling() {
-    _pendingSessionsPollTimer?.cancel();
-    _pendingSessionsPollTimer = null;
-    _pendingSessionsPollingStarted = false;
-  }
-
   void _refreshPendingSessions() {
     try {
       final bloc = _driverMenuBloc;
@@ -298,7 +266,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPopNext() {
     super.didPopNext();
-    _startPendingSessionsPollingIfNeeded();
     // When user returns to driver home (e.g. from Car Camera or Confirm Arrival), reset so home (two cards) is shown, not Vehicle details.
     _homeResetNotifier.value++;
     // Reset so we can navigate to Confirm Arrival again if operator changed status while we were away
@@ -325,25 +292,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPush() {
     super.didPush();
-    _startPendingSessionsPollingIfNeeded();
-  }
-
-  @override
-  void didPushNext() {
-    super.didPushNext();
-    _stopPendingSessionsPolling();
   }
 
   @override
   void dispose() {
     _webSocketCheckTimer?.cancel();
-    try {
-      if (_assignedBloc != null && !_assignedBloc!.isClosed) {
-        _assignedBloc!.add(const StopAssignedSessionsPolling());
-      }
-    } catch (_) {
-      // Bloc may already be closed during teardown
-    }
     _retrievalNotificationTapSubscription?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
@@ -352,8 +305,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _driverFlowContext = null;
     _driverMenuBloc = null;
     _assignedSheetContext = null;
-    _assignedSessionsPollingStarted = false;
-    _stopPendingSessionsPolling();
     _hasShownSessionDialog = false;
     _hasNavigatedForStatus = false;
     _lastPushedConfirmArrivalSessionId = null;
@@ -764,19 +715,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             final assignedBloc = context.read<AssignedSessionsBackgroundBloc>();
             // Store the bloc reference for use in timer callbacks
             _assignedBloc = assignedBloc;
-
-            // Start 5-second polling for assigned-to-me API while user is on this screen
-            if (!_assignedSessionsPollingStarted) {
-              _assignedSessionsPollingStarted = true;
-              assignedBloc.add(const StartAssignedSessionsPolling());
-            }
-
-            // Poll GET /sessions/pending every 5s — source of truth for status-driven
-            // navigation (Confirm Arrival, etc.). Each refresh emits [DriverHomeLoaded] and
-            // [_tryResumeDriverFlowFromHome] runs for the next FIFO row that needs action.
-            if (!_pendingSessionsPollingStarted) {
-              _startPendingSessionsPollingIfNeeded();
-            }
 
             // When opened from retrieval notification tap, refresh session/pending API first
             if (_refreshPendingFromNotification) {
