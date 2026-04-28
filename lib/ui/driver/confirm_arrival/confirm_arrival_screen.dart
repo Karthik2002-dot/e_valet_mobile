@@ -498,11 +498,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
             final scaffoldContent = Scaffold(
               backgroundColor: AppColors.lightBeigeBackground,
               appBar: CustomAppBar(
-                leading: IconButton(
-                  onPressed: _goToHomeScreen,
-                  icon: const Icon(Icons.arrow_back, color: AppColors.white),
-                  tooltip: 'Close retrieval flow',
-                ),
+                onLogoTap: _goToHomeScreen,
                 showOverflowMenu: true,
               ),
               body: Column(
