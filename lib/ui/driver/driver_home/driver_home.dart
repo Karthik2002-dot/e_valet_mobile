@@ -92,14 +92,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   /// Last session id we auto-opened Confirm Arrival for (detect stuck guard if route observer misses didPopNext).
   String? _lastPushedConfirmArrivalSessionId;
 
-  // Track if 5-second assigned-sessions polling has been started (start once, stop on dispose)
-  bool _assignedSessionsPollingStarted = false;
-
-  // Poll pending sessions every 5s so operator override (e.g. ARRIVED in Car Logs) is detected
-  Timer? _pendingSessionsPollTimer;
-  bool _pendingSessionsPollingStarted = false;
-  static const int _pendingSessionsPollIntervalSeconds = 5;
-
   void _refreshPendingSessions() {
     try {
       final bloc = _driverMenuBloc;
@@ -300,19 +292,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void didPush() {
     super.didPush();
-    // Builder widget in build() will handle refresh
   }
 
   @override
   void dispose() {
     _webSocketCheckTimer?.cancel();
-    try {
-      if (_assignedBloc != null && !_assignedBloc!.isClosed) {
-        _assignedBloc!.add(const StopAssignedSessionsPolling());
-      }
-    } catch (_) {
-      // Bloc may already be closed during teardown
-    }
     _retrievalNotificationTapSubscription?.cancel();
     _routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
@@ -321,10 +305,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     _driverFlowContext = null;
     _driverMenuBloc = null;
     _assignedSheetContext = null;
-    _assignedSessionsPollingStarted = false;
-    _pendingSessionsPollTimer?.cancel();
-    _pendingSessionsPollTimer = null;
-    _pendingSessionsPollingStarted = false;
     _hasShownSessionDialog = false;
     _hasNavigatedForStatus = false;
     _lastPushedConfirmArrivalSessionId = null;
@@ -736,25 +716,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             // Store the bloc reference for use in timer callbacks
             _assignedBloc = assignedBloc;
 
-            // Start 5-second polling for assigned-to-me API while user is on this screen
-            if (!_assignedSessionsPollingStarted) {
-              _assignedSessionsPollingStarted = true;
-              assignedBloc.add(const StartAssignedSessionsPolling());
-            }
-
-            // Poll GET /sessions/pending every 5s — source of truth for status-driven
-            // navigation (Confirm Arrival, etc.). Each refresh emits [DriverHomeLoaded] and
-            // [_tryResumeDriverFlowFromHome] runs for the next FIFO row that needs action.
-            if (!_pendingSessionsPollingStarted) {
-              _pendingSessionsPollingStarted = true;
-              _pendingSessionsPollTimer = Timer.periodic(
-                const Duration(seconds: _pendingSessionsPollIntervalSeconds),
-                (_) {
-                  if (mounted) _refreshPendingSessions();
-                },
-              );
-            }
-
             // When opened from retrieval notification tap, refresh session/pending API first
             if (_refreshPendingFromNotification) {
               _refreshPendingFromNotification = false;
@@ -835,8 +796,17 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       actionLabel: 'logout',
                       info: state.preBreakInfo,
                     ).then((selectedDriver) async {
-
-                      if (!context.mounted || selectedDriver == null) return;
+                      if (!context.mounted) return;
+                      if (selectedDriver == null) {
+                        context.read<DriverMenuBloc>().add(const DriverMenuReset());
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const DriverHomeScreen(),
+                          ),
+                          (route) => false,
+                        );
+                        return;
+                      }
                       // After passing sessions, re-check pending work before retrying logout.
                       // This avoids a confusing "popup loop" when other blockers (active retrievals /
                       // pending assignments) still exist.

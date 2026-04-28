@@ -296,10 +296,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       await TokenStorage.saveButtonConfig(
         confirmArrivalDisableSeconds: config.confirmArrivalDisableSeconds,
         customerMissingDisableSeconds: config.customerMissingDisableSeconds,
+        confirmHandoverDisableSeconds: config.confirmHandoverDisableSeconds,
       );
       log(
         'Button config updated: confirmArrival=${config.confirmArrivalDisableSeconds}s, '
-        'customerMissing=${config.customerMissingDisableSeconds}s',
+        'customerMissing=${config.customerMissingDisableSeconds}s, '
+        'confirmHandover=${config.confirmHandoverDisableSeconds}s',
       );
     } catch (e) {
       // Non-blocking by design: login should continue with env defaults.

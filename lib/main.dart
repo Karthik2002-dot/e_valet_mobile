@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +11,7 @@ import 'package:niloufer_valet_mobile/bloc/splash/splash_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/websocket/websocket_event.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
+import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
@@ -180,15 +183,18 @@ class _AppLifecycleHandler extends StatefulWidget {
 class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
     with WidgetsBindingObserver {
   bool _isShowingPermissionsScreen = false;
+  Timer? _dailyResetTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleDailyResetTimer();
   }
 
   @override
   void dispose() {
+    _dailyResetTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -199,8 +205,36 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
       } catch (_) {}
+      _enforceDailyResetIfNeeded();
+      _scheduleDailyResetTimer();
       _checkPermissionsOnResume();
     }
+  }
+
+  void _scheduleDailyResetTimer() {
+    _dailyResetTimer?.cancel();
+    final now = DateTime.now();
+    final nextResetAt = SessionManager.nextDailyResetAt(now);
+    final wait = nextResetAt.difference(now);
+    _dailyResetTimer = Timer(wait, () async {
+      await _enforceDailyResetIfNeeded();
+      _scheduleDailyResetTimer();
+    });
+  }
+
+  Future<void> _enforceDailyResetIfNeeded() async {
+    final didReset = await SessionManager.enforceDailyResetIfNeeded();
+    if (!didReset || !mounted) return;
+    final ctx = FirebaseMessagingService.navigatorKey.currentContext;
+    if (ctx == null) return;
+    SnackBars.showErrorSnackBar(
+      ctx,
+      'Session expired for the new day. Please login again.',
+    );
+    Navigator.of(ctx).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _checkPermissionsOnResume() async {

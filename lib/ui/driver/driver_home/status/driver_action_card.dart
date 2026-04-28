@@ -71,55 +71,51 @@ class DriverActionCard extends StatelessWidget {
                     color: AppColors.actionButtonYellow,
                     borderRadius: BorderRadius.circular(w * 0.025),
                   ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Center(
-                        child: TextComponent(
-                          labelText: buttonLabel,
-                          fontSize: isDesktop
-                              ? w * 0.018
-                              : isTablet
-                                  ? w * 0.028
-                                  : w * 0.048,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.white,
-                        ),
+                      TextComponent(
+                        labelText: buttonLabel,
+                        fontSize: isDesktop
+                            ? w * 0.018
+                            : isTablet
+                                ? w * 0.028
+                                : w * 0.048,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.white,
                       ),
-                      if (notificationCount > 0)
-                        Positioned(
-                          right: w * 0.02,
-                          top: -h * 0.008,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              minWidth: w * 0.06,
-                              minHeight: h * 0.03,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: w * 0.015,
-                              vertical: h * 0.003,
-                            ),
-                            decoration: const BoxDecoration(
-                              color: AppColors.error,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: TextComponent(
-                                labelText: notificationCount > 99
-                                    ? '99+'
-                                    : notificationCount.toString(),
-                                fontSize: isDesktop
-                                    ? w * 0.010
-                                    : isTablet
-                                        ? w * 0.016
-                                        : w * 0.028,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white,
-                              ),
+                      if (notificationCount > 0) ...[
+                        SizedBox(width: w * 0.018),
+                        Container(
+                          constraints: BoxConstraints(
+                            minWidth: w * 0.06,
+                            minHeight: h * 0.03,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: w * 0.015,
+                            vertical: h * 0.003,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Center(
+                            child: TextComponent(
+                              labelText: notificationCount > 99
+                                  ? '99+'
+                                  : notificationCount.toString(),
+                              fontSize: isDesktop
+                                  ? w * 0.010
+                                  : isTablet
+                                      ? w * 0.016
+                                      : w * 0.028,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),

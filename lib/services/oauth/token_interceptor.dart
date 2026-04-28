@@ -58,6 +58,8 @@ class TokenStorage {
       'confirm_arrival_disable_seconds';
   static const String _customerMissingDisableSecondsKey =
       'customer_missing_disable_seconds';
+  static const String _confirmHandoverDisableSecondsKey =
+      'confirm_handover_disable_seconds';
 
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
@@ -547,12 +549,15 @@ class TokenStorage {
   static Future<void> saveButtonConfig({
     required int confirmArrivalDisableSeconds,
     required int customerMissingDisableSeconds,
+    required int confirmHandoverDisableSeconds,
   }) async {
     try {
       await _box.put(
           _confirmArrivalDisableSecondsKey, confirmArrivalDisableSeconds);
       await _box.put(
           _customerMissingDisableSecondsKey, customerMissingDisableSeconds);
+      await _box.put(
+          _confirmHandoverDisableSecondsKey, confirmHandoverDisableSeconds);
     } catch (e) {
       print('[TokenStorage] ❌ Error saving button config: $e');
       rethrow;
@@ -596,6 +601,28 @@ class TokenStorage {
     try {
       if (!Hive.isBoxOpen(_boxName)) return null;
       final value = Hive.box(_boxName).get(_customerMissingDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<int?> getConfirmHandoverDisableSeconds() async {
+    try {
+      final value = _box.get(_confirmHandoverDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading confirm handover config: $e');
+      return null;
+    }
+  }
+
+  static int? getConfirmHandoverDisableSecondsSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_confirmHandoverDisableSecondsKey);
       if (value is int) return value;
       return int.tryParse(value?.toString() ?? '');
     } catch (_) {
@@ -778,6 +805,7 @@ class TokenStorage {
     await clearSelectedOutlet();
     await _box.delete(_confirmArrivalDisableSecondsKey);
     await _box.delete(_customerMissingDisableSecondsKey);
+    await _box.delete(_confirmHandoverDisableSecondsKey);
   }
 
   static Future<bool> hasValidTokens() async {

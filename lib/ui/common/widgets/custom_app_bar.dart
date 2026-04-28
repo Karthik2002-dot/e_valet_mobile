@@ -8,6 +8,7 @@ import 'package:niloufer_valet_mobile/ui/common/translations/language_dropdown_b
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final List<Widget>? actions;
+  final VoidCallback? onLogoTap;
   final bool showLanguageIcon;
   final bool showOverflowMenu;
   final Color backgroundColor;
@@ -18,6 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.leading,
     this.actions,
+    this.onLogoTap,
     this.showLanguageIcon = false,
     this.showOverflowMenu = false,
     this.backgroundColor = AppColors.primary,
@@ -65,12 +67,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       automaticallyImplyLeading: false,
       leading: leading,
-      title: SizedBox(
-        width: defaultLogoSize,
-        height: defaultLogoSize,
-        child: Image.asset(
-          'assets/images/niloufer.logo.png',
-          fit: BoxFit.contain,
+      title: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onLogoTap,
+        child: SizedBox(
+          width: defaultLogoSize,
+          height: defaultLogoSize,
+          child: Image.asset(
+            'assets/images/niloufer.logo.png',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
       actions: appBarActions,

@@ -10,6 +10,7 @@ class SessionManager {
       'session_has_shown_scanner_intro_v1';
   static const String _hasShownCarPhotoIntroKey =
       'session_has_shown_car_photo_intro_v1';
+  static const int _dailyResetHour = 3; // 3:00 AM local time
 
   static Box get _box {
     if (!Hive.isBoxOpen(TokenStorage.boxName)) {
@@ -20,10 +21,11 @@ class SessionManager {
     return Hive.box(TokenStorage.boxName);
   }
 
-  /// Marks the current session as active for today's date.
+  /// Marks the current session as active for the current business day.
+  /// Business day rolls over at 3:00 AM local time.
   static Future<void> markLoggedInForToday() async {
     await _box.put(_isLoggedInKey, true);
-    await _box.put(_loginDateKey, _todayKey());
+    await _box.put(_loginDateKey, _businessDayKey());
   }
 
   /// Clears any persisted session metadata (including intro animation flags).
@@ -56,29 +58,57 @@ class SessionManager {
     await _box.put(_hasShownCarPhotoIntroKey, true);
   }
 
-  /// Returns true when the stored login markers are still valid for today.
+  /// Returns true when stored login markers are valid for the current
+  /// business day (which changes at 3:00 AM local time).
   static Future<bool> hasValidSessionForToday() async {
     final isLoggedIn = (_box.get(_isLoggedInKey) as bool?) ?? false;
     if (!isLoggedIn) return false;
 
     final storedDate = _box.get(_loginDateKey) as String?;
     if (storedDate == null || storedDate.isEmpty) return false;
-    if (storedDate != _todayKey()) return false;
+    if (storedDate != _businessDayKey()) return false;
 
     final token = await TokenStorage.getAccessToken();
     return token != null && token.isNotEmpty;
   }
 
-  /// Returns true if user has valid tokens (persistent login check).
-  /// This checks for tokens regardless of date, for persistent authentication.
+  /// Returns true if user session is valid for the current business day.
   static Future<bool> isUserLoggedIn() async {
-    return await TokenStorage.hasValidTokens();
+    return await hasValidSessionForToday();
   }
 
-  static String _todayKey() {
-    final now = DateTime.now();
-    final month = now.month.toString().padLeft(2, '0');
-    final day = now.day.toString().padLeft(2, '0');
-    return '${now.year}-$month-$day';
+  /// Clears local auth/session data if we crossed the daily 3:00 AM cutoff.
+  /// Returns true when a forced reset happened.
+  static Future<bool> enforceDailyResetIfNeeded() async {
+    final hasTokens = await TokenStorage.hasValidTokens();
+    if (!hasTokens) return false;
+
+    final validForCurrentBusinessDay = await hasValidSessionForToday();
+    if (validForCurrentBusinessDay) return false;
+
+    await TokenStorage.clearAll();
+    await clearSessionFlags();
+    return true;
   }
+
+  /// Current business-day key based on a 3:00 AM cutoff.
+  static String _businessDayKey([DateTime? reference]) {
+    final now = reference ?? DateTime.now();
+    final businessNow =
+        now.hour < _dailyResetHour ? now.subtract(const Duration(days: 1)) : now;
+    final month = businessNow.month.toString().padLeft(2, '0');
+    final day = businessNow.day.toString().padLeft(2, '0');
+    return '${businessNow.year}-$month-$day';
+  }
+
+  /// Timestamp for next forced daily reset (next 3:00 AM local time).
+  static DateTime nextDailyResetAt([DateTime? reference]) {
+    final now = reference ?? DateTime.now();
+    var next = DateTime(now.year, now.month, now.day, _dailyResetHour);
+    if (!now.isBefore(next)) {
+      next = next.add(const Duration(days: 1));
+    }
+    return next;
+  }
+
 }
