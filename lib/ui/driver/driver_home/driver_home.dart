@@ -796,8 +796,17 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       actionLabel: 'logout',
                       info: state.preBreakInfo,
                     ).then((selectedDriver) async {
-
-                      if (!context.mounted || selectedDriver == null) return;
+                      if (!context.mounted) return;
+                      if (selectedDriver == null) {
+                        context.read<DriverMenuBloc>().add(const DriverMenuReset());
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const DriverHomeScreen(),
+                          ),
+                          (route) => false,
+                        );
+                        return;
+                      }
                       // After passing sessions, re-check pending work before retrying logout.
                       // This avoids a confusing "popup loop" when other blockers (active retrievals /
                       // pending assignments) still exist.
