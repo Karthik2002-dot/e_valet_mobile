@@ -425,6 +425,9 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
 
   void _goToHomeScreen() {
     _cancelOperatorOverridePolling();
+    // User intentionally left retrieval flow via logo tap; suppress immediate
+    // auto-resume/sheet reopen for this same session on home.
+    TokenStorage.markRetrievalConfirmFlowCompletedCooldownSync(widget.session.id);
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
       (route) => false,

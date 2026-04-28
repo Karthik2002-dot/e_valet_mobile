@@ -250,12 +250,6 @@ class _PendingRetrievalRequestsScreenState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          TextComponent(
-                            labelText:
-                                '${TextConstants.vehicleNumberLabel}: ${session.vehicleNumber?.trim().isNotEmpty == true ? session.vehicleNumber : '-'}',
-                            color: AppColors.black,
-                          ),
                           const SizedBox(height: 6),
                           TextComponent(
                             labelText:

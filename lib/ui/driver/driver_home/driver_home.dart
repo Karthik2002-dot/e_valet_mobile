@@ -634,6 +634,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
     final firstId = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession(
         assignedState.sessions);
+    if (firstId != null &&
+        firstId.isNotEmpty &&
+        TokenStorage.shouldSuppressAutoConfirmArrivalForSessionSync(firstId)) {
+      return;
+    }
 
     final driverMenuState = blocContext.read<DriverMenuBloc>().state;
     if (driverMenuState is! DriverHomeLoaded) {
