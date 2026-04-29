@@ -224,21 +224,51 @@ class _AssignedSessionSheetLoaderState
                                 : (effectiveSessionId != null
                                     ? [effectiveSessionId]
                                     : <String>[]);
+                            
+                            // Capture the park flow status immediately
+                            final isCurrentlyInPhotoFlow = ParkFlowSignals.isCarPhotoParkFlowActive;
+                            
                             final skipRetrievalNext = ids.isNotEmpty &&
                                 _isInTransitParkFlow(context, ids.first);
                             final shouldKeepCurrentFlow = skipRetrievalNext ||
                                 widget.keepCurrentFlowOnAccept;
-                            if (shouldKeepCurrentFlow) {
+                            
+                            debugPrint('[Retrieval Accept] skipRetrievalNext=$skipRetrievalNext, keepCurrentFlowOnAccept=${widget.keepCurrentFlowOnAccept}, inPhotoFlow=$isCurrentlyInPhotoFlow');
+                            
+                            // Mark as collected if keeping current flow
+                            if (shouldKeepCurrentFlow || isCurrentlyInPhotoFlow) {
+                              debugPrint('[Retrieval Accept] Keeping current flow - saving ack and closing sheet only');
                               for (final sid in ids) {
                                 TokenStorage.saveCollectKeysInTransitAckSync(
                                     sid);
                               }
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            } else {
-                              Navigator.of(context).pop();
-                              _navigateToConfirmArrival(context);
+                            }
+                            
+                            // Close the sheet (just pop the modal, don't navigate)
+                            // Use rootNavigator: true because the sheet was shown with useRootNavigator: true
+                            if (context.mounted) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (!context.mounted) return;
+                                try {
+                                  final navigator = Navigator.of(context, rootNavigator: true);
+                                  if (navigator.canPop()) {
+                                    debugPrint('[Retrieval Accept] Popping retrieval sheet with rootNavigator');
+                                    navigator.pop();
+                                  }
+                                } catch (e) {
+                                  debugPrint('[Retrieval Accept] Error popping sheet: $e');
+                                }
+                              });
+                            }
+                            
+                            // Only navigate to ConfirmArrival if NOT in a photo flow
+                            if (!isCurrentlyInPhotoFlow && !shouldKeepCurrentFlow) {
+                              debugPrint('[Retrieval Accept] Not in photo flow - navigating to Confirm Arrival after delay');
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  _navigateToConfirmArrival(context);
+                                }
+                              });
                             }
                           } else if (state is RetrivalRequestError) {
                             SnackBars.showErrorSnackBar(context, state.message);
@@ -362,12 +392,14 @@ class _AssignedSessionSheetLoaderState
       // User is on car photo / camera stack — retrieval must not stack Confirm Arrival
       // on top (popping would return here incorrectly).
       if (ParkFlowSignals.isCarPhotoParkFlowActive) {
+        debugPrint('[Retrieval] In park flow: ParkFlowSignals active');
         return true;
       }
       final hiveParking = TokenStorage.getSessionIdSync();
       if (hiveParking != null &&
           hiveParking.isNotEmpty &&
           hiveParking == retrievalSessionId) {
+        debugPrint('[Retrieval] In park flow: Session ID matches hive parking');
         return true;
       }
       final menu = context.read<DriverMenuBloc>().state;
@@ -377,8 +409,13 @@ class _AssignedSessionSheetLoaderState
       final pending = menu.pendingSessions!;
       if (!pending.hasCheckedInSession) return false;
       final checked = pending.checkedInSession;
-      return checked != null && checked.sessionId == retrievalSessionId;
-    } catch (_) {
+      final result = checked != null && checked.sessionId == retrievalSessionId;
+      if (result) {
+        debugPrint('[Retrieval] In park flow: Checked-in session matches');
+      }
+      return result;
+    } catch (e) {
+      debugPrint('[Retrieval] Error in _isInTransitParkFlow: $e');
       return false;
     }
   }
