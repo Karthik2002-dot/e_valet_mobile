@@ -108,6 +108,10 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Clear any global "no internet" banner so it never shows over the camera
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ScaffoldMessenger.of(context).clearMaterialBanners();
+    });
     // Only initialize if not already initializing
     // Add a small delay to ensure camera service is ready
     if (!_isInitializing) {
@@ -271,7 +275,8 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                         ? state.isFlashOn
                         : false;
 
-            return Scaffold(
+            return ScaffoldMessenger(
+              child: Scaffold(
               backgroundColor: AppColors.black,
               appBar: const CustomAppBar(showOverflowMenu: true),
               body: LayoutBuilder(
@@ -348,6 +353,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                   );
                 },
               ),
+            ),
             );
           },
         ),

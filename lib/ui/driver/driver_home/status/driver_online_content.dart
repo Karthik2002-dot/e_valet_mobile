@@ -47,7 +47,7 @@ class _DriverOnlineContentState extends State<DriverOnlineContent>
     with WidgetsBindingObserver {
   // Poll interval for backend session cancellation detection.
   // Backend cancels after inactivity; we check every 5 mins as requested.
-  static const Duration _pendingSessionPollInterval = Duration(minutes: 5);
+  static const Duration _pendingSessionPollInterval = Duration(seconds: 2);
 
   Timer? _pendingSessionPollTimer;
   bool _pendingSessionWatchdogStarted = false;
