@@ -61,6 +61,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
   @override
   void initState() {
     super.initState();
+    // Clear any global "no internet" banner so it never shows over the preview
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ScaffoldMessenger.of(context).clearMaterialBanners();
+    });
     _currentParkingLocation = widget.parkingLocation;
     _currentVehicleNumber = widget.vehicleNumber;
     _parkingLocationController = TextEditingController(
@@ -348,7 +352,8 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
 
             return PopScope(
               canPop: false,
-              child: Scaffold(
+              child: ScaffoldMessenger(
+                child: Scaffold(
                 backgroundColor: AppColors.lightBeigeBackground,
                 appBar: const CustomAppBar(showOverflowMenu: true),
                 resizeToAvoidBottomInset: true,
@@ -627,6 +632,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                           ),
                         ],
                       ),
+              ),
               ),
             );
           },

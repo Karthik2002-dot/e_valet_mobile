@@ -17,6 +17,7 @@ import 'package:niloufer_valet_mobile/services/version/version_service.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
 import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
 import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
@@ -139,7 +140,8 @@ class MyApp extends StatelessWidget {
               listener: (context, state) {
                 final t = context.read<AppTranslationsNotifier>();
                 final messenger = ScaffoldMessenger.of(context);
-                if (state is ConnectivityOffline) {
+                if (state is ConnectivityOffline &&
+                    !ParkFlowSignals.isCarPhotoParkFlowActive) {
                   messenger.clearMaterialBanners();
                   messenger.showMaterialBanner(
                     MaterialBanner(
