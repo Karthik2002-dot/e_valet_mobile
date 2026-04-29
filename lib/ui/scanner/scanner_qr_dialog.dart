@@ -140,7 +140,8 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                             onPressed: isProcessing ? null : _toggleTorch,
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, color: AppColors.black),
+                            icon:
+                                const Icon(Icons.close, color: AppColors.black),
                             onPressed: isProcessing
                                 ? null
                                 : () => Navigator.of(context).pop(false),

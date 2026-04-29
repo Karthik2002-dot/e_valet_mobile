@@ -50,7 +50,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         // This app bar is also used on operator/auth screens.
         DriverMenuBloc? driverMenuBloc;
         try {
-          driverMenuBloc = BlocProvider.of<DriverMenuBloc>(context, listen: false);
+          driverMenuBloc =
+              BlocProvider.of<DriverMenuBloc>(context, listen: false);
         } catch (_) {
           driverMenuBloc = null;
         }

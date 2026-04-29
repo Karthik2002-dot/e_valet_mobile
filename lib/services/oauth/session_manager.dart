@@ -94,8 +94,9 @@ class SessionManager {
   /// Current business-day key based on a 3:00 AM cutoff.
   static String _businessDayKey([DateTime? reference]) {
     final now = reference ?? DateTime.now();
-    final businessNow =
-        now.hour < _dailyResetHour ? now.subtract(const Duration(days: 1)) : now;
+    final businessNow = now.hour < _dailyResetHour
+        ? now.subtract(const Duration(days: 1))
+        : now;
     final month = businessNow.month.toString().padLeft(2, '0');
     final day = businessNow.day.toString().padLeft(2, '0');
     return '${businessNow.year}-$month-$day';
@@ -110,5 +111,4 @@ class SessionManager {
     }
     return next;
   }
-
 }
