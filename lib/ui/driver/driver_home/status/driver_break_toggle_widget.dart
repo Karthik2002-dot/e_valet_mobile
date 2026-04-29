@@ -31,11 +31,10 @@ class DriverBreakToggleWidget extends StatelessWidget {
             ? statusState.status.isOnBreak
             : statusState is DriverBreakToggleLoading
                 ? statusState.previousStatus?.isOnBreak ?? false
-            : false;
+                : false;
 
         // Check if we're in a loading state (updating break status)
-        final isLoading =
-            statusState is DriverStatusLoading ||
+        final isLoading = statusState is DriverStatusLoading ||
             statusState is DriverBreakToggleLoading;
 
         return Row(

@@ -130,8 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<DriverMenuBloc, DriverMenuState>(
         listener: (ctx, menuState) {
           if (menuState is DriverMenuLogoutSuccess) {
-            SnackBars.showSuccessSnackBar(
-                ctx, menuState.response.message);
+            SnackBars.showSuccessSnackBar(ctx, menuState.response.message);
             Navigator.of(ctx).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (__) => const LoginScreen(),

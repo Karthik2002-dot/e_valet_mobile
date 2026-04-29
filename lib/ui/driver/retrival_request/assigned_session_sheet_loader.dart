@@ -224,46 +224,55 @@ class _AssignedSessionSheetLoaderState
                                 : (effectiveSessionId != null
                                     ? [effectiveSessionId]
                                     : <String>[]);
-                            
+
                             // Capture the park flow status immediately
-                            final isCurrentlyInPhotoFlow = ParkFlowSignals.isCarPhotoParkFlowActive;
-                            
+                            final isCurrentlyInPhotoFlow =
+                                ParkFlowSignals.isCarPhotoParkFlowActive;
+
                             final skipRetrievalNext = ids.isNotEmpty &&
                                 _isInTransitParkFlow(context, ids.first);
                             final shouldKeepCurrentFlow = skipRetrievalNext ||
                                 widget.keepCurrentFlowOnAccept;
-                            
-                            debugPrint('[Retrieval Accept] skipRetrievalNext=$skipRetrievalNext, keepCurrentFlowOnAccept=${widget.keepCurrentFlowOnAccept}, inPhotoFlow=$isCurrentlyInPhotoFlow');
-                            
+
+                            debugPrint(
+                                '[Retrieval Accept] skipRetrievalNext=$skipRetrievalNext, keepCurrentFlowOnAccept=${widget.keepCurrentFlowOnAccept}, inPhotoFlow=$isCurrentlyInPhotoFlow');
+
                             // Mark as collected if keeping current flow
-                            if (shouldKeepCurrentFlow || isCurrentlyInPhotoFlow) {
-                              debugPrint('[Retrieval Accept] Keeping current flow - saving ack and closing sheet only');
+                            if (shouldKeepCurrentFlow ||
+                                isCurrentlyInPhotoFlow) {
+                              debugPrint(
+                                  '[Retrieval Accept] Keeping current flow - saving ack and closing sheet only');
                               for (final sid in ids) {
                                 TokenStorage.saveCollectKeysInTransitAckSync(
                                     sid);
                               }
                             }
-                            
+
                             // Close the sheet (just pop the modal, don't navigate)
                             // Use rootNavigator: true because the sheet was shown with useRootNavigator: true
                             if (context.mounted) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (!context.mounted) return;
                                 try {
-                                  final navigator = Navigator.of(context, rootNavigator: true);
+                                  final navigator = Navigator.of(context,
+                                      rootNavigator: true);
                                   if (navigator.canPop()) {
-                                    debugPrint('[Retrieval Accept] Popping retrieval sheet with rootNavigator');
+                                    debugPrint(
+                                        '[Retrieval Accept] Popping retrieval sheet with rootNavigator');
                                     navigator.pop();
                                   }
                                 } catch (e) {
-                                  debugPrint('[Retrieval Accept] Error popping sheet: $e');
+                                  debugPrint(
+                                      '[Retrieval Accept] Error popping sheet: $e');
                                 }
                               });
                             }
-                            
+
                             // Only navigate to ConfirmArrival if NOT in a photo flow
-                            if (!isCurrentlyInPhotoFlow && !shouldKeepCurrentFlow) {
-                              debugPrint('[Retrieval Accept] Not in photo flow - navigating to Confirm Arrival after delay');
+                            if (!isCurrentlyInPhotoFlow &&
+                                !shouldKeepCurrentFlow) {
+                              debugPrint(
+                                  '[Retrieval Accept] Not in photo flow - navigating to Confirm Arrival after delay');
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted) {
                                   _navigateToConfirmArrival(context);

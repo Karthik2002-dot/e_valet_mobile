@@ -264,7 +264,8 @@ class _ProfileContentState extends State<ProfileContent> {
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(
-                            vertical: MediaQuery.of(context).size.height * 0.015,
+                            vertical:
+                                MediaQuery.of(context).size.height * 0.015,
                           ),
                           side: BorderSide(
                             color: AppColors.qrErrorColor,

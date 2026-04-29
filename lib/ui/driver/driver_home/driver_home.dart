@@ -803,7 +803,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     ).then((selectedDriver) async {
                       if (!context.mounted) return;
                       if (selectedDriver == null) {
-                        context.read<DriverMenuBloc>().add(const DriverMenuReset());
+                        context
+                            .read<DriverMenuBloc>()
+                            .add(const DriverMenuReset());
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
                             builder: (_) => const DriverHomeScreen(),
@@ -816,7 +818,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       // This avoids a confusing "popup loop" when other blockers (active retrievals /
                       // pending assignments) still exist.
                       try {
-                        final latest = await PreBreakInfoApiService.getPreBreakInfo();
+                        final latest =
+                            await PreBreakInfoApiService.getPreBreakInfo();
                         if (!context.mounted) return;
                         if (latest.hasBlockingData) {
                           SnackBars.showErrorSnackBar(
@@ -833,10 +836,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         }
                       } catch (e) {
                         // If we fail to re-check, fall back to previous behavior.
-                        print('🟢 LOGOUT FLOW recheck failed, retrying logout anyway: $e');
+                        print(
+                            '🟢 LOGOUT FLOW recheck failed, retrying logout anyway: $e');
                       }
 
-                      context.read<DriverMenuBloc>().add(const DriverLogoutPressed());
+                      context
+                          .read<DriverMenuBloc>()
+                          .add(const DriverLogoutPressed());
                     });
                   } else if (state is DriverMenuAction) {
                     switch (state.action) {
@@ -910,7 +916,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                   builder: (context, statusState) {
                     final isLogoutActionInProgress =
                         menuState is DriverMenuLogoutPrecheckLoading ||
-                        menuState is DriverMenuLogoutLoading;
+                            menuState is DriverMenuLogoutLoading;
                     final isBreakActionInProgress =
                         statusState is DriverBreakToggleLoading;
                     final shouldBlockActions =

@@ -8,9 +8,11 @@ class TextConstants {
   static const driversGroup = 'Drivers Group';
   static const carLogs = 'Car Logs';
   static const cards = 'Cards';
+
   /// Explains why operators assign card counts per driver on the Cards tab.
   static const String cardsAllocationDescription =
       'Assign physical car numbers.';
+
   /// Row hint when no numbers assigned yet.
   static const String cardsNoNumbersAssigned = 'No card numbers assigned';
   static const String cardsEditAllocationTitle = 'Assigned card numbers';
@@ -183,6 +185,7 @@ class TextConstants {
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
+
   /// Selected outlet from login (operator/scanner/driver session).
   static const String profileOutletLabel = 'Outlet';
   static const String usernameLabel = 'Username';

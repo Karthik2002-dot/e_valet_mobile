@@ -30,7 +30,8 @@ class _PendingRetrievalRequestsScreenState
   }
 
   Future<List<PendingSession>> _loadPendingRetrievals() async {
-    final pendingResponse = await SessionsPendingApiService.getPendingSessions();
+    final pendingResponse =
+        await SessionsPendingApiService.getPendingSessions();
     return pendingResponse.sessions.where(_isRetrievalTask).toList();
   }
 
@@ -192,106 +193,116 @@ class _PendingRetrievalRequestsScreenState
                       ),
                     ],
                   ),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    GestureDetector(
-                      onTap: (photoUrl != null && photoUrl.isNotEmpty)
-                          ? () => FullImageViewerDialog.show(context, photoUrl)
-                          : null,
-                      child: SizedBox(
-                        height: 150,
-                        width: double.infinity,
-                        child: photoUrl != null && photoUrl.isNotEmpty
-                            ? Image.network(
-                                photoUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, _, __) => Container(
-                                  color: AppColors.greyLight.withOpacity(0.35),
-                                  alignment: Alignment.center,
-                                  child: const Icon(Icons.image_not_supported,
-                                      color: AppColors.mutedText),
-                                ),
-                              )
-                            : Container(
-                                color: AppColors.greyLight.withOpacity(0.35),
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.directions_car_filled,
-                                    color: AppColors.mutedText, size: 34),
-                              ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: (photoUrl != null && photoUrl.isNotEmpty)
+                              ? () =>
+                                  FullImageViewerDialog.show(context, photoUrl)
+                              : null,
+                          child: SizedBox(
+                            height: 150,
+                            width: double.infinity,
+                            child: photoUrl != null && photoUrl.isNotEmpty
+                                ? Image.network(
+                                    photoUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, _, __) => Container(
+                                      color:
+                                          AppColors.greyLight.withOpacity(0.35),
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: AppColors.mutedText),
+                                    ),
+                                  )
+                                : Container(
+                                    color:
+                                        AppColors.greyLight.withOpacity(0.35),
+                                    alignment: Alignment.center,
+                                    child: const Icon(
+                                        Icons.directions_car_filled,
+                                        color: AppColors.mutedText,
+                                        size: 34),
+                                  ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: TextComponent(
-                                  labelText:
-                                      '${TextConstants.cardNumber} ${session.cardNumber}',
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.black,
-                                ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextComponent(
+                                      labelText:
+                                          '${TextConstants.cardNumber} ${session.cardNumber}',
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _statusColor(session)
+                                          .withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: TextComponent(
+                                      labelText: _statusLabel(session),
+                                      color: _statusColor(session),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _statusColor(session).withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: TextComponent(
-                                  labelText: _statusLabel(session),
-                                  color: _statusColor(session),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
+                              const SizedBox(height: 6),
+                              TextComponent(
+                                labelText:
+                                    '${TextConstants.parkingLocationLabel}: ${session.parkingLocation?.trim().isNotEmpty == true ? session.parkingLocation : '-'}',
+                                color: AppColors.black,
                               ),
+                              const SizedBox(height: 6),
+                              TextComponent(
+                                labelText:
+                                    'Pending for: ${session.pendingForMinutes} min',
+                                color: AppColors.mutedText,
+                              ),
+                              if (isTopFifoItem) ...[
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44,
+                                  child: ElevatedButton(
+                                    onPressed: () =>
+                                        _continueRetrievalFlow(session),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: TextComponent(
+                                      labelText: t.getByKey(
+                                        'continueLabel',
+                                        TextConstants.continueLabel,
+                                      ),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          TextComponent(
-                            labelText:
-                                '${TextConstants.parkingLocationLabel}: ${session.parkingLocation?.trim().isNotEmpty == true ? session.parkingLocation : '-'}',
-                            color: AppColors.black,
-                          ),
-                          const SizedBox(height: 6),
-                          TextComponent(
-                            labelText:
-                                'Pending for: ${session.pendingForMinutes} min',
-                            color: AppColors.mutedText,
-                          ),
-                          if (isTopFifoItem) ...[
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 44,
-                              child: ElevatedButton(
-                                onPressed: () => _continueRetrievalFlow(session),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: TextComponent(
-                                  labelText: t.getByKey(
-                                    'continueLabel',
-                                    TextConstants.continueLabel,
-                                  ),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ]),
+                        ),
+                      ]),
                 );
               },
               separatorBuilder: (_, __) => const SizedBox(height: 12),

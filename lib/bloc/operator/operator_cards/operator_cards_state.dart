@@ -27,10 +27,12 @@ class OperatorCardsLoadFailure extends OperatorCardsState {
 
 class OperatorCardsReady extends OperatorCardsState {
   final List<ValetResponse> valets;
+
   /// Card numbers per driver from GET /operators/card-assignments (driverUserId → numbers).
   final Map<String, List<int>> cardNumbersByDriverId;
   final String searchQuery;
   final bool isRefreshing;
+
   /// Bumps after each successful valets+assignments fetch (list keys).
   final int dataRevision;
 

@@ -99,7 +99,8 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
               return const SizedBox.shrink();
             }
 
-            final cards = data.cards.toList()..sort((a, b) => a.cardNumber.compareTo(b.cardNumber));
+            final cards = data.cards.toList()
+              ..sort((a, b) => a.cardNumber.compareTo(b.cardNumber));
             final count = cards.length;
             final countLabel = count == 1
                 ? '1 ${t.get(TextConstants.cardSingular)}'
@@ -174,7 +175,8 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: TextComponent(
-                                labelText: '${t.get(TextConstants.cardNumber)}: ${card.cardNumber}',
+                                labelText:
+                                    '${t.get(TextConstants.cardNumber)}: ${card.cardNumber}',
                                 color: AppColors.black,
                                 fontWeight: FontWeight.w600,
                               ),

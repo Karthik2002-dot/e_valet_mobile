@@ -7,7 +7,8 @@ import 'package:niloufer_valet_mobile/models/operator/operator_cards/card_assign
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 
 class OperatorCardsBloc extends Bloc<OperatorCardsEvent, OperatorCardsState> {
-  OperatorCardsBloc({required this.outletId}) : super(const OperatorCardsInitial()) {
+  OperatorCardsBloc({required this.outletId})
+      : super(const OperatorCardsInitial()) {
     on<OperatorCardsLoadRequested>(_onLoadRequested);
     on<OperatorCardsRefreshRequested>(_onRefreshRequested);
     on<OperatorCardsSearchQueryChanged>(_onSearchQueryChanged);
@@ -67,7 +68,8 @@ class OperatorCardsBloc extends Bloc<OperatorCardsEvent, OperatorCardsState> {
       final valetsResponse =
           await ValetListApiService.getValets(outletId: outletId);
       final assignmentsResponse =
-          await CardAssignmentsApiService.getCardAssignments(outletId: outletId);
+          await CardAssignmentsApiService.getCardAssignments(
+              outletId: outletId);
 
       final list = List<ValetResponse>.from(valetsResponse.valets)
         ..sort(
