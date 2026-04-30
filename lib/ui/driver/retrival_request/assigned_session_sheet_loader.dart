@@ -30,6 +30,27 @@ String? sessionIdOfQueueEntry(dynamic s) {
   return null;
 }
 
+String retrievalStatusOfQueueEntry(dynamic s) {
+  if (s is AssignedSession) {
+    return s.retrievalLifecycleStatus;
+  }
+  if (s is Map<String, dynamic>) {
+    final rawStatus = s['status'];
+    if (rawStatus is String && rawStatus.trim().isNotEmpty) {
+      return rawStatus.trim().toUpperCase();
+    }
+    if (rawStatus is Map<String, dynamic>) {
+      for (final key in ['name', 'value', 'status', 'state', 'code']) {
+        final value = rawStatus[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim().toUpperCase();
+        }
+      }
+    }
+  }
+  return '';
+}
+
 /// Next retrieval row to show: first FIFO item not in collect-keys-in-transit ack.
 /// When the head is acked (in-transit accept done) but other assignments remain, this surfaces them.
 dynamic firstQueueEntryVisibleForRetrievalSheet(
@@ -41,6 +62,9 @@ dynamic firstQueueEntryVisibleForRetrievalSheet(
     final id = sessionIdOfQueueEntry(s);
     if (id == null || id.isEmpty) continue;
     if (excluded.isNotEmpty && id.trim() == excluded) continue;
+    // Show the bottom sheet only for fresh retrieval assignments.
+    // ACCEPTED / ARRIVED sessions should continue in their own flow.
+    if (retrievalStatusOfQueueEntry(s) != 'ASSIGNED') continue;
     if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return s;
   }
   return null;
