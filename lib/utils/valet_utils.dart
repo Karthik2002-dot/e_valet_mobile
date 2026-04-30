@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
@@ -32,7 +33,38 @@ class ValetUtils {
       case 'OFFLINE':
         return TextConstants.statusOffline;
       default:
-        return status.isNotEmpty ? status : 'Offline';
+        return status.isNotEmpty ? status : TextConstants.offlineLabel;
+    }
+  }
+
+  /// Localized valet status for operator UI; prefers API keys [i18nKeyStatusAvailable] / [i18nKeyStatusOffline], then legacy `available` / `offline`.
+  static String translatedStatusLabel(
+    String status,
+    AppTranslationsNotifier t,
+  ) {
+    switch (status.toUpperCase()) {
+      case 'AVAILABLE':
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusAvailable,
+          TextConstants.i18nKeyAvailable,
+        ], TextConstants.statusAvailable);
+      case 'OFFLINE':
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusOffline,
+          TextConstants.i18nKeyOffline,
+        ], TextConstants.statusOffline);
+      case 'ON_DUTY':
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusOnDuty,
+          TextConstants.i18nKeyOnDuty,
+        ], TextConstants.statusOnDuty);
+      case 'ON_BREAK':
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusOnBreak,
+          TextConstants.i18nKeyOnBreak,
+        ], TextConstants.statusOnBreak);
+      default:
+        return t.get(getStatusLabel(status));
     }
   }
 

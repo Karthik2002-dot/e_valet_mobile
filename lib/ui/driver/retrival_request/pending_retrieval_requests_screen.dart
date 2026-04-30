@@ -139,10 +139,11 @@ class _PendingRetrievalRequestsScreenState
       _checkForNewAssignment(res.sessions);
     } catch (e) {
       if (!mounted) return;
-      if (!silent) setState(() {
-        _isInitialLoading = false;
-        _error = e;
-      });
+      if (!silent)
+        setState(() {
+          _isInitialLoading = false;
+          _error = e;
+        });
     }
   }
 
@@ -412,7 +413,8 @@ class _PendingRetrievalRequestsScreenState
               ),
             ],
           ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             GestureDetector(
               onTap: (photoUrl != null && photoUrl.isNotEmpty)
                   ? () => FullImageViewerDialog.show(context, photoUrl)
@@ -479,8 +481,7 @@ class _PendingRetrievalRequestsScreenState
                   ),
                   const SizedBox(height: 6),
                   TextComponent(
-                    labelText:
-                        'Pending for: ${session.pendingForMinutes} min',
+                    labelText: 'Pending for: ${session.pendingForMinutes} min',
                     color: AppColors.mutedText,
                   ),
                   if (isTopFifoItem) ...[

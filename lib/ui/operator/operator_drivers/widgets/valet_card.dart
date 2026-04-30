@@ -286,7 +286,7 @@ class ValetCard extends StatelessWidget {
                   ),
                 ),
                 child: TextComponent(
-                  labelText: t.get(ValetUtils.getStatusLabel(valet!.status)),
+                  labelText: ValetUtils.translatedStatusLabel(valet!.status, t),
                   fontSize: smallFontSize.clamp(9.0, 12.0),
                   fontWeight: FontWeight.w600,
                   color: ValetUtils.getStatusColor(valet!.status),
