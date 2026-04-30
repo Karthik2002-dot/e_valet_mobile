@@ -109,7 +109,10 @@ class OperatorDrawer extends StatelessWidget {
               ),
               OperatorDrawerItem(
                 iconData: Icons.groups,
-                title: t.getByKey('driversGroup', TextConstants.driversGroup),
+                title: t.getByKey(
+                  TextConstants.i18nKeyDriversGroup,
+                  TextConstants.driversGroup,
+                ),
                 isSelected: selectedIndex == 9,
                 fontSize: itemFontSize,
                 rowHeight: itemRowHeight,

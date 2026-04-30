@@ -220,7 +220,7 @@ class _OvertimeValetRowState extends State<OvertimeValetRow> {
     final nameFontSize = (screenWidth * 0.04).clamp(16.0, 20.0);
     final phoneFontSize = (screenWidth * 0.032).clamp(14.0, 18.0);
     final statusColor = ValetUtils.getStatusColor(widget.status);
-    final statusLabel = ValetUtils.getStatusLabel(widget.status);
+    final statusLabel = ValetUtils.translatedStatusLabel(widget.status, t);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(

@@ -210,14 +210,20 @@ class _OperatorCardsScreenState extends State<OperatorCardsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               TextComponent(
-                                labelText: 'Cards Allotment',
+                                labelText: t.getByKey(
+                                  'cardsAllotmentTitle',
+                                  TextConstants.cardsAllotmentTitle,
+                                ),
                                 color: AppColors.black,
                                 fontSize: (width * 0.042).clamp(16.0, 22.0),
                                 fontWeight: FontWeight.bold,
                               ),
                               const SizedBox(height: 2),
                               TextComponent(
-                                labelText: 'Assign cards to each valet',
+                                labelText: t.getByKey(
+                                  'cardsAssignToEachValet',
+                                  TextConstants.cardsAssignToEachValet,
+                                ),
                                 color: AppColors.grey,
                                 fontSize: (width * 0.03).clamp(12.0, 14.0),
                                 fontWeight: FontWeight.w500,

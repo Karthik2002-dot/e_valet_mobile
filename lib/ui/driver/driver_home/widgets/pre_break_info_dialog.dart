@@ -3,9 +3,12 @@ import 'package:niloufer_valet_mobile/api/driver/pass_available_drivers_api_serv
 import 'package:niloufer_valet_mobile/api/driver/pass_parked_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/pre_break/pre_break_info_response.dart';
+import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:provider/provider.dart';
 
 class PreBreakInfoDialog extends StatefulWidget {
   final PreBreakInfoResponse info;
@@ -162,24 +165,20 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      final passedParkedCount =
-          await PassParkedSessionsApiService.passParkedSessions(
+      await PassParkedSessionsApiService.passParkedSessions(
         sessionIds: _sessionIdsToPass,
         passedToDriverUserId: selectedDriver.driverUserId,
       );
 
       // Also pass active retrieval sessions (if any) to selected driver.
       // These typically block logout as "active retrievals" / "pending assignments".
-      int passedActiveRetrievalsCount = 0;
       final retrievalIds = _activeRetrievalSessionIds;
       if (retrievalIds.isNotEmpty) {
         for (final sessionId in retrievalIds) {
-          final message =
-              await PassAvailableDriversApiService.passSessionToDriver(
+          await PassAvailableDriversApiService.passSessionToDriver(
             sessionId: sessionId,
             driverUserId: selectedDriver.driverUserId,
           );
-          passedActiveRetrievalsCount++;
         }
       }
 
@@ -212,6 +211,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
     final cards = widget.info.blockingCardNumbers;
     final availableDrivers = widget.info.availableDrivers;
@@ -241,7 +241,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
           const SizedBox(width: 10),
           Expanded(
             child: TextComponent(
-              labelText: 'Pending Work Details',
+              labelText: t.getByKey(
+                'pendingWorkDetailsTitle',
+                TextConstants.pendingWorkDetailsTitle,
+              ),
               fontSize: screenWidth * 0.043,
               fontWeight: FontWeight.w700,
               color: AppColors.black,
@@ -258,7 +261,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
             children: [
               if (activeRetrievals.isNotEmpty) ...[
                 TextComponent(
-                  labelText: 'Active retrievals',
+                  labelText: t.getByKey(
+                    'pendingWorkActiveRetrievalsLabel',
+                    TextConstants.pendingWorkActiveRetrievalsLabel,
+                  ),
                   fontSize: screenWidth * 0.036,
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
@@ -271,7 +277,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
               ],
               if (cards.isNotEmpty) ...[
                 TextComponent(
-                  labelText: 'Card numbers',
+                  labelText: t.getByKey(
+                    'pendingWorkCardNumbersLabel',
+                    TextConstants.pendingWorkCardNumbersLabel,
+                  ),
                   fontSize: screenWidth * 0.036,
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
@@ -309,7 +318,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
                 const SizedBox(height: 14),
               if (availableDrivers.isNotEmpty) ...[
                 TextComponent(
-                  labelText: 'Available drivers',
+                  labelText: t.getByKey(
+                    'pendingWorkAvailableDriversLabel',
+                    TextConstants.pendingWorkAvailableDriversLabel,
+                  ),
                   fontSize: screenWidth * 0.036,
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
@@ -386,8 +398,8 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           ),
-          child: const TextComponent(
-            labelText: 'Close',
+          child: TextComponent(
+            labelText: t.get(TextConstants.close),
             fontWeight: FontWeight.w700,
             color: AppColors.primary,
           ),
@@ -415,8 +427,11 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.black),
                   ),
                 )
-              : const TextComponent(
-                  labelText: 'Select Driver',
+              : TextComponent(
+                  labelText: t.getByKey(
+                    'pendingWorkSelectDriver',
+                    TextConstants.pendingWorkSelectDriver,
+                  ),
                   fontWeight: FontWeight.w700,
                   color: AppColors.black,
                 ),

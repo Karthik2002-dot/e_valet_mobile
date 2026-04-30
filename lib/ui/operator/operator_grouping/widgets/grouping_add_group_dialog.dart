@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/models/operator/operator_grouping/add_grou
 import 'package:niloufer_valet_mobile/models/operator/operator_valet/valet_response.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/operator/operator_grouping/widgets/grouping_dialog_valet_field.dart';
 
@@ -154,7 +155,13 @@ class _GroupingAddGroupDialogBodyState
                 children: [
                   Expanded(
                     child: TextComponent(
-                      labelText: t.getByKey('addGroup', 'Add Group'),
+                      labelText: t.getFirstTranslation(
+                        [
+                          TextConstants.i18nKeyAddGroupLabel,
+                          TextConstants.i18nKeyAddGroup,
+                        ],
+                        TextConstants.addGroupLabel,
+                      ),
                       fontWeight: FontWeight.w700,
                       color: AppColors.black,
                       fontSize: 16,
