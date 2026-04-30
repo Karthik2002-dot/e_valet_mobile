@@ -44,6 +44,54 @@ class _PendingRetrievalRequestsScreenState
 
   static const Duration _pollInterval = Duration(seconds: 2);
   Timer? _pollTimer;
+  final Map<String, String> _stablePhotoUrlBySessionId = <String, String>{};
+
+  DateTime? _sessionFifoTime(PendingSession session) {
+    final assignedAtRaw = (session.assignedAt ?? '').trim();
+    if (assignedAtRaw.isNotEmpty) {
+      final assignedAt = DateTime.tryParse(assignedAtRaw);
+      if (assignedAt != null) return assignedAt;
+    }
+    final createdAtRaw = session.createdAt.trim();
+    if (createdAtRaw.isNotEmpty) {
+      return DateTime.tryParse(createdAtRaw);
+    }
+    return null;
+  }
+
+  int _compareSessionFifo(PendingSession a, PendingSession b) {
+    final ta = _sessionFifoTime(a);
+    final tb = _sessionFifoTime(b);
+    if (ta == null && tb == null) {
+      return a.sessionId.compareTo(b.sessionId);
+    }
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    final c = ta.compareTo(tb);
+    if (c != 0) return c;
+    return a.sessionId.compareTo(b.sessionId);
+  }
+
+  String _normalizePhotoUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final q = url.indexOf('?');
+    return q < 0 ? url : url.substring(0, q);
+  }
+
+  String _retrievalRowSignature(PendingSession s) {
+    final normalizedPhoto = _normalizePhotoUrl(_photoUrl(s));
+    return [
+      s.sessionId,
+      s.status.trim().toUpperCase(),
+      (s.taskType ?? '').trim().toUpperCase(),
+      (s.parkingLocation ?? '').trim(),
+      normalizedPhoto,
+    ].join('|');
+  }
+
+  String _retrievalListSignature(List<PendingSession> sessions) {
+    return sessions.map(_retrievalRowSignature).join('||');
+  }
 
   @override
   void initState() {
@@ -70,12 +118,24 @@ class _PendingRetrievalRequestsScreenState
     try {
       final res = await SessionsPendingApiService.getPendingSessions();
       if (!mounted) return;
-      final list = res.sessions.where(_isRetrievalTask).toList();
-      setState(() {
-        _retrievals = list;
-        _isInitialLoading = false;
-        _error = null;
-      });
+      final list = res.sessions.where(_isRetrievalTask).toList()
+        ..sort(_compareSessionFifo);
+
+      final currentIds = list.map((s) => s.sessionId).toSet();
+      _stablePhotoUrlBySessionId
+          .removeWhere((sessionId, _) => !currentIds.contains(sessionId));
+
+      final previous = _retrievals ?? const <PendingSession>[];
+      final hasMeaningfulChange =
+          _retrievalListSignature(previous) != _retrievalListSignature(list);
+
+      if (!silent || _isInitialLoading || _retrievals == null || hasMeaningfulChange) {
+        setState(() {
+          _retrievals = list;
+          _isInitialLoading = false;
+          _error = null;
+        });
+      }
       _checkForNewAssignment(res.sessions);
     } catch (e) {
       if (!mounted) return;
@@ -236,6 +296,26 @@ class _PendingRetrievalRequestsScreenState
     return null;
   }
 
+  String? _displayPhotoUrl(PendingSession session) {
+    final sessionId = session.sessionId.trim();
+    if (sessionId.isEmpty) return _photoUrl(session);
+
+    final latest = _photoUrl(session);
+    final existing = _stablePhotoUrlBySessionId[sessionId];
+
+    if (latest == null || latest.isEmpty) {
+      return existing;
+    }
+
+    if (existing != null &&
+        _normalizePhotoUrl(existing) == _normalizePhotoUrl(latest)) {
+      return existing;
+    }
+
+    _stablePhotoUrlBySessionId[sessionId] = latest;
+    return latest;
+  }
+
   // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
@@ -316,9 +396,10 @@ class _PendingRetrievalRequestsScreenState
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       itemBuilder: (context, index) {
         final session = retrievals[index];
-        final photoUrl = _photoUrl(session);
+        final photoUrl = _displayPhotoUrl(session);
         final isTopFifoItem = index == 0;
         return Container(
+          key: ValueKey('retrieval-${session.sessionId}'),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -343,6 +424,7 @@ class _PendingRetrievalRequestsScreenState
                     ? Image.network(
                         photoUrl,
                         fit: BoxFit.cover,
+                        gaplessPlayback: true,
                         errorBuilder: (context, _, __) => Container(
                           color: AppColors.greyLight.withOpacity(0.35),
                           alignment: Alignment.center,
