@@ -54,9 +54,15 @@ class ValetUtils {
           TextConstants.i18nKeyOffline,
         ], TextConstants.statusOffline);
       case 'ON_DUTY':
-        return t.get(TextConstants.statusOnDuty);
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusOnDuty,
+          TextConstants.i18nKeyOnDuty,
+        ], TextConstants.statusOnDuty);
       case 'ON_BREAK':
-        return t.get(TextConstants.statusOnBreak);
+        return t.getFirstTranslation([
+          TextConstants.i18nKeyStatusOnBreak,
+          TextConstants.i18nKeyOnBreak,
+        ], TextConstants.statusOnBreak);
       default:
         return t.get(getStatusLabel(status));
     }

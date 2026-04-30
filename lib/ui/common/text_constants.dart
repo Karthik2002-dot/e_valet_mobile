@@ -28,8 +28,12 @@ class TextConstants {
   static const String i18nKeyMembers = 'members';
   static const String i18nKeyGroupNamePrefix = 'groupNamePrefix';
   static const String i18nKeyStatusAvailable = 'statusAvailable';
+  static const String i18nKeyStatusOnDuty = 'statusOnDuty';
+  static const String i18nKeyStatusOnBreak = 'statusOnBreak';
   static const String i18nKeyStatusOffline = 'statusOffline';
   static const String i18nKeyAvailable = 'available';
+  static const String i18nKeyOnDuty = 'onDuty';
+  static const String i18nKeyOnBreak = 'onBreak';
   static const String i18nKeyOffline = 'offline';
 
   static const carLogs = 'Car Logs';
