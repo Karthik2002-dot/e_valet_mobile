@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
@@ -6,6 +9,8 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_header_widget
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_online_content.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_offline_content.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/status/driver_break_content.dart';
+import 'package:niloufer_valet_mobile/ui/scanner/scanner_qr_dialog.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 class DriverHomeContent extends StatefulWidget {
   final String driverName;
@@ -61,6 +66,12 @@ class _DriverHomeContentState extends State<DriverHomeContent>
       });
   }
 
+  Future<void> _openScanDialogAndRefresh() async {
+    final success = await ScannerQrDialog.show(context);
+    if (!mounted || !success) return;
+    context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -101,6 +112,8 @@ class _DriverHomeContentState extends State<DriverHomeContent>
         // Use CustomAppBar with language icon and menu
         appBar: CustomAppBar(
           showLanguageIcon: true,
+          showScannerIcon: TokenStorage.getScannerButtonStatusSync() ?? false,
+          onScannerTap: _openScanDialogAndRefresh,
           showOverflowMenu: true,
           logoSize: logoSize,
           iconSize: iconSize,

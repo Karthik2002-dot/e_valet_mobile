@@ -10,7 +10,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final VoidCallback? onLogoTap;
   final bool showLanguageIcon;
+  final bool showScannerIcon;
   final bool showOverflowMenu;
+  final VoidCallback? onScannerTap;
   final Color backgroundColor;
   final double? logoSize;
   final double? iconSize;
@@ -21,7 +23,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.onLogoTap,
     this.showLanguageIcon = false,
+    this.showScannerIcon = false,
     this.showOverflowMenu = false,
+    this.onScannerTap,
     this.backgroundColor = AppColors.primary,
     this.logoSize,
     this.iconSize,
@@ -41,6 +45,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       appBarActions = actions;
     } else {
       final built = <Widget>[];
+      if (showScannerIcon) {
+        built.add(
+          IconButton(
+            tooltip: 'Scanner',
+            icon: Icon(
+              Icons.qr_code_scanner,
+              color: AppColors.white,
+              size: defaultIconSize,
+            ),
+            onPressed: onScannerTap,
+          ),
+        );
+        built.add(SizedBox(width: screenWidth * 0.01));
+      }
       if (showLanguageIcon) {
         built.add(LanguageDropdownButton(iconSize: defaultIconSize));
         built.add(SizedBox(width: screenWidth * 0.04));
