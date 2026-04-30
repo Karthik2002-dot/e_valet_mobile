@@ -4,12 +4,12 @@ import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/button_config.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
-class ButtonConfigApiService {
-  ButtonConfigApiService._();
+class ConfigApiService {
+  ConfigApiService._();
 
   static String get _baseUrl => ApiConfig.valetBaseUrl;
 
-  static Future<ButtonConfig> getButtonConfig() async {
+  static Future<ButtonConfig> getConfig() async {
     final accessToken = await TokenStorage.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       throw ApiException(
@@ -24,14 +24,14 @@ class ButtonConfigApiService {
     );
 
     try {
-      final response = await base.get('/miscellaneous/button-config');
+      final response = await base.get('/miscellaneous/config');
       final data = response.data as Map<String, dynamic>;
       return ButtonConfig.fromJson(data);
     } on ApiException {
       rethrow;
     } catch (_) {
       throw ApiException(
-        'Failed to fetch button config. Please try again.',
+        'Failed to fetch config. Please try again.',
         code: 'unknown_error',
       );
     }

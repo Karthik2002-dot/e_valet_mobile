@@ -60,6 +60,11 @@ class TokenStorage {
       'customer_missing_disable_seconds';
   static const String _confirmHandoverDisableSecondsKey =
       'confirm_handover_disable_seconds';
+  static const String _scannerButtonStatusKey = 'scanner_button_status';
+  static const String _imageCompressionQualityKey =
+      'image_compression_quality';
+  static const String _imageCompressionMaxSizeKbKey =
+      'image_compression_max_size_kb';
 
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
@@ -550,6 +555,9 @@ class TokenStorage {
     required int confirmArrivalDisableSeconds,
     required int customerMissingDisableSeconds,
     required int confirmHandoverDisableSeconds,
+    required bool scannerButtonStatus,
+    required int imageCompressionQuality,
+    required int imageCompressionMaxSizeKB,
   }) async {
     try {
       await _box.put(
@@ -558,6 +566,9 @@ class TokenStorage {
           _customerMissingDisableSecondsKey, customerMissingDisableSeconds);
       await _box.put(
           _confirmHandoverDisableSecondsKey, confirmHandoverDisableSeconds);
+      await _box.put(_scannerButtonStatusKey, scannerButtonStatus);
+      await _box.put(_imageCompressionQualityKey, imageCompressionQuality);
+      await _box.put(_imageCompressionMaxSizeKbKey, imageCompressionMaxSizeKB);
     } catch (e) {
       print('[TokenStorage] ❌ Error saving button config: $e');
       rethrow;
@@ -626,6 +637,60 @@ class TokenStorage {
       if (value is int) return value;
       return int.tryParse(value?.toString() ?? '');
     } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<bool?> getScannerButtonStatus() async {
+    try {
+      final value = _box.get(_scannerButtonStatusKey);
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.trim().toLowerCase();
+        if (normalized == 'true') return true;
+        if (normalized == 'false') return false;
+      }
+      return null;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading scanner button status: $e');
+      return null;
+    }
+  }
+
+  static bool? getScannerButtonStatusSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_scannerButtonStatusKey);
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.trim().toLowerCase();
+        if (normalized == 'true') return true;
+        if (normalized == 'false') return false;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<int?> getImageCompressionQuality() async {
+    try {
+      final value = _box.get(_imageCompressionQualityKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading image compression quality: $e');
+      return null;
+    }
+  }
+
+  static Future<int?> getImageCompressionMaxSizeKB() async {
+    try {
+      final value = _box.get(_imageCompressionMaxSizeKbKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading image compression max size: $e');
       return null;
     }
   }
@@ -806,6 +871,9 @@ class TokenStorage {
     await _box.delete(_confirmArrivalDisableSecondsKey);
     await _box.delete(_customerMissingDisableSecondsKey);
     await _box.delete(_confirmHandoverDisableSecondsKey);
+    await _box.delete(_scannerButtonStatusKey);
+    await _box.delete(_imageCompressionQualityKey);
+    await _box.delete(_imageCompressionMaxSizeKbKey);
   }
 
   static Future<bool> hasValidTokens() async {
