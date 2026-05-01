@@ -9,13 +9,16 @@ import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_av
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_event.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_requesy_state.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
+import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 
 /// Session id for one queue entry (same rules as [AssignedSessionsBackgroundBloc]).
 String? sessionIdOfQueueEntry(dynamic s) {
@@ -299,7 +302,12 @@ class _AssignedSessionSheetLoaderState
                                   '[Retrieval Accept] Not in photo flow - navigating to Confirm Arrival after delay');
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted) {
-                                  _navigateToConfirmArrival(context);
+                                  final acceptedId =
+                                      ids.isNotEmpty ? ids.first : null;
+                                  _navigateToConfirmArrival(
+                                    context,
+                                    acceptedSessionId: acceptedId,
+                                  );
                                 }
                               });
                             }
@@ -453,8 +461,92 @@ class _AssignedSessionSheetLoaderState
     }
   }
 
-  void _navigateToConfirmArrival(BuildContext context) async {
+  DateTime? _sessionFifoTime(PendingSession session) {
+    final assignedAtRaw = (session.assignedAt ?? '').trim();
+    if (assignedAtRaw.isNotEmpty) {
+      final assignedAt = DateTime.tryParse(assignedAtRaw);
+      if (assignedAt != null) return assignedAt;
+    }
+    final createdAtRaw = session.createdAt.trim();
+    if (createdAtRaw.isNotEmpty) {
+      return DateTime.tryParse(createdAtRaw);
+    }
+    return null;
+  }
+
+  int _compareSessionFifo(PendingSession a, PendingSession b) {
+    final ta = _sessionFifoTime(a);
+    final tb = _sessionFifoTime(b);
+    if (ta == null && tb == null) {
+      return a.sessionId.compareTo(b.sessionId);
+    }
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    final c = ta.compareTo(tb);
+    if (c != 0) return c;
+    return a.sessionId.compareTo(b.sessionId);
+  }
+
+  bool _isRetrievalTask(PendingSession session) {
+    final taskType = (session.taskType ?? '').trim().toUpperCase();
+    if (taskType.contains('RETRIEVAL') || taskType.contains('RETRIEVE')) {
+      return true;
+    }
+    return session.isAccepted || session.isArrived;
+  }
+
+  bool _isInConfirmArrivalFlowStatus(PendingSession session) {
+    return session.isAccepted || session.isArrived;
+  }
+
+  Future<PendingSession?> _resolveFifoConfirmArrivalTarget(
+    String? acceptedSessionId,
+  ) async {
+    try {
+      final pending = await SessionsPendingApiService.getPendingSessions();
+      final sessions = pending.sessions.where(_isRetrievalTask).toList()
+        ..sort(_compareSessionFifo);
+      if (sessions.isEmpty) return null;
+
+      for (final session in sessions) {
+        if (_isInConfirmArrivalFlowStatus(session)) return session;
+      }
+      if (acceptedSessionId != null && acceptedSessionId.isNotEmpty) {
+        for (final session in sessions) {
+          if (session.sessionId == acceptedSessionId) return session;
+        }
+      }
+      return sessions.first;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _navigateToConfirmArrival(
+    BuildContext context, {
+    String? acceptedSessionId,
+  }) async {
     final navigator = Navigator.of(context);
+    final pendingTarget =
+        await _resolveFifoConfirmArrivalTarget(acceptedSessionId);
+    if (pendingTarget != null) {
+      final session = SessionConverter.pendingToAssigned(pendingTarget);
+      navigator.push(
+        MaterialPageRoute(
+          builder: (context) => ConfirmArrivalScreen(
+            session: session,
+            preventBackNavigation: true,
+            showHandoverOnLoad: pendingTarget.isArrived,
+            acceptTriggeredAt: pendingTarget.sessionId == acceptedSessionId
+                ? _acceptTriggeredAt
+                : null,
+            disableConfirmArrivalForSeconds: null,
+          ),
+        ),
+      );
+      return;
+    }
+
     final sessionData = await TokenStorage.getAssignedSessionData();
     if (sessionData != null) {
       try {
@@ -464,7 +556,9 @@ class _AssignedSessionSheetLoaderState
             builder: (context) => ConfirmArrivalScreen(
               session: session,
               preventBackNavigation: true,
-              acceptTriggeredAt: _acceptTriggeredAt,
+              showHandoverOnLoad: session.retrievalLifecycleStatus == 'ARRIVED',
+              acceptTriggeredAt:
+                  session.id == acceptedSessionId ? _acceptTriggeredAt : null,
               disableConfirmArrivalForSeconds: null,
             ),
           ),
