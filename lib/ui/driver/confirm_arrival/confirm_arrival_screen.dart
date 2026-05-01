@@ -116,15 +116,44 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       _confirmArrivalRemainingSeconds = 0;
       return;
     }
+
+    final now = DateTime.now();
+    final persisted = TokenStorage.getConfirmArrivalDisabledUntilForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
+
+    DateTime? disabledUntil = persisted;
+    if (disabledUntil == null || !disabledUntil.isAfter(now)) {
+      final fromAccept = widget.acceptTriggeredAt;
+      if (fromAccept != null) {
+        disabledUntil = fromAccept.add(Duration(seconds: totalSeconds));
+      } else {
+        disabledUntil = now.add(Duration(seconds: totalSeconds));
+      }
+      TokenStorage.saveConfirmArrivalDisabledUntilForSessionSync(
+        widget.session.id,
+        disabledUntil,
+        cardNumber: widget.session.cardNumber,
+      );
+    }
+
+    final remaining = disabledUntil.difference(now).inSeconds;
+    if (remaining <= 0) {
+      _confirmArrivalButtonEnabled = true;
+      _confirmArrivalRemainingSeconds = 0;
+      return;
+    }
+
     _confirmArrivalButtonEnabled = false;
-    _confirmArrivalRemainingSeconds = totalSeconds;
+    _confirmArrivalRemainingSeconds = remaining;
     _enableConfirmArrivalTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
         if (!mounted) return;
         setState(() {
           _confirmArrivalRemainingSeconds =
-              (_confirmArrivalRemainingSeconds - 1).clamp(0, totalSeconds);
+              (_confirmArrivalRemainingSeconds - 1).clamp(0, remaining);
           if (_confirmArrivalRemainingSeconds <= 0) {
             _enableConfirmArrivalTimer?.cancel();
             _enableConfirmArrivalTimer = null;
@@ -136,6 +165,16 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
   }
 
   void _ensureHandoverCooldownStarted() {
+    final persisted =
+        TokenStorage.getConfirmHandoverDisabledUntilForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
+    if (persisted != null && persisted.isAfter(DateTime.now())) {
+      _confirmHandoverDisabledUntil = persisted;
+      return;
+    }
+
     final until = _confirmHandoverDisabledUntil;
     if (until != null && until.isAfter(DateTime.now())) return;
     final secs = _confirmHandoverDisableSecondsFromEnv();
@@ -143,10 +182,26 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       _confirmHandoverDisabledUntil = null;
       return;
     }
-    _confirmHandoverDisabledUntil = DateTime.now().add(Duration(seconds: secs));
+    final newUntil = DateTime.now().add(Duration(seconds: secs));
+    _confirmHandoverDisabledUntil = newUntil;
+    TokenStorage.saveConfirmHandoverDisabledUntilForSessionSync(
+      widget.session.id,
+      newUntil,
+      cardNumber: widget.session.cardNumber,
+    );
   }
 
   void _ensureCustomerMissingCooldownStarted() {
+    final persisted =
+        TokenStorage.getCustomerMissingDisabledUntilForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
+    if (persisted != null && persisted.isAfter(DateTime.now())) {
+      _customerMissingDisabledUntil = persisted;
+      return;
+    }
+
     final until = _customerMissingDisabledUntil;
     if (until != null && until.isAfter(DateTime.now())) return;
     final secs = _customerMissingDisableSecondsFromEnv();
@@ -154,7 +209,13 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       _customerMissingDisabledUntil = null;
       return;
     }
-    _customerMissingDisabledUntil = DateTime.now().add(Duration(seconds: secs));
+    final newUntil = DateTime.now().add(Duration(seconds: secs));
+    _customerMissingDisabledUntil = newUntil;
+    TokenStorage.saveCustomerMissingDisabledUntilForSessionSync(
+      widget.session.id,
+      newUntil,
+      cardNumber: widget.session.cardNumber,
+    );
   }
 
   void _showHandoverStage({bool startCustomerMissingCooldown = false}) {
@@ -390,6 +451,10 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       try {
         TokenStorage.removeCollectKeysInTransitAckForSessionSync(
             widget.session.id);
+        TokenStorage.clearHandoverButtonCooldownForSessionSync(
+          widget.session.id,
+          cardNumber: widget.session.cardNumber,
+        );
       } catch (e, st) {
         dev.log(
           'ConfirmArrival Hive removeCollectKeys error',

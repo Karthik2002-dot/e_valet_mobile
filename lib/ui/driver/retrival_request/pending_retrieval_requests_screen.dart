@@ -34,6 +34,11 @@ class PendingRetrievalRequestsScreen extends StatefulWidget {
 
 class _PendingRetrievalRequestsScreenState
     extends State<PendingRetrievalRequestsScreen> {
+  // Global retrieval sheet from DriverHome already handles newly assigned
+  // sessions across routes. Keep local auto-sheet off to avoid duplicate
+  // bottom sheets in Pending/Arrival flow.
+  static const bool _enableLocalAssignedSheetAutoPopup = false;
+
   // List state — updated on every poll (no loading spinner after first load)
   List<PendingSession>? _retrievals;
   bool _isInitialLoading = true;
@@ -41,6 +46,7 @@ class _PendingRetrievalRequestsScreenState
 
   // Sheet guard — prevents opening a second sheet while one is already visible
   bool _isShowingSheet = false;
+  final Set<String> _assignmentSheetShownSessionIds = <String>{};
 
   static const Duration _pollInterval = Duration(seconds: 2);
   Timer? _pollTimer;
@@ -139,7 +145,9 @@ class _PendingRetrievalRequestsScreenState
           _error = null;
         });
       }
-      _checkForNewAssignment(res.sessions);
+      if (_enableLocalAssignedSheetAutoPopup) {
+        _checkForNewAssignment(res.sessions);
+      }
     } catch (e) {
       if (!mounted) return;
       if (!silent)
@@ -183,14 +191,32 @@ class _PendingRetrievalRequestsScreenState
 
   void _checkForNewAssignment(List<PendingSession> sessions) {
     if (!mounted || _isShowingSheet) return;
-    final newly = sessions.where(_isNewlyAssignedRetrieval).toList();
-    if (newly.isEmpty) return;
-    _showAssignedSheet(newly.first);
+    final newlyAssigned = sessions.where(_isNewlyAssignedRetrieval).toList()
+      ..sort(_compareSessionFifo);
+    final activeNewlyAssignedIds = newlyAssigned
+        .map((s) => s.sessionId)
+        .where((id) => id.isNotEmpty)
+        .toSet();
+
+    // Allow future sheets only when a session truly leaves the "newly assigned" state.
+    _assignmentSheetShownSessionIds
+        .removeWhere((id) => !activeNewlyAssignedIds.contains(id));
+
+    if (newlyAssigned.isEmpty) return;
+    final nextToShow = newlyAssigned.firstWhere(
+      (session) => !_assignmentSheetShownSessionIds.contains(session.sessionId),
+      orElse: () => newlyAssigned.first,
+    );
+    if (_assignmentSheetShownSessionIds.contains(nextToShow.sessionId)) {
+      return;
+    }
+    _showAssignedSheet(nextToShow);
   }
 
   void _showAssignedSheet(PendingSession pendingSession) {
     if (_isShowingSheet || !mounted) return;
     _isShowingSheet = true;
+    _assignmentSheetShownSessionIds.add(pendingSession.sessionId);
 
     final assignedSession = SessionConverter.pendingToAssigned(pendingSession);
     VibrationController.startRetrievalAlert();
