@@ -40,6 +40,7 @@ class DriverManualEntryContent extends StatefulWidget {
 class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
   final TextEditingController _tagNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String? _submittedCardNumber;
 
   bool get _canSubmitTagNumber => _tagNumberController.text.trim().isNotEmpty;
 
@@ -75,6 +76,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
         );
         return;
       }
+      _submittedCardNumber = cardNumber.toString();
 
       // Get outletId from DriverStatusBloc
       final statusState = context.read<DriverStatusBloc>().state;
@@ -110,6 +112,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
               builder: (context) => CarCameraScreen(
                 sessionId: null,
                 preventBackNavigation: true,
+                cardNumber: _submittedCardNumber,
               ),
             ),
           );

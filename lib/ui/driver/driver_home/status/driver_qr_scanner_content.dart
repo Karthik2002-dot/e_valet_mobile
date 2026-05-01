@@ -65,6 +65,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
 
   /// Set when submitting so third screen knows whether to show parking location form (tag) or go straight to Lottie (QR).
   bool _lastSubmissionWasTagNumber = false;
+  String? _lastSubmittedCardNumber;
 
   @override
   void initState() {
@@ -149,6 +150,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     final qrState = submitContext.read<QrBloc>().state;
     if (qrState.qrData != null) {
       _lastSubmissionWasTagNumber = false;
+      _lastSubmittedCardNumber = qrState.qrData!.cardNumber.toString();
       submitContext.read<TagSubmissionBloc>().add(
             QrCodeSubmitted(qrState.qrData!),
           );
@@ -167,6 +169,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
         return;
       }
       _lastSubmissionWasTagNumber = true;
+      _lastSubmittedCardNumber = cardNumber.toString();
       final statusState = submitContext.read<DriverStatusBloc>().state;
       int outletId = int.tryParse(dotenv.env['OUTLET_ID'] ?? '1') ?? 1;
       if (statusState is DriverStatusLoaded) {
@@ -196,6 +199,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
                   MaterialPageRoute(
                     builder: (context) => CarPhotoIntroScreen(
                       cameViaTagNumber: _lastSubmissionWasTagNumber,
+                      cardNumber: _lastSubmittedCardNumber,
                       onReturnFromCamera: () {
                         widget.onReturnFromCarCamera?.call();
                         if (mounted) {

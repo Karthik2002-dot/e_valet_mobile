@@ -32,6 +32,7 @@ class PreviewCarScreen extends StatefulWidget {
   final bool isReparking;
   final String? parkingLocation;
   final String? vehicleNumber;
+  final String? cardNumber;
 
   const PreviewCarScreen({
     super.key,
@@ -40,6 +41,7 @@ class PreviewCarScreen extends StatefulWidget {
     this.isReparking = false,
     this.parkingLocation,
     this.vehicleNumber,
+    this.cardNumber,
   });
 
   @override
@@ -383,6 +385,43 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                       onRetake: () => Navigator.pop(context),
                                     ),
                                     SizedBox(height: screenHeight * 0.02),
+                                    if (widget.cardNumber != null &&
+                                        widget.cardNumber!.trim().isNotEmpty)
+                                      Container(
+                                        width: double.infinity,
+                                        padding:
+                                            EdgeInsets.all(screenWidth * 0.04),
+                                        margin: EdgeInsets.only(
+                                            bottom: screenHeight * 0.02),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppColors.primary,
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.badge,
+                                              color: AppColors.primary,
+                                              size: screenWidth * 0.05,
+                                            ),
+                                            SizedBox(width: screenWidth * 0.02),
+                                            Expanded(
+                                              child: TextComponent(
+                                                labelText:
+                                                    '${t.get(TextConstants.cardNumber)}: ${widget.cardNumber!}',
+                                                fontSize: screenWidth * 0.038,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     Container(
                                       width: double.infinity,
                                       padding:
@@ -531,6 +570,41 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                               fontSize: screenWidth * 0.038,
                                               color: AppColors.black,
                                             ),
+                                            if (widget.cardNumber != null &&
+                                                widget.cardNumber!
+                                                    .trim()
+                                                    .isNotEmpty) ...[
+                                              SizedBox(
+                                                  height: screenHeight * 0.012),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.badge,
+                                                    color: AppColors.primary,
+                                                    size: screenWidth * 0.045,
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          screenWidth * 0.02),
+                                                  TextComponent(
+                                                    labelText: t.get(
+                                                        TextConstants
+                                                            .cardNumberLabel),
+                                                    fontSize:
+                                                        screenWidth * 0.035,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.black,
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  height: screenHeight * 0.004),
+                                              TextComponent(
+                                                labelText: widget.cardNumber!,
+                                                fontSize: screenWidth * 0.038,
+                                                color: AppColors.black,
+                                              ),
+                                            ],
                                             if (_currentVehicleNumber != null &&
                                                 _currentVehicleNumber!
                                                     .isNotEmpty) ...[

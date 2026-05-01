@@ -122,8 +122,20 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       widget.session.id,
       cardNumber: widget.session.cardNumber,
     );
+    final alreadyStarted =
+        TokenStorage.hasConfirmArrivalTimerStartedForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
 
     DateTime? disabledUntil = persisted;
+    if (alreadyStarted &&
+        (disabledUntil == null || !disabledUntil.isAfter(now))) {
+      _confirmArrivalButtonEnabled = true;
+      _confirmArrivalRemainingSeconds = 0;
+      return;
+    }
+
     if (disabledUntil == null || !disabledUntil.isAfter(now)) {
       final fromAccept = widget.acceptTriggeredAt;
       if (fromAccept != null) {
@@ -131,6 +143,10 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       } else {
         disabledUntil = now.add(Duration(seconds: totalSeconds));
       }
+      TokenStorage.markConfirmArrivalTimerStartedForSessionSync(
+        widget.session.id,
+        cardNumber: widget.session.cardNumber,
+      );
       TokenStorage.saveConfirmArrivalDisabledUntilForSessionSync(
         widget.session.id,
         disabledUntil,
@@ -170,6 +186,16 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
       widget.session.id,
       cardNumber: widget.session.cardNumber,
     );
+    final alreadyStarted =
+        TokenStorage.hasConfirmHandoverTimerStartedForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
+    if (alreadyStarted &&
+        (persisted == null || !persisted.isAfter(DateTime.now()))) {
+      _confirmHandoverDisabledUntil = null;
+      return;
+    }
     if (persisted != null && persisted.isAfter(DateTime.now())) {
       _confirmHandoverDisabledUntil = persisted;
       return;
@@ -184,6 +210,10 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
     }
     final newUntil = DateTime.now().add(Duration(seconds: secs));
     _confirmHandoverDisabledUntil = newUntil;
+    TokenStorage.markConfirmHandoverTimerStartedForSessionSync(
+      widget.session.id,
+      cardNumber: widget.session.cardNumber,
+    );
     TokenStorage.saveConfirmHandoverDisabledUntilForSessionSync(
       widget.session.id,
       newUntil,
@@ -406,6 +436,7 @@ class _ConfirmArrivalScreenState extends State<ConfirmArrivalScreen> {
             cameViaTagNumber: false,
             sessionId: widget.session.id,
             isReparking: true,
+            cardNumber: widget.session.cardNumber.toString(),
           ),
         ),
       );
