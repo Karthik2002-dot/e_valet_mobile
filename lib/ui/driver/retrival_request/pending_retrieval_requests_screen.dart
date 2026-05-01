@@ -129,7 +129,10 @@ class _PendingRetrievalRequestsScreenState
       final hasMeaningfulChange =
           _retrievalListSignature(previous) != _retrievalListSignature(list);
 
-      if (!silent || _isInitialLoading || _retrievals == null || hasMeaningfulChange) {
+      if (!silent ||
+          _isInitialLoading ||
+          _retrievals == null ||
+          hasMeaningfulChange) {
         setState(() {
           _retrievals = list;
           _isInitialLoading = false;
@@ -208,11 +211,14 @@ class _PendingRetrievalRequestsScreenState
           canPop: false,
           child: _AssignedSheetBody(
             session: assignedSession,
-            onAccepted: (DateTime acceptedAt) {
+            onAccepted: (DateTime acceptedAt) async {
               _isShowingSheet = false;
               VibrationController.stop();
-              _refresh();
-              _navigateToConfirmArrival(assignedSession, acceptedAt);
+              await _refresh();
+              await _navigateToConfirmArrivalFifo(
+                acceptedSessionId: assignedSession.id,
+                acceptedAt: acceptedAt,
+              );
             },
             onDismiss: () {
               _isShowingSheet = false;
@@ -228,19 +234,63 @@ class _PendingRetrievalRequestsScreenState
     });
   }
 
-  void _navigateToConfirmArrival(
-    AssignedSession session,
-    DateTime acceptedAt,
-  ) {
+  void _navigateToConfirmArrival(AssignedSession session, DateTime? acceptedAt,
+      {bool showHandoverOnLoad = false}) {
     if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ConfirmArrivalScreen(
           session: session,
           preventBackNavigation: true,
+          showHandoverOnLoad: showHandoverOnLoad,
           acceptTriggeredAt: acceptedAt,
         ),
       ),
+    );
+  }
+
+  bool _isInConfirmArrivalFlowStatus(PendingSession session) {
+    return session.isAccepted || session.isArrived;
+  }
+
+  Future<PendingSession?> _resolveFifoConfirmArrivalTarget(
+    String acceptedSessionId,
+  ) async {
+    List<PendingSession> sessions;
+    try {
+      final res = await SessionsPendingApiService.getPendingSessions();
+      sessions = res.sessions.where(_isRetrievalTask).toList()
+        ..sort(_compareSessionFifo);
+    } catch (_) {
+      sessions =
+          List<PendingSession>.from(_retrievals ?? const <PendingSession>[])
+            ..sort(_compareSessionFifo);
+    }
+
+    if (sessions.isEmpty) return null;
+
+    for (final session in sessions) {
+      if (_isInConfirmArrivalFlowStatus(session)) return session;
+    }
+
+    for (final session in sessions) {
+      if (session.sessionId == acceptedSessionId) return session;
+    }
+
+    return sessions.first;
+  }
+
+  Future<void> _navigateToConfirmArrivalFifo({
+    required String acceptedSessionId,
+    required DateTime acceptedAt,
+  }) async {
+    final target = await _resolveFifoConfirmArrivalTarget(acceptedSessionId);
+    if (!mounted || target == null) return;
+    final assigned = SessionConverter.pendingToAssigned(target);
+    _navigateToConfirmArrival(
+      assigned,
+      target.sessionId == acceptedSessionId ? acceptedAt : null,
+      showHandoverOnLoad: target.isArrived,
     );
   }
 

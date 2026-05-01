@@ -58,8 +58,7 @@ class DriverHomeScreen extends StatefulWidget {
 
 class _DriverHomeScreenState extends State<DriverHomeScreen>
     with WidgetsBindingObserver, RouteAware {
-  static const Duration _pendingSessionsRefreshInterval =
-      Duration(seconds: 2);
+  static const Duration _pendingSessionsRefreshInterval = Duration(seconds: 2);
 
   /// When this changes, DriverHomeContent resets so home (two cards) is shown on reopen/return.
   final ValueNotifier<int> _homeResetNotifier = ValueNotifier(0);
@@ -141,7 +140,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   String? _firstAssignableRetrievalSessionId(List<dynamic> sessions) {
     for (final session in sessions) {
-      final id = AssignedSessionsBackgroundBloc.sessionIdOfFirstSession([session]);
+      final id =
+          AssignedSessionsBackgroundBloc.sessionIdOfFirstSession([session]);
       if (id == null || id.isEmpty) continue;
       if (_statusOfAssignedQueueEntry(session) != 'ASSIGNED') continue;
       if (TokenStorage.collectKeysInTransitAckContainsSync(id)) continue;
@@ -538,14 +538,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
       return top;
     }
 
-    final retrievalConfirmCandidates = pending.sessions
-        .where((s) =>
-            (s.isArrived || s.isAccepted) &&
-            _pendingSessionNeedsConfirmArrivalNavigation(context, s))
+    final retrievalCandidates = pending.sessions
+        .where((s) => s.isArrived || s.isAccepted)
         .toList()
       ..sort(_comparePendingSessionsFifo);
-    if (retrievalConfirmCandidates.isNotEmpty) {
-      return retrievalConfirmCandidates.first;
+    if (retrievalCandidates.isNotEmpty) {
+      // Strict FIFO: always keep the oldest accepted/arrived retrieval as head.
+      // Do not advance to newer retrievals while this head is pending/suppressed.
+      return retrievalCandidates.first;
     }
 
     return top;
@@ -559,11 +559,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     if (pending == null || pending.sessions.isEmpty) return false;
     final assignedId = assignedRetrievalSessionId.trim();
     if (assignedId.isEmpty) return false;
-    final top = pending.sessions.first;
-    if (top.sessionId.trim() != assignedId) return false;
-    if (top.isReparking || top.isCheckedIn) return true;
-    if (top.isArrived || top.isAccepted) {
-      return _pendingSessionNeedsConfirmArrivalNavigation(context, top);
+    final nextPending = _nextPendingSessionForDriverFlow(context, pending);
+    if (nextPending == null) return false;
+    if (nextPending.sessionId.trim() != assignedId) return false;
+    if (nextPending.isReparking || nextPending.isCheckedIn) return true;
+    if (nextPending.isArrived || nextPending.isAccepted) {
+      return true;
     }
     return false;
   }
@@ -823,8 +824,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     // Otherwise a different REPARKING row was hiding the sheet on camera/preview.
     if (pendingSessions != null && pendingSessions.hasReparkingSession) {
       final rep = pendingSessions.reparkingSession;
-      if (rep != null &&
-          rep.sessionId.trim() == firstId.trim()) {
+      if (rep != null && rep.sessionId.trim() == firstId.trim()) {
         return;
       }
     }
