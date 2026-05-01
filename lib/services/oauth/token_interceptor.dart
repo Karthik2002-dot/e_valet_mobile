@@ -58,6 +58,8 @@ class TokenStorage {
       'confirm_arrival_disable_seconds';
   static const String _confirmArrivalDisabledUntilBySessionKey =
       'confirm_arrival_disabled_until_by_session';
+  static const String _confirmArrivalTimerStartedBySessionKey =
+      'confirm_arrival_timer_started_by_session';
   static const String _customerMissingDisableSecondsKey =
       'customer_missing_disable_seconds';
   static const String _confirmHandoverDisableSecondsKey =
@@ -66,6 +68,8 @@ class TokenStorage {
       'customer_missing_disabled_until_by_session';
   static const String _confirmHandoverDisabledUntilBySessionKey =
       'confirm_handover_disabled_until_by_session';
+  static const String _confirmHandoverTimerStartedBySessionKey =
+      'confirm_handover_timer_started_by_session';
   static const String _scannerButtonStatusKey = 'scanner_button_status';
   static const String _imageCompressionQualityKey = 'image_compression_quality';
   static const String _imageCompressionMaxSizeKbKey =
@@ -745,6 +749,71 @@ class TokenStorage {
     );
   }
 
+  static bool hasConfirmArrivalTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return false;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return false;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmArrivalTimerStartedBySessionKey);
+      if (raw is! Map) return false;
+      final map = <String, bool>{};
+      var found = false;
+      for (final entry in raw.entries) {
+        final k = entry.key?.toString().trim() ?? '';
+        if (k.isEmpty) continue;
+        final v = entry.value;
+        final started = v == true || v?.toString() == 'true';
+        if (started) {
+          map[k] = true;
+          if (keys.contains(k)) found = true;
+        }
+      }
+      if (map.length != raw.length) {
+        box.put(_confirmArrivalTimerStartedBySessionKey, map);
+      }
+      return found;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void markConfirmArrivalTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmArrivalTimerStartedBySessionKey);
+      final map = <String, bool>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty) continue;
+          final v = entry.value;
+          final started = v == true || v?.toString() == 'true';
+          if (started) map[k] = true;
+        }
+      }
+      for (final k in keys) {
+        map[k] = true;
+      }
+      box.put(_confirmArrivalTimerStartedBySessionKey, map);
+    } catch (_) {}
+  }
+
   static void saveCustomerMissingDisabledUntilForSessionSync(
     String sessionId,
     DateTime until, {
@@ -816,6 +885,71 @@ class TokenStorage {
     );
   }
 
+  static bool hasConfirmHandoverTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return false;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return false;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmHandoverTimerStartedBySessionKey);
+      if (raw is! Map) return false;
+      final map = <String, bool>{};
+      var found = false;
+      for (final entry in raw.entries) {
+        final k = entry.key?.toString().trim() ?? '';
+        if (k.isEmpty) continue;
+        final v = entry.value;
+        final started = v == true || v?.toString() == 'true';
+        if (started) {
+          map[k] = true;
+          if (keys.contains(k)) found = true;
+        }
+      }
+      if (map.length != raw.length) {
+        box.put(_confirmHandoverTimerStartedBySessionKey, map);
+      }
+      return found;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void markConfirmHandoverTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmHandoverTimerStartedBySessionKey);
+      final map = <String, bool>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty) continue;
+          final v = entry.value;
+          final started = v == true || v?.toString() == 'true';
+          if (started) map[k] = true;
+        }
+      }
+      for (final k in keys) {
+        map[k] = true;
+      }
+      box.put(_confirmHandoverTimerStartedBySessionKey, map);
+    } catch (_) {}
+  }
+
   static void clearHandoverButtonCooldownForSessionSync(
     String sessionId, {
     int? cardNumber,
@@ -848,6 +982,8 @@ class TokenStorage {
       clearMap(_customerMissingDisabledUntilBySessionKey);
       clearMap(_confirmHandoverDisabledUntilBySessionKey);
       clearMap(_confirmArrivalDisabledUntilBySessionKey);
+      clearMap(_confirmArrivalTimerStartedBySessionKey);
+      clearMap(_confirmHandoverTimerStartedBySessionKey);
     } catch (_) {}
   }
 
@@ -1080,8 +1216,10 @@ class TokenStorage {
     await clearSelectedOutlet();
     await _box.delete(_confirmArrivalDisableSecondsKey);
     await _box.delete(_confirmArrivalDisabledUntilBySessionKey);
+    await _box.delete(_confirmArrivalTimerStartedBySessionKey);
     await _box.delete(_customerMissingDisableSecondsKey);
     await _box.delete(_confirmHandoverDisableSecondsKey);
+    await _box.delete(_confirmHandoverTimerStartedBySessionKey);
     await _box.delete(_customerMissingDisabledUntilBySessionKey);
     await _box.delete(_confirmHandoverDisabledUntilBySessionKey);
     await _box.delete(_scannerButtonStatusKey);

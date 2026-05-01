@@ -684,6 +684,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     cameViaTagNumber: false,
                     sessionId: reparkingSession.sessionId,
                     isReparking: true,
+                    cardNumber: reparkingSession.cardNumber.toString(),
                   ),
                 ),
               );
@@ -708,6 +709,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                         builder: (_) => CarPhotoIntroScreen(
                           cameViaTagNumber: false,
                           sessionId: checkedInSession.sessionId,
+                          cardNumber: checkedInSession.cardNumber.toString(),
                         ),
                       ),
                     );

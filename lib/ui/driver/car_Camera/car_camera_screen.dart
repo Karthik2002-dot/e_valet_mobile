@@ -21,6 +21,7 @@ class CarCameraScreen extends StatefulWidget {
   final String? sessionId;
   final bool isReparking;
   final bool preventBackNavigation;
+  final String? cardNumber;
 
   /// Pre-fill parking location (e.g. from third screen tag flow).
   final String? initialParkingLocation;
@@ -31,6 +32,7 @@ class CarCameraScreen extends StatefulWidget {
     this.isReparking = false,
     this.preventBackNavigation = false,
     this.initialParkingLocation,
+    this.cardNumber,
   });
 
   @override
@@ -233,6 +235,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                   imagePath: state.imagePath,
                   sessionId: widget.sessionId,
                   isReparking: widget.isReparking,
+                  cardNumber: widget.cardNumber,
                 ),
               ),
             );
@@ -499,6 +502,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
               sessionId: widget.sessionId,
               isReparking: widget.isReparking,
               parkingLocation: parkingLocation,
+              cardNumber: widget.cardNumber,
             ),
           ),
         );
