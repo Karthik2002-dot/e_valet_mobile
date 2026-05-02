@@ -38,6 +38,28 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
   String? _selectedDriverUserId;
   bool _isSubmitting = false;
 
+  List<int> get _retrievalCardNumbers {
+    final cards = <int>{};
+    for (final r in widget.info.activeRetrievals) {
+      if (r.cardNumber > 0) {
+        cards.add(r.cardNumber);
+      }
+    }
+    final out = cards.toList()..sort();
+    return out;
+  }
+
+  List<int> get _parkedCardNumbers {
+    final cards = <int>{};
+    for (final s in widget.info.blockingSessions) {
+      if (s.cardNumber > 0) {
+        cards.add(s.cardNumber);
+      }
+    }
+    final out = cards.toList()..sort();
+    return out;
+  }
+
   List<String> get _activeRetrievalSessionIds {
     final merged = <String>{
       ...widget.info.activeRetrievals
@@ -47,92 +69,51 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
     return merged.toList(growable: false);
   }
 
-  Widget _buildActiveRetrievalRow(
-    BuildContext context,
-    PreBreakActiveRetrievalInfo r,
-  ) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final location = (r.parkingLocation ?? '').trim();
-    final vehicle = (r.vehicleNumber ?? '').trim();
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.greyLight),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.local_shipping_outlined,
-              color: AppColors.black,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    TextComponent(
-                      labelText: 'Card #${r.cardNumber}',
-                      fontSize: screenWidth * 0.034,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.black,
+  Widget _buildCardChipsSection(
+    BuildContext context, {
+    required String title,
+    required List<int> cards,
+    required double screenWidth,
+  }) {
+    if (cards.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextComponent(
+          labelText: title,
+          fontSize: screenWidth * 0.036,
+          fontWeight: FontWeight.w700,
+          color: AppColors.black,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: cards
+              .map(
+                (card) => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.14),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.45),
                     ),
-                  ],
-                ),
-                if (vehicle.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  TextComponent(
-                    labelText: vehicle,
-                    fontSize: screenWidth * 0.032,
-                    fontWeight: FontWeight.w500,
+                  ),
+                  child: TextComponent(
+                    labelText: card.toString(),
+                    fontSize: screenWidth * 0.033,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.black,
-                    maxLines: 1,
                   ),
-                ],
-                if (location.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: AppColors.grey,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: TextComponent(
-                          labelText: location,
-                          fontSize: screenWidth * 0.03,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.black,
-                          maxLines: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ],
     );
   }
 
@@ -208,9 +189,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
     final screenWidth = MediaQuery.of(context).size.width;
-    final cards = widget.info.blockingCardNumbers;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final retrievalCards = _retrievalCardNumbers;
+    final parkedCards = _parkedCardNumbers;
     final availableDrivers = widget.info.availableDrivers;
-    final activeRetrievals = widget.info.activeRetrievals;
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
@@ -249,67 +231,34 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
       ),
       content: SizedBox(
         width: screenWidth * 0.86,
-        child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: screenHeight * 0.62,
+          ),
+          child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (activeRetrievals.isNotEmpty) ...[
-                TextComponent(
-                  labelText: t.getByKey(
-                    'pendingWorkActiveRetrievalsLabel',
-                    TextConstants.pendingWorkActiveRetrievalsLabel,
-                  ),
-                  fontSize: screenWidth * 0.036,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.black,
+              if (retrievalCards.isNotEmpty) ...[
+                _buildCardChipsSection(
+                  context,
+                  title: 'Retrieval card numbers',
+                  cards: retrievalCards,
+                  screenWidth: screenWidth,
                 ),
-                const SizedBox(height: 8),
-                ...activeRetrievals
-                    .map((r) => _buildActiveRetrievalRow(context, r))
-                    .toList(growable: false),
-                const SizedBox(height: 4),
+                const SizedBox(height: 12),
               ],
-              if (cards.isNotEmpty) ...[
-                TextComponent(
-                  labelText: t.getByKey(
-                    'pendingWorkCardNumbersLabel',
-                    TextConstants.pendingWorkCardNumbersLabel,
-                  ),
-                  fontSize: screenWidth * 0.036,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.black,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: cards
-                      .map(
-                        (card) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.14),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppColors.primary.withOpacity(0.45),
-                            ),
-                          ),
-                          child: TextComponent(
-                            labelText: card.toString(),
-                            fontSize: screenWidth * 0.033,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
+              if (parkedCards.isNotEmpty) ...[
+                _buildCardChipsSection(
+                  context,
+                  title: 'Parked card numbers',
+                  cards: parkedCards,
+                  screenWidth: screenWidth,
                 ),
               ],
-              if (cards.isNotEmpty && availableDrivers.isNotEmpty)
+              if ((retrievalCards.isNotEmpty || parkedCards.isNotEmpty) &&
+                  availableDrivers.isNotEmpty)
                 const SizedBox(height: 14),
               if (availableDrivers.isNotEmpty) ...[
                 TextComponent(
@@ -381,6 +330,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
               ],
             ],
           ),
+        ),
         ),
       ),
       actions: [
