@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:niloufer_valet_mobile/api/driver/pass_available_drivers_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/pass_parked_sessions_api_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/pre_break/pre_break_info_response.dart';
@@ -148,12 +147,10 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
   List<String> get _sessionIdsToPass {
     final merged = <String>{
-      ...widget.info.ownParkedSessions
+      ...widget.info.blockingSessions
           .map((e) => e.sessionId.trim())
           .where((e) => e.isNotEmpty),
-      ...widget.info.passedToMeSessions
-          .map((e) => e.sessionId.trim())
-          .where((e) => e.isNotEmpty),
+      ..._activeRetrievalSessionIds,
     };
     return merged.toList(growable: false);
   }
@@ -165,21 +162,19 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      await PassParkedSessionsApiService.passParkedSessions(
-        sessionIds: _sessionIdsToPass,
-        passedToDriverUserId: selectedDriver.driverUserId,
-      );
+      final allSessionIds = _sessionIdsToPass;
+      if (allSessionIds.isNotEmpty) {
+        await PassParkedSessionsApiService.passParkedSessions(
+          sessionIds: allSessionIds,
+          passedToDriverUserId: selectedDriver.driverUserId,
+        );
+      }
 
-      // Also pass active retrieval sessions (if any) to selected driver.
-      // These typically block logout as "active retrievals" / "pending assignments".
-      final retrievalIds = _activeRetrievalSessionIds;
-      if (retrievalIds.isNotEmpty) {
-        for (final sessionId in retrievalIds) {
-          await PassAvailableDriversApiService.passSessionToDriver(
-            sessionId: sessionId,
-            driverUserId: selectedDriver.driverUserId,
-          );
-        }
+      if (allSessionIds.isEmpty) {
+        throw ApiException(
+          'No pending work available to pass.',
+          code: 'no_work',
+        );
       }
 
       if (!mounted) return;

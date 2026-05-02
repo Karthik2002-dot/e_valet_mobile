@@ -95,6 +95,7 @@ class PreBreakDriverInfo extends Equatable {
 }
 
 class PreBreakInfoResponse extends Equatable {
+  final String currentDriverUserId;
   final bool hasPendingAssignments;
   final List<PreBreakActiveRetrievalInfo> activeRetrievals;
   final List<PreBreakSessionInfo> ownParkedSessions;
@@ -103,6 +104,7 @@ class PreBreakInfoResponse extends Equatable {
   final List<PreBreakDriverInfo> outletDrivers;
 
   const PreBreakInfoResponse({
+    required this.currentDriverUserId,
     required this.hasPendingAssignments,
     required this.activeRetrievals,
     required this.ownParkedSessions,
@@ -124,6 +126,11 @@ class PreBreakInfoResponse extends Equatable {
     }
 
     return PreBreakInfoResponse(
+      currentDriverUserId: (json['driverUserId'] ??
+              json['currentDriverUserId'] ??
+              json['userId'] ??
+              '')
+          .toString(),
       hasPendingAssignments: json['hasPendingAssignments'] as bool? ?? false,
       activeRetrievals: parseList(
         json['activeRetrievals'],
@@ -159,14 +166,31 @@ class PreBreakInfoResponse extends Equatable {
       .where(_isOwnSessionStillBlocking)
       .toList(growable: false);
 
+  bool _isPassedToMeSessionStillBlocking(PreBreakSessionInfo session) {
+    final passedTo = session.passedToDriverUserId?.trim() ?? '';
+    if (passedTo.isEmpty) return true;
+    final me = currentDriverUserId.trim();
+    // If backend doesn't send current driver id, fail-open so visible items
+    // in passedToMeSessions are not accidentally hidden.
+    if (me.isEmpty) return true;
+    return passedTo == me;
+  }
+
+  List<PreBreakSessionInfo> get _blockingPassedToMeSessions => passedToMeSessions
+      .where(_isPassedToMeSessionStillBlocking)
+      .toList(growable: false);
+
+  List<PreBreakSessionInfo> get blockingSessions => [
+        ..._blockingOwnParkedSessions,
+        ..._blockingPassedToMeSessions,
+      ];
+
   bool get hasBlockingData =>
       hasPendingAssignments ||
       activeRetrievals.isNotEmpty ||
-      _blockingOwnParkedSessions.isNotEmpty ||
-      passedToMeSessions.isNotEmpty;
+      blockingSessions.isNotEmpty;
 
-  int get parkedSessionsCount =>
-      _blockingOwnParkedSessions.length + passedToMeSessions.length;
+  int get parkedSessionsCount => blockingSessions.length;
 
   List<int> get blockingCardNumbers {
     final seen = <int>{};
@@ -176,7 +200,7 @@ class PreBreakInfoResponse extends Equatable {
       seen.add(c);
       cards.add(c);
     }
-    for (final s in [..._blockingOwnParkedSessions, ...passedToMeSessions]) {
+    for (final s in blockingSessions) {
       if (s.cardNumber <= 0 || seen.contains(s.cardNumber)) continue;
       seen.add(s.cardNumber);
       cards.add(s.cardNumber);
@@ -199,6 +223,7 @@ class PreBreakInfoResponse extends Equatable {
 
   @override
   List<Object?> get props => [
+        currentDriverUserId,
         hasPendingAssignments,
         activeRetrievals,
         ownParkedSessions,
