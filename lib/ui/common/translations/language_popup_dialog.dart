@@ -8,7 +8,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 /// Popup dialog for language selection. Does not close on tap outside;
 /// user must select a language or tap Close.
-class LanguagePopupDialog extends StatelessWidget {
+class LanguagePopupDialog extends StatefulWidget {
   const LanguagePopupDialog({
     super.key,
     required this.languages,
@@ -21,6 +21,28 @@ class LanguagePopupDialog extends StatelessWidget {
   final Language? selectedLanguage;
   final Future<void> Function(Language lang) onLanguageSelected;
   final VoidCallback onClose;
+
+  @override
+  State<LanguagePopupDialog> createState() => _LanguagePopupDialogState();
+}
+
+class _LanguagePopupDialogState extends State<LanguagePopupDialog> {
+  bool _selectionInProgress = false;
+
+  Future<void> _handleLanguageTap(Language lang) async {
+    if (_selectionInProgress) return;
+    setState(() => _selectionInProgress = true);
+    try {
+      await widget.onLanguageSelected(lang);
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _selectionInProgress = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,12 +104,14 @@ class LanguagePopupDialog extends StatelessWidget {
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: onClose,
+                      onTap: _selectionInProgress ? null : widget.onClose,
                       borderRadius: BorderRadius.circular(20),
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
-                          Icons.close_rounded,
+                          _selectionInProgress
+                              ? Icons.hourglass_top_rounded
+                              : Icons.close_rounded,
                           color: AppColors.mutedText,
                           size: 22,
                         ),
@@ -102,20 +126,17 @@ class LanguagePopupDialog extends StatelessWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(16),
-                itemCount: languages.length,
+                itemCount: widget.languages.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
-                  final lang = languages[index];
-                  final isSelected = selectedLanguage == lang;
+                  final lang = widget.languages[index];
+                  final isSelected = widget.selectedLanguage == lang;
                   return Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () async {
-                        await onLanguageSelected(lang);
-                        if (context.mounted) {
-                          Navigator.of(context).pop();
-                        }
-                      },
+                      onTap: _selectionInProgress
+                          ? null
+                          : () => _handleLanguageTap(lang),
                       borderRadius: BorderRadius.circular(14),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),

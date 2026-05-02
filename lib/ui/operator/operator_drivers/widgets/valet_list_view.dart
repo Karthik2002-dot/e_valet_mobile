@@ -104,7 +104,8 @@ class ValetListView extends StatelessWidget {
         if (state is ValetListLoaded) {
           // First, filter by status based on selected KPI card
           List filteredValets = state.response.valets;
-          String digitsOnly(String input) => input.replaceAll(RegExp(r'\D'), '');
+          String digitsOnly(String input) =>
+              input.replaceAll(RegExp(r'\D'), '');
 
           // Apply status filter
           switch (statusFilter) {

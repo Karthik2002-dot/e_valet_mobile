@@ -6,11 +6,47 @@ class TextConstants {
   static const parkedCar = 'Parked Car';
   static const valets = 'Valets';
   static const driversGroup = 'Drivers Group';
+
+  /// Operator Drivers Group screen — header, actions, and member count row.
+  static const String driversGroupSubtitle = 'Manage Drivers Group';
+  static const String addGroupLabel = 'Add Group';
+  static const String addMembersLabel = 'Add members';
+  static const String groupMembersCountLabel = 'Members';
+
+  /// Prefix when API group name is `Group 1`, `Group 2`, etc. (see grouping UI).
+  static const String groupNamePrefix = 'Group';
+
+  /// Backend i18n map keys — `GET /i18n/translations` → `translations[key]`.
+  /// Keep these in sync with operator grouping UI and [ValetUtils.translatedStatusLabel].
+  static const String i18nKeyDriversGroup = 'driversGroup';
+  static const String i18nKeyDriversGroupSubtitle = 'driversGroupSubtitle';
+  static const String i18nKeyGroupingDescription = 'groupingDescription';
+  static const String i18nKeyAddGroup = 'addGroup';
+  static const String i18nKeyAddGroupLabel = 'addGroupLabel';
+  static const String i18nKeyAddMembers = 'addMembers';
+  static const String i18nKeyAddMembersLabel = 'addMembersLabel';
+  static const String i18nKeyMembers = 'members';
+  static const String i18nKeyGroupNamePrefix = 'groupNamePrefix';
+  static const String i18nKeyStatusAvailable = 'statusAvailable';
+  static const String i18nKeyStatusOnDuty = 'statusOnDuty';
+  static const String i18nKeyStatusOnBreak = 'statusOnBreak';
+  static const String i18nKeyStatusOffline = 'statusOffline';
+  static const String i18nKeyAvailable = 'available';
+  static const String i18nKeyOnDuty = 'onDuty';
+  static const String i18nKeyOnBreak = 'onBreak';
+  static const String i18nKeyOffline = 'offline';
+
   static const carLogs = 'Car Logs';
   static const cards = 'Cards';
+
+  /// Operator Cards tab header and subtitle.
+  static const String cardsAllotmentTitle = 'Cards Allotment';
+  static const String cardsAssignToEachValet = 'Assign cards to each valet';
+
   /// Explains why operators assign card counts per driver on the Cards tab.
   static const String cardsAllocationDescription =
       'Assign physical car numbers.';
+
   /// Row hint when no numbers assigned yet.
   static const String cardsNoNumbersAssigned = 'No card numbers assigned';
   static const String cardsEditAllocationTitle = 'Assigned card numbers';
@@ -183,6 +219,7 @@ class TextConstants {
   static const String submitButton = 'Submit';
   static const String phoneLabel = 'Phone';
   static const String emailLabel = 'Email';
+
   /// Selected outlet from login (operator/scanner/driver session).
   static const String profileOutletLabel = 'Outlet';
   static const String usernameLabel = 'Username';
@@ -402,6 +439,10 @@ class TextConstants {
   // Car Logs Pagination
   static const String paginationShowLabel = 'Show:';
 
+  /// Shared labels for availability vs offline (slots, valet status, filters).
+  static const String availableLabel = 'Available';
+  static const String offlineLabel = 'Offline';
+
   // Drivers Screen (Operator)
   static const String driversTitle = 'Drivers';
   static const String driversDescription = 'Manage and monitor all drivers';
@@ -414,7 +455,7 @@ class TextConstants {
   static const String parkingSlotsTitle = 'Parking Slots';
   static const String parkingSlotsDescription =
       'Manage and monitor parking slots';
-  static const String available = 'Available';
+  static const String available = availableLabel;
   static const String occupied = 'Occupied';
   static const String availableValue = '12';
   static const String occupiedValue = '8';
@@ -445,24 +486,31 @@ class TextConstants {
   static const String selectDriverInstruction =
       'Select a driver to assign this retrieval request';
 
+  /// Shown when break/logout is blocked until parked or retrieval work is passed.
+  static const String pendingWorkDetailsTitle = 'Pending Work Details';
+  static const String pendingWorkActiveRetrievalsLabel = 'Active retrievals';
+  static const String pendingWorkCardNumbersLabel = 'Card numbers';
+  static const String pendingWorkAvailableDriversLabel = 'Available drivers';
+  static const String pendingWorkSelectDriver = 'Select Driver';
+
   // Valet Dashboard
   static const String valetDashboardTitle = 'Valet Dashboard';
   static const String valetDashboardDescription =
       'Monitor and manage your valet team';
   static const String totalValets = 'Total Valets';
-  static const String onavailableValets = 'Available';
+  static const String onavailableValets = availableLabel;
   static const String onDutyValets = 'On Duty';
   static const String onBreakValets = 'On Break';
-  static const String offlineValets = 'Offline';
+  static const String offlineValets = offlineLabel;
   static const String searchByNameOrPhone = 'Search By Name Or Phone...';
   static const String searchByNameOrCardNumber =
       'Search by name or card number';
 
   // Valet Status Labels
-  static const String statusAvailable = 'Available';
+  static const String statusAvailable = availableLabel;
   static const String statusOnDuty = 'On Duty';
   static const String statusOnBreak = 'On Break';
-  static const String statusOffline = 'Offline';
+  static const String statusOffline = offlineLabel;
   static const headerOnBreak = 'On Break';
   static const onBreakScreen = 'On Break';
   static const statusLabel = 'Status';

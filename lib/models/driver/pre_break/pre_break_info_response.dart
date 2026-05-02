@@ -155,8 +155,9 @@ class PreBreakInfoResponse extends Equatable {
     return passedTo.isEmpty;
   }
 
-  List<PreBreakSessionInfo> get _blockingOwnParkedSessions =>
-      ownParkedSessions.where(_isOwnSessionStillBlocking).toList(growable: false);
+  List<PreBreakSessionInfo> get _blockingOwnParkedSessions => ownParkedSessions
+      .where(_isOwnSessionStillBlocking)
+      .toList(growable: false);
 
   bool get hasBlockingData =>
       hasPendingAssignments ||

@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/operator/operator_cards/card_numbers_in
 class CardAllocationEditDialog extends StatefulWidget {
   final String driverName;
   final String driverUserId;
+
   /// Outlet id from env / app (string); sent as int in the JSON body.
   final String outletId;
   final List<int> initialCardNumbers;

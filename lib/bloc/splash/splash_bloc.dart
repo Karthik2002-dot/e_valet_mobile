@@ -53,6 +53,9 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     SplashAnimationCompleted event,
     Emitter<SplashState> emit,
   ) async {
+    // Enforce 3:00 AM daily reset before any auto-login path.
+    await SessionManager.enforceDailyResetIfNeeded();
+
     // Check if user is already logged in
     final isAuthenticated = await SessionManager.isUserLoggedIn();
 

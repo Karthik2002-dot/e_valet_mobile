@@ -3,7 +3,23 @@ import 'package:niloufer_valet_mobile/models/operator/operator_grouping/driver_g
 import 'package:niloufer_valet_mobile/models/operator/operator_grouping/driver_group_member.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+
+/// When the API returns names like `Group 1`, swap the English prefix for i18n.
+String localizedDriverGroupTitle(String apiName, AppTranslationsNotifier t) {
+  final trimmed = apiName.trim();
+  final match =
+      RegExp(r'^Group\s+(\S+)\s*$', caseSensitive: false).firstMatch(trimmed);
+  if (match != null) {
+    final prefix = t.getByKey(
+      TextConstants.i18nKeyGroupNamePrefix,
+      TextConstants.groupNamePrefix,
+    );
+    return '$prefix ${match.group(1)}';
+  }
+  return apiName;
+}
 
 class GroupingGroupListCard extends StatelessWidget {
   const GroupingGroupListCard({
@@ -58,7 +74,7 @@ class GroupingGroupListCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextComponent(
-                        labelText: g.name,
+                        labelText: localizedDriverGroupTitle(g.name, t),
                         color: AppColors.black,
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -68,7 +84,7 @@ class GroupingGroupListCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       TextComponent(
                         labelText:
-                            '${t.getByKey('members', 'Members')}: ${g.memberCount}',
+                            '${t.getByKey(TextConstants.i18nKeyMembers, TextConstants.groupMembersCountLabel)}: ${g.memberCount}',
                         color: AppColors.grey,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -92,9 +108,12 @@ class GroupingGroupListCard extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.person_add_alt_1, size: 18),
                   label: TextComponent(
-                    labelText: t.getByKey(
-                      'addMembers',
-                      'Add members',
+                    labelText: t.getFirstTranslation(
+                      [
+                        TextConstants.i18nKeyAddMembersLabel,
+                        TextConstants.i18nKeyAddMembers,
+                      ],
+                      TextConstants.addMembersLabel,
                     ),
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,

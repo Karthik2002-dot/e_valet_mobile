@@ -27,6 +27,7 @@ import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.da
 class CarPhotoIntroScreen extends StatefulWidget {
   final bool cameViaTagNumber;
   final VoidCallback? onReturnFromCamera;
+  final String? cardNumber;
 
   /// When opening from a pending session (e.g. CHECKED_IN card), pass sessionId so the screen can submit without scanning first.
   final String? sessionId;
@@ -38,6 +39,7 @@ class CarPhotoIntroScreen extends StatefulWidget {
     super.key,
     required this.cameViaTagNumber,
     this.onReturnFromCamera,
+    this.cardNumber,
     this.sessionId,
     this.isReparking = false,
   });
@@ -181,6 +183,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
             isReparking: widget.isReparking,
             parkingLocation: parkingLocation,
             vehicleNumber: vehicleNumber,
+            cardNumber: widget.cardNumber,
           ),
         ),
       );
@@ -336,6 +339,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
     double w,
     double h,
   ) {
+    final hasCardNumber =
+        widget.cardNumber != null && widget.cardNumber!.trim().isNotEmpty;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -343,25 +349,68 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
         horizontal: w * 0.04,
       ),
       color: AppColors.white,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextComponent(
-            labelText: t.getByKey(
-                'vehicleDetailsTitle', TextConstants.vehicleDetailsTitle),
-            fontSize: w * 0.045,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: hasCardNumber
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
+              children: [
+                TextComponent(
+                  labelText: t.getByKey(
+                      'vehicleDetailsTitle', TextConstants.vehicleDetailsTitle),
+                  fontSize: w * 0.045,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  textAlign: hasCardNumber ? TextAlign.start : TextAlign.center,
+                ),
+                SizedBox(height: h * 0.006),
+                TextComponent(
+                  labelText: t.getByKey('vehicleDetailsParkingPhotoHint',
+                      TextConstants.vehicleDetailsParkingPhotoHint),
+                  fontSize: w * 0.032,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.black,
+                  textAlign: hasCardNumber ? TextAlign.start : TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: h * 0.006),
-          TextComponent(
-            labelText: t.getByKey('vehicleDetailsParkingPhotoHint',
-                TextConstants.vehicleDetailsParkingPhotoHint),
-            fontSize: w * 0.032,
-            fontWeight: FontWeight.w400,
-            color: AppColors.black,
-            textAlign: TextAlign.center,
-          ),
+          if (hasCardNumber) ...[
+            SizedBox(width: w * 0.03),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: w * 0.03,
+                vertical: h * 0.008,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.actionButtonYellow.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.primary, width: 1.2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextComponent(
+                    labelText: t.get(TextConstants.cardNumberLabel),
+                    fontSize: w * 0.028,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                  TextComponent(
+                    labelText: widget.cardNumber!,
+                    fontSize: w * 0.056,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

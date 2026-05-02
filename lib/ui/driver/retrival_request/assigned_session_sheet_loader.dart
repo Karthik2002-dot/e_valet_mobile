@@ -9,13 +9,16 @@ import 'package:niloufer_valet_mobile/bloc/driver/pass_available_drivers/pass_av
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_request_event.dart';
 import 'package:niloufer_valet_mobile/bloc/retrival_request/retrival_requesy_state.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/confirm_arrival/confirm_arrival_screen.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/retrival_request/retrieval_request_sheet.dart';
 import 'package:niloufer_valet_mobile/services/vibration_controller.dart';
+import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 
 /// Session id for one queue entry (same rules as [AssignedSessionsBackgroundBloc]).
 String? sessionIdOfQueueEntry(dynamic s) {
@@ -30,6 +33,27 @@ String? sessionIdOfQueueEntry(dynamic s) {
   return null;
 }
 
+String retrievalStatusOfQueueEntry(dynamic s) {
+  if (s is AssignedSession) {
+    return s.retrievalLifecycleStatus;
+  }
+  if (s is Map<String, dynamic>) {
+    final rawStatus = s['status'];
+    if (rawStatus is String && rawStatus.trim().isNotEmpty) {
+      return rawStatus.trim().toUpperCase();
+    }
+    if (rawStatus is Map<String, dynamic>) {
+      for (final key in ['name', 'value', 'status', 'state', 'code']) {
+        final value = rawStatus[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim().toUpperCase();
+        }
+      }
+    }
+  }
+  return '';
+}
+
 /// Next retrieval row to show: first FIFO item not in collect-keys-in-transit ack.
 /// When the head is acked (in-transit accept done) but other assignments remain, this surfaces them.
 dynamic firstQueueEntryVisibleForRetrievalSheet(
@@ -41,6 +65,9 @@ dynamic firstQueueEntryVisibleForRetrievalSheet(
     final id = sessionIdOfQueueEntry(s);
     if (id == null || id.isEmpty) continue;
     if (excluded.isNotEmpty && id.trim() == excluded) continue;
+    // Show the bottom sheet only for fresh retrieval assignments.
+    // ACCEPTED / ARRIVED sessions should continue in their own flow.
+    if (retrievalStatusOfQueueEntry(s) != 'ASSIGNED') continue;
     if (!TokenStorage.collectKeysInTransitAckContainsSync(id)) return s;
   }
   return null;
@@ -224,21 +251,65 @@ class _AssignedSessionSheetLoaderState
                                 : (effectiveSessionId != null
                                     ? [effectiveSessionId]
                                     : <String>[]);
+
+                            // Capture the park flow status immediately
+                            final isCurrentlyInPhotoFlow =
+                                ParkFlowSignals.isCarPhotoParkFlowActive;
+
                             final skipRetrievalNext = ids.isNotEmpty &&
                                 _isInTransitParkFlow(context, ids.first);
                             final shouldKeepCurrentFlow = skipRetrievalNext ||
                                 widget.keepCurrentFlowOnAccept;
-                            if (shouldKeepCurrentFlow) {
+
+                            debugPrint(
+                                '[Retrieval Accept] skipRetrievalNext=$skipRetrievalNext, keepCurrentFlowOnAccept=${widget.keepCurrentFlowOnAccept}, inPhotoFlow=$isCurrentlyInPhotoFlow');
+
+                            // Mark as collected if keeping current flow
+                            if (shouldKeepCurrentFlow ||
+                                isCurrentlyInPhotoFlow) {
+                              debugPrint(
+                                  '[Retrieval Accept] Keeping current flow - saving ack and closing sheet only');
                               for (final sid in ids) {
                                 TokenStorage.saveCollectKeysInTransitAckSync(
                                     sid);
                               }
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            } else {
-                              Navigator.of(context).pop();
-                              _navigateToConfirmArrival(context);
+                            }
+
+                            // Close the sheet (just pop the modal, don't navigate)
+                            // Use rootNavigator: true because the sheet was shown with useRootNavigator: true
+                            if (context.mounted) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (!context.mounted) return;
+                                try {
+                                  final navigator = Navigator.of(context,
+                                      rootNavigator: true);
+                                  if (navigator.canPop()) {
+                                    debugPrint(
+                                        '[Retrieval Accept] Popping retrieval sheet with rootNavigator');
+                                    navigator.pop();
+                                  }
+                                } catch (e) {
+                                  debugPrint(
+                                      '[Retrieval Accept] Error popping sheet: $e');
+                                }
+                              });
+                            }
+
+                            // Only navigate to ConfirmArrival if NOT in a photo flow
+                            if (!isCurrentlyInPhotoFlow &&
+                                !shouldKeepCurrentFlow) {
+                              debugPrint(
+                                  '[Retrieval Accept] Not in photo flow - navigating to Confirm Arrival after delay');
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  final acceptedId =
+                                      ids.isNotEmpty ? ids.first : null;
+                                  _navigateToConfirmArrival(
+                                    context,
+                                    acceptedSessionId: acceptedId,
+                                  );
+                                }
+                              });
                             }
                           } else if (state is RetrivalRequestError) {
                             SnackBars.showErrorSnackBar(context, state.message);
@@ -362,12 +433,14 @@ class _AssignedSessionSheetLoaderState
       // User is on car photo / camera stack — retrieval must not stack Confirm Arrival
       // on top (popping would return here incorrectly).
       if (ParkFlowSignals.isCarPhotoParkFlowActive) {
+        debugPrint('[Retrieval] In park flow: ParkFlowSignals active');
         return true;
       }
       final hiveParking = TokenStorage.getSessionIdSync();
       if (hiveParking != null &&
           hiveParking.isNotEmpty &&
           hiveParking == retrievalSessionId) {
+        debugPrint('[Retrieval] In park flow: Session ID matches hive parking');
         return true;
       }
       final menu = context.read<DriverMenuBloc>().state;
@@ -377,14 +450,103 @@ class _AssignedSessionSheetLoaderState
       final pending = menu.pendingSessions!;
       if (!pending.hasCheckedInSession) return false;
       final checked = pending.checkedInSession;
-      return checked != null && checked.sessionId == retrievalSessionId;
-    } catch (_) {
+      final result = checked != null && checked.sessionId == retrievalSessionId;
+      if (result) {
+        debugPrint('[Retrieval] In park flow: Checked-in session matches');
+      }
+      return result;
+    } catch (e) {
+      debugPrint('[Retrieval] Error in _isInTransitParkFlow: $e');
       return false;
     }
   }
 
-  void _navigateToConfirmArrival(BuildContext context) async {
+  DateTime? _sessionFifoTime(PendingSession session) {
+    final assignedAtRaw = (session.assignedAt ?? '').trim();
+    if (assignedAtRaw.isNotEmpty) {
+      final assignedAt = DateTime.tryParse(assignedAtRaw);
+      if (assignedAt != null) return assignedAt;
+    }
+    final createdAtRaw = session.createdAt.trim();
+    if (createdAtRaw.isNotEmpty) {
+      return DateTime.tryParse(createdAtRaw);
+    }
+    return null;
+  }
+
+  int _compareSessionFifo(PendingSession a, PendingSession b) {
+    final ta = _sessionFifoTime(a);
+    final tb = _sessionFifoTime(b);
+    if (ta == null && tb == null) {
+      return a.sessionId.compareTo(b.sessionId);
+    }
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    final c = ta.compareTo(tb);
+    if (c != 0) return c;
+    return a.sessionId.compareTo(b.sessionId);
+  }
+
+  bool _isRetrievalTask(PendingSession session) {
+    final taskType = (session.taskType ?? '').trim().toUpperCase();
+    if (taskType.contains('RETRIEVAL') || taskType.contains('RETRIEVE')) {
+      return true;
+    }
+    return session.isAccepted || session.isArrived;
+  }
+
+  bool _isInConfirmArrivalFlowStatus(PendingSession session) {
+    return session.isAccepted || session.isArrived;
+  }
+
+  Future<PendingSession?> _resolveFifoConfirmArrivalTarget(
+    String? acceptedSessionId,
+  ) async {
+    try {
+      final pending = await SessionsPendingApiService.getPendingSessions();
+      final sessions = pending.sessions.where(_isRetrievalTask).toList()
+        ..sort(_compareSessionFifo);
+      if (sessions.isEmpty) return null;
+
+      for (final session in sessions) {
+        if (_isInConfirmArrivalFlowStatus(session)) return session;
+      }
+      if (acceptedSessionId != null && acceptedSessionId.isNotEmpty) {
+        for (final session in sessions) {
+          if (session.sessionId == acceptedSessionId) return session;
+        }
+      }
+      return sessions.first;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _navigateToConfirmArrival(
+    BuildContext context, {
+    String? acceptedSessionId,
+  }) async {
     final navigator = Navigator.of(context);
+    final pendingTarget =
+        await _resolveFifoConfirmArrivalTarget(acceptedSessionId);
+    if (pendingTarget != null) {
+      final session = SessionConverter.pendingToAssigned(pendingTarget);
+      navigator.push(
+        MaterialPageRoute(
+          builder: (context) => ConfirmArrivalScreen(
+            session: session,
+            preventBackNavigation: true,
+            showHandoverOnLoad: pendingTarget.isArrived,
+            acceptTriggeredAt: pendingTarget.sessionId == acceptedSessionId
+                ? _acceptTriggeredAt
+                : null,
+            disableConfirmArrivalForSeconds: null,
+          ),
+        ),
+      );
+      return;
+    }
+
     final sessionData = await TokenStorage.getAssignedSessionData();
     if (sessionData != null) {
       try {
@@ -394,7 +556,9 @@ class _AssignedSessionSheetLoaderState
             builder: (context) => ConfirmArrivalScreen(
               session: session,
               preventBackNavigation: true,
-              acceptTriggeredAt: _acceptTriggeredAt,
+              showHandoverOnLoad: session.retrievalLifecycleStatus == 'ARRIVED',
+              acceptTriggeredAt:
+                  session.id == acceptedSessionId ? _acceptTriggeredAt : null,
               disableConfirmArrivalForSeconds: null,
             ),
           ),

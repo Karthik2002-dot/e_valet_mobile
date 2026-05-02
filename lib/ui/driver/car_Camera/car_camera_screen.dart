@@ -21,6 +21,7 @@ class CarCameraScreen extends StatefulWidget {
   final String? sessionId;
   final bool isReparking;
   final bool preventBackNavigation;
+  final String? cardNumber;
 
   /// Pre-fill parking location (e.g. from third screen tag flow).
   final String? initialParkingLocation;
@@ -31,6 +32,7 @@ class CarCameraScreen extends StatefulWidget {
     this.isReparking = false,
     this.preventBackNavigation = false,
     this.initialParkingLocation,
+    this.cardNumber,
   });
 
   @override
@@ -108,6 +110,10 @@ class _CarCameraScreenState extends State<CarCameraScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _routeObserver?.subscribe(this, ModalRoute.of(context)!);
+    // Clear any global "no internet" banner so it never shows over the camera
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ScaffoldMessenger.of(context).clearMaterialBanners();
+    });
     // Only initialize if not already initializing
     // Add a small delay to ensure camera service is ready
     if (!_isInitializing) {
@@ -229,6 +235,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                   imagePath: state.imagePath,
                   sessionId: widget.sessionId,
                   isReparking: widget.isReparking,
+                  cardNumber: widget.cardNumber,
                 ),
               ),
             );
@@ -271,82 +278,86 @@ class _CarCameraScreenState extends State<CarCameraScreen>
                         ? state.isFlashOn
                         : false;
 
-            return Scaffold(
-              backgroundColor: AppColors.black,
-              appBar: const CustomAppBar(showOverflowMenu: true),
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Calculate approximate input container height based on its content
-                  final screenHeight = MediaQuery.of(context).size.height;
-                  // Container padding (vertical): 0.015 * 2 = 0.03
-                  // Header text: ~0.04, Spacing: 0.008, Input field: 0.06, Spacing: 0.01, Button: 0.035
-                  // Total: ~0.183 or 18.3%, using 19% for better alignment
-                  final estimatedInputHeight = screenHeight * 0.19;
+            return ScaffoldMessenger(
+              child: Scaffold(
+                backgroundColor: AppColors.black,
+                appBar: const CustomAppBar(showOverflowMenu: true),
+                body: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Calculate approximate input container height based on its content
+                    final screenHeight = MediaQuery.of(context).size.height;
+                    // Container padding (vertical): 0.015 * 2 = 0.03
+                    // Header text: ~0.04, Spacing: 0.008, Input field: 0.06, Spacing: 0.01, Button: 0.035
+                    // Total: ~0.183 or 18.3%, using 19% for better alignment
+                    final estimatedInputHeight = screenHeight * 0.19;
 
-                  return Stack(
-                    children: [
-                      // Camera Preview Widget (positioned at bottom)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        top:
-                            estimatedInputHeight, // Start right after input container
-                        child: CameraPreviewWidget(
-                          isCameraInitialized: isCameraInitialized,
-                          cameraController: cameraController,
+                    return Stack(
+                      children: [
+                        // Camera Preview Widget (positioned at bottom)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          top:
+                              estimatedInputHeight, // Start right after input container
+                          child: CameraPreviewWidget(
+                            isCameraInitialized: isCameraInitialized,
+                            cameraController: cameraController,
+                          ),
                         ),
-                      ),
 
-                      // Top Overlay (Flash button, Instructions) - positioned over camera
-                      CameraTopOverlay(
-                        isFlashOn: isFlashOn,
-                        onFlashToggle: () => context
-                            .read<CarCameraBloc>()
-                            .add(const ToggleFlashRequested()),
-                        topOffset: estimatedInputHeight, // Start at camera area
-                      ),
+                        // Top Overlay (Flash button, Instructions) - positioned over camera
+                        CameraTopOverlay(
+                          isFlashOn: isFlashOn,
+                          onFlashToggle: () => context
+                              .read<CarCameraBloc>()
+                              .add(const ToggleFlashRequested()),
+                          topOffset:
+                              estimatedInputHeight, // Start at camera area
+                        ),
 
-                      // Capture Button Overlay (positioned over camera)
-                      Positioned(
-                        bottom: MediaQuery.of(context).size.width *
-                            0.1, // Position at bottom with some margin
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Builder(
-                            builder: (builderContext) => GestureDetector(
-                              onTap: () {
-                                _capturePhoto(builderContext);
-                              },
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.18,
-                                height:
-                                    MediaQuery.of(context).size.width * 0.18,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.primary,
-                                  border: Border.all(
-                                    color: AppColors.white,
-                                    width: 4,
+                        // Capture Button Overlay (positioned over camera)
+                        Positioned(
+                          bottom: MediaQuery.of(context).size.width *
+                              0.1, // Position at bottom with some margin
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Builder(
+                              builder: (builderContext) => GestureDetector(
+                                onTap: () {
+                                  _capturePhoto(builderContext);
+                                },
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.18,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.18,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.primary,
+                                    border: Border.all(
+                                      color: AppColors.white,
+                                      width: 4,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
 
-                      // Top Overlay (Input field only)
-                      CameraBottomOverlay(
-                        onCapture: _capturePhoto,
-                        onSubmit: _handleSubmitWithParkingLocation,
-                        positionAtTop: true,
-                        initialParkingLocation: widget.initialParkingLocation,
-                      ),
-                    ],
-                  );
-                },
+                        // Top Overlay (Input field only)
+                        CameraBottomOverlay(
+                          onCapture: _capturePhoto,
+                          onSubmit: _handleSubmitWithParkingLocation,
+                          positionAtTop: true,
+                          initialParkingLocation: widget.initialParkingLocation,
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             );
           },
@@ -491,6 +502,7 @@ class _CarCameraScreenState extends State<CarCameraScreen>
               sessionId: widget.sessionId,
               isReparking: widget.isReparking,
               parkingLocation: parkingLocation,
+              cardNumber: widget.cardNumber,
             ),
           ),
         );

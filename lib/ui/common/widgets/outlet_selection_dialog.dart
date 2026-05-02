@@ -98,8 +98,7 @@ class OutletSelectionDialog extends StatelessWidget {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: outlets.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 10),
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         final outlet = outlets[index];
                         return _OutletTile(

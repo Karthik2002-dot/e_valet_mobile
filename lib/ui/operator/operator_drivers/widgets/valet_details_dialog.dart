@@ -105,7 +105,7 @@ class ValetDetailsDialog extends StatelessWidget {
                     const SizedBox(height: 12),
                     _DetailRow(
                       label: t.get(TextConstants.statusLabel),
-                      value: t.get(ValetUtils.getStatusLabel(valet.status)),
+                      value: ValetUtils.translatedStatusLabel(valet.status, t),
                       valueColor: ValetUtils.getStatusColor(valet.status),
                     ),
                     const SizedBox(height: 12),

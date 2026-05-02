@@ -35,7 +35,8 @@ class LoginSuccessNeedsOutletSelection extends LoginState {
   });
 
   @override
-  List<Object?> get props => [profile, outlets, isDriver, isOperator, isScanner];
+  List<Object?> get props =>
+      [profile, outlets, isDriver, isOperator, isScanner];
 }
 
 /// Outlet selected; now performing clock-in / verify-location in the background.

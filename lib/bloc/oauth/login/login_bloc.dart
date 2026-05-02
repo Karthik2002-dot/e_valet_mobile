@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:niloufer_valet_mobile/api/driver/button_config_api_service.dart';
+import 'package:niloufer_valet_mobile/api/driver/config_api_service.dart';
 import 'package:niloufer_valet_mobile/api/driver/driver_status_api_service.dart';
 import 'package:niloufer_valet_mobile/api/oauth/login_api_service.dart';
 import 'package:niloufer_valet_mobile/api/outlet/outlet_api_service.dart';
@@ -213,7 +213,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           log('Failed to connect WebSocket after outlet selection: $e');
         }
 
-        await _fetchAndStoreButtonConfig();
+        await _fetchAndStoreConfig();
 
         emit(LoginSuccess(profile));
         return;
@@ -278,7 +278,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         return;
       }
 
-      await _fetchAndStoreButtonConfig();
+      await _fetchAndStoreConfig();
 
       emit(LoginSuccess(profile));
     } on ApiException catch (e) {
@@ -290,20 +290,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Future<void> _fetchAndStoreButtonConfig() async {
+  Future<void> _fetchAndStoreConfig() async {
     try {
-      final config = await ButtonConfigApiService.getButtonConfig();
+      final config = await ConfigApiService.getConfig();
       await TokenStorage.saveButtonConfig(
         confirmArrivalDisableSeconds: config.confirmArrivalDisableSeconds,
         customerMissingDisableSeconds: config.customerMissingDisableSeconds,
+        confirmHandoverDisableSeconds: config.confirmHandoverDisableSeconds,
+        scannerButtonStatus: config.scannerButtonStatus,
+        imageCompressionQuality: config.imageCompressionQuality,
+        imageCompressionMaxSizeKB: config.imageCompressionMaxSizeKB,
       );
       log(
-        'Button config updated: confirmArrival=${config.confirmArrivalDisableSeconds}s, '
-        'customerMissing=${config.customerMissingDisableSeconds}s',
+        'Config updated: confirmArrival=${config.confirmArrivalDisableSeconds}s, '
+        'customerMissing=${config.customerMissingDisableSeconds}s, '
+        'confirmHandover=${config.confirmHandoverDisableSeconds}s, '
+        'scannerButtonStatus=${config.scannerButtonStatus}, '
+        'imageQuality=${config.imageCompressionQuality}, '
+        'imageMaxKB=${config.imageCompressionMaxSizeKB}',
       );
     } catch (e) {
       // Non-blocking by design: login should continue with env defaults.
-      log('Failed to fetch button config after login: $e');
+      log('Failed to fetch config after login: $e');
     }
   }
 

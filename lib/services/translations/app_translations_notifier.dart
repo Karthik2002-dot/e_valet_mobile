@@ -45,6 +45,17 @@ class AppTranslationsNotifier extends ChangeNotifier {
     return value ?? fallback ?? apiKey;
   }
 
+  /// First non-empty translation among [apiKeys], else [fallback].
+  /// Use when the backend may store the same string under more than one key
+  /// (e.g. legacy `groupingDescription` vs `driversGroupSubtitle`).
+  String getFirstTranslation(List<String> apiKeys, String fallback) {
+    for (final k in apiKeys) {
+      final v = _translations?[k];
+      if (v != null && v.isNotEmpty) return v;
+    }
+    return fallback;
+  }
+
   /// Loads translations from [TranslationsCache] and notifies listeners so the
   /// app rebuilds. Call after app start (e.g. in provider create) and after
   /// the user selects a new language in the language dropdown.

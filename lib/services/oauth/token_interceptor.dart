@@ -56,8 +56,24 @@ class TokenStorage {
   static const String _selectedOutletNameKey = 'selected_outlet_name';
   static const String _confirmArrivalDisableSecondsKey =
       'confirm_arrival_disable_seconds';
+  static const String _confirmArrivalDisabledUntilBySessionKey =
+      'confirm_arrival_disabled_until_by_session';
+  static const String _confirmArrivalTimerStartedBySessionKey =
+      'confirm_arrival_timer_started_by_session';
   static const String _customerMissingDisableSecondsKey =
       'customer_missing_disable_seconds';
+  static const String _confirmHandoverDisableSecondsKey =
+      'confirm_handover_disable_seconds';
+  static const String _customerMissingDisabledUntilBySessionKey =
+      'customer_missing_disabled_until_by_session';
+  static const String _confirmHandoverDisabledUntilBySessionKey =
+      'confirm_handover_disabled_until_by_session';
+  static const String _confirmHandoverTimerStartedBySessionKey =
+      'confirm_handover_timer_started_by_session';
+  static const String _scannerButtonStatusKey = 'scanner_button_status';
+  static const String _imageCompressionQualityKey = 'image_compression_quality';
+  static const String _imageCompressionMaxSizeKbKey =
+      'image_compression_max_size_kb';
 
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
@@ -547,12 +563,21 @@ class TokenStorage {
   static Future<void> saveButtonConfig({
     required int confirmArrivalDisableSeconds,
     required int customerMissingDisableSeconds,
+    required int confirmHandoverDisableSeconds,
+    required bool scannerButtonStatus,
+    required int imageCompressionQuality,
+    required int imageCompressionMaxSizeKB,
   }) async {
     try {
       await _box.put(
           _confirmArrivalDisableSecondsKey, confirmArrivalDisableSeconds);
       await _box.put(
           _customerMissingDisableSecondsKey, customerMissingDisableSeconds);
+      await _box.put(
+          _confirmHandoverDisableSecondsKey, confirmHandoverDisableSeconds);
+      await _box.put(_scannerButtonStatusKey, scannerButtonStatus);
+      await _box.put(_imageCompressionQualityKey, imageCompressionQuality);
+      await _box.put(_imageCompressionMaxSizeKbKey, imageCompressionMaxSizeKB);
     } catch (e) {
       print('[TokenStorage] ❌ Error saving button config: $e');
       rethrow;
@@ -599,6 +624,419 @@ class TokenStorage {
       if (value is int) return value;
       return int.tryParse(value?.toString() ?? '');
     } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<int?> getConfirmHandoverDisableSeconds() async {
+    try {
+      final value = _box.get(_confirmHandoverDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading confirm handover config: $e');
+      return null;
+    }
+  }
+
+  static int? getConfirmHandoverDisableSecondsSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_confirmHandoverDisableSecondsKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static List<String> _cooldownKeysForSession({
+    required String sessionId,
+    int? cardNumber,
+  }) {
+    final keys = <String>[];
+    final sid = sessionId.trim();
+    if (sid.isNotEmpty) keys.add(sid);
+    if (cardNumber != null && cardNumber > 0) {
+      keys.add('card:$cardNumber');
+    }
+    return keys;
+  }
+
+  static DateTime? _getDisabledUntilForKeysSync({
+    required String mapKey,
+    required List<String> candidateKeys,
+  }) {
+    if (candidateKeys.isEmpty) return null;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final box = Hive.box(_boxName);
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final raw = box.get(mapKey);
+      if (raw is! Map) return null;
+
+      final cleaned = <String, int>{};
+      for (final entry in raw.entries) {
+        final k = entry.key?.toString().trim() ?? '';
+        if (k.isEmpty) continue;
+        final v = entry.value;
+        final untilMs = v is int ? v : int.tryParse(v.toString()) ?? 0;
+        if (untilMs > nowMs) {
+          cleaned[k] = untilMs;
+        }
+      }
+      if (cleaned.length != raw.length) {
+        box.put(mapKey, cleaned);
+      }
+
+      for (final key in candidateKeys) {
+        final until = cleaned[key];
+        if (until != null) {
+          return DateTime.fromMillisecondsSinceEpoch(until);
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static void _saveDisabledUntilForKeysSync({
+    required String mapKey,
+    required List<String> targetKeys,
+    required DateTime until,
+  }) {
+    if (targetKeys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final untilMs = until.millisecondsSinceEpoch;
+      final raw = box.get(mapKey);
+      final map = <String, int>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty) continue;
+          final v = entry.value;
+          final exp = v is int ? v : int.tryParse(v.toString()) ?? 0;
+          if (exp > nowMs) {
+            map[k] = exp;
+          }
+        }
+      }
+      for (final key in targetKeys) {
+        if (untilMs > nowMs) {
+          map[key] = untilMs;
+        } else {
+          map.remove(key);
+        }
+      }
+      box.put(mapKey, map);
+    } catch (_) {}
+  }
+
+  static DateTime? getCustomerMissingDisabledUntilForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    return _getDisabledUntilForKeysSync(
+      mapKey: _customerMissingDisabledUntilBySessionKey,
+      candidateKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+    );
+  }
+
+  static bool hasConfirmArrivalTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return false;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return false;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmArrivalTimerStartedBySessionKey);
+      if (raw is! Map) return false;
+      final map = <String, bool>{};
+      var found = false;
+      for (final entry in raw.entries) {
+        final k = entry.key?.toString().trim() ?? '';
+        if (k.isEmpty) continue;
+        final v = entry.value;
+        final started = v == true || v?.toString() == 'true';
+        if (started) {
+          map[k] = true;
+          if (keys.contains(k)) found = true;
+        }
+      }
+      if (map.length != raw.length) {
+        box.put(_confirmArrivalTimerStartedBySessionKey, map);
+      }
+      return found;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void markConfirmArrivalTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmArrivalTimerStartedBySessionKey);
+      final map = <String, bool>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty) continue;
+          final v = entry.value;
+          final started = v == true || v?.toString() == 'true';
+          if (started) map[k] = true;
+        }
+      }
+      for (final k in keys) {
+        map[k] = true;
+      }
+      box.put(_confirmArrivalTimerStartedBySessionKey, map);
+    } catch (_) {}
+  }
+
+  static void saveCustomerMissingDisabledUntilForSessionSync(
+    String sessionId,
+    DateTime until, {
+    int? cardNumber,
+  }) {
+    _saveDisabledUntilForKeysSync(
+      mapKey: _customerMissingDisabledUntilBySessionKey,
+      targetKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+      until: until,
+    );
+  }
+
+  static DateTime? getConfirmArrivalDisabledUntilForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    return _getDisabledUntilForKeysSync(
+      mapKey: _confirmArrivalDisabledUntilBySessionKey,
+      candidateKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+    );
+  }
+
+  static void saveConfirmArrivalDisabledUntilForSessionSync(
+    String sessionId,
+    DateTime until, {
+    int? cardNumber,
+  }) {
+    _saveDisabledUntilForKeysSync(
+      mapKey: _confirmArrivalDisabledUntilBySessionKey,
+      targetKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+      until: until,
+    );
+  }
+
+  static DateTime? getConfirmHandoverDisabledUntilForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    return _getDisabledUntilForKeysSync(
+      mapKey: _confirmHandoverDisabledUntilBySessionKey,
+      candidateKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+    );
+  }
+
+  static void saveConfirmHandoverDisabledUntilForSessionSync(
+    String sessionId,
+    DateTime until, {
+    int? cardNumber,
+  }) {
+    _saveDisabledUntilForKeysSync(
+      mapKey: _confirmHandoverDisabledUntilBySessionKey,
+      targetKeys: _cooldownKeysForSession(
+        sessionId: sessionId,
+        cardNumber: cardNumber,
+      ),
+      until: until,
+    );
+  }
+
+  static bool hasConfirmHandoverTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return false;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return false;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmHandoverTimerStartedBySessionKey);
+      if (raw is! Map) return false;
+      final map = <String, bool>{};
+      var found = false;
+      for (final entry in raw.entries) {
+        final k = entry.key?.toString().trim() ?? '';
+        if (k.isEmpty) continue;
+        final v = entry.value;
+        final started = v == true || v?.toString() == 'true';
+        if (started) {
+          map[k] = true;
+          if (keys.contains(k)) found = true;
+        }
+      }
+      if (map.length != raw.length) {
+        box.put(_confirmHandoverTimerStartedBySessionKey, map);
+      }
+      return found;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void markConfirmHandoverTimerStartedForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final keys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    );
+    if (keys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final raw = box.get(_confirmHandoverTimerStartedBySessionKey);
+      final map = <String, bool>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty) continue;
+          final v = entry.value;
+          final started = v == true || v?.toString() == 'true';
+          if (started) map[k] = true;
+        }
+      }
+      for (final k in keys) {
+        map[k] = true;
+      }
+      box.put(_confirmHandoverTimerStartedBySessionKey, map);
+    } catch (_) {}
+  }
+
+  static void clearHandoverButtonCooldownForSessionSync(
+    String sessionId, {
+    int? cardNumber,
+  }) {
+    final targetKeys = _cooldownKeysForSession(
+      sessionId: sessionId,
+      cardNumber: cardNumber,
+    ).toSet();
+    if (targetKeys.isEmpty) return;
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return;
+      final box = Hive.box(_boxName);
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      void clearMap(String mapKey) {
+        final raw = box.get(mapKey);
+        if (raw is! Map) return;
+        final map = <String, int>{};
+        for (final entry in raw.entries) {
+          final k = entry.key?.toString().trim() ?? '';
+          if (k.isEmpty || targetKeys.contains(k)) continue;
+          final v = entry.value;
+          final exp = v is int ? v : int.tryParse(v.toString()) ?? 0;
+          if (exp > nowMs) {
+            map[k] = exp;
+          }
+        }
+        box.put(mapKey, map);
+      }
+
+      clearMap(_customerMissingDisabledUntilBySessionKey);
+      clearMap(_confirmHandoverDisabledUntilBySessionKey);
+      clearMap(_confirmArrivalDisabledUntilBySessionKey);
+      clearMap(_confirmArrivalTimerStartedBySessionKey);
+      clearMap(_confirmHandoverTimerStartedBySessionKey);
+    } catch (_) {}
+  }
+
+  static Future<bool?> getScannerButtonStatus() async {
+    try {
+      final value = _box.get(_scannerButtonStatusKey);
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.trim().toLowerCase();
+        if (normalized == 'true') return true;
+        if (normalized == 'false') return false;
+      }
+      return null;
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading scanner button status: $e');
+      return null;
+    }
+  }
+
+  static bool? getScannerButtonStatusSync() {
+    try {
+      if (!Hive.isBoxOpen(_boxName)) return null;
+      final value = Hive.box(_boxName).get(_scannerButtonStatusKey);
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.trim().toLowerCase();
+        if (normalized == 'true') return true;
+        if (normalized == 'false') return false;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<int?> getImageCompressionQuality() async {
+    try {
+      final value = _box.get(_imageCompressionQualityKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading image compression quality: $e');
+      return null;
+    }
+  }
+
+  static Future<int?> getImageCompressionMaxSizeKB() async {
+    try {
+      final value = _box.get(_imageCompressionMaxSizeKbKey);
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] ❌ Error reading image compression max size: $e');
       return null;
     }
   }
@@ -777,7 +1215,16 @@ class TokenStorage {
     await clearSessionId();
     await clearSelectedOutlet();
     await _box.delete(_confirmArrivalDisableSecondsKey);
+    await _box.delete(_confirmArrivalDisabledUntilBySessionKey);
+    await _box.delete(_confirmArrivalTimerStartedBySessionKey);
     await _box.delete(_customerMissingDisableSecondsKey);
+    await _box.delete(_confirmHandoverDisableSecondsKey);
+    await _box.delete(_confirmHandoverTimerStartedBySessionKey);
+    await _box.delete(_customerMissingDisabledUntilBySessionKey);
+    await _box.delete(_confirmHandoverDisabledUntilBySessionKey);
+    await _box.delete(_scannerButtonStatusKey);
+    await _box.delete(_imageCompressionQualityKey);
+    await _box.delete(_imageCompressionMaxSizeKbKey);
   }
 
   static Future<bool> hasValidTokens() async {
