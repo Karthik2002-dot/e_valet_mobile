@@ -30,6 +30,25 @@ class OfflineParkingService {
     await photoBox.clear();
   }
 
+  /// Sync-safe read used by UI guards to avoid false "incomplete" prompts
+  /// while an already-submitted offline park is waiting for network sync.
+  static bool hasPendingPhotoForSessionSync(String? sessionId) {
+    final target = (sessionId ?? '').trim();
+    if (target.isEmpty) return false;
+    try {
+      if (!Hive.isBoxOpen(_photoBoxName)) return false;
+      final box = Hive.box<OfflineParkingPhoto>(_photoBoxName);
+      for (final photo in box.values) {
+        if ((photo.sessionId ?? '').trim() == target) {
+          return true;
+        }
+      }
+    } catch (_) {
+      return false;
+    }
+    return false;
+  }
+
   static Future<void> syncPendingData() async {
     await _syncPhotos();
   }
