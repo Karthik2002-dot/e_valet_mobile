@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
@@ -10,8 +12,12 @@ import 'package:url_launcher/url_launcher.dart';
 const String kPlayStoreUrl =
     'https://play.google.com/store/apps/details?id=com.niloufer.valet&pcampaignid=web_share';
 
+/// App Store link for Niloufer Valet app (iOS).
+const String kAppStoreUrl =
+    'https://apps.apple.com/in/app/cafe-niloufer-e-valet/id6759244244';
+
 /// Non-dismissible mandatory update popup (dialog).
-/// - Update Now: opens Play Store.
+/// - Update Now: opens the appropriate store.
 /// - Later: does nothing (user stays on dialog).
 class MandatoryUpdateDialog extends StatelessWidget {
   const MandatoryUpdateDialog({super.key});
@@ -28,8 +34,8 @@ class MandatoryUpdateDialog extends StatelessWidget {
     );
   }
 
-  Future<void> _openPlayStore() async {
-    final uri = Uri.parse(kPlayStoreUrl);
+  Future<void> _openStore() async {
+    final uri = Uri.parse(Platform.isIOS ? kAppStoreUrl : kPlayStoreUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -88,7 +94,7 @@ class MandatoryUpdateDialog extends StatelessWidget {
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                onPressed: _openPlayStore,
+                onPressed: _openStore,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.black,
