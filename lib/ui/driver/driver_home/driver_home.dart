@@ -31,6 +31,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/profile/profile_screen.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/assigned_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_session.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
 import 'package:niloufer_valet_mobile/utils/session_converter.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
@@ -88,6 +89,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
 
   // Track if we've already shown the session incomplete dialog
   bool _hasShownSessionDialog = false;
+  DateTime? _suppressSessionIncompleteDialogUntil;
 
   // Track if we've already navigated for accepted/arrived sessions
   bool _hasNavigatedForStatus = false;
@@ -313,6 +315,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
+      _suppressSessionIncompleteDialogUntil =
+          DateTime.now().add(const Duration(seconds: 8));
+      OfflineParkingService.syncPendingData();
       // App came back to foreground - preserve current screen (do not reset to home).
       // User stays on QR/park flow unless they press back.
       _checkWebSocketOnResume();
@@ -331,6 +336,17 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
         state == AppLifecycleState.hidden) {
       _stopPendingSessionsRefreshTimer();
     }
+  }
+
+  bool _shouldSuppressSessionIncompleteDialogForSession(String sessionId) {
+    final suppressUntil = _suppressSessionIncompleteDialogUntil;
+    if (suppressUntil != null && DateTime.now().isBefore(suppressUntil)) {
+      return true;
+    }
+    if (OfflineParkingService.hasPendingPhotoForSessionSync(sessionId)) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -691,6 +707,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
             }
           });
         } else if (target.isCheckedIn) {
+          if (_shouldSuppressSessionIncompleteDialogForSession(
+              target.sessionId)) {
+            return;
+          }
           // Keep first API task in focus; do not jump to retrieval while this is first.
           scheduledDriverFlowNavigation = true;
           _hasNavigatedForStatus = true;
