@@ -16,6 +16,7 @@ import 'package:niloufer_valet_mobile/models/outlet/verify_location_response.dar
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/connectivity/driver_connectivity_log_service.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'login_event.dart';
@@ -340,7 +341,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         longitude: longitude,
         accuracy: accuracy,
       );
-      await DriverStatusApiService.clockIn(clockInRequest);
+      final clockInResponse = await DriverStatusApiService.clockIn(clockInRequest);
+      await DriverConnectivityLogService.instance.onShiftActiveAfterClockIn(
+        shiftId: clockInResponse.shiftId,
+        outletId: clockInResponse.outletId,
+      );
       log('Automatic clock-in successful after outlet selection');
       return null;
     } on ApiException catch (e) {
