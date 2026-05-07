@@ -4,6 +4,7 @@ import 'package:niloufer_valet_mobile/api/core/base_http_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/oauth/logout_response.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/connectivity/driver_connectivity_log_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 
 class LogoutApiService {
@@ -27,6 +28,9 @@ class LogoutApiService {
       defaultHeaders: headers,
     );
 
+    // Upload queued connectivity logs while the valet access token is still valid.
+    await DriverConnectivityLogService.instance.flushPendingIgnoringSchedule();
+
     LogoutResponse response;
     try {
       final httpResponse = await http.postJson(
@@ -46,6 +50,7 @@ class LogoutApiService {
 
     // Always clear local tokens and session, even if API call failed
     await TokenStorage.clearAll();
+    await DriverConnectivityLogService.instance.clearOnLogout();
     await SessionManager.clearSessionFlags();
 
     return response;

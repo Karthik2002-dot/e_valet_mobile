@@ -15,6 +15,7 @@ import 'package:niloufer_valet_mobile/models/outlet/verify_location_request.dart
 import 'package:niloufer_valet_mobile/models/outlet/verify_location_response.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/connectivity/driver_connectivity_log_service.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 
 class OutletLocationRetryCubit extends Cubit<OutletLocationRetryState> {
@@ -75,7 +76,12 @@ class OutletLocationRetryCubit extends Cubit<OutletLocationRetryState> {
         longitude: longitude,
         accuracy: accuracy,
       );
-      await DriverStatusApiService.clockIn(clockInRequest);
+      final clockInResponse =
+          await DriverStatusApiService.clockIn(clockInRequest);
+      await DriverConnectivityLogService.instance.onShiftActiveAfterClockIn(
+        shiftId: clockInResponse.shiftId,
+        outletId: clockInResponse.outletId,
+      );
     } on ApiException catch (e) {
       log('Retry driver clock-in failed: ${e.message}');
       if (_isLocationTooFarMessage(e.message)) {

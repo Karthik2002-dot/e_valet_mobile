@@ -7,6 +7,7 @@ import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/break_start_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/status/break_end_request.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
+import 'package:niloufer_valet_mobile/services/connectivity/driver_connectivity_log_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 
 /// Driver status is driven by login (clock-in) and logout (clock-out).
@@ -26,6 +27,13 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
 
     try {
       final status = await DriverStatusApiService.getDriverStatus();
+      if (!status.isOffline && status.shiftId > 0 && status.outletId > 0) {
+        await DriverConnectivityLogService.instance.syncFromDriverStatus(
+          shiftId: status.shiftId,
+          outletId: status.outletId,
+          isOffline: status.isOffline,
+        );
+      }
       emit(DriverStatusLoaded(status));
     } on ApiException catch (e) {
       emit(DriverStatusError(e.message));
@@ -43,6 +51,13 @@ class DriverStatusBloc extends Bloc<DriverStatusEvent, DriverStatusState> {
     // Don't show loading state on refresh to avoid UI flicker
     try {
       final status = await DriverStatusApiService.getDriverStatus();
+      if (!status.isOffline && status.shiftId > 0 && status.outletId > 0) {
+        await DriverConnectivityLogService.instance.syncFromDriverStatus(
+          shiftId: status.shiftId,
+          outletId: status.outletId,
+          isOffline: status.isOffline,
+        );
+      }
       emit(DriverStatusLoaded(status));
     } on ApiException catch (e) {
       if (state is DriverStatusLoaded) {
