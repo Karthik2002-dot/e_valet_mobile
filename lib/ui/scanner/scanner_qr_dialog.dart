@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_event.dart';
 import 'package:niloufer_valet_mobile/bloc/scanner/scanner_qr/scanner_qr_state.dart';
+import 'package:niloufer_valet_mobile/services/qr/valet_qr_scanner_controller_factory.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
@@ -42,7 +45,8 @@ class ScannerQrDialog extends StatefulWidget {
 }
 
 class _ScannerQrDialogState extends State<ScannerQrDialog> {
-  final MobileScannerController _controller = MobileScannerController();
+  late final MobileScannerController _controller =
+      createValetQrScannerController(autoStart: true);
   bool _isTorchOn = false;
 
   @override
@@ -161,49 +165,63 @@ class _ScannerQrDialogState extends State<ScannerQrDialog> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: size.height * 0.4,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            MobileScanner(
-                              controller: _controller,
-                              onDetect: _onDetect,
-                              errorBuilder: (context, error, child) => Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline,
-                                      color: AppColors.error,
-                                      size: 48,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextComponent(
-                                      labelText:
-                                          t.get(TextConstants.cameraError),
-                                      color: AppColors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (isProcessing)
-                              Container(
-                                color: AppColors.qrProcessingOverlay,
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.white,
-                                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: size.height * 0.4,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final w = constraints.maxWidth;
+                          final h = constraints.maxHeight;
+                          final side = math.min(w, h) * 0.88;
+                          final scanWindow = Rect.fromCenter(
+                            center: Offset(w / 2, h / 2),
+                            width: side,
+                            height: side,
+                          );
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              MobileScanner(
+                                controller: _controller,
+                                scanWindow: scanWindow,
+                                onDetect: _onDetect,
+                                errorBuilder:
+                                    (context, error, child) => Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline,
+                                        color: AppColors.error,
+                                        size: 48,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextComponent(
+                                        labelText:
+                                            t.get(TextConstants.cameraError),
+                                        color: AppColors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
+                              if (isProcessing)
+                                Container(
+                                  color: AppColors.qrProcessingOverlay,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
+                    ),
                     ),
                   ),
                 ),
