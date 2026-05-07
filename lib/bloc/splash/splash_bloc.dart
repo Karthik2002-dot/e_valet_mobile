@@ -147,17 +147,18 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     double accuracy;
 
     try {
-      final locationData = await TokenStorage.getCurrentLocation();
-      if (locationData != null) {
-        latitude = locationData['latitude'] as double;
-        longitude = locationData['longitude'] as double;
-        accuracy = locationData['accuracy'] as double? ?? 0.0;
-      } else {
-        final coordinates = await LocationService.getCurrentCoordinates();
-        latitude = coordinates['latitude']!;
-        longitude = coordinates['longitude']!;
-        accuracy = coordinates['accuracy']!;
-      }
+      final coordinates = await LocationService.getCurrentCoordinates();
+      latitude = coordinates['latitude']!;
+      longitude = coordinates['longitude']!;
+      accuracy = coordinates['accuracy']!;
+
+      final location =
+          '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+      await TokenStorage.saveCurrentLocation(
+        latitude: latitude,
+        longitude: longitude,
+        location: location,
+      );
     } catch (e) {
       print('Splash: Failed to get location for verify-location: $e');
       latitude = 0.0;

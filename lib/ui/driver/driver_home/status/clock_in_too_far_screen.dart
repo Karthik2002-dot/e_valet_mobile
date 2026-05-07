@@ -15,10 +15,17 @@ class ClockInTooFarScreen extends StatelessWidget {
   /// When true, app bar uses [ScannerMenuBloc] (profile + logout only). Otherwise [DriverMenuBloc].
   final bool scannerMode;
 
+  /// When set, shows a Retry action (fresh GPS + clock-in / verify).
+  final VoidCallback? onRetryPressed;
+
+  final bool isRetryBusy;
+
   const ClockInTooFarScreen({
     super.key,
     required this.message,
     this.scannerMode = false,
+    this.onRetryPressed,
+    this.isRetryBusy = false,
   });
 
   @override
@@ -121,6 +128,53 @@ class ClockInTooFarScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (onRetryPressed != null) ...[
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.06,
+                  vertical: screenHeight * 0.015,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isRetryBusy ? null : onRetryPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      padding: EdgeInsets.symmetric(
+                        vertical: screenHeight * 0.018,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      disabledBackgroundColor:
+                          AppColors.primary.withValues(alpha: 0.65),
+                      disabledForegroundColor: AppColors.white,
+                    ),
+                    child: isRetryBusy
+                        ? SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
+                            ),
+                          )
+                        : TextComponent(
+                            labelText: t.get(TextConstants.retryButton),
+                            fontSize: isDesktop
+                                ? screenWidth * 0.014
+                                : isTablet
+                                    ? screenWidth * 0.028
+                                    : screenWidth * 0.038,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white,
+                            textAlign: TextAlign.center,
+                          ),
+                  ),
+                ),
+              ),
+            ],
             const SafeArea(
               top: false,
               child: Footer(),

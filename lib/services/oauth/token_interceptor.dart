@@ -1214,6 +1214,7 @@ class TokenStorage {
     await clearResetToken();
     await clearSessionId();
     await clearSelectedOutlet();
+    await clearCurrentLocation();
     await _box.delete(_confirmArrivalDisableSecondsKey);
     await _box.delete(_confirmArrivalDisabledUntilBySessionKey);
     await _box.delete(_confirmArrivalTimerStartedBySessionKey);

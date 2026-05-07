@@ -58,18 +58,26 @@ class LoginSuccessClockInTooFar extends LoginState {
   final Profile profile;
   final String message;
 
+  /// Outlet chosen in the dialog — not yet persisted when clock-in fails for distance.
+  final Outlet outlet;
+
   const LoginSuccessClockInTooFar({
     required this.profile,
     required this.message,
+    required this.outlet,
   });
 
   @override
-  List<Object?> get props => [profile, message];
+  List<Object?> get props => [profile, message, outlet];
 }
 
 /// Operator/Scanner logged in but verify-location returned withinBounds: false.
 class LoginSuccessLocationTooFar extends LoginState {
   final Profile profile;
+
+  /// Persisted before verify-location (operator / scanner admin path); used for Retry.
+  final int outletId;
+
   final String outletName;
   final double distanceMeters;
   final double allowedRadiusMeters;
@@ -79,6 +87,7 @@ class LoginSuccessLocationTooFar extends LoginState {
 
   const LoginSuccessLocationTooFar({
     required this.profile,
+    required this.outletId,
     required this.outletName,
     required this.distanceMeters,
     required this.allowedRadiusMeters,
@@ -86,8 +95,14 @@ class LoginSuccessLocationTooFar extends LoginState {
   });
 
   @override
-  List<Object?> get props =>
-      [profile, outletName, distanceMeters, allowedRadiusMeters, detailMessage];
+  List<Object?> get props => [
+        profile,
+        outletId,
+        outletName,
+        distanceMeters,
+        allowedRadiusMeters,
+        detailMessage,
+      ];
 
   /// Text for [ClockInTooFarScreen]: API detail line if present, else distance/outlet summary.
   String get userFacingMessage {
