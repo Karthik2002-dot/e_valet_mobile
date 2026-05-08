@@ -70,6 +70,15 @@ class LoginApiService {
       // Mark session as active for today
       await SessionManager.markLoggedInForToday();
 
+      final normalizedRoles =
+          rolesList.map((r) => r.toLowerCase().trim()).toList();
+      if (user.id.isNotEmpty) {
+        await TokenStorage.saveCachedAuthContext(
+          normalizedRoles: normalizedRoles,
+          userId: user.id,
+        );
+      }
+
       return Profile(
         user: user,
         applicationId: applicationId,

@@ -64,74 +64,110 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       return;
     }
 
-    // If authenticated, try to fetch the profile to determine roles.
-    List<String> roles = [];
+    final profileLoad = await _loadProfileOrOfflineSnapshot();
+    if (profileLoad == null) {
+      emit(const SplashCompleted(isAuthenticated: false, roles: []));
+      return;
+    }
+
+    final roles = profileLoad.roles;
+    final userId = profileLoad.userId;
+
     String? outletId;
-    String? userId;
 
-    try {
-      final profile = await ProfileApiService.getProfile();
-      roles = profile.normalizedRoles;
-      userId = profile.user.id;
+    // Get outletId if user is operator or scanner (both need outlet room for real-time updates)
+    final isOperator = roles.any((r) => r.contains('operator'));
+    final isScanner = roles.any((r) => r.contains('scanner'));
+    final isAdmin = roles.any((r) => r.contains('admin'));
+    final isDriver = roles.any((r) => r.contains('driver'));
+    if (isOperator || isScanner) {
+      outletId = dotenv.env['OUTLET_ID'] ?? '1';
+    }
 
-      // Get outletId if user is operator or scanner (both need outlet room for real-time updates)
-      final isOperator = roles.any((r) => r.contains('operator'));
-      final isScanner = roles.any((r) => r.contains('scanner'));
-      final isAdmin = roles.any((r) => r.contains('admin'));
-      final isDriver = roles.any((r) => r.contains('driver'));
-      if (isOperator || isScanner) {
-        outletId = dotenv.env['OUTLET_ID'] ?? '1';
-      }
-
-      // If user is a driver, check status before WebSocket: OFFLINE means session ended → log out and go to login.
-      // Only connect WebSocket when driver is ONLINE (or operator).
-      if (isDriver) {
-        try {
-          final driverStatus = await DriverStatusApiService.getDriverStatus();
-          if (driverStatus.isOffline) {
-            await TokenStorage.clearAll();
-            await SessionManager.clearSessionFlags();
-            emit(const SplashCompleted(isAuthenticated: false, roles: []));
-            return;
-          }
-        } catch (e) {
-          // If status fetch fails (e.g. network), still allow navigation to driver home
-          print('Splash: Driver status fetch failed: $e');
-        }
-      }
-
-      // Operator / scanner / admin (same outlet verify as after login): if too far, clear session — mirrors driver OFFLINE gate so refresh cannot open the dashboard.
-      final needsOutletLocationVerify =
-          !isDriver && (isOperator || isScanner || isAdmin);
-      if (needsOutletLocationVerify) {
-        final tooFar = await _isTooFarForStoredOutlet();
-        if (tooFar) {
+    // If user is a driver, check status before WebSocket: OFFLINE means session ended → log out and go to login.
+    // Only connect WebSocket when driver is ONLINE (or operator).
+    if (isDriver) {
+      try {
+        final driverStatus = await DriverStatusApiService.getDriverStatus();
+        if (driverStatus.isOffline) {
           await TokenStorage.clearAll();
           await SessionManager.clearSessionFlags();
           emit(const SplashCompleted(isAuthenticated: false, roles: []));
           return;
         }
+      } catch (e) {
+        // If status fetch fails (e.g. network), still allow navigation to driver home
+        print('Splash: Driver status fetch failed: $e');
       }
+    }
 
-      // Initialize WebSocket only when user is allowed to continue (operator, or driver with ONLINE status)
-      if (webSocketBloc != null) {
-        await WebSocketHelper.connectAfterLogin(
-          webSocketBloc: webSocketBloc!,
-          outletId: outletId,
-          operatorId: isOperator ? userId : null,
-          driverId: isDriver ? userId : null,
-          initialDelay:
-              const Duration(milliseconds: 1500), // Longer delay for splash
-        );
+    // Operator / scanner / admin (same outlet verify as after login): if too far, clear session — mirrors driver OFFLINE gate so refresh cannot open the dashboard.
+    final needsOutletLocationVerify =
+        !isDriver && (isOperator || isScanner || isAdmin);
+    if (needsOutletLocationVerify) {
+      final tooFar = await _isTooFarForStoredOutlet();
+      if (tooFar) {
+        await TokenStorage.clearAll();
+        await SessionManager.clearSessionFlags();
+        emit(const SplashCompleted(isAuthenticated: false, roles: []));
+        return;
       }
-    } catch (e) {
-      // Ignore profile fetch failure; fallback to empty roles
-      print('Splash: Profile fetch failed: $e');
-      emit(const SplashCompleted(isAuthenticated: false, roles: []));
-      return;
+    }
+
+    // Initialize WebSocket only when user is allowed to continue (operator, or driver with ONLINE status)
+    if (webSocketBloc != null) {
+      await WebSocketHelper.connectAfterLogin(
+        webSocketBloc: webSocketBloc!,
+        outletId: outletId,
+        operatorId: isOperator ? userId : null,
+        driverId: isDriver ? userId : null,
+        initialDelay:
+            const Duration(milliseconds: 1500), // Longer delay for splash
+      );
     }
 
     emit(SplashCompleted(isAuthenticated: isAuthenticated, roles: roles));
+  }
+
+  /// Loads profile from the network, or last cached roles/user id when the failure
+  /// is transient (e.g. no connectivity). Returns null only when login is required.
+  Future<({List<String> roles, String userId})?> _loadProfileOrOfflineSnapshot() async {
+    try {
+      final profile = await ProfileApiService.getProfile();
+      final roles = profile.normalizedRoles;
+      final userId = profile.user.id;
+      await TokenStorage.saveCachedAuthContext(
+        normalizedRoles: roles,
+        userId: userId,
+      );
+      return (roles: roles, userId: userId);
+    } on ApiException catch (e) {
+      print('Splash: Profile fetch failed: $e');
+      if (_profileFailureRequiresLogout(e)) {
+        return null;
+      }
+      return _readCachedAuthSnapshot();
+    } catch (e) {
+      print('Splash: Profile fetch failed: $e');
+      return _readCachedAuthSnapshot();
+    }
+  }
+
+  Future<({List<String> roles, String userId})?> _readCachedAuthSnapshot() async {
+    final roles = await TokenStorage.getCachedNormalizedRoles();
+    final userId = await TokenStorage.getCachedUserId();
+    if (roles == null || roles.isEmpty || userId == null || userId.isEmpty) {
+      return null;
+    }
+    return (roles: roles, userId: userId);
+  }
+
+  bool _profileFailureRequiresLogout(ApiException e) {
+    if (e.code == 'no_token') return true;
+    if (e.code == 'session_expired') return true;
+    if (e.code == 'no_refresh') return true;
+    if (e.statusCode == 401) return true;
+    return false;
   }
 
   /// Same location check as [LoginBloc] after outlet selection. Returns true if user must not enter the app.

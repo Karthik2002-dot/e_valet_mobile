@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -31,31 +32,54 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   }
 
   Future<void> _onCheckConnectivity(
-      CheckConnectivity event, Emitter<ConnectivityState> emit) async {
+    CheckConnectivity event,
+    Emitter<ConnectivityState> emit,
+  ) async {
     final results = await _connectivity.checkConnectivity();
-    _updateState(results, emit);
+    await _applyConnectivityResults(results, emit);
   }
 
-  void _onConnectivityChanged(
-      ConnectivityChanged event, Emitter<ConnectivityState> emit) {
-    _updateState(event.results, emit);
+  Future<void> _onConnectivityChanged(
+    ConnectivityChanged event,
+    Emitter<ConnectivityState> emit,
+  ) async {
+    await _applyConnectivityResults(event.results, emit);
   }
 
-  void _updateState(
-      List<ConnectivityResult> results, Emitter<ConnectivityState> emit) {
+  /// No carrier / Wi‑Fi, or link is up but DNS cannot resolve (matches "Failed host lookup" cases).
+  Future<void> _applyConnectivityResults(
+    List<ConnectivityResult> results,
+    Emitter<ConnectivityState> emit,
+  ) async {
     unawaited(
       DriverConnectivityLogService.instance.handleConnectivityResults(results),
     );
 
-    bool isOffline =
+    final noInterface =
         results.isEmpty || results.every((r) => r == ConnectivityResult.none);
-    if (isOffline) {
-      emit(ConnectivityOffline());
-    } else {
-      // Trigger sync immediately when back online
+    if (noInterface) {
+      emit(ConnectivityUnavailable());
+      return;
+    }
+
+    final reachable = await _dnsReachable();
+    if (reachable) {
       OfflineParkingService.syncPendingData();
       emit(ConnectivityOnline());
       unawaited(DriverConnectivityLogService.instance.tryFlushIfDue());
+    } else {
+      emit(ConnectivityUnavailable());
+    }
+  }
+
+  Future<bool> _dnsReachable() async {
+    try {
+      await InternetAddress.lookup('cloudflare.com').timeout(
+        const Duration(seconds: 4),
+      );
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
