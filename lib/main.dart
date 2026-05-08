@@ -14,9 +14,6 @@ import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_s
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/services/version/version_service.dart';
-import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
 import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
@@ -26,7 +23,9 @@ import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.d
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_event.dart';
 import 'package:niloufer_valet_mobile/bloc/connectivity/connectivity_state.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/no_internet_overlay.dart';
 import 'package:niloufer_valet_mobile/api/oauth/refresh_api_service.dart';
 import 'package:niloufer_valet_mobile/services/permissions/permissions_service.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
@@ -136,33 +135,34 @@ class MyApp extends StatelessWidget {
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
           builder: (context, child) {
-            return BlocListener<ConnectivityBloc, ConnectivityState>(
-              listener: (context, state) {
-                final t = context.read<AppTranslationsNotifier>();
-                final messenger = ScaffoldMessenger.of(context);
-                if (state is ConnectivityOffline &&
-                    !ParkFlowSignals.isCarPhotoParkFlowActive) {
-                  messenger.clearMaterialBanners();
-                  messenger.showMaterialBanner(
-                    MaterialBanner(
-                      backgroundColor: AppColors.error,
-                      content: TextComponent(
-                        labelText: t.get(TextConstants.noInternetConnection),
-                        color: AppColors.white,
-                        textAlign: TextAlign.center,
-                      ),
-                      actions: [
-                        const SizedBox.shrink(),
-                      ],
-                    ),
-                  );
-                } else if (state is ConnectivityOnline) {
-                  messenger.clearMaterialBanners();
+            return BlocBuilder<ConnectivityBloc, ConnectivityState>(
+              builder: (context, state) {
+                if (state is ConnectivityOnline) {
+                  ScaffoldMessenger.of(context).clearMaterialBanners();
                 }
+
+                final showNoInternet = state is ConnectivityUnavailable &&
+                    !ParkFlowSignals.isCarPhotoParkFlowActive;
+
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _AppLifecycleHandler(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+                    if (showNoInternet)
+                      Positioned.fill(
+                        child: NoInternetOverlay(
+                          onRetry: () {
+                            context
+                                .read<ConnectivityBloc>()
+                                .add(CheckConnectivity());
+                          },
+                        ),
+                      ),
+                  ],
+                );
               },
-              child: _AppLifecycleHandler(
-                child: child ?? const SizedBox.shrink(),
-              ),
             );
           },
         ),
@@ -206,6 +206,9 @@ class _AppLifecycleHandlerState extends State<_AppLifecycleHandler>
     if (state == AppLifecycleState.resumed) {
       try {
         context.read<WebSocketBloc>().add(const ReconnectWebSocket());
+      } catch (_) {}
+      try {
+        context.read<ConnectivityBloc>().add(CheckConnectivity());
       } catch (_) {}
       _enforceDailyResetIfNeeded();
       _scheduleDailyResetTimer();
