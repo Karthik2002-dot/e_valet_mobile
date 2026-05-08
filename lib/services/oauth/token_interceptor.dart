@@ -75,6 +75,16 @@ class TokenStorage {
   static const String _imageCompressionMaxSizeKbKey =
       'image_compression_max_size_kb';
 
+  /// Driver POST /connectivity/log/batch context (cleared on logout).
+  static const String _driverConnectivityShiftIdKey =
+      'driver_connectivity_shift_id';
+  static const String _driverConnectivityOutletIdKey =
+      'driver_connectivity_outlet_id';
+  static const String _connectivityPendingEventsJsonKey =
+      'connectivity_pending_events_json';
+  static const String _connectivityNextFlushDueUtcMillisKey =
+      'connectivity_next_flush_due_utc_millis';
+
   /// Legacy single id (migrated into [_collectKeysInTransitSessionIdsKey]).
   static const String _collectKeysInTransitSessionIdKey =
       'collect_keys_in_transit_session_id';
@@ -1201,6 +1211,101 @@ class TokenStorage {
     } catch (_) {}
   }
 
+  static Future<void> clearDriverConnectivityLogData() async {
+    try {
+      await _box.delete(_driverConnectivityShiftIdKey);
+      await _box.delete(_driverConnectivityOutletIdKey);
+      await _box.delete(_connectivityPendingEventsJsonKey);
+      await _box.delete(_connectivityNextFlushDueUtcMillisKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing driver connectivity log: $e');
+    }
+  }
+
+  static Future<void> saveDriverConnectivityShiftContext({
+    required int shiftId,
+    required int outletId,
+  }) async {
+    try {
+      await _box.put(_driverConnectivityShiftIdKey, shiftId);
+      await _box.put(_driverConnectivityOutletIdKey, outletId);
+    } catch (e) {
+      print('[TokenStorage] Error saving driver connectivity context: $e');
+      rethrow;
+    }
+  }
+
+  static Future<int?> getDriverConnectivityShiftId() async {
+    try {
+      final v = _box.get(_driverConnectivityShiftIdKey);
+      if (v is int) return v;
+      return int.tryParse(v?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] Error reading driver connectivity shiftId: $e');
+      return null;
+    }
+  }
+
+  static Future<int?> getDriverConnectivityOutletId() async {
+    try {
+      final v = _box.get(_driverConnectivityOutletIdKey);
+      if (v is int) return v;
+      return int.tryParse(v?.toString() ?? '');
+    } catch (e) {
+      print('[TokenStorage] Error reading driver connectivity outletId: $e');
+      return null;
+    }
+  }
+
+  static Future<void> saveConnectivityNextFlushDue(DateTime utc) async {
+    try {
+      await _box.put(
+        _connectivityNextFlushDueUtcMillisKey,
+        utc.millisecondsSinceEpoch,
+      );
+    } catch (e) {
+      print('[TokenStorage] Error saving connectivity flush schedule: $e');
+      rethrow;
+    }
+  }
+
+  static Future<DateTime?> getConnectivityNextFlushDue() async {
+    try {
+      final v = _box.get(_connectivityNextFlushDueUtcMillisKey);
+      if (v is! int) return null;
+      return DateTime.fromMillisecondsSinceEpoch(v, isUtc: true);
+    } catch (e) {
+      print('[TokenStorage] Error reading connectivity flush schedule: $e');
+      return null;
+    }
+  }
+
+  static Future<String?> getConnectivityPendingEventsJson() async {
+    try {
+      return _box.get(_connectivityPendingEventsJsonKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error reading connectivity pending events: $e');
+      return null;
+    }
+  }
+
+  static Future<void> saveConnectivityPendingEventsJson(String json) async {
+    try {
+      await _box.put(_connectivityPendingEventsJsonKey, json);
+    } catch (e) {
+      print('[TokenStorage] Error saving connectivity pending events: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> clearConnectivityPendingEvents() async {
+    try {
+      await _box.delete(_connectivityPendingEventsJsonKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing connectivity pending events: $e');
+    }
+  }
+
   // Bulk helpers
   static Future<void> clearAllTokens() async {
     await clearAccessToken();
@@ -1214,6 +1319,8 @@ class TokenStorage {
     await clearResetToken();
     await clearSessionId();
     await clearSelectedOutlet();
+    await clearCurrentLocation();
+    await clearDriverConnectivityLogData();
     await _box.delete(_confirmArrivalDisableSecondsKey);
     await _box.delete(_confirmArrivalDisabledUntilBySessionKey);
     await _box.delete(_confirmArrivalTimerStartedBySessionKey);

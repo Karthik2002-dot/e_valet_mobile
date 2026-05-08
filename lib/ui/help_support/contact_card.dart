@@ -42,8 +42,17 @@ class ContactCard extends StatelessWidget {
     return phone.replaceAll(RegExp(r'[^\d]'), '');
   }
 
+  /// Strips leading country code `91` for local dialing when the number is stored
+  /// as `+91` + 10 digits (typical Indian mobile/support lines from the API).
+  String _digitsForDial(String digitsOnly) {
+    if (digitsOnly.length == 12 && digitsOnly.startsWith('91')) {
+      return digitsOnly.substring(2);
+    }
+    return digitsOnly;
+  }
+
   Future<void> _makeCall() async {
-    final digits = _phoneDigitsOnly(contact.phone);
+    final digits = _digitsForDial(_phoneDigitsOnly(contact.phone));
     if (digits.isNotEmpty) {
       await FlutterPhoneDirectCaller.callNumber(digits);
     }

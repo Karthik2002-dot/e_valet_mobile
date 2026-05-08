@@ -16,6 +16,7 @@ import 'package:niloufer_valet_mobile/models/outlet/verify_location_response.dar
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/services/notification/firebase_messaging_service.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/connectivity/driver_connectivity_log_service.dart';
 import 'package:niloufer_valet_mobile/services/websocket/websocket_helper.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'login_event.dart';
@@ -143,25 +144,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       double accuracy;
 
       try {
-        final locationData = await TokenStorage.getCurrentLocation();
-        if (locationData != null) {
-          latitude = locationData['latitude'] as double;
-          longitude = locationData['longitude'] as double;
-          accuracy = locationData['accuracy'] as double? ?? 0.0;
-        } else {
-          final coordinates = await LocationService.getCurrentCoordinates();
-          latitude = coordinates['latitude']!;
-          longitude = coordinates['longitude']!;
-          accuracy = coordinates['accuracy']!;
+        final coordinates = await LocationService.getCurrentCoordinates();
+        latitude = coordinates['latitude']!;
+        longitude = coordinates['longitude']!;
+        accuracy = coordinates['accuracy']!;
 
-          final location =
-              '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
-          await TokenStorage.saveCurrentLocation(
-            latitude: latitude,
-            longitude: longitude,
-            location: location,
-          );
-        }
+        final location =
+            '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}';
+        await TokenStorage.saveCurrentLocation(
+          latitude: latitude,
+          longitude: longitude,
+          location: location,
+        );
       } catch (e) {
         log('Failed to get location after outlet selection: $e');
         latitude = 0.0;
@@ -182,9 +176,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
         if (clockInError != null) {
           if (_isLocationTooFarMessage(clockInError)) {
+            await TokenStorage.clearCurrentLocation();
             emit(LoginSuccessClockInTooFar(
               profile: profile,
               message: clockInError,
+              outlet: outlet,
             ));
           } else {
             emit(LoginFailure(clockInError));
@@ -256,8 +252,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } on ApiException catch (e) {
         // Backend may return 4xx with a message instead of 200 + withinBounds: false.
         if (_isLocationTooFarMessage(e.message)) {
+          await TokenStorage.clearCurrentLocation();
           emit(LoginSuccessLocationTooFar(
             profile: profile,
+            outletId: outlet.id,
             outletName: outlet.name,
             distanceMeters: 0,
             allowedRadiusMeters: 0,
@@ -269,8 +267,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
 
       if (!verifyResponse.withinBounds) {
+        await TokenStorage.clearCurrentLocation();
         emit(LoginSuccessLocationTooFar(
           profile: profile,
+          outletId: verifyResponse.outletId,
           outletName: verifyResponse.outletName,
           distanceMeters: verifyResponse.distanceMeters,
           allowedRadiusMeters: verifyResponse.allowedRadiusMeters,
@@ -341,7 +341,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         longitude: longitude,
         accuracy: accuracy,
       );
-      await DriverStatusApiService.clockIn(clockInRequest);
+      final clockInResponse = await DriverStatusApiService.clockIn(clockInRequest);
+      await DriverConnectivityLogService.instance.onShiftActiveAfterClockIn(
+        shiftId: clockInResponse.shiftId,
+        outletId: clockInResponse.outletId,
+      );
       log('Automatic clock-in successful after outlet selection');
       return null;
     } on ApiException catch (e) {
