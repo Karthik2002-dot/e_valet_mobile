@@ -9,4 +9,5 @@ class ConnectivityInitial extends ConnectivityState {}
 
 class ConnectivityOnline extends ConnectivityState {}
 
-class ConnectivityOffline extends ConnectivityState {}
+/// No usable network: no interface, or interface present but DNS/reachability probe failed.
+class ConnectivityUnavailable extends ConnectivityState {}

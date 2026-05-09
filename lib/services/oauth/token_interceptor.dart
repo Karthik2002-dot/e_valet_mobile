@@ -75,6 +75,11 @@ class TokenStorage {
   static const String _imageCompressionMaxSizeKbKey =
       'image_compression_max_size_kb';
 
+  /// Last known roles and user id when `/auth/profile` succeeds (splash offline fallback).
+  static const String _cachedNormalizedRolesKey =
+      'cached_normalized_roles_v1';
+  static const String _cachedUserIdKey = 'cached_user_id_v1';
+
   /// Driver POST /connectivity/log/batch context (cleared on logout).
   static const String _driverConnectivityShiftIdKey =
       'driver_connectivity_shift_id';
@@ -1306,6 +1311,50 @@ class TokenStorage {
     }
   }
 
+  static Future<void> saveCachedAuthContext({
+    required List<String> normalizedRoles,
+    required String userId,
+  }) async {
+    try {
+      await _box.put(_cachedNormalizedRolesKey, normalizedRoles);
+      await _box.put(_cachedUserIdKey, userId);
+    } catch (e) {
+      print('[TokenStorage] Error saving cached auth context: $e');
+      rethrow;
+    }
+  }
+
+  static Future<List<String>?> getCachedNormalizedRoles() async {
+    try {
+      final raw = _box.get(_cachedNormalizedRolesKey);
+      if (raw is List) {
+        return raw.map((e) => e.toString()).toList();
+      }
+      return null;
+    } catch (e) {
+      print('[TokenStorage] Error reading cached roles: $e');
+      return null;
+    }
+  }
+
+  static Future<String?> getCachedUserId() async {
+    try {
+      return _box.get(_cachedUserIdKey) as String?;
+    } catch (e) {
+      print('[TokenStorage] Error reading cached user id: $e');
+      return null;
+    }
+  }
+
+  static Future<void> clearCachedAuthContext() async {
+    try {
+      await _box.delete(_cachedNormalizedRolesKey);
+      await _box.delete(_cachedUserIdKey);
+    } catch (e) {
+      print('[TokenStorage] Error clearing cached auth context: $e');
+    }
+  }
+
   // Bulk helpers
   static Future<void> clearAllTokens() async {
     await clearAccessToken();
@@ -1314,6 +1363,7 @@ class TokenStorage {
 
   static Future<void> clearAll() async {
     await clearAllTokens();
+    await clearCachedAuthContext();
     await clearUserName();
     await clearPhoneNumber();
     await clearResetToken();
