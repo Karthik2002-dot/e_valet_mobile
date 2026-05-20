@@ -15,10 +15,6 @@ import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
-import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
-import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
-import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
-import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
@@ -128,41 +124,13 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     }
   }
 
-  Future<void> _handlePostParkNavigation(BuildContext context) async {
+  void _handlePostParkNavigation(BuildContext context) {
     if (_hasNavigatedAfterSuccess) return;
     _hasNavigatedAfterSuccess = true;
 
-    PendingSessionsResponse? pending;
-    try {
-      pending = await SessionsPendingApiService.getPendingSessions();
-    } catch (_) {
-      // If pending session API fails, keep normal success flow.
-      pending = null;
-    }
-
     if (!context.mounted) return;
 
-    final hasPending = pending != null && pending.sessions.isNotEmpty;
-
-    if (hasPending) {
-      // Mirror CarSuccessScreen cleanup: otherwise the pending-session watchdog in
-      // DriverOnlineContent can interpret the old id as "cancelled" and pop the
-      // user back to Home right after they tap Park Vehicle again.
-      try {
-        await TokenStorage.clearSessionId();
-        await TokenStorage.clearSessionIdFromGetApi();
-      } catch (_) {}
-
-      // Skip success screen; DriverHome already contains the single source of truth
-      // for "pending session → correct screen" navigation.
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
-        (route) => false,
-      );
-      return;
-    }
-
-    // Normal flow: show success screen, then it returns to home automatically.
+    // Always show success for 5s (CarSuccessScreen timer), then return to home.
     final isLocationBased =
         widget.parkingLocation != null && widget.parkingLocation!.isNotEmpty;
     Navigator.of(context).pushReplacement(

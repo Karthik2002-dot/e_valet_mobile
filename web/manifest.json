@@ -1,6 +1,6 @@
 {
-    "name": "niloufer_valet_mobile",
-    "short_name": "niloufer_valet_mobile",
+    "name": "ValetLink",
+    "short_name": "ValetLink",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

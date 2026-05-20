@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/app_logo.dart';
 import 'package:niloufer_valet_mobile/ui/oauth/profile/overflow_menu.dart';
 import 'package:niloufer_valet_mobile/ui/common/translations/language_dropdown_button.dart';
 
@@ -34,7 +35,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final defaultLogoSize = logoSize ?? 60;
+    final defaultLogoSize = logoSize ?? 48;
+    final logoHeight =
+        defaultLogoSize.clamp(0.0, kToolbarHeight - 8).toDouble();
     final defaultIconSize = iconSize ?? screenWidth * 0.06;
 
     // Build actions:
@@ -89,14 +92,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onLogoTap,
-        child: SizedBox(
-          width: defaultLogoSize,
-          height: defaultLogoSize,
-          child: Image.asset(
-            'assets/images/niloufer.logo.png',
-            fit: BoxFit.contain,
-          ),
-        ),
+        child: AppLogo(height: logoHeight),
       ),
       actions: appBarActions,
     );

@@ -5,12 +5,11 @@ class AppColors {
   AppColors._(); // Private constructor to prevent instantiation
 
   // Primary Color
-  static const Color primary = Color(0xFFF9B231);
-  static const Color primaryDark = Color(0xFFC79100);
-  static const Color primarySoft = Color(0xFFFFF1D6); // light chip/border
-  static const Color accent =
-      Color(0xFFFF7A00); // vivid accent used in tabs/buttons
-  static const Color headerYellow = Color(0xFFF7B32B); // QR screen header color
+  static const Color primary = Color(0xFFFFA500);
+  static const Color primaryDark = Color(0xFFE69500);
+  static const Color primarySoft = Color(0xFFFFF4E0); // light chip/border
+  static const Color accent = primary;
+  static const Color headerYellow = primary; // app bar / header background
 
   // Secondary Color
   static const Color secondary = Color(0xFF39756A);
@@ -21,8 +20,7 @@ class AppColors {
       Color(0xFFF5F5EC); // Light beige (home screen)
   static const Color surface = Colors.white;
   static const Color cardBackground = Color(0xFFFCFCFC); // Home screen cards
-  static const Color actionButtonYellow =
-      Color(0xFFFBBF24); // Park/Retrieve buttons
+  static const Color actionButtonYellow = primary; // Park/Retrieve buttons
   static const Color surfaceBorder = Color(0xFFEAEAEA);
   static const Color divider = Color(0xFFE5E7EB);
   static const Color shadow10 = Color(0x1A000000); // 10% black

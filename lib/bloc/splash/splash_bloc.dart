@@ -43,9 +43,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       print(st);
     }
 
-    // Simulate loading time or any initialization
-    await Future.delayed(const Duration(milliseconds: 500));
-
     emit(const SplashLoaded());
   }
 

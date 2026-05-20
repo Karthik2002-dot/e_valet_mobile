@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/app_logo.dart';
 import 'operator_drawer_item.dart';
 
 class OperatorDrawer extends StatelessWidget {
@@ -22,6 +23,8 @@ class OperatorDrawer extends StatelessWidget {
     final itemRowHeight = isIOS ? 40.0 : 44.0;
     final itemIconSize = isIOS ? 30.0 : 35.0;
     final itemVerticalMargin = isIOS ? 3.0 : 4.0;
+    final drawerWidth = MediaQuery.of(context).size.width * 0.75;
+    final logoWidth = (drawerWidth * 0.9).clamp(220.0, 320.0);
 
     return Drawer(
       child: Container(
@@ -36,9 +39,9 @@ class OperatorDrawer extends StatelessWidget {
             ),
             children: [
               Center(
-                child: Image.asset(
-                  'assets/images/niloufer.logo.png',
-                  width: 112,
+                child: AppLogo(
+                  height: 56,
+                  width: logoWidth,
                 ),
               ),
               const SizedBox(height: 16),
