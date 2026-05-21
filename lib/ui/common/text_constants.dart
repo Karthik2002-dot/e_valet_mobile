@@ -200,6 +200,8 @@ class TextConstants {
   /// Hint for the parking/photo screen (after tag/QR submit): car photo only.
   static const String vehicleDetailsParkingPhotoHint =
       'Capture a photo of the car.';
+  static const String tapToCaptureVehiclePhoto =
+      'Tap to capture vehicle photo';
   static const String previewDoneButton = 'Done';
   static const String scanTabLabel = 'Scan';
   static const String typeIdNumberTabLabel = 'ID Number';

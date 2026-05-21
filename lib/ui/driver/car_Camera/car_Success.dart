@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/vehicle_photo_placeholder.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
@@ -34,12 +36,8 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
   @override
   void initState() {
     super.initState();
-    // After a successful park, the previous "pending session" id must be cleared.
-    // Otherwise, the pending-session watchdog in `DriverOnlineContent` will detect
-    // it as "cancelled" on the next Park attempt and pop the user back to Home.
     TokenStorage.clearSessionId();
     TokenStorage.clearSessionIdFromGetApi();
-    // Deferred retrieval ids stay in Hive until Confirm Arrival / handover completes.
     _autoReturnTimer = Timer(_autoReturnDuration, _navigateToHome);
   }
 
@@ -65,94 +63,72 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Determine background color and image to show
-    final backgroundColor = widget.isLocationBasedParking
-        ? AppColors.headerYellow
-        : AppColors.primary;
+    final hasImage =
+        widget.imagePath != null && widget.imagePath!.trim().isNotEmpty;
 
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: backgroundColor,
-        appBar: CustomAppBar(
-          showOverflowMenu: true,
-          backgroundColor: backgroundColor,
-        ),
+        backgroundColor: AppColors.coral,
+        appBar: const CustomAppBar(showOverflowMenu: true),
         body: SafeArea(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Successfully Parked text
               Padding(
-                padding: EdgeInsets.only(
-                  top: screenHeight * 0.06,
-                  bottom: screenHeight * 0.04,
-                ),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                 child: TextComponent(
                   labelText: t.get(TextConstants.successfullyParked),
                   color: AppColors.white,
-                  fontSize: screenWidth * 0.055,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  textAlign: TextAlign.center,
                 ),
               ),
-
-              // Car image - show car.png for location-based parking, otherwise show captured image
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.all(screenWidth * 0.03),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(screenWidth * 0.04),
-                    child: widget.isLocationBasedParking
-                        ? // Show car.png image with full display (no cropping)
-                        Image.asset(
-                            'assets/images/car.png',
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                  child: hasImage
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            File(widget.imagePath!),
                             width: double.infinity,
-                            height: double.infinity,
                             fit: BoxFit.contain,
-                          )
-                        : // Show captured image for normal photo flow
-                        (widget.imagePath != null
-                            ? Image.file(
-                                File(widget.imagePath!),
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Fallback to static logo if image loading fails
-                                  return ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        screenWidth * 0.04),
-                                    child: Image.asset(
-                                      'assets/images/car.png',
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  );
-                                },
-                              )
-                            : // Fallback if no image path provided
-                            Image.asset(
+                            errorBuilder: (context, error, stackTrace) {
+                              return VehiclePhotoPlaceholder(
+                                caption: t.get(
+                                    TextConstants.tapToCaptureVehiclePhoto),
+                                minHeight: 200,
+                              );
+                            },
+                          ),
+                        )
+                      : widget.isLocationBasedParking
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
                                 'assets/images/car.png',
                                 width: double.infinity,
-                                height: double.infinity,
                                 fit: BoxFit.contain,
-                              )),
-                  ),
+                              ),
+                            )
+                          : VehiclePhotoPlaceholder(
+                              caption: t.get(
+                                  TextConstants.tapToCaptureVehiclePhoto),
+                              minHeight: 200,
+                            ),
                 ),
               ),
-
-              // Return To Home button
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.1,
-                  vertical: screenHeight * 0.03,
+                  vertical: 16,
                 ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: screenHeight * 0.07,
+                  height: 48,
                   child: ElevatedButton(
                     onPressed: _isReturningHome
                         ? null
@@ -163,8 +139,9 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.white,
+                      foregroundColor: AppColors.nearBlack,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
@@ -175,22 +152,21 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.black),
+                                AppColors.nearBlack,
+                              ),
                             ),
                           )
-                        : TextComponent(
-                            labelText: t.get(TextConstants.returnToHome),
-                            color: AppColors.black,
-                            fontSize: screenWidth * 0.06,
-                            fontWeight: FontWeight.w600,
+                        : Text(
+                            t.get(TextConstants.returnToHome),
+                            style: AppTypography.ctaStyle.copyWith(
+                              color: AppColors.nearBlack,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                   ),
                 ),
               ),
-
-              // Footer
               const Footer(),
-              SizedBox(height: screenHeight * 0.02),
             ],
           ),
         ),

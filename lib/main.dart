@@ -32,6 +32,8 @@ import 'package:niloufer_valet_mobile/ui/oauth/login/login.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home_route_observer.dart';
 import 'package:niloufer_valet_mobile/ui/permissions/permissions_screen.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -134,6 +136,26 @@ class MyApp extends StatelessWidget {
           navigatorObservers: [DriverHomeRouteObserver()],
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            fontFamily: AppTypography.primaryFamily,
+            fontFamilyFallback: AppTypography.fallbackFamilies,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.coral,
+              primary: AppColors.coral,
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: AppColors.coral,
+              foregroundColor: AppColors.white,
+              elevation: 0,
+            ),
+            textTheme: TextTheme(
+              displayLarge: AppTypography.heroStyle,
+              headlineMedium: AppTypography.sectionStyle,
+              titleMedium: AppTypography.subheadingStyle,
+              bodyMedium: AppTypography.bodyStyle,
+              labelSmall: AppTypography.labelStyle,
+            ),
+          ),
           builder: (context, child) {
             return BlocBuilder<ConnectivityBloc, ConnectivityState>(
               builder: (context, state) {

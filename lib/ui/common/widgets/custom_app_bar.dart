@@ -14,7 +14,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showScannerIcon;
   final bool showOverflowMenu;
   final VoidCallback? onScannerTap;
-  final Color backgroundColor;
   final double? logoSize;
   final double? iconSize;
 
@@ -27,7 +26,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showScannerIcon = false,
     this.showOverflowMenu = false,
     this.onScannerTap,
-    this.backgroundColor = AppColors.primary,
     this.logoSize,
     this.iconSize,
   });
@@ -85,7 +83,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     return AppBar(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.coral,
       elevation: 0,
       automaticallyImplyLeading: false,
       leading: leading,

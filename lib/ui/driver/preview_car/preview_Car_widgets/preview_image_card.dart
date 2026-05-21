@@ -5,6 +5,8 @@ import 'package:niloufer_valet_mobile/services/translations/app_translations_not
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
+import 'package:niloufer_valet_mobile/ui/common/typography.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/vehicle_photo_placeholder.dart';
 
 class PreviewImageCard extends StatelessWidget {
   final String imagePath;
@@ -21,75 +23,64 @@ class PreviewImageCard extends StatelessWidget {
     final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final file = File(imagePath);
+    final fileExists = file.existsSync();
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(screenWidth * 0.04),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(screenWidth * 0.04),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow10,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.trackGray, width: 0.5),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Captured image preview
-          ClipRRect(
-            borderRadius: BorderRadius.circular(screenWidth * 0.03),
-            child: Image.file(
-              File(imagePath),
-              width: double.infinity,
-              height: screenHeight * 0.3,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: screenHeight * 0.3,
-                  color: AppColors.greyLight,
-                  child: const Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 50,
-                      color: AppColors.grey,
-                    ),
-                  ),
-                );
-              },
+          if (fileExists)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                file,
+                width: double.infinity,
+                height: screenHeight * 0.3,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return VehiclePhotoPlaceholder(
+                    caption: t.get(TextConstants.tapToCaptureVehiclePhoto),
+                    onTap: onRetake,
+                    minHeight: screenHeight * 0.25,
+                  );
+                },
+              ),
+            )
+          else
+            VehiclePhotoPlaceholder(
+              caption: t.get(TextConstants.tapToCaptureVehiclePhoto),
+              onTap: onRetake,
+              minHeight: screenHeight * 0.25,
             ),
-          ),
-          SizedBox(height: screenHeight * 0.02),
-
-          // Retake button (centered and narrower with circular corners)
-          Center(
-            child: SizedBox(
-              width: screenWidth * 0.7, // 70% width
-              height: screenHeight * 0.055, // Slightly shorter height
-              child: ElevatedButton.icon(
-                onPressed: onRetake,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        screenWidth * 0.08), // More circular corners
-                  ),
-                  elevation: 0,
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: onRetake,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.coral,
+                foregroundColor: AppColors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                icon: Icon(
-                  Icons.camera_alt,
-                  color: AppColors.white,
-                  size: screenWidth * 0.05,
-                ),
-                label: TextComponent(
-                  labelText:
-                      t.getByKey('retakeButton', TextConstants.retakeButton),
-                  fontSize: screenWidth * 0.04,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
-                ),
+                elevation: 0,
+              ),
+              icon: Icon(Icons.camera_alt, size: screenWidth * 0.05),
+              label: TextComponent(
+                labelText:
+                    t.getByKey('retakeButton', TextConstants.retakeButton),
+                fontSize: AppTypography.cta,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white,
               ),
             ),
           ),

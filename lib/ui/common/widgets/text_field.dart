@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 
 class TextFieldComponent extends StatefulWidget {
   final String labelText;
@@ -69,13 +70,13 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
             ],
             TextComponent(
               labelText: widget.labelText,
-              fontSize: widget.labelFontSize ?? 14,
-              color: AppColors.black,
+              fontSize: widget.labelFontSize ?? 13,
+              color: AppColors.nearBlack,
               fontWeight: FontWeight.w500,
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: widget.controller,
           obscureText: widget.obscureText,
@@ -90,9 +91,11 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
           onFieldSubmitted: widget.onSubmitEditing != null
               ? (_) => widget.onSubmitEditing!()
               : null,
-          style: TextStyle(
-            fontSize: widget.fontSize ?? 14,
-            color: AppColors.black,
+          style: AppTypography.merge(
+            TextStyle(
+              fontSize: widget.fontSize ?? AppTypography.body,
+              color: AppColors.nearBlack,
+            ),
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,

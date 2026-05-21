@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -11,7 +12,6 @@ class CameraBottomOverlay extends StatefulWidget {
   final Future<void> Function(BuildContext, String)? onSubmit;
   final bool positionAtTop;
 
-  /// Pre-fill parking location (e.g. from third screen when user entered via tag number).
   final String? initialParkingLocation;
 
   const CameraBottomOverlay({
@@ -33,24 +33,14 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
   bool _isSubmitLoading = false;
 
   Future<void> _runSubmit(BuildContext context, String parkingLocation) async {
-    if (_isSubmitLoading) {
-      return;
-    }
+    if (_isSubmitLoading) return;
     final onSubmit = widget.onSubmit;
-    if (onSubmit == null) {
-      return;
-    }
-    setState(() {
-      _isSubmitLoading = true;
-    });
+    if (onSubmit == null) return;
+    setState(() => _isSubmitLoading = true);
     try {
       await onSubmit(context, parkingLocation);
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isSubmitLoading = false);
     }
   }
 
@@ -62,9 +52,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
       _parkingLocationController.text = initial;
     }
     _focusNode.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     });
   }
 
@@ -90,53 +78,53 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
-          vertical: screenHeight * 0.015, // Reduced vertical padding
+          vertical: screenHeight * 0.015,
         ),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-        ),
+        color: AppColors.white,
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Prevent overflow
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Parking Location Input Header
             TextComponent(
               labelText: t.getByKey(
-                  'parkingLocationLabel', TextConstants.parkingLocationLabel),
-              color: AppColors.black,
-              fontSize: screenWidth * 0.04,
-              fontWeight: FontWeight.w600,
+                'parkingLocationLabel',
+                TextConstants.parkingLocationLabel,
+              ),
+              color: AppColors.nearBlack,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
-            SizedBox(height: screenHeight * 0.008), // Reduced spacing
-            // Parking Location Input Field
+            const SizedBox(height: 6),
             Container(
-              height:
-                  screenHeight * 0.06, // Increased height for better visibility
+              height: screenHeight * 0.06,
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.primary,
-                  width: 1,
-                ),
+                border: Border.all(color: AppColors.coral, width: 1),
               ),
               child: TextField(
                 controller: _parkingLocationController,
                 focusNode: _focusNode,
-                style: TextStyle(
-                  color: AppColors.black,
-                  fontSize: screenWidth * 0.04,
+                style: AppTypography.merge(
+                  TextStyle(
+                    color: AppColors.nearBlack,
+                    fontSize: AppTypography.body,
+                  ),
                 ),
                 decoration: InputDecoration(
-                  hintText: t.getByKey('enterParkingLocationHint',
-                      TextConstants.enterParkingLocationHint),
-                  hintStyle: TextStyle(
-                    color: AppColors.grey.withOpacity(0.6),
-                    fontSize: screenWidth * 0.04,
+                  hintText: t.getByKey(
+                    'enterParkingLocationHint',
+                    TextConstants.enterParkingLocationHint,
+                  ),
+                  hintStyle: AppTypography.merge(
+                    TextStyle(
+                      color: AppColors.grey.withValues(alpha: 0.6),
+                      fontSize: AppTypography.body,
+                    ),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.03,
-                    vertical: screenHeight * 0.018, // Slightly reduced padding
+                    vertical: screenHeight * 0.018,
                   ),
                   border: InputBorder.none,
                 ),
@@ -150,9 +138,9 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
               ),
             ),
             SizedBox(height: screenHeight * 0.012),
-            // Submit Button - Full width, taller, with loader when submitting
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
                 onPressed: _isSubmitLoading
                     ? null
@@ -161,9 +149,12 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                             _parkingLocationController.text.trim();
                         if (parkingLocation.isEmpty) {
                           SnackBars.showErrorSnackBar(
-                              context,
-                              t.getByKey('pleaseEnterParkingLocation',
-                                  TextConstants.pleaseEnterParkingLocation));
+                            context,
+                            t.getByKey(
+                              'pleaseEnterParkingLocation',
+                              TextConstants.pleaseEnterParkingLocation,
+                            ),
+                          );
                           return;
                         }
                         if (widget.onSubmit != null) {
@@ -171,18 +162,15 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.coral,
                   foregroundColor: AppColors.white,
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.018,
-                  ),
-                  minimumSize: Size(double.infinity, screenHeight * 0.052),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 0,
                 ),
                 child: _isSubmitLoading
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
@@ -193,9 +181,12 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                       )
                     : TextComponent(
                         labelText: t.getByKey(
-                            'submitButton', TextConstants.submitButton),
-                        fontSize: screenWidth * 0.04,
+                          'submitButton',
+                          TextConstants.submitButton,
+                        ),
+                        fontSize: AppTypography.cta,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.white,
                       ),
               ),
             ),

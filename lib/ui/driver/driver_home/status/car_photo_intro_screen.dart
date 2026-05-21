@@ -12,6 +12,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/card_number_badge.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_preview_widget.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Camer_widgets/camera_top_overlay.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_Screen.dart';
@@ -381,34 +382,9 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
           ),
           if (hasCardNumber) ...[
             SizedBox(width: w * 0.03),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: w * 0.03,
-                vertical: h * 0.008,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.actionButtonYellow.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primary, width: 1.2),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextComponent(
-                    labelText: t.get(TextConstants.cardNumberLabel),
-                    fontSize: w * 0.028,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                  TextComponent(
-                    labelText: widget.cardNumber!,
-                    fontSize: w * 0.056,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.black,
-                  ),
-                ],
-              ),
+            CardNumberBadge(
+              label: t.get(TextConstants.cardNumberLabel),
+              value: widget.cardNumber!,
             ),
           ],
         ],

@@ -222,12 +222,15 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.nearBlack,
+                      foregroundColor: AppColors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      disabledBackgroundColor: AppColors.greyLight,
+                      minimumSize: const Size(double.infinity, 48),
+                      disabledBackgroundColor: AppColors.disabledBackground,
+                      disabledForegroundColor: AppColors.disabledText,
                     ),
                     child: isLoading
                         ? SizedBox(
@@ -244,15 +247,15 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
                             children: [
                               TextComponent(
                                 labelText: t.get(TextConstants.proceedToRepark),
-                                fontSize: screenWidth * 0.05,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.black,
+                                color: AppColors.white,
                               ),
                               SizedBox(width: screenWidth * 0.02),
                               Icon(
                                 Icons.arrow_forward,
-                                color: AppColors.black,
-                                size: screenWidth * 0.06,
+                                color: AppColors.white,
+                                size: 20,
                               ),
                             ],
                           ),

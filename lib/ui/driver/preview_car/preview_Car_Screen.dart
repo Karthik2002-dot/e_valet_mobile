@@ -11,6 +11,7 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/card_number_badge.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_header.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
@@ -355,39 +356,14 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                     SizedBox(height: screenHeight * 0.02),
                                     if (widget.cardNumber != null &&
                                         widget.cardNumber!.trim().isNotEmpty)
-                                      Container(
-                                        width: double.infinity,
-                                        padding:
-                                            EdgeInsets.all(screenWidth * 0.04),
-                                        margin: EdgeInsets.only(
-                                            bottom: screenHeight * 0.02),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: AppColors.primary,
-                                            width: 1.5,
-                                          ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: screenHeight * 0.02,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.badge,
-                                              color: AppColors.primary,
-                                              size: screenWidth * 0.05,
-                                            ),
-                                            SizedBox(width: screenWidth * 0.02),
-                                            Expanded(
-                                              child: TextComponent(
-                                                labelText:
-                                                    '${t.get(TextConstants.cardNumber)}: ${widget.cardNumber!}',
-                                                fontSize: screenWidth * 0.038,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColors.black,
-                                              ),
-                                            ),
-                                          ],
+                                        child: CardNumberBadge(
+                                          label: t.get(
+                                              TextConstants.cardNumberLabel),
+                                          value: widget.cardNumber!,
                                         ),
                                       ),
                                     Container(
@@ -413,7 +389,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                         keyboardType: TextInputType.text,
                                         textInputAction: TextInputAction.done,
                                         fontSize: screenWidth * 0.04,
-                                        labelFontSize: screenWidth * 0.04,
+                                        labelFontSize: 13,
                                         contentPadding: EdgeInsets.symmetric(
                                           horizontal: screenWidth * 0.04,
                                           vertical: screenHeight * 0.018,
@@ -634,13 +610,19 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
-                                                        AppColors.primary,
+                                                        AppColors.coral,
+                                                    foregroundColor:
+                                                        AppColors.white,
+                                                    disabledBackgroundColor:
+                                                        AppColors
+                                                            .disabledBackground,
+                                                    disabledForegroundColor:
+                                                        AppColors.disabledText,
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              screenWidth *
-                                                                  0.028),
+                                                              12),
                                                     ),
                                                     elevation: 0,
                                                   ),
