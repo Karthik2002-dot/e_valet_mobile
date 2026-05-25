@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
@@ -140,7 +141,6 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
             SizedBox(height: screenHeight * 0.012),
             SizedBox(
               width: double.infinity,
-              height: 48,
               child: ElevatedButton(
                 onPressed: _isSubmitLoading
                     ? null
@@ -164,8 +164,15 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.coral,
                   foregroundColor: AppColors.white,
+                  minimumSize: Size(
+                    double.infinity,
+                    ButtonMetrics.cameraSubmitMinHeight(context),
+                  ),
+                  padding: ButtonMetrics.cameraSubmitPadding(context),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(
+                      ButtonMetrics.cameraSubmitRadius,
+                    ),
                   ),
                   elevation: 0,
                 ),
@@ -184,7 +191,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                           'submitButton',
                           TextConstants.submitButton,
                         ),
-                        fontSize: AppTypography.cta,
+                        fontSize: ButtonMetrics.cameraSubmitFontSize(context),
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),

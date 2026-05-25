@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 
 class PreviewSubmitButton extends StatelessWidget {
@@ -25,8 +25,10 @@ class PreviewSubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
-    final screenWidth = MediaQuery.of(context).size.width;
     final canPress = isEnabled && !isLoading;
+    final buttonHeight = ButtonMetrics.submitHeight(context);
+    final textSize = ButtonMetrics.submitFontSize(context);
+    final radius = ButtonMetrics.submitRadius(context);
 
     final bgColor = isReparking ? AppColors.nearBlack : AppColors.coral;
 
@@ -39,7 +41,7 @@ class PreviewSubmitButton extends StatelessWidget {
               : t.getByKey('submitButton', TextConstants.submitButton)),
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: buttonHeight,
         child: ElevatedButton(
           onPressed: canPress ? onSubmit : null,
           style: ElevatedButton.styleFrom(
@@ -48,14 +50,14 @@ class PreviewSubmitButton extends StatelessWidget {
             disabledBackgroundColor: AppColors.disabledBackground,
             disabledForegroundColor: AppColors.disabledText,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(radius),
             ),
             elevation: 0,
           ),
           child: isLoading
               ? const SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 24,
+                  height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
@@ -71,16 +73,19 @@ class PreviewSubmitButton extends StatelessWidget {
                               ? t.get(TextConstants.submitRePark)
                               : t.getByKey(
                                   'submitButton', TextConstants.submitButton)),
-                      fontSize: AppTypography.cta,
-                      fontWeight: FontWeight.bold,
-                      color: canPress ? AppColors.white : AppColors.disabledText,
+                      fontSize: textSize,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          canPress ? AppColors.white : AppColors.disabledText,
                     ),
                     if (overrideLabel == null && !isReparking) ...[
-                      SizedBox(width: screenWidth * 0.02),
+                      SizedBox(width: MediaQuery.sizeOf(context).width * 0.02),
                       Icon(
                         Icons.arrow_forward,
-                        color: canPress ? AppColors.white : AppColors.disabledText,
-                        size: AppTypography.cta,
+                        color: canPress
+                            ? AppColors.white
+                            : AppColors.disabledText,
+                        size: textSize,
                       ),
                     ],
                   ],

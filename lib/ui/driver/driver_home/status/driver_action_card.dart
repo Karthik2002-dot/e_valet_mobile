@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 /// Action card (Park Vehicle / Retrieve Vehicle) per design system.
@@ -57,28 +57,32 @@ class DriverActionCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
                   child: ElevatedButton(
                     onPressed: isTappable ? onTap : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.coral,
                       foregroundColor: AppColors.white,
                       elevation: 0,
+                      padding: ButtonMetrics.actionBarPadding(context),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          ButtonMetrics.actionBarRadius(context),
+                        ),
                       ),
-                      padding: EdgeInsets.zero,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          buttonLabel,
-                          style: AppTypography.ctaStyle.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.bold,
+                        TextComponent(
+                          labelText: buttonLabel,
+                          fontSize: ButtonMetrics.actionBarFontSize(
+                            context,
+                            isTablet: isTablet,
+                            isDesktop: isDesktop,
                           ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
                         ),
                         if (notificationCount > 0) ...[
                           const SizedBox(width: 8),

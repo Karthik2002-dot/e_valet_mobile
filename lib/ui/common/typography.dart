@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Design-system typography: Times New Roman → Plus Jakarta Sans → Inter.
+/// Design-system typography: Jost (labeled buttons and body via [TextComponent]).
 class AppTypography {
   AppTypography._();
 
-  static const String primaryFamily = 'Times New Roman';
-  static const List<String> fallbackFamilies = ['Plus Jakarta Sans', 'Inter'];
+  static const String primaryFamily = 'Jost';
 
   // Type scale (px)
   static const double hero = 48;
@@ -24,9 +24,7 @@ class AppTypography {
     TextDecoration? decoration,
     FontStyle? fontStyle,
   }) {
-    return TextStyle(
-      fontFamily: primaryFamily,
-      fontFamilyFallback: fallbackFamilies,
+    return GoogleFonts.jost(
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color,
@@ -51,7 +49,7 @@ class AppTypography {
 
   /// Merges [base] with the app font stack; widget-level overrides win.
   static TextStyle merge(TextStyle? base) {
-    final resolved = style();
+    final resolved = GoogleFonts.jost();
     if (base == null) return resolved;
     return resolved.merge(base);
   }

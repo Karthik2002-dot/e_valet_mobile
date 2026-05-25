@@ -5,7 +5,7 @@ import 'package:niloufer_valet_mobile/services/translations/app_translations_not
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/vehicle_photo_placeholder.dart';
 
 class PreviewImageCard extends StatelessWidget {
@@ -22,7 +22,6 @@ class PreviewImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.watch<AppTranslationsNotifier>();
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
     final file = File(imagePath);
     final fileExists = file.existsSync();
 
@@ -61,26 +60,33 @@ class PreviewImageCard extends StatelessWidget {
               minHeight: screenHeight * 0.25,
             ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: onRetake,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.coral,
-                foregroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          Center(
+            child: SizedBox(
+              width: ButtonMetrics.retakeWidth(context),
+              height: ButtonMetrics.retakeHeight(context),
+              child: ElevatedButton.icon(
+                onPressed: onRetake,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.coral,
+                  foregroundColor: AppColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      ButtonMetrics.retakeRadius(context),
+                    ),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              icon: Icon(Icons.camera_alt, size: screenWidth * 0.05),
-              label: TextComponent(
-                labelText:
-                    t.getByKey('retakeButton', TextConstants.retakeButton),
-                fontSize: AppTypography.cta,
-                fontWeight: FontWeight.w600,
-                color: AppColors.white,
+                icon: Icon(
+                  Icons.camera_alt,
+                  size: ButtonMetrics.retakeIconSize(context),
+                ),
+                label: TextComponent(
+                  labelText:
+                      t.getByKey('retakeButton', TextConstants.retakeButton),
+                  fontSize: ButtonMetrics.retakeFontSize(context),
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.white,
+                ),
               ),
             ),
           ),

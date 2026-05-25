@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 
 class ElevatedButtonComponent extends StatefulWidget {
@@ -50,7 +51,7 @@ class _ElevatedButtonComponentState extends State<ElevatedButtonComponent> {
           backgroundColor: widget.elevatedButtonBackgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              widget.radius ?? 8.0,
+              widget.radius ?? ButtonMetrics.authRadius,
             ),
           ),
         ),

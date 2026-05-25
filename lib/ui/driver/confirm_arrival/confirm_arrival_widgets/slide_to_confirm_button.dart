@@ -28,7 +28,26 @@ class SlideToConfirmButton extends StatelessWidget {
     final countdown =
         !enabled && disabledRemainingSeconds > 0 ? disabledRemainingSeconds : 0;
 
-    final button = CountdownCtaButton(
+    if (useBigStyle) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return CountdownCtaButton(
+            label: t.getByKey(
+              'slideToConfirmArrival',
+              TextConstants.slideToConfirmArrival,
+            ),
+            onPressed: onConfirm,
+            isLoading: isLoading,
+            countdownSeconds: countdown,
+            iconWhenEnabled: Icons.my_location,
+            height: constraints.maxHeight,
+            useBigFont: true,
+          );
+        },
+      );
+    }
+
+    return CountdownCtaButton(
       label: t.getByKey(
         'slideToConfirmArrival',
         TextConstants.slideToConfirmArrival,
@@ -37,12 +56,6 @@ class SlideToConfirmButton extends StatelessWidget {
       isLoading: isLoading,
       countdownSeconds: countdown,
       iconWhenEnabled: Icons.my_location,
-      height: 48,
     );
-
-    if (useBigStyle) {
-      return SizedBox(width: double.infinity, height: double.infinity, child: button);
-    }
-    return button;
   }
 }

@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/countdown_cta_button.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class HandoverButtonsSection extends StatefulWidget {
   final bool isLoading;
   final VoidCallback onConfirmHandover;
@@ -132,51 +133,60 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
     required int countdownSeconds,
   }) {
     final disabled = countdownSeconds > 0;
-    return SizedBox(
-      key: key,
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        onPressed: (isLoading || disabled) ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
-          foregroundColor: AppColors.white,
-          disabledBackgroundColor: AppColors.error.withValues(alpha: 0.7),
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (disabled)
-                    CountdownCtaButton.countdownBadge(countdownSeconds)
-                  else
-                    const Icon(Icons.warning, color: AppColors.white, size: 22),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: AppTypography.ctaStyle.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+    return Builder(
+      builder: (context) {
+        final fontSize = ButtonMetrics.confirmBigFontSize(context);
+        return SizedBox(
+          key: key,
+          width: double.infinity,
+          height: ButtonMetrics.confirmHeight(context),
+          child: ElevatedButton(
+            onPressed: (isLoading || disabled) ? null : onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.white,
+              disabledBackgroundColor: AppColors.error.withValues(alpha: 0.7),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(ButtonMetrics.confirmRadius),
               ),
-      ),
+            ),
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.white),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (disabled)
+                        CountdownCtaButton.countdownBadge(countdownSeconds)
+                      else
+                        const Icon(Icons.warning,
+                            color: AppColors.white, size: 22),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: TextComponent(
+                          labelText: label,
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 
@@ -189,14 +199,19 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: CountdownCtaButton(
-            label: t.get(TextConstants.slideToConfirmHandover),
-            onPressed: widget.onConfirmHandover,
-            isLoading:
-                widget.isLoading && _confirmHandoverRemainingSeconds <= 0,
-            countdownSeconds: _confirmHandoverRemainingSeconds,
-            iconWhenEnabled: Icons.handshake,
-            height: 48,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return CountdownCtaButton(
+                label: t.get(TextConstants.slideToConfirmHandover),
+                onPressed: widget.onConfirmHandover,
+                isLoading: widget.isLoading &&
+                    _confirmHandoverRemainingSeconds <= 0,
+                countdownSeconds: _confirmHandoverRemainingSeconds,
+                iconWhenEnabled: Icons.handshake,
+                height: constraints.maxHeight,
+                useBigFont: true,
+              );
+            },
           ),
         ),
         SizedBox(height: screenHeight * 0.02),

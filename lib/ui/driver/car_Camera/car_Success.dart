@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -128,7 +128,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                 ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 48,
+                  height: ButtonMetrics.returnHomeHeight(context),
                   child: ElevatedButton(
                     onPressed: _isReturningHome
                         ? null
@@ -141,7 +141,9 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                       backgroundColor: AppColors.white,
                       foregroundColor: AppColors.nearBlack,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          ButtonMetrics.returnHomeRadius(context),
+                        ),
                       ),
                       elevation: 0,
                     ),
@@ -156,12 +158,11 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                               ),
                             ),
                           )
-                        : Text(
-                            t.get(TextConstants.returnToHome),
-                            style: AppTypography.ctaStyle.copyWith(
-                              color: AppColors.nearBlack,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        : TextComponent(
+                            labelText: t.get(TextConstants.returnToHome),
+                            fontSize: ButtonMetrics.returnHomeFontSize(context),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.nearBlack,
                           ),
                   ),
                 ),

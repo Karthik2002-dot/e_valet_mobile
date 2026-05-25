@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
-import 'package:niloufer_valet_mobile/ui/common/typography.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 /// Full-width coral CTA with optional 24px countdown badge on the left.
 class CountdownCtaButton extends StatelessWidget {
@@ -10,6 +10,7 @@ class CountdownCtaButton extends StatelessWidget {
   final int countdownSeconds;
   final IconData? iconWhenEnabled;
   final double? height;
+  final bool useBigFont;
 
   const CountdownCtaButton({
     super.key,
@@ -18,7 +19,8 @@ class CountdownCtaButton extends StatelessWidget {
     this.isLoading = false,
     this.countdownSeconds = 0,
     this.iconWhenEnabled,
-    this.height = 48,
+    this.height,
+    this.useBigFont = false,
   });
 
   static Widget countdownBadge(int seconds) {
@@ -32,7 +34,7 @@ class CountdownCtaButton extends StatelessWidget {
       ),
       child: Text(
         '$seconds',
-        style: AppTypography.style(
+        style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: AppColors.white,
@@ -46,6 +48,11 @@ class CountdownCtaButton extends StatelessWidget {
     final disabled = countdownSeconds > 0;
     final effectiveOnPressed =
         (isLoading || disabled) ? null : onPressed;
+    final effectiveHeight =
+        height ?? ButtonMetrics.confirmHeight(context);
+    final fontSize = useBigFont
+        ? ButtonMetrics.confirmBigFontSize(context)
+        : ButtonMetrics.confirmFontSize(context);
 
     Widget leading;
     if (isLoading) {
@@ -73,9 +80,12 @@ class CountdownCtaButton extends StatelessWidget {
         disabledBackgroundColor: AppColors.coral.withValues(alpha: 0.7),
         disabledForegroundColor: AppColors.white.withValues(alpha: 0.85),
         elevation: 0,
-        minimumSize: Size(double.infinity, height ?? 48),
+        minimumSize: Size(double.infinity, effectiveHeight),
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(ButtonMetrics.confirmRadius),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +95,7 @@ class CountdownCtaButton extends StatelessWidget {
           Flexible(
             child: TextComponent(
               labelText: label,
-              fontSize: AppTypography.cta,
+              fontSize: fontSize,
               fontWeight: FontWeight.w600,
               color: AppColors.white,
               textAlign: TextAlign.center,
