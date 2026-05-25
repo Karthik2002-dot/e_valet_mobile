@@ -7,6 +7,14 @@ class AppTypography {
 
   static const String primaryFamily = 'Jost';
 
+  /// Used when [primaryFamily] is unavailable (e.g. before Google Fonts loads).
+  static const List<String> fallbackFamilies = [
+    'Roboto',
+    'Helvetica',
+    'Arial',
+    'sans-serif',
+  ];
+
   // Type scale (px)
   static const double hero = 48;
   static const double section = 32;
