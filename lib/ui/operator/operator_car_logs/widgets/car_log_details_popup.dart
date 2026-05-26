@@ -144,7 +144,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                   maxHeight: screenSize.height * 0.8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -236,7 +236,7 @@ class _CarLogDetailsPopupState extends State<CarLogDetailsPopup> {
                             onPressed: () => widget.onClose(),
                             child: TextComponent(
                               labelText: t.get(TextConstants.cancelButton),
-                              color: AppColors.grey,
+                              color: AppColors.mutedText,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

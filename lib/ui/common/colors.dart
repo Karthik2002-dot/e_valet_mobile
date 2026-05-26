@@ -4,47 +4,65 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Brand
-  /// Coral 400 — headers, primary CTAs (#D85A30 only; no other orange hex).
+  // Dark / header — top bar, primary buttons (#1C1C1E).
+  static const Color headerDark = Color(0xFF1C1C1E);
+  static const Color nearBlack = headerDark;
+
+  // Brand — charcoal for headers/primary CTAs; coral for logo, highlights, active UI.
+  static const Color primary = headerDark;
+  static const Color primaryDark = headerDark;
+
+  /// Accent — logo highlights, key highlights, active states only (#D85A30).
   static const Color coral = Color(0xFFD85A30);
   static const Color orange = coral;
-  static const Color primary = coral;
-  static const Color primaryDark = coral;
   static const Color accent = coral;
-  static const Color headerYellow = coral;
   static const Color actionButtonYellow = coral;
-  static const Color primarySoft = Color(0x1AD85A30);
+  static const Color accentSoft = Color(0x1AD85A30);
+  static const Color primarySoft = accentSoft;
   static const Color coralLight = Color(0x33D85A30);
 
+  /// Legacy alias — prefer [headerDark] for app bars.
+  static const Color headerYellow = headerDark;
+
   // Neutrals
-  static const Color nearBlack = Color(0xFF1C1C1E);
   static const Color offWhite = Color(0xFFF5F5F0);
   static const Color trackGray = Color(0xFFE8E8E4);
-  static const Color footerGray = Color(0xFF888888);
+  /// Muted text — secondary labels, hints, captions (#6B7280).
+  static const Color mutedText = Color(0xFF6B7280);
+  static const Color secondaryLabel = mutedText;
+  /// @deprecated Prefer [mutedText] for secondary labels.
+  static const Color footerGray = mutedText;
   static const Color disabledBackground = trackGray;
-  static const Color disabledText = footerGray;
+  static const Color disabledText = mutedText;
 
   // Semantic
   static const Color infoBlue = Color(0xFF378ADD);
   static const Color secondary = Color(0xFF39756A);
 
   // Surfaces
-  static const Color background = Color(0xFFF7F7F9);
-  static const Color lightBeigeBackground = Color(0xFFF5F5EC);
-  static const Color surface = Colors.white;
-  static const Color cardBackground = Colors.white;
+  /// Primary surface — page backgrounds and cards (#FFFFFF).
+  static const Color primarySurface = Color(0xFFFFFFFF);
+  static const Color background = primarySurface;
+  static const Color lightBeigeBackground = primarySurface;
+  static const Color surface = primarySurface;
+  static const Color cardBackground = primarySurface;
   static const Color surfaceBorder = trackGray;
   static const Color divider = Color(0xFFE5E7EB);
   static const Color shadow10 = Color(0x1A000000);
-  static const Color mutedText = Color(0xFF6B7280);
+
+  /// Body text on white / light surfaces (#1C1C1E).
+  static const Color bodyText = headerDark;
+
+  /// Text on dark surfaces — app bar titles, primary button labels (#FFFFFF).
+  static const Color textOnDark = Color(0xFFFFFFFF);
 
   static const Color greyLight = Color(0xFFE0E0E0);
   static const Color success = Colors.green;
   static const Color error = Colors.red;
   static const Color cancelAssignmentIcon = Color(0xFFFF5722);
-  static const Color black = Colors.black;
+  static const Color black = bodyText;
   static const Color grey = Colors.grey;
-  static const Color white = Colors.white;
+  static const Color white = textOnDark;
   static const Color blue = Colors.blue;
   static const Color purple = Colors.purple;
   static const Color transparent = Colors.transparent;

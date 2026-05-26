@@ -30,7 +30,7 @@ class PreviewSubmitButton extends StatelessWidget {
     final textSize = ButtonMetrics.submitFontSize(context);
     final radius = ButtonMetrics.submitRadius(context);
 
-    final bgColor = isReparking ? AppColors.nearBlack : AppColors.coral;
+    final bgColor = AppColors.primary;
 
     return Semantics(
       button: true,

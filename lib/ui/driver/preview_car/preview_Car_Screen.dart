@@ -184,20 +184,20 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                     hintText: t.getByKey('parkingLocationHint',
                         TextConstants.parkingLocationHint),
                     hintStyle: TextStyle(
-                      color: AppColors.grey.withOpacity(0.6),
+                      color: AppColors.mutedText,
                       fontSize: screenWidth * 0.04,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.surfaceBorder,
                         width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.accent,
                         width: 2,
                       ),
                     ),
@@ -223,20 +223,20 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                   decoration: InputDecoration(
                     hintText: t.get(TextConstants.enterVehicleNumberHint),
                     hintStyle: TextStyle(
-                      color: AppColors.grey.withOpacity(0.6),
+                      color: AppColors.mutedText,
                       fontSize: screenWidth * 0.04,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.surfaceBorder,
                         width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.accent,
                         width: 2,
                       ),
                     ),
@@ -251,7 +251,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
               child: TextComponent(
                 labelText: t.get(TextConstants.cancel),
                 fontSize: screenWidth * 0.038,
-                color: AppColors.grey,
+                color: AppColors.mutedText,
               ),
             ),
             ElevatedButton(
@@ -371,10 +371,10 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                       padding:
                                           EdgeInsets.all(screenWidth * 0.04),
                                       decoration: BoxDecoration(
-                                        color: AppColors.white,
+                                        color: AppColors.cardBackground,
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: AppColors.primary,
+                                          color: AppColors.accent,
                                           width: 1.5,
                                         ),
                                       ),
@@ -444,11 +444,11 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                         padding:
                                             EdgeInsets.all(screenWidth * 0.04),
                                         decoration: BoxDecoration(
-                                          color: AppColors.white,
+                                          color: AppColors.cardBackground,
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: AppColors.primary,
+                                            color: AppColors.accent,
                                             width: 1.5,
                                           ),
                                         ),
@@ -465,7 +465,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                   children: [
                                                     Icon(
                                                       Icons.location_on,
-                                                      color: AppColors.primary,
+                                                      color: AppColors.accent,
                                                       size: screenWidth * 0.05,
                                                     ),
                                                     SizedBox(
@@ -491,13 +491,12 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                     padding: EdgeInsets.all(
                                                         screenWidth * 0.02),
                                                     decoration: BoxDecoration(
-                                                      color: AppColors.primary
-                                                          .withOpacity(0.1),
+                                                      color: AppColors.accentSoft,
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(
                                                       Icons.edit,
-                                                      color: AppColors.primary,
+                                                      color: AppColors.accent,
                                                       size: screenWidth * 0.045,
                                                     ),
                                                   ),
@@ -524,7 +523,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 children: [
                                                   Icon(
                                                     Icons.badge,
-                                                    color: AppColors.primary,
+                                                    color: AppColors.accent,
                                                     size: screenWidth * 0.045,
                                                   ),
                                                   SizedBox(
@@ -558,7 +557,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                 children: [
                                                   Icon(
                                                     Icons.directions_car,
-                                                    color: AppColors.primary,
+                                                    color: AppColors.accent,
                                                     size: screenWidth * 0.045,
                                                   ),
                                                   SizedBox(
@@ -610,7 +609,7 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
-                                                        AppColors.coral,
+                                                        AppColors.primary,
                                                     foregroundColor:
                                                         AppColors.white,
                                                     disabledBackgroundColor:

@@ -62,7 +62,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
       child: Container(
         padding: EdgeInsets.all(screenWidth * 0.06),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -117,7 +117,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
               labelText: t.get(TextConstants.reparkConfirmationMessage),
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w400,
-              color: AppColors.grey,
+              color: AppColors.mutedText,
               textAlign: TextAlign.center,
             ),
 
@@ -271,7 +271,7 @@ class _CustomerMissingDialogState extends State<CustomerMissingDialog> {
               labelText: t.get(TextConstants.pressBelowToCancel),
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,
-              color: AppColors.grey,
+              color: AppColors.mutedText,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: screenHeight * 0.008),

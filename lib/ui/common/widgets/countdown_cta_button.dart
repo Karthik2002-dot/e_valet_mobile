@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-/// Full-width coral CTA with optional 24px countdown badge on the left.
+/// Full-width primary CTA with optional 24px countdown badge on the left.
 class CountdownCtaButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -75,9 +75,9 @@ class CountdownCtaButton extends StatelessWidget {
     final button = ElevatedButton(
       onPressed: effectiveOnPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.coral,
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        disabledBackgroundColor: AppColors.coral.withValues(alpha: 0.7),
+        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.7),
         disabledForegroundColor: AppColors.white.withValues(alpha: 0.85),
         elevation: 0,
         minimumSize: Size(double.infinity, effectiveHeight),

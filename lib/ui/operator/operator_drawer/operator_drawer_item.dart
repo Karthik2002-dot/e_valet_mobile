@@ -39,19 +39,38 @@ class OperatorDrawerItem extends StatelessWidget {
                 children: [
                   if (isSelected)
                     Positioned.fill(
-                      left: 20,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: rowHeight,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(22),
-                              bottomLeft: Radius.circular(22),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.accent,
+                              borderRadius: const BorderRadius.horizontal(
+                                left: Radius.circular(4),
+                              ),
                             ),
                           ),
-                        ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                height: rowHeight,
+                                margin: const EdgeInsets.only(left: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardBackground,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(22),
+                                    bottomLeft: Radius.circular(22),
+                                  ),
+                                  border: Border.all(
+                                    color: AppColors.accent.withOpacity(0.35),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   Container(

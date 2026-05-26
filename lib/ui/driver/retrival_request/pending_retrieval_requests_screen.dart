@@ -479,7 +479,7 @@ class _PendingRetrievalRequestsScreenState
           key: ValueKey('retrieval-${session.sessionId}'),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

@@ -155,7 +155,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
             TextComponent(
               labelText: widget.helperText,
               fontSize: (width * 0.032).clamp(12.0, 14.0),
-              color: AppColors.grey,
+              color: AppColors.mutedText,
               fontWeight: FontWeight.w500,
             ),
             const SizedBox(height: 12),
@@ -176,7 +176,7 @@ class _CardAllocationEditDialogState extends State<CardAllocationEditDialog> {
                 hintText: widget.hint,
                 hintStyle: TextStyle(
                   fontSize: (width * 0.032).clamp(13.0, 15.0),
-                  color: AppColors.grey,
+                  color: AppColors.mutedText,
                   fontWeight: FontWeight.w500,
                 ),
                 alignLabelWithHint: true,

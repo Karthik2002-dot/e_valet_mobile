@@ -37,7 +37,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
     final t = context.watch<AppTranslationsNotifier>();
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.primarySurface,
       appBar: CustomAppBar(
         showOverflowMenu: true,
         leading: IconButton(
@@ -72,7 +72,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                       const SizedBox(height: 8),
                       TextComponent(
                         labelText: snapshot.error.toString(),
-                        color: AppColors.grey,
+                        color: AppColors.mutedText,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -147,7 +147,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   if (cards.isEmpty)
                     TextComponent(
                       labelText: t.get(TextConstants.cardsNoNumbersAssigned),
-                      color: AppColors.grey,
+                      color: AppColors.mutedText,
                       fontStyle: FontStyle.italic,
                     )
                   else
@@ -159,7 +159,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: AppColors.cardBackground,
                           border: Border.all(
                             color: AppColors.grey.withOpacity(0.25),
                           ),

@@ -58,11 +58,12 @@ class _TextComponentState extends State<TextComponent> {
     final displayText =
         shouldTranslate ? _translateText(widget.labelText) : widget.labelText;
 
+    final defaultColor = Theme.of(context).colorScheme.onSurface;
     final style = AppTypography.merge(
       TextStyle(
         height: widget.height,
         fontSize: widget.fontSize,
-        color: widget.color,
+        color: widget.color ?? defaultColor,
         fontWeight: widget.fontWeight,
         backgroundColor: widget.textBackgroundColor,
         fontStyle: widget.fontStyle,

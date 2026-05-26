@@ -154,7 +154,7 @@ class GroupingDialogValetField extends StatelessWidget {
                 'noAvailableMembers',
                 'No available drivers',
               ),
-              color: AppColors.grey,
+              color: AppColors.mutedText,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -172,7 +172,7 @@ class GroupingDialogValetField extends StatelessWidget {
             ),
             suffixIcon: const Icon(
               Icons.arrow_drop_down,
-              color: AppColors.grey,
+              color: AppColors.mutedText,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -182,7 +182,7 @@ class GroupingDialogValetField extends StatelessWidget {
             final picked = await showModalBottomSheet<List<ValetResponse>>(
               context: context,
               isScrollControlled: true,
-              backgroundColor: AppColors.white,
+              backgroundColor: AppColors.primarySurface,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
                   top: Radius.circular(16),

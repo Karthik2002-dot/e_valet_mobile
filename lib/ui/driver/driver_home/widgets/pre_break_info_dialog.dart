@@ -357,7 +357,7 @@ class _PreBreakInfoDialogState extends State<PreBreakInfoDialog> {
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.black,
             disabledBackgroundColor: AppColors.greyLight,
-            disabledForegroundColor: AppColors.grey,
+            disabledForegroundColor: AppColors.mutedText,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),

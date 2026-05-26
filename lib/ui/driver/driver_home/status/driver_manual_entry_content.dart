@@ -130,7 +130,7 @@ class _DriverManualEntryContentState extends State<DriverManualEntryContent> {
               width: double.infinity,
               padding: EdgeInsets.all(w * 0.04),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(w * 0.04),
                 boxShadow: [
                   BoxShadow(

@@ -31,10 +31,10 @@ class TabChip extends StatelessWidget {
             horizontal: 8,
           ),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.actionButtonYellow : AppColors.white,
+            color: isActive ? AppColors.accentSoft : AppColors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isActive ? AppColors.primary : AppColors.divider,
+              color: isActive ? AppColors.accent : AppColors.divider,
               width: 1,
             ),
           ),
@@ -44,7 +44,7 @@ class TabChip extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.grey,
+                  color: isActive ? AppColors.accent : AppColors.grey,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.white, width: 1),
                 ),

@@ -139,14 +139,33 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             fontFamily: AppTypography.primaryFamily,
             fontFamilyFallback: AppTypography.fallbackFamilies,
+            scaffoldBackgroundColor: AppColors.primarySurface,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: AppColors.coral,
-              primary: AppColors.coral,
+              seedColor: AppColors.headerDark,
+              primary: AppColors.headerDark,
+              onPrimary: AppColors.textOnDark,
+              surface: AppColors.primarySurface,
+              onSurface: AppColors.bodyText,
+              onSurfaceVariant: AppColors.mutedText,
+            ),
+            cardTheme: const CardThemeData(
+              color: AppColors.primarySurface,
+              surfaceTintColor: Colors.transparent,
             ),
             appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.coral,
-              foregroundColor: AppColors.white,
+              backgroundColor: AppColors.headerDark,
+              foregroundColor: AppColors.textOnDark,
               elevation: 0,
+              scrolledUnderElevation: 0,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.headerDark,
+                foregroundColor: AppColors.textOnDark,
+                elevation: 0,
+              ),
             ),
             textTheme: TextTheme(
               displayLarge: AppTypography.heroStyle,
@@ -154,6 +173,9 @@ class MyApp extends StatelessWidget {
               titleMedium: AppTypography.subheadingStyle,
               bodyMedium: AppTypography.bodyStyle,
               labelSmall: AppTypography.labelStyle,
+            ).apply(
+              bodyColor: AppColors.bodyText,
+              displayColor: AppColors.bodyText,
             ),
           ),
           builder: (context, child) {

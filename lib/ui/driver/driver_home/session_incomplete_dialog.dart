@@ -44,7 +44,7 @@ class SessionIncompleteDialog extends StatelessWidget {
             screenWidth * 0.06,
           ),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(

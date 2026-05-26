@@ -99,7 +99,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
             Container(
               height: screenHeight * 0.06,
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.coral, width: 1),
               ),
@@ -119,7 +119,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                   ),
                   hintStyle: AppTypography.merge(
                     TextStyle(
-                      color: AppColors.grey.withValues(alpha: 0.6),
+                      color: AppColors.mutedText,
                       fontSize: AppTypography.body,
                     ),
                   ),
@@ -162,7 +162,7 @@ class _CameraBottomOverlayState extends State<CameraBottomOverlay> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.coral,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
                   minimumSize: Size(
                     double.infinity,
