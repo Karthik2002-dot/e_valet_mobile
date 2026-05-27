@@ -109,6 +109,7 @@ class SessionIncompleteDialog extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textOnDark,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -119,7 +120,7 @@ class SessionIncompleteDialog extends StatelessWidget {
                         'continueLabel', TextConstants.continueLabel),
                     fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.black,
+                    color: AppColors.textOnDark,
                   ),
                 ),
               ),

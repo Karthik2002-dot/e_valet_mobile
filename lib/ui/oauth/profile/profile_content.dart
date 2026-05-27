@@ -187,7 +187,7 @@ class _ProfileContentState extends State<ProfileContent> {
                             );
                           },
                           labelText: t.get(TextConstants.resetPassword),
-                          fontColor: AppColors.black,
+                          fontColor: AppColors.textOnDark,
                         ),
                       ),
                     ],

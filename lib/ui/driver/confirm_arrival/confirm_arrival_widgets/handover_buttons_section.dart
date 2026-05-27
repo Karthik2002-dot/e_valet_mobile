@@ -154,8 +154,8 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
             ),
             child: isLoading
                 ? const SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: ButtonMetrics.countdownBadgeSize,
+                    height: ButtonMetrics.countdownBadgeSize,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor:
@@ -169,7 +169,7 @@ class HandoverButtonsSectionState extends State<HandoverButtonsSection> {
                         CountdownCtaButton.countdownBadge(countdownSeconds)
                       else
                         const Icon(Icons.warning,
-                            color: AppColors.white, size: 22),
+                            color: AppColors.white, size: 26),
                       const SizedBox(width: 12),
                       Flexible(
                         child: TextComponent(

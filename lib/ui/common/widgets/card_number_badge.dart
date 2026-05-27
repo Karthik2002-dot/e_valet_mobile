@@ -7,17 +7,25 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 class CardNumberBadge extends StatelessWidget {
   final String label;
   final String value;
+  final bool compact;
 
   const CardNumberBadge({
     super.key,
     required this.label,
     required this.value,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final padding = compact
+        ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+        : const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+    final labelFontSize = compact ? 10.0 : 11.0;
+    final valueFontSize = compact ? 18.0 : 22.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: padding,
       decoration: BoxDecoration(
         color: AppColors.offWhite,
         borderRadius: BorderRadius.circular(8),
@@ -29,7 +37,7 @@ class CardNumberBadge extends StatelessWidget {
         children: [
           TextComponent(
             labelText: label.toUpperCase(),
-            fontSize: 11,
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
             color: AppColors.nearBlack,
             letterSpacing: 0.6,
@@ -38,7 +46,7 @@ class CardNumberBadge extends StatelessWidget {
           Text(
             value,
             style: AppTypography.style(
-              fontSize: 22,
+              fontSize: valueFontSize,
               fontWeight: FontWeight.bold,
               color: AppColors.nearBlack,
             ),

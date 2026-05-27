@@ -16,6 +16,7 @@ class Footer extends StatelessWidget {
           fontSize: 10,
           fontWeight: FontWeight.w400,
           color: AppColors.mutedText,
+          textAlign: TextAlign.center,
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
-/// Full-width primary CTA with optional 24px countdown badge on the left.
+/// Full-width primary CTA with optional countdown badge on the left.
 class CountdownCtaButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -25,8 +25,11 @@ class CountdownCtaButton extends StatelessWidget {
 
   static Widget countdownBadge(int seconds) {
     return Container(
-      width: 24,
-      height: 24,
+      constraints: const BoxConstraints(
+        minWidth: ButtonMetrics.countdownBadgeSize,
+        minHeight: ButtonMetrics.countdownBadgeSize,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: AppColors.nearBlack.withValues(alpha: 0.35),
@@ -35,9 +38,10 @@ class CountdownCtaButton extends StatelessWidget {
       child: Text(
         '$seconds',
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: ButtonMetrics.countdownBadgeFontSize,
           fontWeight: FontWeight.w700,
           color: AppColors.white,
+          height: 1.1,
         ),
       ),
     );
@@ -54,11 +58,14 @@ class CountdownCtaButton extends StatelessWidget {
         ? ButtonMetrics.confirmBigFontSize(context)
         : ButtonMetrics.confirmFontSize(context);
 
-    Widget leading;
+    final bool showLeading =
+        isLoading || disabled || iconWhenEnabled != null;
+
+    Widget? leading;
     if (isLoading) {
       leading = const SizedBox(
-        width: 24,
-        height: 24,
+        width: ButtonMetrics.countdownBadgeSize,
+        height: ButtonMetrics.countdownBadgeSize,
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
@@ -67,9 +74,7 @@ class CountdownCtaButton extends StatelessWidget {
     } else if (disabled) {
       leading = countdownBadge(countdownSeconds);
     } else if (iconWhenEnabled != null) {
-      leading = Icon(iconWhenEnabled, color: AppColors.white, size: 22);
-    } else {
-      leading = const SizedBox(width: 24);
+      leading = Icon(iconWhenEnabled, color: AppColors.white, size: 26);
     }
 
     final button = ElevatedButton(
@@ -87,12 +92,11 @@ class CountdownCtaButton extends StatelessWidget {
               BorderRadius.circular(ButtonMetrics.confirmRadius),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          leading,
-          const SizedBox(width: 12),
-          Flexible(
+          SizedBox(
+            width: double.infinity,
             child: TextComponent(
               labelText: label,
               fontSize: fontSize,
@@ -103,6 +107,13 @@ class CountdownCtaButton extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (showLeading && leading != null)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Center(child: leading),
+            ),
         ],
       ),
     );

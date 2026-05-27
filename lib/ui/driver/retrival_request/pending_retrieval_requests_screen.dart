@@ -569,6 +569,7 @@ class _PendingRetrievalRequestsScreenState
                         onPressed: () => _continueRetrievalFlow(session),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textOnDark,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -581,7 +582,7 @@ class _PendingRetrievalRequestsScreenState
                           ),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.black,
+                          color: AppColors.textOnDark,
                         ),
                       ),
                     ),

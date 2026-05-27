@@ -11,7 +11,6 @@ import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text_field.dart';
 import 'package:niloufer_valet_mobile/ui/common/text_constants.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/snack_bar.dart';
-import 'package:niloufer_valet_mobile/ui/common/widgets/card_number_badge.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_header.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
@@ -347,25 +346,15 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     PreviewHeader(
-                                        isReparking: widget.isReparking),
+                                        isReparking: widget.isReparking,
+                                        cardNumber: widget.cardNumber,
+                                      ),
                                     SizedBox(height: screenHeight * 0.02),
                                     PreviewImageCard(
                                       imagePath: widget.imagePath!,
                                       onRetake: () => Navigator.pop(context),
                                     ),
                                     SizedBox(height: screenHeight * 0.02),
-                                    if (widget.cardNumber != null &&
-                                        widget.cardNumber!.trim().isNotEmpty)
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                          bottom: screenHeight * 0.02,
-                                        ),
-                                        child: CardNumberBadge(
-                                          label: t.get(
-                                              TextConstants.cardNumberLabel),
-                                          value: widget.cardNumber!,
-                                        ),
-                                      ),
                                     Container(
                                       width: double.infinity,
                                       padding:
@@ -432,7 +421,9 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   PreviewHeader(
-                                      isReparking: widget.isReparking),
+                                    isReparking: widget.isReparking,
+                                    cardNumber: widget.cardNumber,
+                                  ),
                                   SizedBox(height: screenHeight * 0.02),
 
                                   // Parking Location Display (if provided) - container expands till bottom of screen, OK button inside at bottom

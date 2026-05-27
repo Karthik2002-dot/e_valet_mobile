@@ -92,14 +92,16 @@ class OperatorDrawerItem extends StatelessWidget {
               Icon(
                 iconData,
                 size: iconSize,
-                color: isSelected ? AppColors.black : AppColors.white,
+                // Icons sit on the dark drawer strip (right of the pill), not on
+                // the white selected background — keep them white when selected.
+                color: AppColors.white,
               )
             else if (asset != null)
               Image.asset(
                 asset!,
                 width: iconSize,
                 height: iconSize,
-                color: isSelected ? AppColors.black : AppColors.white,
+                color: AppColors.white,
               ),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.02,
