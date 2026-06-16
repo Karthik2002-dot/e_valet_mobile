@@ -29,7 +29,7 @@ class PreviewImageCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.trackGray, width: 0.5),
       ),
@@ -67,7 +67,7 @@ class PreviewImageCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onRetake,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.coral,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(

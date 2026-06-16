@@ -153,7 +153,7 @@ class ValetListView extends StatelessWidget {
             return Center(
               child: TextComponent(
                 labelText: t.get(TextConstants.noValetsFound),
-                color: AppColors.grey,
+                color: AppColors.mutedText,
               ),
             );
           }

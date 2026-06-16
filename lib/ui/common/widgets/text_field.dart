@@ -101,7 +101,7 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
             hintText: widget.hintText,
             hintStyle: TextStyle(
               fontSize: widget.fontSize ?? 14,
-              color: AppColors.grey.withOpacity(0.6),
+              color: AppColors.mutedText,
             ),
             filled: true,
             fillColor: widget.backgroundColor ?? AppColors.white,
@@ -130,7 +130,7 @@ class _TextFieldComponentState extends State<TextFieldComponent> {
                 widget.borderRadius ?? 8,
               ),
               borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.primary,
+                color: widget.borderColor ?? AppColors.accent,
                 width: 2,
               ),
             ),

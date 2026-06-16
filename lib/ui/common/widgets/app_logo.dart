@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
 class AppLogo extends StatelessWidget {
   static const assetPath = 'assets/images/niloufer.logo.png';
@@ -9,17 +10,21 @@ class AppLogo extends StatelessWidget {
   final double height;
   final double? width;
 
+  /// Coral accent bar under the logo (e.g. drawer branding).
+  final bool showAccentUnderline;
+
   const AppLogo({
     super.key,
     required this.height,
     this.width,
+    this.showAccentUnderline = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final logoWidth = width ?? height * aspectRatio;
 
-    return SizedBox(
+    final logo = SizedBox(
       width: logoWidth,
       height: height,
       child: Image.asset(
@@ -27,6 +32,25 @@ class AppLogo extends StatelessWidget {
         fit: BoxFit.contain,
         alignment: Alignment.centerLeft,
       ),
+    );
+
+    if (!showAccentUnderline) return logo;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        logo,
+        const SizedBox(height: 6),
+        Container(
+          height: 3,
+          width: logoWidth,
+          decoration: BoxDecoration(
+            color: AppColors.accent,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ],
     );
   }
 }

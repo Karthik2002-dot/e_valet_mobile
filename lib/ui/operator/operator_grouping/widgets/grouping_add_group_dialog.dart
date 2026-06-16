@@ -135,7 +135,7 @@ class _GroupingAddGroupDialogBodyState
   Widget build(BuildContext context) {
     final t = widget.t;
     return Dialog(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.primarySurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

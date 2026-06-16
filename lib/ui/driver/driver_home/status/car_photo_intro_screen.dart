@@ -400,7 +400,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.grey,
+            color: AppColors.mutedText,
             borderRadius: BorderRadius.circular(w * 0.04),
           ),
           child: Stack(
@@ -451,7 +451,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.grey,
+          color: AppColors.mutedText,
           borderRadius: BorderRadius.circular(w * 0.04),
         ),
         clipBehavior: Clip.antiAlias,

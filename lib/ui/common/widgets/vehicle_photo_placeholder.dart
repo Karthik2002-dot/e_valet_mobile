@@ -21,7 +21,7 @@ class VehiclePhotoPlaceholder extends StatelessWidget {
       width: double.infinity,
       constraints: BoxConstraints(minHeight: minHeight ?? 160),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: CustomPaint(

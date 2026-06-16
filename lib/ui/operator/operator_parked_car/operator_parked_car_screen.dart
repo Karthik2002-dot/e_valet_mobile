@@ -183,7 +183,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                       labelText: t.getByKey(
                                           'parkedCarDescription',
                                           TextConstants.parkedCarDescription),
-                                      color: AppColors.grey,
+                                      color: AppColors.mutedText,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.02,
@@ -210,7 +210,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                           'searchByCardNumberHint',
                                           TextConstants.searchByCardNumberHint),
                                       hintStyle: TextStyle(
-                                        color: AppColors.grey,
+                                        color: AppColors.mutedText,
                                         fontSize:
                                             MediaQuery.of(context).size.width *
                                                 0.02,
@@ -226,7 +226,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                                           ? IconButton(
                                               icon: Icon(
                                                 Icons.clear,
-                                                color: AppColors.grey,
+                                                color: AppColors.mutedText,
                                                 size: MediaQuery.of(context)
                                                         .size
                                                         .width *
@@ -312,7 +312,7 @@ class _OperatorParkedCarScreenState extends State<OperatorParkedCarScreen> {
                       TextComponent(
                         labelText: state.message,
                         fontSize: MediaQuery.of(context).size.width * 0.016,
-                        color: AppColors.grey,
+                        color: AppColors.mutedText,
                       ),
                     ],
                   ),

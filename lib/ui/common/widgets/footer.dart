@@ -11,14 +11,12 @@ class Footer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Center(
-        child: Opacity(
-          opacity: 0.5,
-          child: TextComponent(
-            labelText: '${TextConstants.poweredBy} Yathi Solutions',
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            color: AppColors.footerGray,
-          ),
+        child: TextComponent(
+          labelText: '${TextConstants.poweredBy} Yathi Solutions',
+          fontSize: 10,
+          fontWeight: FontWeight.w400,
+          color: AppColors.mutedText,
+          textAlign: TextAlign.center,
         ),
       ),
     );

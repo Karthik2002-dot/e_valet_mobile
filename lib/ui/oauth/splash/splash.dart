@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
       child: BlocBuilder<SplashBloc, SplashState>(
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: AppColors.white,
+            backgroundColor: AppColors.primarySurface,
             body: state is SplashError
                 ? Center(
                     child: Column(

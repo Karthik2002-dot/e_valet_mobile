@@ -29,18 +29,25 @@ class DriverActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTappable = onTap != null;
+    // Match login card outline (coral accent, 2px).
+    final cardRadius = BorderRadius.circular(
+      (screenWidth * 0.05).clamp(12.0, 20.0),
+    );
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.trackGray, width: 0.5),
+        color: AppColors.cardBackground,
+        borderRadius: cardRadius,
+        border: Border.all(
+          color: AppColors.accent,
+          width: 2,
+        ),
       ),
       child: Material(
         color: AppColors.transparent,
         child: InkWell(
           onTap: isTappable ? onTap : null,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: cardRadius,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -60,8 +67,8 @@ class DriverActionCard extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: isTappable ? onTap : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.coral,
-                      foregroundColor: AppColors.white,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.textOnDark,
                       elevation: 0,
                       padding: ButtonMetrics.actionBarPadding(context),
                       shape: RoundedRectangleBorder(
@@ -82,7 +89,7 @@ class DriverActionCard extends StatelessWidget {
                             isDesktop: isDesktop,
                           ),
                           fontWeight: FontWeight.w600,
-                          color: AppColors.white,
+                          color: AppColors.textOnDark,
                         ),
                         if (notificationCount > 0) ...[
                           const SizedBox(width: 8),

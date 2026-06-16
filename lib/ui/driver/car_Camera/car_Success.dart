@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 import 'package:niloufer_valet_mobile/ui/common/button_metrics.dart';
+import 'package:niloufer_valet_mobile/ui/common/widgets/countdown_cta_button.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/custom_app_bar.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/footer.dart';
 import 'package:niloufer_valet_mobile/ui/common/widgets/text.dart';
@@ -70,7 +71,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: AppColors.coral,
+        backgroundColor: AppColors.primarySurface,
         appBar: const CustomAppBar(showOverflowMenu: true),
         body: SafeArea(
           child: Column(
@@ -80,7 +81,7 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                 child: TextComponent(
                   labelText: t.get(TextConstants.successfullyParked),
-                  color: AppColors.white,
+                  color: AppColors.headerDark,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   textAlign: TextAlign.center,
@@ -122,49 +123,17 @@ class _CarSuccessScreenState extends State<CarSuccessScreen> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.1,
-                  vertical: 16,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                child: CountdownCtaButton(
+                  label: t.get(TextConstants.returnToHome),
+                  isLoading: _isReturningHome,
+                  useBigFont: true,
                   height: ButtonMetrics.returnHomeHeight(context),
-                  child: ElevatedButton(
-                    onPressed: _isReturningHome
-                        ? null
-                        : () {
-                            _autoReturnTimer?.cancel();
-                            _autoReturnTimer = null;
-                            _navigateToHome();
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      foregroundColor: AppColors.nearBlack,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          ButtonMetrics.returnHomeRadius(context),
-                        ),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isReturningHome
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.nearBlack,
-                              ),
-                            ),
-                          )
-                        : TextComponent(
-                            labelText: t.get(TextConstants.returnToHome),
-                            fontSize: ButtonMetrics.returnHomeFontSize(context),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.nearBlack,
-                          ),
-                  ),
+                  onPressed: () {
+                    _autoReturnTimer?.cancel();
+                    _autoReturnTimer = null;
+                    _navigateToHome();
+                  },
                 ),
               ),
               const Footer(),

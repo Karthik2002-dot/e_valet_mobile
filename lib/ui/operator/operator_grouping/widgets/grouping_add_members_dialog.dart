@@ -79,7 +79,7 @@ class GroupingAddMembersDialog {
         return StatefulBuilder(
           builder: (ctx, setLocalState) {
             return Dialog(
-              backgroundColor: AppColors.white,
+              backgroundColor: AppColors.primarySurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

@@ -30,7 +30,7 @@ class PreviewSubmitButton extends StatelessWidget {
     final textSize = ButtonMetrics.submitFontSize(context);
     final radius = ButtonMetrics.submitRadius(context);
 
-    final bgColor = isReparking ? AppColors.nearBlack : AppColors.coral;
+    final bgColor = AppColors.primary;
 
     return Semantics(
       button: true,
@@ -63,31 +63,38 @@ class PreviewSubmitButton extends StatelessWidget {
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                   ),
                 )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+              : Stack(
+                  alignment: Alignment.center,
                   children: [
-                    TextComponent(
-                      labelText: overrideLabel ??
-                          (isReparking
-                              ? t.get(TextConstants.submitRePark)
-                              : t.getByKey(
-                                  'submitButton', TextConstants.submitButton)),
-                      fontSize: textSize,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          canPress ? AppColors.white : AppColors.disabledText,
-                    ),
-                    if (overrideLabel == null && !isReparking) ...[
-                      SizedBox(width: MediaQuery.sizeOf(context).width * 0.02),
-                      Icon(
-                        Icons.arrow_forward,
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextComponent(
+                        labelText: overrideLabel ??
+                            (isReparking
+                                ? t.get(TextConstants.submitRePark)
+                                : t.getByKey('submitButton',
+                                    TextConstants.submitButton)),
+                        fontSize: textSize,
+                        fontWeight: FontWeight.w600,
                         color: canPress
                             ? AppColors.white
                             : AppColors.disabledText,
-                        size: textSize,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                    ),
+                    if (overrideLabel == null && !isReparking)
+                      Positioned(
+                        right: 0,
+                        child: Icon(
+                          Icons.arrow_forward,
+                          color: canPress
+                              ? AppColors.white
+                              : AppColors.disabledText,
+                          size: textSize,
+                        ),
+                      ),
                   ],
                 ),
         ),

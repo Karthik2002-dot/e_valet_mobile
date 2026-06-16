@@ -318,7 +318,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.grey,
+        color: AppColors.mutedText,
         borderRadius: BorderRadius.circular(w * 0.04),
       ),
       child: Column(
@@ -454,7 +454,7 @@ class _DriverQrScannerContentState extends State<DriverQrScannerContent> {
             width: double.infinity,
             padding: EdgeInsets.all(w * 0.04),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(w * 0.03),
               boxShadow: [
                 BoxShadow(
