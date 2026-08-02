@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
 class AppLogo extends StatelessWidget {
-  static const assetPath = 'assets/images/niloufer.logo.png';
+  /// Light-surface mark (orange V, black L).
+  static const assetPath = 'assets/images/vl_black.png';
 
-  /// Wide banner logo; width is derived from height when not provided.
-  static const aspectRatio = 4.2;
+  /// Dark-surface / launcher mark (orange V, white L).
+  static const assetPathOnDark = 'assets/images/vl_white.png';
+
+  /// Square VL mark.
+  static const aspectRatio = 1.0;
 
   final double height;
   final double? width;
+
+  /// When true, uses [assetPathOnDark] (e.g. on the dark app bar).
+  final bool onDarkBackground;
 
   /// Coral accent bar under the logo (e.g. drawer branding).
   final bool showAccentUnderline;
@@ -17,20 +24,22 @@ class AppLogo extends StatelessWidget {
     super.key,
     required this.height,
     this.width,
+    this.onDarkBackground = false,
     this.showAccentUnderline = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final logoWidth = width ?? height * aspectRatio;
+    final path = onDarkBackground ? assetPathOnDark : assetPath;
 
     final logo = SizedBox(
       width: logoWidth,
       height: height,
       child: Image.asset(
-        assetPath,
+        path,
         fit: BoxFit.contain,
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.center,
       ),
     );
 
