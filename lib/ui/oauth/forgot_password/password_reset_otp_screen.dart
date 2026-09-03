@@ -69,7 +69,7 @@ class _PasswordResetOtpScreenState extends State<PasswordResetOtpScreen> {
         },
         child: Scaffold(
           backgroundColor: AppColors.primarySurface,
-          appBar: const CustomAppBar(),
+          appBar: const CustomAppBar(hideParkedCarsAction: true),
           body: SafeArea(
             child: Column(
               children: [

@@ -15,11 +15,18 @@ import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_image_card.dart';
 import 'package:niloufer_valet_mobile/ui/driver/preview_car/preview_Car_widgets/preview_submit_button.dart';
 import 'package:niloufer_valet_mobile/ui/driver/car_Camera/car_Success.dart';
+import 'package:niloufer_valet_mobile/api/driver/sessions_pending_api.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/pending_sessions_response.dart';
+import 'package:niloufer_valet_mobile/ui/driver/driver_home/driver_home.dart';
+import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_bloc.dart';
+import 'package:niloufer_valet_mobile/bloc/driver/driver_home/driver_menu_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_bloc.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_event.dart';
 import 'package:niloufer_valet_mobile/bloc/driver/preview_car/preview_car_state.dart';
 import 'package:niloufer_valet_mobile/services/location/location_service.dart';
 import 'package:niloufer_valet_mobile/models/core/api_exceptions.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
 
 class PreviewCarScreen extends StatefulWidget {
   /// Photo path when coming from Scan; null when coming from Type Parking Number only.
@@ -95,19 +102,29 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
           ? _parkingLocationController.text.trim()
           : _currentParkingLocation;
 
+      final sessionId = widget.sessionId;
+      final parsedCardNumber = int.tryParse(widget.cardNumber?.trim() ?? '');
+      final cardNumber = parsedCardNumber ??
+          OfflineParkingService.cardNumberFromOfflineSessionId(sessionId);
+      final checkinSubmittedOnServer = sessionId != null &&
+          sessionId.isNotEmpty &&
+          !OfflineParkingService.isOfflineSessionId(sessionId);
+
       context.read<PreviewCarBloc>().add(
             SubmitPhotoRequested(
               imagePath: (widget.parkingLocation == null ||
                       widget.parkingLocation!.isEmpty)
                   ? widget.imagePath
                   : null,
-              sessionId: widget.sessionId,
+              sessionId: sessionId,
               isReparking: widget.isReparking,
               latitude: coordinates['latitude']!,
               longitude: coordinates['longitude']!,
               accuracy: coordinates['accuracy'],
               parkingLocation: parkingLocation,
               vehicleNumber: _currentVehicleNumber,
+              cardNumber: cardNumber,
+              checkinSubmittedOnServer: checkinSubmittedOnServer,
             ),
           );
     } on ApiException catch (e) {
@@ -124,13 +141,42 @@ class _PreviewCarScreenState extends State<PreviewCarScreen> {
     }
   }
 
-  void _handlePostParkNavigation(BuildContext context) {
+  void _refreshParkedCarsCount(BuildContext context) {
+    try {
+      context.read<DriverMenuBloc>().add(const DriverPendingSessionsRefresh());
+    } catch (_) {}
+  }
+
+  Future<void> _handlePostParkNavigation(BuildContext context) async {
     if (_hasNavigatedAfterSuccess) return;
     _hasNavigatedAfterSuccess = true;
 
+    _refreshParkedCarsCount(context);
+
+    PendingSessionsResponse? pending;
+    try {
+      pending = await SessionsPendingApiService.getPendingSessions();
+    } catch (_) {
+      pending = null;
+    }
+
     if (!context.mounted) return;
 
-    // Always show success for 5s (CarSuccessScreen timer), then return to home.
+    final hasPending = pending != null && pending.sessions.isNotEmpty;
+
+    if (hasPending) {
+      try {
+        await TokenStorage.clearSessionId();
+        await TokenStorage.clearSessionIdFromGetApi();
+      } catch (_) {}
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const DriverHomeScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
     final isLocationBased =
         widget.parkingLocation != null && widget.parkingLocation!.isNotEmpty;
     Navigator.of(context).pushReplacement(

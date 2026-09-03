@@ -41,6 +41,7 @@ class ClockInTooFarScreen extends StatelessWidget {
       appBar: CustomAppBar(
         showLanguageIcon: true,
         showOverflowMenu: true,
+        hideParkedCarsAction: true,
         actions: scannerMode
             ? [
                 const OverflowMenu(scannerMode: true),

@@ -19,6 +19,7 @@ import 'package:niloufer_valet_mobile/ui/oauth/splash/splash.dart';
 import 'package:niloufer_valet_mobile/services/background/background_sync_service.dart';
 import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
 import 'package:niloufer_valet_mobile/models/driver/session/checkin_request_adapter.dart';
+import 'package:niloufer_valet_mobile/models/driver/session/offline_checkin_request.dart';
 import 'package:niloufer_valet_mobile/models/driver/park/offline_parking_photo.dart';
 import 'package:provider/provider.dart';
 import 'package:niloufer_valet_mobile/services/translations/app_translations_notifier.dart';
@@ -50,6 +51,10 @@ void main() async {
   final offlineParkingPhotoAdapter = OfflineParkingPhotoAdapter();
   if (!Hive.isAdapterRegistered(offlineParkingPhotoAdapter.typeId)) {
     Hive.registerAdapter(offlineParkingPhotoAdapter);
+  }
+  final offlineCheckinRequestAdapter = OfflineCheckinRequestAdapter();
+  if (!Hive.isAdapterRegistered(offlineCheckinRequestAdapter.typeId)) {
+    Hive.registerAdapter(offlineCheckinRequestAdapter);
   }
   await OfflineParkingService.init();
   await TokenStorage.init();
@@ -186,7 +191,7 @@ class MyApp extends StatelessWidget {
                 }
 
                 final showNoInternet = state is ConnectivityUnavailable &&
-                    !ParkFlowSignals.isCarPhotoParkFlowActive;
+                    !ParkFlowSignals.shouldSuppressNoInternetOverlay;
 
                 return Stack(
                   fit: StackFit.expand,

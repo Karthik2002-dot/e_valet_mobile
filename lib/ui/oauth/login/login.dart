@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: Scaffold(
             backgroundColor: AppColors.primarySurface,
-            appBar: const CustomAppBar(),
+            appBar: const CustomAppBar(hideParkedCarsAction: true),
             body: SafeArea(
               child: Column(
                 children: [

@@ -21,6 +21,7 @@ import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_camera_event.da
 import 'package:niloufer_valet_mobile/bloc/driver/car_camera/car_Camera_State.dart';
 import 'package:niloufer_valet_mobile/services/oauth/session_manager.dart';
 import 'package:niloufer_valet_mobile/services/oauth/token_interceptor.dart';
+import 'package:niloufer_valet_mobile/services/offline_sync/offline_parking_service.dart';
 import 'package:niloufer_valet_mobile/ui/driver/driver_home/park_flow_signals.dart';
 
 /// Third screen: Car Photo only — Lottie (Carphoto.json) 2 sec then camera → Capture → Preview (user enters parking location, taps Done) → Park/Repark API → Car Success.
@@ -97,6 +98,7 @@ class _CarPhotoIntroScreenState extends State<CarPhotoIntroScreen>
     if (!mounted || _isHandlingCancellation) return;
     final sessionId = await TokenStorage.getSessionId();
     if (sessionId == null || sessionId.isEmpty) return;
+    if (OfflineParkingService.isOfflineSessionId(sessionId)) return;
 
     try {
       final pending = await SessionsPendingApiService.getPendingSessions();
