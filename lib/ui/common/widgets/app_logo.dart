@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:niloufer_valet_mobile/ui/common/colors.dart';
 
 class AppLogo extends StatelessWidget {
-  /// Light-surface mark (orange V, black L).
-  static const assetPath = 'assets/images/vl_black.png';
+  /// Light-surface mark (white background, orange V, black L).
+  static const assetPath = 'assets/images/vl_white.png';
 
-  /// Dark-surface / launcher mark (orange V, white L).
-  static const assetPathOnDark = 'assets/images/vl_white.png';
+  /// Dark-surface mark (black background, orange V, white L).
+  static const assetPathOnDark = 'assets/images/vl_black.png';
 
   /// Square VL mark.
   static const aspectRatio = 1.0;
